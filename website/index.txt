@@ -1,0 +1,423 @@
+h1. roo
+
+h2. What
+
+This gem allows you to access the content of 
+
+* Open-office spreadsheets (.ods)
+* Excel spreadsheets (.xls) 
+* Google (online) spreadsheets
+* Excel's new file format .xlsx
+
+h2. Supporting this project
+
+Die Programme dieses Projekts sind kostenlos erhältlich und verwendbar. 
+Du kannst jedoch die weitere Entwicklung dieses Projekts mit einer finanziellen 
+Zuwendung unterstützen (ansonsten müßte ich mich verstärkt anderen Projekten
+widmen, die mehr finanziellen Ertrag einbringen, damit ich auch morgen noch
+für meine Katzen das Futter kaufen kann :-)).
+
+Am bequemsten kannst du per Paypal an die Email-Adresse thopre@gmail.com 
+bezahlen. 
+Falls du per Überweisung zahlen willst, frage bitte nach meiner Kontoverbindung!
+
+Ich werde, aufteilt pro Quartal, eine Liste der Spender mit Namen und Betrag, 
+sortiert nach Spendenhöhe hier veröffenlichen. Wenn von dir nichts anderes
+mitgeteilt, werde ich dich nach deinem Namen, soweit aus der Email-Adresse
+ersichtlich, in der Liste veröffenlichen. Falls etwas anderes gewünscht wird,
+z. B. "Firma ABC GmbH" oder anonym, dann teile mir dies bitte mit!
+
+h3. Spender
+
+h4. Juli-September 2008
+
+table.
+|Betrag|Name|
+|-|-|
+
+h4. April-Juni 2008
+
+table.
+|Betrag|Name|
+|-|-|
+
+
+
+h2. Installing
+
+<pre syntax="ruby">[sudo] gem install roo</pre>
+
+h2. The basics
+
+Currently only read-access is implemented.
+Google spreadsheets can be read and written.
+
+Please note that the upper left cell of a table is numbered (1,1) or (1,'A') (not 0,0).
+
+h2. Demonstration of usage
+
+Supposed you have created this spreadsheet:
+
+<img src="Screenshot-spreadsheet3.png">
+
+which includes the amount of work you have done for a customer. 
+
+You can now process this spreadsheet with the following sample code.
+
+<pre>
+<code>
+  1 require 'rubygems'
+  2 require 'roo'
+  3 
+  4 HOURLY_RATE = 123.45
+  5 
+  6 oo = Openoffice.new("simple_spreadsheet.ods")
+  7 oo.default_sheet = oo.sheets.first
+  8 4.upto(12) do |line|
+  9   date       = oo.cell(line,'A')
+ 10   start_time = oo.cell(line,'B')
+ 11   end_time   = oo.cell(line,'C')
+ 12   pause      = oo.cell(line,'D')
+ 13   sum        = (end_time - start_time) - pause
+ 14   comment    = oo.cell(line,'F')
+ 15   amount     = sum * HOURLY_RATE
+ 16   if date
+ 17     puts "#{date}\t#{sum}\t#{amount}\t#{comment}"
+ 18   end
+ 19 end
+</code>
+</pre>
+
+which produces this output
+
+<pre>
+<code>
+2007-05-07      1.0     123.45  Task 1
+2007-05-07      1.75    216.0375        Task 1
+2007-05-07      1.0     123.45  Task 2
+2007-05-08      1.0     123.45  Task 2
+2007-05-08      1.0     123.45  Task 3
+2007-05-08      0.5     61.725  Task 3
+2007-05-14      0.5     61.725  Task 3
+2007-05-14      0.5     61.725  Task 3
+2007-05-15      1.0     123.45  Task 3
+</code>
+</pre>
+
+With the methods 
+
+<code>first_column</code>,
+<code>last_column</code>,
+<code>first_row</code> and
+<code>last_row</code>
+
+you can change line 8 from
+
+<pre>
+<code>
+  4.upto(12) do |line|
+</code>
+</pre>
+
+to
+
+<pre>
+<code>
+  4.upto(oo.last_row) do |line|
+</code>
+</pre>
+
+h3. Cell Types
+
+oo.*celltype*(row,col) returns the type of a cell. Currently these types will be
+returned:
+
+* :float
+* :string
+* :date
+* :percentage
+* :formula
+* :time
+* :datetime
+
+Numeric values are returned as type :float, the return value is a Ruby Float object (note: integer values like 42 are returned as 42.0 - not as a Fixnum 42 object).
+
+String values are returned as type :string and Ruby String object.
+
+Date values are returned as type :date and as a Ruby Date object.
+
+Datetime values are returned as type :datetime and as a Ruby DateTime object.
+
+Percentage are return as type :percentage and as Ruby Float object with the 
+range from 0.0 to 1.0.
+
+Formulas are returned as type :formula - the value of the cell is the computed
+value of this formula. The formula itself can be retrieved with the #formula
+method.
+
+Time values are returned as type :time - the value of the cell are the seconds
+from midnight as a Fixnum object
+
+h3. Write access
+
+Cells in a google spreadsheet can be read or written.
+
+To write to a cell use the method call:
+
+<pre>
+<code>
+oo.set_value(row, col, value)
+</code>
+</pre>
+
+There is an example in the examples folder which illustrates write access. 
+
+h3. Formulas
+
+Formulas in Openoffice- and Google-Spreadsheets can be handled. 
+
+oo.*celltype*(row,col) returns :formula if there is a formula in this cell.
+
+oo.*formula?*(row,col) returns true if there is a formula
+
+oo.*formula*(row,col) returns the formula in this cell in a string variable (like "=SUM([.A1:.M13])").
+ You can do whatever you want with this expression. Please note that the syntax of
+formulas might vary between different sort of spreadsheets. There is no conversion
+of the formula syntax.
+ 
+If there is no formula in this cell nil is returned.
+
+oo.*cell*(row,col) returns the computed result of the formula (as it was saved in the file, no recalculation is done in this Gem).
+
+oo.*formulas* returns all formulas in the selected spreadsheet in an array like this:
+
+<pre>
+<code>
+  [[1,2,"=SUM(.A1:.B1)"],
+   [1,3,"=SIN(.C3)"],
+   [1,4,"=COS(.D4)"]]
+</code>
+</pre>
+
+Each entry consists of the elements row, col, formula.
+
+Note: oo.*cell*(row,col) is the same for ordinary cells and formulas. So you can use the computated value of a formula. If you have to distinguish if a cell is a formula use #*formula*? 
+
+Please note: formulas in Excel-Spreadsheets cannot be handled (this is another gem, see: "Thanks")
+
+h3. YAML-Output
+
+You can generate YAML-Output from your spreadsheet data. The method is called:
+
+oo.to_yaml # => produces YAML output from the entire default spreadsheet
+oo.to_yaml({"myattribute1" => "myvalue1", "myattribute2" => "myvalue2")
+           # => YAML output with additional attributes
+oo.to_yaml({..}, 2,10, 300,10) # => only the rectangle from row 2, column 10 to row 300, column 10 will be returned
+
+If you omit one or more parameters the maximum boundaries of your spreadsheet will be used.
+
+With the YAML output you can import your data in a Ruby on Rails application in a manner that spreadsheet data can accessed in a Rails application.
+
+This is not limited to a Rails application - you can also do further evaluations with your data.
+
+h3. CSV-Output
+
+You can generate output in csv-format with
+
+<pre>
+<code>
+oo.to_csv
+</code>
+</pre>
+
+to write to the standard output or
+
+<pre>
+<code>
+oo.to_csv("somefile.txt")
+</code>
+</pre>
+
+to write to a file.
+
+h3. Using MS-Excel spreadsheets
+
+You can also access MS-Excel spreadsheat.
+
+Replace Openoffice with 
+<pre>
+<code>oo = Excel.new("simple_spreadsheet.xls").
+
+</code>
+</pre>
+
+or Google.new() or Excelx.new().
+
+All methode are the same for OpenOffice-, Excel- and Google-objects.
+<strike> The only difference
+is the setting of the default-worksheet. OpenOffice uses the name of the worksheet whereas Excel needs the index of the worksheet (1,2,3,..).
+</strike>
+
+Formulas can only be handled in OpenOffice-, Excel .XLSX files  and Google-spreadsheets.
+
+Features in OpenOffice/Excel/Google:
+
+table(border:1px solid black).
+|feature|Open Office|Excel|Google|Excel .xlsx|
+|formulas|yes|no|yes|yes|
+|celltype|:percentage|:float|:percentage|:percentage|
+|access|read-only|read-only|read and write|read-only|
+
+The parseexcel-gem does not support the celltype 'percentage' but uses 'float' instead. This is not a big deal as you can also use 'float' to do calculations with these cells.
+
+Old .sxc OpenOffice files are currently not supported - please load these files and save it as an "OpenDocument Spreadsheet (.ods)".
+
+Instead of a filename the Google#new method needs the 'key' of a Google-Spreadsheet. This key can be copied from the URL when you display a google spreadsheet with your browser.
+
+If you want to use Google spreadsheets you must either have set the
+environment variables 'GOOGLE_MAIL' and 'GOOGLE_PASSWORD' or you pass
+the Google-name and -password to the Google#new method.
+
+Setting these variables can be done if you add these lines to your
+~/.bashrc (or similar setup file within other shells):
+
+  export GOOGLE_MAIL="yourname@gmail.com"
+  export GOOGLE_PASSWORD="mysecretpassword"
+ 
+This gem does not check if you are allowed to access a specific google spreadsheet. If it's not your own spreadsheet or you are not allowed to read or write to a spreadsheet the behaviour is not defined (but it will not work ;-) ).
+
+The default behavior at opening a spreadsheet with a certain extension has been 
+changed.
+Say you're trying to open a spreadsheet file with the extension .xls, which is normally
+ an Excel file 
+with the Openoffice.new() call. This cannot work, if the file is really an excel file - instead 
+you have to open it with the Excel.new() call.
+
+Now you're getting an exception raised. Before it was was only a warning and the
+access to this file failed.
+
+Theorectically you can have a file with the extension .xls which is in fact an Openoffice spreadsheet file.
+
+It's possible to open such a file with the Openoffice class, but you have have to
+override the parameter 'file_warning' in the new method: 
+'Openoffice.new('myfile.xls', false, :warning)' or
+'Openoffice.new('myfile.xls', false, :ignore)'.
+
+If you set it to :warning you get a warning if you try to use a spreadsheet file with 
+the 'false' extension, but the 
+program will try to handle the file with this class (of course this will fail, if the file
+is really of the false type).
+
+If you completely know what you are doing you can also disable the warning with the
+parameter :ignore.
+
+Temporary files of this gem are stored in directories which are named with 'oo_' and
+a number (the PID of the current process).
+These directories are created within the current working directory. If you want to
+use a different directory for temporary files set the environment variable ROO_TMP! (for
+example "export ROO_TMP=/tmp" in your .bashrc file). 
+ROO_TMP was introduced in releases >1.1.0.
+
+h3. Accessing Spreadsheet over the Web
+
+You can even read openoffice or excel-spreadsheets from a http-address:
+<pre>
+<code>oo = Excel.new("http://www.somedomain.com/simple_spreadsheet.xls").
+oo = Openoffice.new("http://www.somedomain.com/simple_spreadsheet.ods").
+</code>
+</pre>
+
+or a zipped file:
+<pre>
+<code>oo = Excel.new("http://www.somedomain.com/simple_spreadsheet.xls.zip",:zip).
+oo = Openoffice.new("http://www.somedomain.com/simple_spreadsheet.ods.zip",:zip).
+</code>
+</pre>
+
+after working with a spreadsheet from the web you have to call 
+<pre>
+<code>oo.remove_tmp 
+</code>
+</pre>
+
+to delete the temporary local copy of the spreadsheet file. If you don't call
+this method you will have subdirectories names 'oo_xxxxx' which you can remove manually.
+Calling remove_tmp is not the best solution to clean temporary files - i will 
+provide a better solution in the next releases.
+
+
+h3. Remote Access
+
+You can even access your spreadsheet data from a remote machine via SOAP. The examples directory shows a little example how to do this. If you like, you can extend these functions or restrict the access to certain cells. 
+Remote access with SOAP is nothing specific to roo, you can do this with every Rub object, but i thought it would nice to give an example what could be done with roo.
+
+h3. Excel spreadsheets / Openoffice spreadsheets / Google spreadsheets with Ruby on Rails
+
+There is a simple helper method to display a spreadsheet at your application page:
+
+* in your controller, add "require 'roo'" and "@rspreadsheet = Openoffice.new("numbers1.ods")" or
+    "@rspreadsheet = Openoffice.new("http://www.somehost.com/data/numbers1.od    s")" to get access to your spreadsheet file
+* use it in any view of your application with "&lt;%= spreadsheet @rspreadsheet, ["Tabelle"]  %&gt;<br/>" or one of the following formats
+
+<img src="Roo_Spreadsheets_Rails.png">
+
+h2. Where is it used?
+
+How do you use roo? What are you doing with roo?
+
+* The author of this gem uses roo for the generation of weekly reports which are (automatically) sent to his customers (Thomas Preymesser, Homepage: www.thopre.com, Blog: thopre.wordpress.com, email me: thopre@gmail.com)
+
+
+If you have an interesting application where you use roo then write me a short description of your project and i will publish it here (write, if your email-address should be published or not). 
+
+Or you can write directly in the project wiki at "http://roo.rubyforge.org/wiki/wiki.pl?Who's_Using_Roo":http://roo.rubyforge.org/wiki/wiki.pl?Who's_Using_Roo
+ 
+
+If you don't want to publish the details you can also write me an email and state, that it should not be published - i am just curious to hear, where it is used.
+
+h2. Documentation
+
+"rdoc":rdoc/index.html
+
+h2. Tests and test data
+
+There are many test files within the test directory. If you don't want to run unit tests and don't want the test data you can completely delete the 'test' directory within the hierarchy of this gem.
+ 
+h2. Feature Requests / Bugs
+
+Submit Feature Requests and bugs here: "http://rubyforge.org/tracker/?group_id=3729":http://rubyforge.org/tracker/?group_id=3729
+
+h2. Forum
+
+International Group:
+"http://groups.google.com/group/ruby-roo":http://groups.google.com/group/ruby-roo
+
+Deutschsprachige Group:
+"http://groups.google.com/group/ruby-roo-de":http://groups.google.com/group/ruby-roo-de
+
+h2. Wiki
+
+"http://roo.rubyforge.org/wiki/wiki.pl":http://roo.rubyforge.org/wiki/wiki.pl
+
+h2. How to submit patches
+
+Read the "8 steps for fixing other people's code":http://drnicwilliams.com/2007/06/01/8-steps-for-fixing-other-peoples-code/ and for section "8b: Submit patch to Google Groups":http://drnicwilliams.com/2007/06/01/8-steps-for-fixing-other-peoples-code/#8b-google-groups, use the Google Group above.
+
+<strike>The trunk repository is <code>svn://rubyforge.org/var/svn/roo/trunk</code> for anonymous access.</strike>
+
+h2. License
+
+This code is free to use under the terms of Ruby
+
+h2. Contact
+
+Comments are welcome. Send an email to "Thomas Preymesser":mailto:thopre@gmail.com.
+
+h2. Thanks
+
+* "Dr Nic Williams":http://rubyforge.org/users/nicwilliams/ for his wonderful gem '"newgem":http://rubyforge.org/projects/newgem/' which makes it very convenient to create, manage and publish Ruby gems
+* for the Excel-part the "spreadsheet":http://rubyforge.org/projects/spreadsheet/ gem is used. My functions are a convenient wrapper around the functions of this gem
+* Dirk Huth f&uuml;rs Testen unter Windows
+* Thanks to davecahill for a bug-fix patch within the google part
+* Thanks to Ryan Waldron for a bug-fix patch in Google set_value
+

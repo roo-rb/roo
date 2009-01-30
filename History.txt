@@ -1,0 +1,225 @@
+== 1.2.3 2009-01-04
+
+* bugfix
+  * fixed encoding in #cell at exported Google-spreadsheets (.xls)
+
+== 1.2.2 2008-12-14
+
+* 2 enhancements
+  * added celltype :datetime in Excelx
+  * added celltype :datetime in Google
+
+== 1.2.1 2008-11-13
+
+* 1 enhancement
+  * added celltype :datetime in Openoffice and Excel
+
+== 1.2.0 2008-08-24
+* 3 major enhancements
+  * Excelx: improved the detection of cell type and conversion into roo types
+  * All: to_csv: changed boundaries from first_row,1..last_row,last_column to 1,1..last_row,last_column
+  * All: Environment variable "ROO_TMP" indicate where temporary directories will be created (if not set the default is the current working directory)
+* 2 bugfixes
+  * Excel: improved the detection of last_row/last_column (parseexcel-gem bug?)
+  * Excel/Excelx/Openoffice: temporary directories were not removed at opening a file of the wrong type
+== 1.1.0 2008-07-26
+* 2 major enhancements
+  * Excel: speed improvements
+  * Changed the behavior of reading files with the wrong type
+* 3 bugfixes
+  * Google: added normalize in set_value method
+  * Excel: last_row in Excel class did not work properly under some circumstances
+  * all: fixed a bug in #to_xml if there is an empty sheet
+== 1.0.2 2008-07-04
+* 2 bugfixes
+  * Excelx: fixed a bug when there are .xml.rels files in the XLSX archive
+  * Excelx: fixed a bug with celltype recognition (see comment with "2008-07-03")
+== 1.0.1 2008-06-30
+* 1 bugfix
+  * Excel: row/column method Fixnum/Float confusion
+== 1.0.0 2008-05-28
+* 2 major enhancements
+  * support of Excel's new .xlsx file format
+  * method #to_xml for exporting a spreadsheet to an xml representation
+* 1 bugfix
+  * fixed a bug with excel-spreadsheet character conversion under Macintosh Darwin
+== 0.9.4 2008-04-22
+* 1 bugfix
+  * fixed a bug with excel-spreadsheet character conversion under Solaris
+== 0.9.3 2008-03-25
+* 1 bugfix
+  * no more tmp directories if an invalid spreadsheet file was openend
+== 0.9.2 2008-03-24
+* 1 enhancement
+  * new celltype :time
+* 1 bugfix
+  * time values like '23:15' are handled as seconds from midnight
+== 0.9.1 2008-03-23
+* 1 enhancement
+  * additional 'sheet' parameter in Google#set_value
+* 1 bugfix
+  * fixed a bug within Google#set_value. thanks to davecahill <dpcahill@gmail.com> for the patch.
+== 0.9.0 2008-01-24
+* 1 enhancement:
+  * better support of roo spreadsheets in rails views
+== 0.8.5 2008-01-16
+* 1 bugfix
+  * fixed a bug within #to_cvs and explicit call of a sheet
+== 0.8.4 2008-01-01
+* 1 bugfix
+  * fixed 'find_by_condition' for excel sheets (header_line= --> GenericSpredsheet)
+== 0.8.3 2007-12-31
+* 2 bugfixes
+  * another fix for the encoding issue in excel sheet-names
+  * reactived the Excel#find method which has been disappeared in the last restructoring, moved to GenericSpreadsheet
+== 0.8.2 2007-12-28
+* 1 enhancement:
+  * basename() only in method #info
+* 2 bugfixes
+  * changed logging-method to mysql-database in test code with AR, table column 'class' => 'class_name'
+  * reactived the Excel#to_csv method which has been disappeared in the last restructoring
+== 0.8.1 2007-12-22
+* 3 bugfixes
+  * fixed a bug with first/last-row/column in empty sheet
+  * #info prints now '- empty -' if a sheet within a document is empty
+  * tried to fix the iconv conversion problem
+== 0.8.0 2007-12-15
+* 2 enhancements:
+  * Google online spreadsheets were implemented
+  * some methods common to more than one class were factored out to the GenericSpreadsheet (virtual) class
+== 0.7.0 2007-11-23
+* 6 enhancements:
+  * Openoffice/Excel: the most methods can be called with an option 'sheet' 
+    parameter which will be used instead of the default sheet 
+  * Excel: improved the speed of CVS output
+  * Openoffice/Excel: new method #column
+  * Openoffice/Excel: new method #find
+  * Openoffice/Excel: new method #info
+  * better exception if a spreadsheet file does not exist
+== 0.6.1 2007-10-06
+* 2 enhancements:
+  * Openoffice: percentage-values are now treated as numbers (not strings)
+  * Openoffice: refactoring
+* 1 bugfix
+  * Openoffice: repeating date-values in a line are now handled correctly
+== 0.6.0 2007-10-06
+* 1 enhancement:
+  * csv-output to stdout or file
+== 0.5.4 2007-08-27
+* 1 bugfix
+  * Openoffice: fixed a bug with internal representation of a spreadsheet (thanks to Ric Kamicar for the patch)
+== 0.5.3 2007-08-26
+* 2 enhancements:
+  * Openoffice: can now read zip-ed files
+  * Openoffice: can now read files from http://-URL over the net
+== 0.5.2 2007-08-26
+* 1 bugfix
+  * excel: removed debugging output
+== 0.5.1 2007-08-26
+* 4 enhancements:
+  * Openoffice: Exception if an illegal sheet-name is selected
+  * Openoffice/Excel: no need to set a default_sheet if there is only one in 
+    the document
+  * Excel: can now read zip-ed files
+  * Excel: can now read files from http://-URL over the net
+
+== 0.5.0 2007-07-20
+* 3 enhancements:
+  * Excel-objects: the methods default_sheet= and sheets can now handle names instead of numbers
+  * changed the celltype methods to return symbols, not strings anymore (possible values are :formula, :float, :string, :date, :percentage (if you need strings you can convert it with .to_s)
+  * tests can now run on the client machine (not only my machine), if there are not public released files involved these tests are skipped
+
+== 0.4.1 2007-06-27
+* 1 bugfix
+  * there was ONE false require-statement which led to misleading error messageswhen this gem was used
+
+== 0.4.0 2007-06-27
+* 7 enhancements:
+  * robustness: Exception if no default_sheet was set
+  * new method reload() implemented 
+  * about 15 % more method documentation
+  * optimization: huge increase of speed (no need to use fixed borders anymore)
+  * added the method 'formulas' which gives you all formulas in a spreadsheet
+  * added the method 'set' which can set cells to a certain value
+  * added the method 'to_yaml' which can produce output for importing in a (rails) database
+* 4 bugfixes
+  * ..row_as_letter methods were nonsense - removed
+  * @cells_read should be reset if the default_sheet is changed
+  * error in excel-part: strings are now converted to utf-8 (the parsexcel-gem gave me an error with my test data, which could not converted to .to_s using latin1 encoding)
+  * fixed bug when default_sheet is changed
+
+== 0.3.0 2007-06-20
+* 1 enhancement:
+  * Openoffice: formula support
+
+== 0.2.7 2007-06-20
+* 1 bugfix:
+  * Excel: float-numbers were truncated to integer
+
+== 0.2.6 2007-06-19
+* 1 bugfix:
+  * Openoffice: two or more consecutive cells with string content failed 
+
+== 0.2.5 2007-06-17
+
+* 2 enhancements:
+  * Excel: row method implemented
+  * more tests
+* 1 bugfix:
+  * Openoffice: row method fixed
+
+== 0.2.4 2007-06-16
+* 1 bugfix:
+  * ID 11605	Two cols with same value: crash roo (openoffice version only)
+
+== 0.2.3 2007-06-02
+* 3 enhancements:
+  * more robust call att Excel#default_sheet= when called with a name
+  * new method empty?
+  * refactoring
+* 1 bugfix:
+  * bugfix in Excel#celltype
+  * bugfix (running under windows only) in closing the temp file before removing it
+
+== 0.2.2 2007-06-01
+* 1 bugfix:
+  * correct pathname for running with windows
+
+
+== 0.2.2 2007-06-01
+* 1 bugfix:
+  * incorrect dependencies fixed 
+
+== 0.2.0 2007-06-01
+* 1 major enhancement:
+  * support for MS-Excel Spreadsheets
+
+== 0.1.2 2007-05-31
+* 1 major enhancement:
+  * cells with more than one character, like 'AA' can now be handled
+
+== 0.1.1 2007-05-31
+* 1 Bugfix
+  * Bugfix in first/last methods
+
+== 0.1.0 2007-05-31
+
+* 1 major enhancement:
+  * new methods first/last row/column
+  * new method officeversion
+
+== 0.0.3 2007-05-30
+
+* 1 minor enhancement:
+  * new method row()
+
+== 0.0.2 2007-05-30
+
+* 2 major enhancement:
+  * fixed some bugs
+  * more ways to access a cell
+
+== 0.0.1 2007-05-25
+
+* 1 major enhancement:
+  * Initial release
