@@ -324,6 +324,7 @@ class Openoffice < GenericSpreadsheet
                             elsif vt == 'float'
                               #
                             elsif vt == 'boolean'
+                              v = tr.attributes['boolean-value']
                               #
                             else
                               # raise "unknown type #{vt}"

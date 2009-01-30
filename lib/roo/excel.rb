@@ -344,7 +344,11 @@ class Excel < GenericSpreadsheet
               v = cell.to_f
             when :text
               vt = :string
-              str_v = cell.to_s('utf-8')
+              if cell.to_s.downcase == 'true'
+                str_v = cell.to_s
+              else
+                str_v = cell.to_s('utf-8')
+              end       
             when :date
               if cell.to_s.to_f < 1.0
                 vt = :time

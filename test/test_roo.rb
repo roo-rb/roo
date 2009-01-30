@@ -4843,4 +4843,23 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
       # test_openoffice_zipped catches the &quot;
      end  
   end    
+  
+  def test_cell_excel_boolean
+    if EXCEL
+      oo = Excel.new(File.join("test","boolean.xls"))
+      oo.default_sheet = oo.sheets.first
+      assert_equal "TRUE", oo.cell(1,1)
+      assert_equal "FALSE", oo.cell(2,1)
+       end  
+     if OPENOFFICE
+       oo = Openoffice.new(File.join("test","boolean.ods"))
+       oo.default_sheet = oo.sheets.first
+       assert_equal "true", oo.cell(1,1)
+       assert_equal "false", oo.cell(2,1)
+     end  
+     if EXCELX
+       # TODO. need a source file to test with
+     end
+  end
+  
 end # class
