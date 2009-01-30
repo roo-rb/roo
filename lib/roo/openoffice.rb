@@ -5,6 +5,7 @@ require 'fileutils'
 require 'zip/zipfilesystem'
 require 'date'
 require 'base64'
+require 'cgi'
 
 class Openoffice < GenericSpreadsheet
 
@@ -304,9 +305,8 @@ class Openoffice < GenericSpreadsheet
                                       str_v = str_v + child.to_s #.text
                                     }
                                   end
-                                  str_v.gsub!(/&quot;/,'"')
-                                  str_v.gsub!(/&amp;/,'&')
-                                  str_v.gsub!(/&apos;/,"'")
+                                  str_v.gsub!(/&apos;/,"'")  # special case not supported by unescapeHTML
+                                  str_v = CGI.unescapeHTML(str_v)
                                 end # == 'p'
                               end
                             elsif vt == 'time'

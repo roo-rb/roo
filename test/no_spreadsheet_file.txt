@@ -1,1 +1,1 @@
-this is intionally not a spreadsheet file
+this is intentionally not a spreadsheet file

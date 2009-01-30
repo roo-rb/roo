@@ -4830,4 +4830,17 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
       assert_equal 'test', xl.cell(2,'F')
     end
   end
+  
+  def test_cell_openoffice_html_escape
+    if OPENOFFICE
+      oo = Openoffice.new(File.join("test","html-escape.ods"))
+      oo.default_sheet = oo.sheets.first
+      assert_equal "'", oo.cell(1,1)
+      assert_equal "&", oo.cell(2,1)
+      assert_equal ">", oo.cell(3,1)
+      assert_equal "<", oo.cell(4,1)
+      assert_equal "`", oo.cell(5,1)
+      # test_openoffice_zipped catches the &quot;
+     end  
+  end    
 end # class
