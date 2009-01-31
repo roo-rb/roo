@@ -4858,7 +4858,10 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
        assert_equal "false", oo.cell(2,1)
      end  
      if EXCELX
-       # TODO. need a source file to test with
+       oo = Excelx.new(File.join("test","boolean.xlsx"))
+       oo.default_sheet = oo.sheets.first
+       assert_equal "TRUE", oo.cell(1,1)
+       assert_equal "FALSE", oo.cell(2,1)
      end
   end
   

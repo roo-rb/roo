@@ -385,6 +385,9 @@ class Excelx < GenericSpreadsheet
                 if row.name == 'c'
                   if row.attributes['t'] == 's'
                     tmp_type = :shared
+                  elsif row.attributes['t'] == 'b'
+                    tmp_type = :boolean
+                    
                   else
                     s_attribute = row.attributes['s']
                     format = attribute2format(s_attribute)
@@ -426,6 +429,9 @@ class Excelx < GenericSpreadsheet
                         vt = :string
                         str_v = @shared_table[cell.text.to_i]
                         excelx_type = :string
+                      elsif tmp_type == :boolean
+                        vt = :boolean
+                        cell.text.to_i == 1 ? v = 'TRUE' : v = 'FALSE'
                       elsif tmp_type == :date
                         vt = :date
                         v = cell.text
