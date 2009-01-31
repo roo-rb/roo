@@ -387,7 +387,6 @@ class Excelx < GenericSpreadsheet
                     tmp_type = :shared
                   elsif row.attributes['t'] == 'b'
                     tmp_type = :boolean
-                    
                   else
                     s_attribute = row.attributes['s']
                     format = attribute2format(s_attribute)
