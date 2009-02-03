@@ -8,7 +8,8 @@
 # (like 'diff') must be changed (or commented out ;-)) if you want to run
 # the tests under another OS
 #
-require File.dirname(__FILE__) + '/test_helper.rb'
+TESTDIR =  File.dirname(__FILE__) 
+require TESTDIR + '/test_helper.rb'
 #require 'soap/rpc/driver'
 require 'fileutils'
 require 'timeout'
@@ -143,11 +144,11 @@ class TestRoo < Test::Unit::TestCase
 
   def test_classes
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       assert_kind_of Openoffice, oo
     end
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       assert_kind_of Excel, oo
     end
     if GOOGLE
@@ -155,7 +156,7 @@ class TestRoo < Test::Unit::TestCase
       assert_kind_of Google, oo
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       assert_kind_of Excelx, oo
     end
   end
@@ -180,7 +181,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_sheets_openoffice
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       assert_equal ["Tabelle1","Name of Sheet 2","Sheet3","Sheet4","Sheet5"], oo.sheets
       assert_raise(RangeError) {
         oo.default_sheet = "no_sheet"
@@ -198,7 +199,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_sheets_gnumeric_ods
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       assert_equal ["Tabelle1","Name of Sheet 2","Sheet3","Sheet4","Sheet5"], oo.sheets
       assert_raise(RangeError) {
         oo.default_sheet = "no_sheet"
@@ -216,7 +217,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_sheets_excel
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       assert_equal ["Tabelle1","Name of Sheet 2","Sheet3","Sheet4","Sheet5"], oo.sheets
       assert_raise(RangeError) {
         oo.default_sheet = "no_sheet"
@@ -233,7 +234,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_sheets_excelx
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       assert_equal ["Tabelle1","Name of Sheet 2","Sheet3","Sheet4","Sheet5"], oo.sheets
       assert_raise(RangeError) {
         oo.default_sheet = "no_sheet"
@@ -267,7 +268,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_cell_openoffice
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.cell(1,1)
       assert_equal 2, oo.cell(1,2)
@@ -306,7 +307,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_cell_gnumeric_ods
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.cell(1,1)
       assert_equal 2, oo.cell(1,2)
@@ -345,7 +346,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_cell_excel
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.cell(1,1)
       assert_equal 2, oo.cell(1,2)
@@ -384,7 +385,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_cell_excelx
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = oo.sheets.first
 
       assert_kind_of Float, oo.cell(1,1)
@@ -465,17 +466,17 @@ class TestRoo < Test::Unit::TestCase
   def test_celltype
     ###
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal :string, oo.celltype(2,6)
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal :string, oo.celltype(2,6)
     end
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = oo.sheets.first
       assert_equal :string, oo.celltype(2,6)
     end
@@ -485,7 +486,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal :string, oo.celltype(2,6)
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert_equal :string, oo.celltype(2,6)
     end
@@ -493,7 +494,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_cell_address
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal "tata", oo.cell(6,1)
       assert_equal "tata", oo.cell(6,'A')
@@ -518,7 +519,7 @@ class TestRoo < Test::Unit::TestCase
     end
 
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal "tata", oo.cell(6,1)
       assert_equal "tata", oo.cell(6,'A')
@@ -543,7 +544,7 @@ class TestRoo < Test::Unit::TestCase
     end
 
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = oo.sheets.first
       assert_equal "tata", oo.cell(6,'A')
       assert_equal "tata", oo.cell(6,1)
@@ -570,7 +571,7 @@ class TestRoo < Test::Unit::TestCase
     end
 
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert_equal "tata", oo.cell(6,1)
       assert_equal "tata", oo.cell(6,'A')
@@ -626,11 +627,11 @@ class TestRoo < Test::Unit::TestCase
   # please note that "1.0" is returned even if it was created with OpenOffice V. 2.0
   def test_officeversion
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       assert_equal "1.0", oo.officeversion
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       assert_equal "1.0", oo.officeversion
     end
     if EXCEL
@@ -648,7 +649,7 @@ class TestRoo < Test::Unit::TestCase
   #TODO: inkonsequente Lieferung Fixnum/Float
   def test_rows
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 41, oo.cell('a',12)
       assert_equal 42, oo.cell('b',12)
@@ -664,7 +665,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal ["einundvierzig", "zweiundvierzig", "dreiundvierzig", "vierundvierzig", "fuenfundvierzig"], oo.row(16)
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 41, oo.cell('a',12)
       assert_equal 42, oo.cell('b',12)
@@ -680,7 +681,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal ["einundvierzig", "zweiundvierzig", "dreiundvierzig", "vierundvierzig", "fuenfundvierzig"], oo.row(16)
     end
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = oo.sheets.first
       assert_equal 41, oo.cell('a',12)
       assert_equal 42, oo.cell('b',12)
@@ -700,7 +701,7 @@ class TestRoo < Test::Unit::TestCase
         "fuenfundvierzig"], oo.row(16)
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert_equal 41, oo.cell('a',12)
       assert_equal 42, oo.cell('b',12)
@@ -743,22 +744,22 @@ class TestRoo < Test::Unit::TestCase
 
   def test_last_row
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 18, oo.last_row
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 18, oo.last_row
     end
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = oo.sheets.first
       assert_equal 18, oo.last_row
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert_equal 18, oo.last_row
     end
@@ -771,22 +772,22 @@ class TestRoo < Test::Unit::TestCase
 
   def test_last_column
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 7, oo.last_column
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 7, oo.last_column
     end
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = oo.sheets.first
       assert_equal 7, oo.last_column
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert_equal 7, oo.last_column
     end
@@ -799,22 +800,22 @@ class TestRoo < Test::Unit::TestCase
 
   def test_last_column_as_letter
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 'G', oo.last_column_as_letter
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 'G', oo.last_column_as_letter
     end
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = 1 # oo.sheets.first
       assert_equal 'G', oo.last_column_as_letter
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert_equal 'G', oo.last_column_as_letter
     end
@@ -827,22 +828,22 @@ class TestRoo < Test::Unit::TestCase
 
   def test_first_row
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.first_row
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.first_row
     end
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = 1 # oo.sheets.first
       assert_equal 1, oo.first_row
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.first_row
     end
@@ -855,22 +856,22 @@ class TestRoo < Test::Unit::TestCase
 
   def test_first_column
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.first_column
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.first_column
     end
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = 1 # oo.sheets.first
       assert_equal 1, oo.first_column
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.first_column
     end
@@ -887,7 +888,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_first_column_as_letter_openoffice
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 'A', oo.first_column_as_letter
     end
@@ -895,7 +896,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_first_column_as_letter_gnumeric_ods
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 'A', oo.first_column_as_letter
     end
@@ -903,7 +904,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_first_column_as_letter_excel
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = 1 # oo.sheets.first
       assert_equal 'A', oo.first_column_as_letter
     end
@@ -911,7 +912,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_first_column_as_letter_excelx
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert_equal 'A', oo.first_column_as_letter
     end
@@ -927,7 +928,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_sheetname
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = "Name of Sheet 2"
       assert_equal 'I am sheet 2', oo.cell('C',5)
       assert_raise(RangeError) { oo.default_sheet = "non existing sheet name" }
@@ -941,7 +942,7 @@ class TestRoo < Test::Unit::TestCase
       assert_raise(RangeError) { dummy = oo.to_yaml({},1,1,1,1,"non existing sheet name")}
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = "Name of Sheet 2"
       assert_equal 'I am sheet 2', oo.cell('C',5)
       assert_raise(RangeError) {
@@ -958,7 +959,7 @@ class TestRoo < Test::Unit::TestCase
       assert_raise(RangeError) { dummy = oo.to_yaml({},1,1,1,1,"non existing sheet name")}
     end
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = "Name of Sheet 2"
       assert_equal 'I am sheet 2', oo.cell('C',5)
       assert_raise(RangeError) {
@@ -975,7 +976,7 @@ class TestRoo < Test::Unit::TestCase
       assert_raise(RangeError) { dummy = oo.to_yaml({},1,1,1,1,"non existing sheet name")}
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = "Name of Sheet 2"
       assert_equal 'I am sheet 2', oo.cell('C',5)
       assert_raise(RangeError) {
@@ -1013,7 +1014,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_boundaries
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = "Name of Sheet 2"
       assert_equal 2, oo.first_column
       assert_equal 'B', oo.first_column_as_letter
@@ -1022,7 +1023,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 14, oo.last_row
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = "Name of Sheet 2"
       assert_equal 2, oo.first_column
       assert_equal 'B', oo.first_column_as_letter
@@ -1032,7 +1033,7 @@ class TestRoo < Test::Unit::TestCase
     end
     if EXCEL
       #-- Excel
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = 2 # "Name of Sheet 2"
       assert_equal 2, oo.first_column
       assert_equal 'B', oo.first_column_as_letter
@@ -1041,7 +1042,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 14, oo.last_row
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = "Name of Sheet 2"
       assert_equal 2, oo.first_column
       assert_equal 'B', oo.first_column_as_letter
@@ -1053,7 +1054,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_multiple_letters
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = "Sheet3"
       assert_equal "i am AA", oo.cell('AA',1)
       assert_equal "i am AB", oo.cell('AB',1)
@@ -1062,7 +1063,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal "i am BA", oo.cell(1,'BA')
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = "Sheet3"
       assert_equal "i am AA", oo.cell('AA',1)
       assert_equal "i am AB", oo.cell('AB',1)
@@ -1071,7 +1072,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal "i am BA", oo.cell(1,'BA')
     end
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = 3 # "Sheet3"
       assert_equal "i am AA", oo.cell('AA',1)
       assert_equal "i am AB", oo.cell('AB',1)
@@ -1080,7 +1081,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal "i am BA", oo.cell(1,'BA')
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = "Sheet3"
       assert_equal "i am AA", oo.cell('AA',1)
       assert_equal "i am AB", oo.cell('AB',1)
@@ -1092,7 +1093,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_argument_error
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       before Date.new(2007,7,20) do
         assert_raise(ArgumentError) {
           #oo.default_sheet = "first sheet"
@@ -1109,28 +1110,28 @@ class TestRoo < Test::Unit::TestCase
 
   def test_empty_eh
     if OPENOFFICE #-- OpenOffice
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert oo.empty?('a',14)
       assert ! oo.empty?('a',15)
       assert oo.empty?('a',20)
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert oo.empty?('a',14)
       assert ! oo.empty?('a',15)
       assert oo.empty?('a',20)
     end
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = 1
       assert oo.empty?('a',14)
       assert ! oo.empty?('a',15)
       assert oo.empty?('a',20)
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert oo.empty?('a',14)
       assert ! oo.empty?('a',15)
@@ -1140,11 +1141,11 @@ class TestRoo < Test::Unit::TestCase
 
   def test_writeopenoffice
     if OPENOFFICEWRITE
-      File.cp(File.join("test","numbers1.ods"),
-        File.join("test","numbers2.ods"))
-      File.cp(File.join("test","numbers2.ods"),
-        File.join("test","bak_numbers2.ods"))
-      oo = Openoffice.new(File.join("test","numbers2.ods"))
+      File.cp(File.join(TESTDIR,"numbers1.ods"),
+        File.join(TESTDIR,"numbers2.ods"))
+      File.cp(File.join(TESTDIR,"numbers2.ods"),
+        File.join(TESTDIR,"bak_numbers2.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers2.ods"))
       oo.default_sheet = oo.sheets.first
       oo.first_row.upto(oo.last_row) {|y|
         oo.first_column.upto(oo.last_column) {|x|
@@ -1156,8 +1157,8 @@ class TestRoo < Test::Unit::TestCase
       }
       oo.save
 
-      oo1 = Openoffice.new(File.join("test","numbers2.ods"))
-      oo2 = Openoffice.new(File.join("test","bak_numbers2.ods"))
+      oo1 = Openoffice.new(File.join(TESTDIR,"numbers2.ods"))
+      oo2 = Openoffice.new(File.join(TESTDIR,"bak_numbers2.ods"))
       #p oo2.to_s
       assert_equal 999, oo2.cell('a',1), oo2.cell('a',1)
       assert_equal oo2.cell('a',1) + 7, oo1.cell('a',1)
@@ -1170,14 +1171,14 @@ class TestRoo < Test::Unit::TestCase
       assert_equal oo2.cell('d',2)+7, oo1.cell('d',2)
       assert_equal oo2.cell('e',2)+7, oo1.cell('e',2)
 
-      File.cp(File.join("test","bak_numbers2.ods"),
-        File.join("test","numbers2.ods"))
+      File.cp(File.join(TESTDIR,"bak_numbers2.ods"),
+        File.join(TESTDIR,"numbers2.ods"))
     end
   end
 
   def test_reload
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.cell(1,1)
 
@@ -1185,7 +1186,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 1, oo.cell(1,1)
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.cell(1,1)
 
@@ -1193,7 +1194,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 1, oo.cell(1,1)
     end
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = 1 # oo.sheets.first
       assert_equal 1, oo.cell(1,1)
 
@@ -1201,7 +1202,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 1, oo.cell(1,1)
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.cell(1,1)
 
@@ -1212,7 +1213,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_bug_contiguous_cells
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = "Sheet4"
       assert_equal Date.new(2007,06,16), oo.cell('a',1)
       assert_equal 10, oo.cell('b',1)
@@ -1221,7 +1222,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 10, oo.cell('e',1)
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = "Sheet4"
       assert_equal Date.new(2007,06,16), oo.cell('a',1)
       assert_equal 10, oo.cell('b',1)
@@ -1241,7 +1242,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_bug_italo_ve
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = "Sheet5"
       assert_equal 1, oo.cell('A',1)
       assert_equal 5, oo.cell('b',1)
@@ -1250,7 +1251,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 3, oo.cell('a',3)
     end
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = "Sheet5"
       assert_equal 1, oo.cell('A',1)
       assert_equal 5, oo.cell('b',1)
@@ -1259,7 +1260,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 3, oo.cell('a',3)
     end
     if GNUMERIC_ODS
-      oo = Openoffice.new(File.join("test","gnumeric_numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"gnumeric_numbers1.ods"))
       oo.default_sheet = "Sheet5"
       assert_equal 1, oo.cell('A',1)
       assert_equal 5, oo.cell('b',1)
@@ -1268,7 +1269,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 3, oo.cell('a',3)
     end
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = 5
       assert_equal 1, oo.cell('A',1)
       assert_equal 5, oo.cell('b',1)
@@ -1277,7 +1278,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 3, oo.cell('a',3)
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = "Sheet5" # oo.sheets[5-1]
       assert_equal 1, oo.cell('A',1)
       assert_equal 5, oo.cell('b',1)
@@ -1299,7 +1300,7 @@ class TestRoo < Test::Unit::TestCase
   #2008-01-30
   def test_italo_table
     local_only do
-      oo = Openoffice.new(File.join("test","simple_spreadsheet_from_italo.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"simple_spreadsheet_from_italo.ods"))
       oo.default_sheet = oo.sheets.first
 
       assert_equal  '1', oo.cell('A',1)
@@ -1361,7 +1362,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal "0.01:percentage",oo.cell(5, 2).to_s+":"+oo.celltype(5, 2).to_s
       assert_equal "0.01:percentage",oo.cell(5, 3).to_s+":"+oo.celltype(5, 3).to_s
 
-      oo = Excel.new(File.join("test","simple_spreadsheet_from_italo.xls"))
+      oo = Excel.new(File.join(TESTDIR,"simple_spreadsheet_from_italo.xls"))
       oo.default_sheet = oo.sheets.first
 
       assert_equal  '1', oo.cell('A',1)
@@ -1435,7 +1436,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_formula_openoffice
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","formula.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"formula.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.cell('A',1)
       assert_equal 2, oo.cell('A',2)
@@ -1466,7 +1467,7 @@ class TestRoo < Test::Unit::TestCase
   def test_formula_excel
     if defined? excel_supports_formulas
       if EXCEL
-        oo = Excel.new(File.join("test","formula.xls"))
+        oo = Excel.new(File.join(TESTDIR,"formula.xls"))
         oo.default_sheet = oo.sheets.first
         assert_equal 1, oo.cell('A',1)
         assert_equal 2, oo.cell('A',2)
@@ -1536,7 +1537,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_formula_excelx
     if EXCELX
-      oo = Excelx.new(File.join("test","formula.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"formula.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.cell('A',1)
       assert_equal 2, oo.cell('A',2)
@@ -1575,7 +1576,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_borders_sheets_openoffice
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","borders.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"borders.ods"))
       oo.default_sheet = oo.sheets[1]
       assert_equal 6, oo.first_row
       assert_equal 11, oo.last_row
@@ -1598,7 +1599,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_borders_sheets_excel
     if EXCEL
-      oo = Excel.new(File.join("test","borders.xls"))
+      oo = Excel.new(File.join(TESTDIR,"borders.xls"))
       oo.default_sheet = oo.sheets[1]
       assert_equal 6, oo.first_row
       assert_equal 11, oo.last_row
@@ -1621,7 +1622,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_borders_sheets_excelx
     if EXCELX
-      oo = Excelx.new(File.join("test","borders.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"borders.xlsx"))
       oo.default_sheet = oo.sheets[1]
       assert_equal 6, oo.first_row
       assert_equal 11, oo.last_row
@@ -1679,7 +1680,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_to_yaml
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal "--- \n"+yaml_entry(5,1,"date","1961-11-21"), oo.to_yaml({}, 5,1,5,1)
       assert_equal "--- \n"+yaml_entry(8,3,"string","thisisc8"), oo.to_yaml({}, 8,3,8,3)
@@ -1702,7 +1703,7 @@ class TestRoo < Test::Unit::TestCase
       #example: puts oo.to_yaml({"probe" => "bodenproben_2007-06-30"}, 12,3)
     end
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = 1
       assert_equal "--- \n"+yaml_entry(5,1,"date","1961-11-21"), oo.to_yaml({}, 5,1,5,1)
       assert_equal "--- \n"+yaml_entry(8,3,"string","thisisc8"), oo.to_yaml({}, 8,3,8,3)
@@ -1723,7 +1724,7 @@ class TestRoo < Test::Unit::TestCase
         yaml_entry(16,5,"string","fuenfundvierzig"), oo.to_yaml({}, 12,3)
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert_equal "--- \n"+yaml_entry(5,1,"date","1961-11-21"), oo.to_yaml({}, 5,1,5,1)
       assert_equal "--- \n"+yaml_entry(8,3,"string","thisisc8"), oo.to_yaml({}, 8,3,8,3)
@@ -1849,7 +1850,7 @@ class TestRoo < Test::Unit::TestCase
   #end
 
   #def test_dsl
-  #  s = Openoffice.new(File.join("test","numbers1.ods"))
+  #  s = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
   #  s.default_sheet = s.sheets.first
   #
   #    s.set 'a',1, 5
@@ -1871,14 +1872,14 @@ class TestRoo < Test::Unit::TestCase
 
   #def test_create_spreadsheet2
   #  # anlegen, falls noch nicht existierend
-  #  s = Openoffice.new(File.join("test","createdspreadsheet.ods"),true)
+  #  s = Openoffice.new(File.join(TESTDIR,"createdspreadsheet.ods"),true)
   #  s.set 'a',1,42
   #  s.set 'b',1,43
   #  s.set 'c',1,44
   #  s.save
   #
   #  #after Date.new(2007,7,3) do
-  #  #  t = Openoffice.new(File.join("test","createdspreadsheet.ods"))
+  #  #  t = Openoffice.new(File.join(TESTDIR,"createdspreadsheet.ods"))
   #  #  assert_equal 42, t.cell(1,'a')
   #  #  assert_equal 43, t.cell('b',1)
   #  #  assert_equal 44, t.cell('c',3)
@@ -1887,7 +1888,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_only_one_sheet
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","only_one_sheet.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"only_one_sheet.ods"))
       # oo.default_sheet = oo.sheets.first
       assert_equal 42, oo.cell('B',4)
       assert_equal 43, oo.cell('C',4)
@@ -1898,7 +1899,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 44, oo.cell('D',4)
     end
     if EXCEL
-      oo = Excel.new(File.join("test","only_one_sheet.xls"))
+      oo = Excel.new(File.join(TESTDIR,"only_one_sheet.xls"))
       # oo.default_sheet = oo.sheets.first
       assert_equal 42, oo.cell('B',4)
       assert_equal 43, oo.cell('C',4)
@@ -1909,7 +1910,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 44, oo.cell('D',4)
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","only_one_sheet.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"only_one_sheet.xlsx"))
       # oo.default_sheet = oo.sheets.first
       assert_equal 42, oo.cell('B',4)
       assert_equal 43, oo.cell('C',4)
@@ -1975,7 +1976,7 @@ class TestRoo < Test::Unit::TestCase
     after Date.new(2009,1,10) do
       if EXCEL
         $log.level = Logger::DEBUG
-        excel = Excel.new(File.join("test","bode-v1.xls.zip"), :zip)
+        excel = Excel.new(File.join(TESTDIR,"bode-v1.xls.zip"), :zip)
         assert excel
         # muss Fehler bringen, weil kein default_sheet gesetzt wurde
         assert_raises (ArgumentError) {
@@ -1994,7 +1995,7 @@ class TestRoo < Test::Unit::TestCase
     if EXCELX
       after Date.new(2999,7,30) do
         # diese Datei gibt es noch nicht gezippt
-        excel = Excelx.new(File.join("test","bode-v1.xlsx.zip"), :zip)
+        excel = Excelx.new(File.join(TESTDIR,"bode-v1.xlsx.zip"), :zip)
         assert excel
         assert_raises (ArgumentError) {
           assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
@@ -2008,7 +2009,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_openoffice_zipped
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","bode-v1.ods.zip"), :zip)
+      oo = Openoffice.new(File.join(TESTDIR,"bode-v1.ods.zip"), :zip)
       assert oo
       # muss Fehler bringen, weil kein default_sheet gesetzt wurde
       assert_raises (ArgumentError) {
@@ -2023,7 +2024,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_bug_ric
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","ric.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"ric.ods"))
       oo.default_sheet = oo.sheets.first
       assert oo.empty?('A',1)
       assert oo.empty?('B',1)
@@ -2091,14 +2092,14 @@ class TestRoo < Test::Unit::TestCase
 
   def test_mehrteilig
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","Bibelbund1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"Bibelbund1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
     end
     #if EXCELX
     #  after Date.new(2008,6,1) do
     #    #Datei gibt es noch nicht
-    #    oo = Excelx.new(File.join("test","Bibelbund1.xlsx"))
+    #    oo = Excelx.new(File.join(TESTDIR,"Bibelbund1.xlsx"))
     #    oo.default_sheet = oo.sheets.first
     #    assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
     #  end
@@ -2111,7 +2112,7 @@ class TestRoo < Test::Unit::TestCase
         assert_nothing_raised(Timeout::Error) {
           Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
             File.delete_if_exist("/tmp/Bibelbund.csv")
-            oo = Openoffice.new(File.join("test","Bibelbund.ods"))
+            oo = Openoffice.new(File.join(TESTDIR,"Bibelbund.ods"))
             oo.default_sheet = oo.sheets.first
             assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
             assert_equal "Tagebuch des Sekret\303\244rs.  Nachrichten aus Chile", oo.cell(46,'A')
@@ -2131,7 +2132,7 @@ class TestRoo < Test::Unit::TestCase
         assert_nothing_raised(Timeout::Error) {
           Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
             File.delete_if_exist("/tmp/Bibelbund.csv")
-            oo = Excel.new(File.join("test","Bibelbund.xls"))
+            oo = Excel.new(File.join(TESTDIR,"Bibelbund.xls"))
             oo.default_sheet = oo.sheets.first
             assert oo.to_csv("/tmp/Bibelbund.csv")
             assert File.exists?("/tmp/Bibelbund.csv")
@@ -2149,7 +2150,7 @@ class TestRoo < Test::Unit::TestCase
           assert_nothing_raised(Timeout::Error) {
             Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
               File.delete_if_exist("/tmp/Bibelbund.csv")
-              oo = Excelx.new(File.join("test","Bibelbund.xlsx"))
+              oo = Excelx.new(File.join(TESTDIR,"Bibelbund.xlsx"))
               oo.default_sheet = oo.sheets.first
               assert oo.to_csv("/tmp/Bibelbund.csv")
               assert File.exists?("/tmp/Bibelbund.csv")
@@ -2185,7 +2186,7 @@ class TestRoo < Test::Unit::TestCase
       #assert_nothing_raised(Timeout::Error) {
       Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
         File.delete_if_exist("/tmp/numbers1.csv")
-        oo = Openoffice.new(File.join("test","numbers1.ods"))
+        oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
 
 
         # bug?, 2008-01-15 from Troy Davis
@@ -2208,7 +2209,7 @@ class TestRoo < Test::Unit::TestCase
       #assert_nothing_raised(Timeout::Error) {
       Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
         File.delete_if_exist("/tmp/numbers1_excel.csv")
-        oo = Excel.new(File.join("test","numbers1.xls"))
+        oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
 
         # bug?, 2008-01-15 from Troy Davis
         assert oo.to_csv("/tmp/numbers1_excel.csv",oo.sheets.first)
@@ -2229,7 +2230,7 @@ class TestRoo < Test::Unit::TestCase
       #assert_nothing_raised(Timeout::Error) {
       Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
         File.delete_if_exist("/tmp/numbers1.csv")
-        oo = Excelx.new(File.join("test","numbers1.xlsx"))
+        oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
 
         # bug?, 2008-01-15 from Troy Davis
         assert oo.to_csv("/tmp/numbers1.csv",oo.sheets.first)
@@ -2270,7 +2271,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_bug_mehrere_datum
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = 'Sheet5'
       assert_equal :date, oo.celltype('A',4)
       assert_equal :date, oo.celltype('B',4)
@@ -2305,7 +2306,7 @@ class TestRoo < Test::Unit::TestCase
     end # Openoffice
 
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = 'Sheet5'
       assert_equal :date, oo.celltype('A',4)
       assert_equal :date, oo.celltype('B',4)
@@ -2339,7 +2340,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal "ABC", oo.cell('E',6)
     end # Excel
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = 'Sheet5'
       assert_equal :date, oo.celltype('A',4)
       assert_equal :date, oo.celltype('B',4)
@@ -2376,7 +2377,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_multiple_sheets
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       2.times do
         oo.default_sheet = "Tabelle1"
         assert_equal 1, oo.cell(1,1)
@@ -2420,7 +2421,7 @@ class TestRoo < Test::Unit::TestCase
 
     if EXCEL
       $debug = true
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       2.times do
         oo.default_sheet = "Tabelle1"
         assert_equal 1, oo.cell(1,1)
@@ -2503,7 +2504,7 @@ class TestRoo < Test::Unit::TestCase
       end
     end
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       2.times do
         oo.default_sheet = "Tabelle1"
         assert_equal 1, oo.cell(1,1)
@@ -2548,7 +2549,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_bug_empty_sheet_openoffice
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","formula.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"formula.ods"))
       oo.default_sheet = 'Sheet3' # is an empty sheet
       assert_nothing_raised(NoMethodError) {
         oo.to_csv(File.join("/","tmp","emptysheet.csv"))
@@ -2559,7 +2560,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_bug_empty_sheet_excelx
     if EXCELX
-      oo = Excelx.new(File.join("test","formula.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"formula.xlsx"))
       oo.default_sheet = 'Sheet3' # is an empty sheet
       assert_nothing_raised(NoMethodError) {
         oo.to_csv(File.join("/","tmp","emptysheet.csv"))
@@ -2572,7 +2573,7 @@ class TestRoo < Test::Unit::TestCase
     if LONG_RUN
       if OPENOFFICE
         Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-          oo = Openoffice.new(File.join("test","Bibelbund.ods"))
+          oo = Openoffice.new(File.join(TESTDIR,"Bibelbund.ods"))
           oo.default_sheet = oo.sheets.first
           rec = oo.find 20
           assert rec
@@ -2593,7 +2594,7 @@ class TestRoo < Test::Unit::TestCase
     if LONG_RUN
       if EXCEL
         Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-          oo = Excel.new(File.join("test","Bibelbund.xls"))
+          oo = Excel.new(File.join(TESTDIR,"Bibelbund.xls"))
           oo.default_sheet = oo.sheets.first
           rec = oo.find 20
           assert rec
@@ -2613,7 +2614,7 @@ class TestRoo < Test::Unit::TestCase
     if LONG_RUN
       if EXCEL
         Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-          oo = Excelx.new(File.join("test","Bibelbund.xlsx"))
+          oo = Excelx.new(File.join(TESTDIR,"Bibelbund.xlsx"))
           oo.default_sheet = oo.sheets.first
           rec = oo.find 20
           assert rec
@@ -2629,7 +2630,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_find_by_row_openoffice
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       oo.header_line = nil
       rec = oo.find 16
@@ -2647,7 +2648,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_find_by_row_excel
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = oo.sheets.first
       oo.header_line = nil
       rec = oo.find 16
@@ -2663,7 +2664,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_find_by_row_excelx
     if EXCELX
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       oo.default_sheet = oo.sheets.first
       oo.header_line = nil
       rec = oo.find 16
@@ -2716,7 +2717,7 @@ class TestRoo < Test::Unit::TestCase
       if OPENOFFICE
         assert_nothing_raised(Timeout::Error) {
           Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-            oo = Openoffice.new(File.join("test","Bibelbund.ods"))
+            oo = Openoffice.new(File.join(TESTDIR,"Bibelbund.ods"))
             oo.default_sheet = oo.sheets.first
             #-----------------------------------------------------------------
             zeilen = oo.find(:all, :conditions => {
@@ -2809,7 +2810,7 @@ class TestRoo < Test::Unit::TestCase
       if EXCEL
         assert_nothing_raised(Timeout::Error) {
           Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-            oo = Excel.new(File.join("test","Bibelbund.xls"))
+            oo = Excel.new(File.join(TESTDIR,"Bibelbund.xls"))
             oo.default_sheet = oo.sheets.first
             #-----------------------------------------------------------------
             zeilen = oo.find(:all, :conditions => {
@@ -2870,7 +2871,7 @@ class TestRoo < Test::Unit::TestCase
 
   #TODO: temporaerer Test
   def test_seiten_als_date
-    oo = Excelx.new(File.join("test","Bibelbund.xlsx"))
+    oo = Excelx.new(File.join(TESTDIR,"Bibelbund.xlsx"))
     oo.default_sheet = oo.sheets.first
     assert_equal 'Bericht aus dem Sekretariat', oo.cell(13,1)
     assert_equal '1981-4', oo.cell(13,'D')
@@ -2884,7 +2885,7 @@ class TestRoo < Test::Unit::TestCase
       if EXCELX
         assert_nothing_raised(Timeout::Error) {
           Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-            oo = Excelx.new(File.join("test","Bibelbund.xlsx"))
+            oo = Excelx.new(File.join(TESTDIR,"Bibelbund.xlsx"))
             oo.default_sheet = oo.sheets.first
             #-----------------------------------------------------------------
             zeilen = oo.find(:all, :conditions => {
@@ -3150,7 +3151,7 @@ class TestRoo < Test::Unit::TestCase
   end
 
   def test_simple_spreadsheet_find_by_condition_openoffice
-    oo = Openoffice.new(File.join("test","simple_spreadsheet.ods"))
+    oo = Openoffice.new(File.join(TESTDIR,"simple_spreadsheet.ods"))
     oo.default_sheet = oo.sheets.first
     oo.header_line = 3
     erg = oo.find(:all, :conditions => {'Comment' => 'Task 1'})
@@ -3165,7 +3166,7 @@ class TestRoo < Test::Unit::TestCase
   def test_simple_spreadsheet_find_by_condition_excel
     if EXCEL
       $debug = true
-      oo = Excel.new(File.join("test","simple_spreadsheet.xls"))
+      oo = Excel.new(File.join(TESTDIR,"simple_spreadsheet.xls"))
       oo.default_sheet = oo.sheets.first
       oo.header_line = 3
       erg = oo.find(:all, :conditions => {'Comment' => 'Task 1'})
@@ -3183,7 +3184,7 @@ class TestRoo < Test::Unit::TestCase
   def test_simple_spreadsheet_find_by_condition_excelx
     if EXCELX
       # die dezimalen Seiten bekomme ich seltsamerweise als Date
-      oo = Excelx.new(File.join("test","simple_spreadsheet.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"simple_spreadsheet.xlsx"))
       oo.default_sheet = oo.sheets.first
       oo.header_line = 3
       erg = oo.find(:all, :conditions => {'Comment' => 'Task 1'})
@@ -3342,19 +3343,19 @@ class TestRoo < Test::Unit::TestCase
     if OPENOFFICE
       ext = ".ods"
       expected = sprintf(expected_templ,ext)
-      oo = Openoffice.new(File.join("test","numbers1.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
       assert_equal expected, oo.info
     end
     if EXCEL
       ext = ".xls"
       expected = sprintf(expected_templ,ext)
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       assert_equal expected, oo.info
     end
     if EXCELX
       ext = ".xlsx"
       expected = sprintf(expected_templ,ext)
-      oo = Excelx.new(File.join("test","numbers1.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
       assert_equal expected, oo.info
     end
     if GOOGLE
@@ -3368,7 +3369,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_bug_excel_numbers1_sheet5_last_row
     if EXCEL
-      oo = Excel.new(File.join("test","numbers1.xls"))
+      oo = Excel.new(File.join(TESTDIR,"numbers1.xls"))
       oo.default_sheet = "Tabelle1"
       assert_equal 1, oo.first_row
       assert_equal 18, oo.last_row
@@ -3593,7 +3594,7 @@ Sheet 3:
 
   def test_bug_time_nil_openoffice
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","time-test.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"time-test.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 12*3600+13*60+14, oo.cell('B',1) # 12:13:14 (secs since midnight)
       assert_equal :time, oo.celltype('B',1)
@@ -3607,7 +3608,7 @@ Sheet 3:
 
   def test_bug_time_nil_excel
     if EXCEL
-      oo = Excel.new(File.join("test","time-test.xls"))
+      oo = Excel.new(File.join(TESTDIR,"time-test.xls"))
       oo.default_sheet = oo.sheets.first
       assert_equal 12*3600+13*60+14, oo.cell('B',1) # 12:13:14 (secs since midnight)
       assert_equal :time, oo.celltype('B',1)
@@ -3621,7 +3622,7 @@ Sheet 3:
 
   def test_bug_time_nil_excelx
     if EXCELX
-      oo = Excelx.new(File.join("test","time-test.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"time-test.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert_equal [:numeric_or_formula, "hh:mm:ss"],oo.excelx_type('b',1)
       assert_in_delta 0.50918981481481485, oo.excelx_value('b', 1), 0.000001
@@ -3653,7 +3654,7 @@ Sheet 3:
   def test_date_time_to_csv_openoffice
     if OPENOFFICE
       File.delete_if_exist("/tmp/time-test.csv")
-      oo = Openoffice.new(File.join("test","time-test.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"time-test.ods"))
       oo.default_sheet = oo.sheets.first
       assert oo.to_csv("/tmp/time-test.csv")
       assert File.exists?("/tmp/time-test.csv")
@@ -3666,7 +3667,7 @@ Sheet 3:
       #ueberfluessige leere Zeilen werden am Ende noch angehaengt
       # last_row fehlerhaft?
       File.delete_if_exist("/tmp/time-test.csv")
-      oo = Excel.new(File.join("test","time-test.xls"))
+      oo = Excel.new(File.join(TESTDIR,"time-test.xls"))
       oo.default_sheet = oo.sheets.first
       assert oo.to_csv("/tmp/time-test.csv")
       assert File.exists?("/tmp/time-test.csv")
@@ -3679,7 +3680,7 @@ Sheet 3:
       #ueberfluessige leere Zeilen werden am Ende noch angehaengt
       # last_row fehlerhaft?
       File.delete_if_exist("/tmp/time-test.csv")
-      oo = Excelx.new(File.join("test","time-test.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"time-test.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert oo.to_csv("/tmp/time-test.csv")
       assert File.exists?("/tmp/time-test.csv")
@@ -3702,7 +3703,7 @@ Sheet 3:
     if OPENOFFICE
       expected =
         "--- \ncell_1_1: \n  row: 1 \n  col: 1 \n  celltype: string \n  value: Mittags: \ncell_1_2: \n  row: 1 \n  col: 2 \n  celltype: time \n  value: 12:13:14 \ncell_1_3: \n  row: 1 \n  col: 3 \n  celltype: time \n  value: 15:16:00 \ncell_1_4: \n  row: 1 \n  col: 4 \n  celltype: time \n  value: 23:00:00 \ncell_2_1: \n  row: 2 \n  col: 1 \n  celltype: date \n  value: 2007-11-21 \n"
-      oo = Openoffice.new(File.join("test","time-test.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"time-test.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal expected, oo.to_yaml
     end
@@ -3712,7 +3713,7 @@ Sheet 3:
     if EXCEL
       expected =
         "--- \ncell_1_1: \n  row: 1 \n  col: 1 \n  celltype: string \n  value: Mittags: \ncell_1_2: \n  row: 1 \n  col: 2 \n  celltype: time \n  value: 12:13:14 \ncell_1_3: \n  row: 1 \n  col: 3 \n  celltype: time \n  value: 15:16:00 \ncell_1_4: \n  row: 1 \n  col: 4 \n  celltype: time \n  value: 23:00:00 \ncell_2_1: \n  row: 2 \n  col: 1 \n  celltype: date \n  value: 2007-11-21 \n"
-      oo = Excel.new(File.join("test","time-test.xls"))
+      oo = Excel.new(File.join(TESTDIR,"time-test.xls"))
       oo.default_sheet = oo.sheets.first
       assert_equal expected, oo.to_yaml
     end
@@ -3722,7 +3723,7 @@ Sheet 3:
     if EXCELX
       expected =
         "--- \ncell_1_1: \n  row: 1 \n  col: 1 \n  celltype: string \n  value: Mittags: \ncell_1_2: \n  row: 1 \n  col: 2 \n  celltype: time \n  value: 12:13:14 \ncell_1_3: \n  row: 1 \n  col: 3 \n  celltype: time \n  value: 15:16:00 \ncell_1_4: \n  row: 1 \n  col: 4 \n  celltype: time \n  value: 23:00:00 \ncell_2_1: \n  row: 2 \n  col: 1 \n  celltype: date \n  value: 2007-11-21 \n"
-      oo = Excelx.new(File.join("test","time-test.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"time-test.xlsx"))
       oo.default_sheet = oo.sheets.first
       assert_equal expected, oo.to_yaml
     end
@@ -3741,9 +3742,9 @@ Sheet 3:
   def test_no_remaining_tmp_files_openoffice
     if OPENOFFICE
       assert_raise(Zip::ZipError) { #TODO: besseres Fehlerkriterium bei
-        # oo = Openoffice.new(File.join("test","no_spreadsheet_file.txt"))
+        # oo = Openoffice.new(File.join(TESTDIR,"no_spreadsheet_file.txt"))
         # es soll absichtlich ein Abbruch provoziert werden, deshalb :ignore
-        oo = Openoffice.new(File.join("test","no_spreadsheet_file.txt"),
+        oo = Openoffice.new(File.join(TESTDIR,"no_spreadsheet_file.txt"),
           false,
           :ignore)
       }
@@ -3755,9 +3756,9 @@ Sheet 3:
   def test_no_remaining_tmp_files_excel
     if EXCEL
       assert_raise(OLE::UnknownFormatError) {
-        # oo = Excel.new(File.join("test","no_spreadsheet_file.txt"))
+        # oo = Excel.new(File.join(TESTDIR,"no_spreadsheet_file.txt"))
         # es soll absichtlich ein Abbruch provoziert werden, deshalb :ignore
-        oo = Excel.new(File.join("test","no_spreadsheet_file.txt"),
+        oo = Excel.new(File.join(TESTDIR,"no_spreadsheet_file.txt"),
           false,
           :ignore)
       }
@@ -3770,9 +3771,9 @@ Sheet 3:
     if EXCELX
       assert_raise(Zip::ZipError) { #TODO: besseres Fehlerkriterium bei
 
-        # oo = Excelx.new(File.join("test","no_spreadsheet_file.txt"))
+        # oo = Excelx.new(File.join(TESTDIR,"no_spreadsheet_file.txt"))
         # es soll absichtlich ein Abbruch provoziert werden, deshalb :ignore
-        oo = Excelx.new(File.join("test","no_spreadsheet_file.txt"),
+        oo = Excelx.new(File.join(TESTDIR,"no_spreadsheet_file.txt"),
           false,
           :ignore)
 
@@ -3870,7 +3871,7 @@ Sheet 3:
     #TODO: does only run within a darwin-environment
     if   RUBY_PLATFORM.downcase =~ /darwin/
       assert_nothing_raised() {
-        oo = Excel.new(File.join("test","ms.xls"))
+        oo = Excel.new(File.join(TESTDIR,"ms.xls"))
       }
     end
   end
@@ -3996,8 +3997,8 @@ Sheet 3:
       after Date.new(2008,12,30) do
         # parseexcel bug
         local_only do
-          s1 = Excel.new(File.join("test","problem.xls"))
-          s2 = Excelx.new(File.join("test","problem.xlsx"))
+          s1 = Excel.new(File.join(TESTDIR,"problem.xls"))
+          s2 = Excelx.new(File.join(TESTDIR,"problem.xlsx"))
           s1.sheets.each {|sh| #TODO:
             s1.default_sheet = sh
             s2.default_sheet = sh
@@ -4021,8 +4022,8 @@ Sheet 3:
           # wieder eingelesene CSV-Datei aus obigem Test
           # muss identisch mit problem.xls sein
           # Importieren aus csv-Datei muss manuell gemacht werden
-          ex = Excel.new(File.join("test","problem.xls"))
-          cs = Excel.new(File.join("test","problemx_csv_imported.xls"))
+          ex = Excel.new(File.join(TESTDIR,"problem.xls"))
+          cs = Excel.new(File.join(TESTDIR,"problemx_csv_imported.xls"))
           # nur das erste sheet betrachten
           ex.default_sheet = ex.sheets.first
           cs.default_sheet = cs.sheets.first
@@ -4055,36 +4056,36 @@ Sheet 3:
 
   def test_file_warning_default
     if OPENOFFICE
-      assert_raises(TypeError) { oo = Openoffice.new(File.join("test","numbers1.xls")) }
-      assert_raises(TypeError) { oo = Openoffice.new(File.join("test","numbers1.xlsx")) }
+      assert_raises(TypeError) { oo = Openoffice.new(File.join(TESTDIR,"numbers1.xls")) }
+      assert_raises(TypeError) { oo = Openoffice.new(File.join(TESTDIR,"numbers1.xlsx")) }
       assert_equal [], Dir.glob("oo_*")
     end
     if EXCEL
-      assert_raises(TypeError) { oo = Excel.new(File.join("test","numbers1.ods")) }
-      assert_raises(TypeError) { oo = Excel.new(File.join("test","numbers1.xlsx")) }
+      assert_raises(TypeError) { oo = Excel.new(File.join(TESTDIR,"numbers1.ods")) }
+      assert_raises(TypeError) { oo = Excel.new(File.join(TESTDIR,"numbers1.xlsx")) }
       assert_equal [], Dir.glob("oo_*")
     end
     if EXCELX
-      assert_raises(TypeError) { oo = Excelx.new(File.join("test","numbers1.ods")) }
-      assert_raises(TypeError) { oo = Excelx.new(File.join("test","numbers1.xls")) }
+      assert_raises(TypeError) { oo = Excelx.new(File.join(TESTDIR,"numbers1.ods")) }
+      assert_raises(TypeError) { oo = Excelx.new(File.join(TESTDIR,"numbers1.xls")) }
       assert_equal [], Dir.glob("oo_*")
     end
   end
 
   def test_file_warning_error
     if OPENOFFICE
-      assert_raises(TypeError) { oo = Openoffice.new(File.join("test","numbers1.xls"),false,:error) }
-      assert_raises(TypeError) { oo = Openoffice.new(File.join("test","numbers1.xlsx"),false,:error) }
+      assert_raises(TypeError) { oo = Openoffice.new(File.join(TESTDIR,"numbers1.xls"),false,:error) }
+      assert_raises(TypeError) { oo = Openoffice.new(File.join(TESTDIR,"numbers1.xlsx"),false,:error) }
       assert_equal [], Dir.glob("oo_*")
     end
     if EXCEL
-      assert_raises(TypeError) { oo = Excel.new(File.join("test","numbers1.ods"),false,:error) }
-      assert_raises(TypeError) { oo = Excel.new(File.join("test","numbers1.xlsx"),false,:error) }
+      assert_raises(TypeError) { oo = Excel.new(File.join(TESTDIR,"numbers1.ods"),false,:error) }
+      assert_raises(TypeError) { oo = Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false,:error) }
       assert_equal [], Dir.glob("oo_*")
     end
     if EXCELX
-      assert_raises(TypeError) { oo = Excelx.new(File.join("test","numbers1.ods"),false,:error) }
-      assert_raises(TypeError) { oo = Excelx.new(File.join("test","numbers1.xls"),false,:error) }
+      assert_raises(TypeError) { oo = Excelx.new(File.join(TESTDIR,"numbers1.ods"),false,:error) }
+      assert_raises(TypeError) { oo = Excelx.new(File.join(TESTDIR,"numbers1.xls"),false,:error) }
       assert_equal [], Dir.glob("oo_*")
     end
   end
@@ -4093,12 +4094,12 @@ Sheet 3:
     if OPENOFFICE
       assert_nothing_raised(TypeError) {
         assert_raises(Zip::ZipError) {
-          oo = Openoffice.new(File.join("test","numbers1.xls"),false, :warning)
+          oo = Openoffice.new(File.join(TESTDIR,"numbers1.xls"),false, :warning)
         }
       }
       assert_nothing_raised(TypeError) {
         assert_raises(Errno::ENOENT) {
-          oo = Openoffice.new(File.join("test","numbers1.xlsx"),false, :warning)
+          oo = Openoffice.new(File.join(TESTDIR,"numbers1.xlsx"),false, :warning)
         }
       }
       assert_equal [], Dir.glob("oo_*")
@@ -4106,22 +4107,22 @@ Sheet 3:
     if EXCEL
       assert_nothing_raised(TypeError) {
         assert_raises(OLE::UnknownFormatError) {
-          oo = Excel.new(File.join("test","numbers1.ods"),false, :warning) }
+          oo = Excel.new(File.join(TESTDIR,"numbers1.ods"),false, :warning) }
       }
       assert_nothing_raised(TypeError) {
         assert_raises(OLE::UnknownFormatError) {
-          oo = Excel.new(File.join("test","numbers1.xlsx"),false, :warning) }
+          oo = Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false, :warning) }
       }
       assert_equal [], Dir.glob("oo_*")
     end
     if EXCELX
       assert_nothing_raised(TypeError) {
         assert_raises(Errno::ENOENT) {
-          oo = Excelx.new(File.join("test","numbers1.ods"),false, :warning) }
+          oo = Excelx.new(File.join(TESTDIR,"numbers1.ods"),false, :warning) }
       }
       assert_nothing_raised(TypeError) {
         assert_raises(Zip::ZipError) {
-          oo = Excelx.new(File.join("test","numbers1.xls"),false, :warning) }
+          oo = Excelx.new(File.join(TESTDIR,"numbers1.xls"),false, :warning) }
       }
       assert_equal [], Dir.glob("oo_*")
     end
@@ -4131,32 +4132,32 @@ Sheet 3:
     if OPENOFFICE
       assert_nothing_raised(TypeError) {
         assert_raises(Zip::ZipError) {
-          oo = Openoffice.new(File.join("test","numbers1.xls"),false, :ignore) }
+          oo = Openoffice.new(File.join(TESTDIR,"numbers1.xls"),false, :ignore) }
       }
       assert_nothing_raised(TypeError) {
         assert_raises(Errno::ENOENT) {
-          oo = Openoffice.new(File.join("test","numbers1.xlsx"),false, :ignore) }
+          oo = Openoffice.new(File.join(TESTDIR,"numbers1.xlsx"),false, :ignore) }
       }
       assert_equal [], Dir.glob("oo_*")
     end
     if EXCEL
       assert_nothing_raised(TypeError) {
         assert_raises(OLE::UnknownFormatError) {
-          oo = Excel.new(File.join("test","numbers1.ods"),false, :ignore) }
+          oo = Excel.new(File.join(TESTDIR,"numbers1.ods"),false, :ignore) }
       }
       assert_nothing_raised(TypeError) {
-        assert_raises(OLE::UnknownFormatError) {oo = Excel.new(File.join("test","numbers1.xlsx"),false, :ignore) }}
+        assert_raises(OLE::UnknownFormatError) {oo = Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false, :ignore) }}
       assert_equal [], Dir.glob("oo_*")
     end
     if EXCELX
       assert_nothing_raised(TypeError) {
         assert_raises(Errno::ENOENT) {
-          oo = Excelx.new(File.join("test","numbers1.ods"),false, :ignore)
+          oo = Excelx.new(File.join(TESTDIR,"numbers1.ods"),false, :ignore)
         }
       }
       assert_nothing_raised(TypeError) {
         assert_raises(Zip::ZipError) {
-          oo = Excelx.new(File.join("test","numbers1.xls"),false, :ignore)
+          oo = Excelx.new(File.join(TESTDIR,"numbers1.xls"),false, :ignore)
         }
       }
       assert_equal [], Dir.glob("oo_*")
@@ -4185,7 +4186,7 @@ Sheet 3:
 
   def test_bug_last_row_excel
     if EXCEL
-      oo = Excel.new(File.join("test","time-test.xls"))
+      oo = Excel.new(File.join(TESTDIR,"time-test.xls"))
       oo.default_sheet = oo.sheets.first
       assert_equal 2, oo.last_row
     end
@@ -4193,7 +4194,7 @@ Sheet 3:
 
   def test_bug_to_xml_with_empty_sheets_openoffice
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","emptysheets.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"emptysheets.ods"))
       oo.sheets.each { |sheet|
         oo.default_sheet = sheet
         assert_equal nil, oo.first_row, "first_row not nil in sheet #{sheet}"
@@ -4213,7 +4214,7 @@ Sheet 3:
 
   def test_bug_to_xml_with_empty_sheets_excel
     if EXCEL
-      oo = Excel.new(File.join("test","emptysheets.xls"))
+      oo = Excel.new(File.join(TESTDIR,"emptysheets.xls"))
       oo.sheets.each { |sheet|
         oo.default_sheet = sheet
         assert_equal nil, oo.first_row, "first_row not nil in sheet #{sheet}"
@@ -4234,7 +4235,7 @@ Sheet 3:
   def test_bug_to_xml_with_empty_sheets_excelx
     # kann ich nicht testen, da ich selbst keine .xlsx Files anlegen kann
     if EXCELX
-      #   oo = Excelx.new(File.join("test","emptysheets.xlsx"))
+      #   oo = Excelx.new(File.join(TESTDIR,"emptysheets.xlsx"))
       #  oo.sheets.each { |sheet|
       #    oo.default_sheet = sheet
       #    assert_equal nil, oo.first_row, "first_row not nil in sheet #{sheet}"
@@ -4257,7 +4258,7 @@ Sheet 3:
     # really a bug? are cells really of type time?
     # No! :float must be the correct type
     if EXCELX
-      oo = Excelx.new(File.join("test","simple_spreadsheet.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"simple_spreadsheet.xlsx"))
       oo.default_sheet = oo.sheets.first
       # puts oo.cell('B',5).to_s
       # assert_equal :time, oo.celltype('B',5)
@@ -4276,7 +4277,7 @@ Sheet 3:
   def test_to_ascii_openoffice
     if OPENOFFICE
       after Date.new(9999,12,31) do
-        oo = Openoffice.new(File.join("test","verysimple_spreadsheet.ods"))
+        oo = Openoffice.new(File.join(TESTDIR,"verysimple_spreadsheet.ods"))
         oo.default_sheet = oo.sheets.first
         expected="
   A    |   B   |  C   |
@@ -4296,7 +4297,7 @@ Sheet 3:
   def test_simple2_excelx
     if EXCELX
       after Date.new(2008,8,2) do
-        oo = Excelx.new(File.join("test","simple_spreadsheet.xlsx"))
+        oo = Excelx.new(File.join(TESTDIR,"simple_spreadsheet.xlsx"))
         oo.default_sheet = oo.sheets.first
         assert_equal [:numeric_or_formula, "yyyy\\-mm\\-dd"], oo.excelx_type('A',4)
         assert_equal [:numeric_or_formula, "#,##0.00"], oo.excelx_type('B',4)
@@ -4658,7 +4659,7 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   
   def test_datetime_openoffice
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","datetime.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"datetime.ods"))
       oo.default_sheet = oo.sheets.first
       do_datetime_tests(oo)
     end
@@ -4666,7 +4667,7 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
 
   def test_datetime_excel
     if EXCEL
-      oo = Excel.new(File.join("test","datetime.xls"))
+      oo = Excel.new(File.join(TESTDIR,"datetime.xls"))
       oo.default_sheet = oo.sheets.first
       do_datetime_tests(oo)
     end
@@ -4674,7 +4675,7 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
 
   def test_datetime_excelx
     if EXCELX
-      oo = Excelx.new(File.join("test","datetime.xlsx"))
+      oo = Excelx.new(File.join(TESTDIR,"datetime.xlsx"))
       oo.default_sheet = oo.sheets.first
       do_datetime_tests(oo)
     end
@@ -4808,7 +4809,7 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
     after Date.new(2009,1,6) do
       if OPENOFFICE
         filecontent = nil
-        File.open(File.join("test","numbers1.ods")) do |f|
+        File.open(File.join(TESTDIR,"numbers1.ods")) do |f|
           filecontent = f.read
           p filecontent.class
           p filecontent.size
@@ -4825,7 +4826,7 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   
   def SKIP_test_bug_encoding_exported_from_google
     if EXCEL
-      xl = Excel.new(File.join("test","numbers1_from_google.xls"))
+      xl = Excel.new(File.join(TESTDIR,"numbers1_from_google.xls"))
       xl.default_sheet = xl.sheets.first
       assert_equal 'test', xl.cell(2,'F')
     end
@@ -4833,7 +4834,7 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   
   def test_cell_openoffice_html_escape
     if OPENOFFICE
-      oo = Openoffice.new(File.join("test","html-escape.ods"))
+      oo = Openoffice.new(File.join(TESTDIR,"html-escape.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal "'", oo.cell(1,1)
       assert_equal "&", oo.cell(2,1)
@@ -4846,19 +4847,19 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   
   def test_cell_excel_boolean
     if EXCEL
-      oo = Excel.new(File.join("test","boolean.xls"))
+      oo = Excel.new(File.join(TESTDIR,"boolean.xls"))
       oo.default_sheet = oo.sheets.first
       assert_equal "TRUE", oo.cell(1,1)
       assert_equal "FALSE", oo.cell(2,1)
        end  
      if OPENOFFICE
-       oo = Openoffice.new(File.join("test","boolean.ods"))
+       oo = Openoffice.new(File.join(TESTDIR,"boolean.ods"))
        oo.default_sheet = oo.sheets.first
        assert_equal "true", oo.cell(1,1)
        assert_equal "false", oo.cell(2,1)
      end  
      if EXCELX
-       oo = Excelx.new(File.join("test","boolean.xlsx"))
+       oo = Excelx.new(File.join(TESTDIR,"boolean.xlsx"))
        oo.default_sheet = oo.sheets.first
        assert_equal "TRUE", oo.cell(1,1)
        assert_equal "FALSE", oo.cell(2,1)
