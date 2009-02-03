@@ -8,6 +8,7 @@
 # (like 'diff') must be changed (or commented out ;-)) if you want to run
 # the tests under another OS
 #
+
 TESTDIR =  File.dirname(__FILE__) 
 require TESTDIR + '/test_helper.rb'
 #require 'soap/rpc/driver'
@@ -107,11 +108,11 @@ end
 
 class TestRoo < Test::Unit::TestCase
 
-  OPENOFFICE = true  	# do Openoffice-Spreadsheet Tests?
-  EXCEL      = true	# do Excel Tests?
-  GOOGLE     = false 	# do Google-Spreadsheet Tests?
-  GNUMERIC_ODS = false # do gnumeric with ods files Tests?
-  EXCELX      = true  	# do Excel-X Tests? (.xlsx-files)
+  OPENOFFICE   = true  	# do Openoffice-Spreadsheet Tests?
+  EXCEL        = true	  # do Excel Tests?
+  GOOGLE       = false 	# do Google-Spreadsheet Tests?
+  GNUMERIC_ODS = false  # do gnumeric with ods files Tests?
+  EXCELX       = true  	# do Excel-X Tests? (.xlsx-files)
 
   OPENOFFICEWRITE = false # experimental: write access with OO-Documents
   ONLINE = true
@@ -4851,19 +4852,55 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
       oo.default_sheet = oo.sheets.first
       assert_equal "TRUE", oo.cell(1,1)
       assert_equal "FALSE", oo.cell(2,1)
-       end  
-     if OPENOFFICE
-       oo = Openoffice.new(File.join(TESTDIR,"boolean.ods"))
-       oo.default_sheet = oo.sheets.first
-       assert_equal "true", oo.cell(1,1)
-       assert_equal "false", oo.cell(2,1)
-     end  
-     if EXCELX
-       oo = Excelx.new(File.join(TESTDIR,"boolean.xlsx"))
-       oo.default_sheet = oo.sheets.first
-       assert_equal "TRUE", oo.cell(1,1)
-       assert_equal "FALSE", oo.cell(2,1)
-     end
+    end  
+    if OPENOFFICE
+      oo = Openoffice.new(File.join(TESTDIR,"boolean.ods"))
+      oo.default_sheet = oo.sheets.first
+      assert_equal "true", oo.cell(1,1)
+      assert_equal "false", oo.cell(2,1)
+    end  
+    if EXCELX
+      oo = Excelx.new(File.join(TESTDIR,"boolean.xlsx"))
+      oo.default_sheet = oo.sheets.first
+      assert_equal "TRUE", oo.cell(1,1)
+      assert_equal "FALSE", oo.cell(2,1)
+    end
+  end
+  
+  def test_cell_styles  
+    if OPENOFFICE
+      oo = Openoffice.new(File.join(TESTDIR,"style.ods"))
+      oo.default_sheet = oo.sheets.first
+  
+      assert_equal true,  oo.bold?(1,1)
+      assert_equal false, oo.italic?(1,1)
+      assert_equal false, oo.underlined?(1,1)
+      
+      assert_equal false, oo.bold?(2,1)
+      assert_equal true,  oo.italic?(2,1)
+      assert_equal false, oo.underlined?(2,1)
+
+      assert_equal false, oo.bold?(3,1)
+      assert_equal false, oo.italic?(3,1)
+      assert_equal false, oo.underlined?(3,1)
+
+      assert_equal false, oo.bold?(4,1)
+      assert_equal false, oo.italic?(4,1)
+      assert_equal true,  oo.underlined?(4,1)
+
+      assert_equal true,  oo.bold?(5,1)
+      assert_equal true,  oo.italic?(5,1)
+      assert_equal false, oo.underlined?(5,1)
+
+      assert_equal true,  oo.bold?(6,1)
+      assert_equal false, oo.italic?(6,1)
+      assert_equal true,  oo.underlined?(6,1)
+
+      assert_equal false, oo.bold?(7,1)
+      assert_equal true,  oo.italic?(7,1)
+      assert_equal true,  oo.underlined?(7,1)
+
+    end
   end
   
 end # class

@@ -57,6 +57,9 @@ class Openoffice < GenericSpreadsheet
     @last_row = Hash.new
     @first_column = Hash.new
     @last_column = Hash.new
+    @style = Hash.new
+    @style_defaults = Hash.new
+    @style_definitions = Hash.new { |h,k| h[k] = {} }
     @header_line = 1
   end
 
@@ -107,6 +110,36 @@ class Openoffice < GenericSpreadsheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     formula(row,col) != nil
+  end
+
+  # Given a cell, return the cell's style name
+  def cell_style(row, col, sheet=nil)
+    sheet = @default_sheet unless sheet
+    read_cells(sheet) unless @cells_read[sheet]
+    row,col = normalize(row,col)
+    @style[sheet][[row,col]] || @style_defaults[sheet]
+  end 
+  private :cell_style
+  
+  # true if the cell style is bold
+  def bold?(*args)
+    style_name = cell_style(*args)
+    return false unless style_name
+    @style_definitions[style_name][:font_weight] == 'bold' ? true : false
+  end
+  
+  # true if the cell style is italic
+  def italic?(*args)
+    style_name = cell_style(*args)
+    return false unless style_name
+    @style_definitions[style_name][:font_style] == 'italic' ? true : false
+  end
+  
+  # true if the cell style is underline
+  def underlined?(*args)
+    style_name = cell_style(*args)
+    return false unless style_name
+    @style_definitions[style_name][:text_underline_style] ? true : false
   end
 
   # set a cell to a certain value
@@ -218,13 +251,15 @@ class Openoffice < GenericSpreadsheet
   end
 
   # helper function to set the internal representation of cells
-  def set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v)
+  def set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v,style_name)
     key = [y,x+i]
     @cell_type[sheet] = {} unless @cell_type[sheet]
     @cell_type[sheet][key] = Openoffice.oo_type_2_roo_type(vt)
     @formula[sheet] = {} unless @formula[sheet]
     @formula[sheet][key] = formula  if formula
     @cell[sheet]    = {} unless @cell[sheet]
+    @style[sheet] = {} unless @style[sheet]
+    @style[sheet][key] = style_name
     case @cell_type[sheet][key]
     when :float
       @cell[sheet][key] = v.to_f
@@ -278,6 +313,7 @@ class Openoffice < GenericSpreadsheet
                     se.each_element do |te|
                       if te.name == "table-column"
                         rep = te.attributes["number-columns-repeated"]
+                        @style_defaults[sheet] = te.attributes["default-cell-style-name"]
                       elsif te.name == "table-row"
                         if te.attributes['number-rows-repeated']
                           skip_y = te.attributes['number-rows-repeated'].to_i
@@ -289,6 +325,7 @@ class Openoffice < GenericSpreadsheet
                             formula = tr.attributes['formula']
                             vt = tr.attributes['value-type']
                             v  = tr.attributes['value']
+                            style_name = tr.attributes['style-name']
                             if vt == 'string'
                               str_v  = ''
                               # insert \n if there is more than one paragraph
@@ -332,12 +369,12 @@ class Openoffice < GenericSpreadsheet
                             if skip
                               if v != nil or tr.attributes['date-value']
                                 0.upto(skip.to_i-1) do |i|
-                                  set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v)
+                                  set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v,style_name)
                                 end
                               end
                               x += (skip.to_i - 1)
                             end # if skip
-                            set_cell_values(sheet,x,y,0,v,vt,formula,tr,str_v)
+                            set_cell_values(sheet,x,y,0,v,vt,formula,tr,str_v,style_name)
                             x += 1
                           end
                         end
@@ -350,6 +387,8 @@ class Openoffice < GenericSpreadsheet
               end
             end
           end
+        elsif oo_element.name == "automatic-styles" 
+          read_styles(oo_element)
         end
       end
     end
@@ -359,6 +398,18 @@ class Openoffice < GenericSpreadsheet
     @cells_read[sheet] = true
   end
 
+  def read_styles(style_elements)
+    style_elements.each do |style|
+      next unless style.name == 'style'
+      style_name = style.attributes['name']
+      style.each do |properties|
+        @style_definitions[style_name][:font_weight] = properties.attributes['font-weight']  if properties.attributes['font-weight']
+        @style_definitions[style_name][:font_style] = properties.attributes['font-style']  if properties.attributes['font-style']
+        @style_definitions[style_name][:text_underline_style] = properties.attributes['text-underline-style']  if properties.attributes['text-underline-style']
+      end    
+    end
+  end
+  
   # Checks if the default_sheet exists. If not an RangeError exception is
   # raised
   def check_default_sheet
