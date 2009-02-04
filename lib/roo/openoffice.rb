@@ -124,22 +124,22 @@ class Openoffice < GenericSpreadsheet
   # true if the cell style is bold
   def bold?(*args)
     style_name = cell_style(*args)
-    return false unless style_name
-    @style_definitions[style_name][:font_weight] == 'bold' ? true : false
+    return false if style_name == 'Default'
+    @style_definitions[style_name][:bold] 
   end
   
   # true if the cell style is italic
   def italic?(*args)
     style_name = cell_style(*args)
-    return false unless style_name
-    @style_definitions[style_name][:font_style] == 'italic' ? true : false
+    return false if style_name == 'Default'
+    @style_definitions[style_name][:italic]
   end
   
   # true if the cell style is underline
   def underlined?(*args)
     style_name = cell_style(*args)
-    return false unless style_name
-    @style_definitions[style_name][:text_underline_style] ? true : false
+    return false if style_name == 'Default'
+    @style_definitions[style_name][:underline]
   end
 
   # set a cell to a certain value
@@ -403,9 +403,9 @@ class Openoffice < GenericSpreadsheet
       next unless style.name == 'style'
       style_name = style.attributes['name']
       style.each do |properties|
-        @style_definitions[style_name][:font_weight] = properties.attributes['font-weight']  if properties.attributes['font-weight']
-        @style_definitions[style_name][:font_style] = properties.attributes['font-style']  if properties.attributes['font-style']
-        @style_definitions[style_name][:text_underline_style] = properties.attributes['text-underline-style']  if properties.attributes['text-underline-style']
+        @style_definitions[style_name][:bold] = (properties.attributes['font-weight']  == 'bold')
+        @style_definitions[style_name][:italic] = (properties.attributes['font-style'] == 'italic')
+        @style_definitions[style_name][:underline] = (properties.attributes['text-underline-style'] != nil)
       end    
     end
   end
