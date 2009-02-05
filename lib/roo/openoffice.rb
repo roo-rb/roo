@@ -113,31 +113,31 @@ class Openoffice < GenericSpreadsheet
   end
 
   # Given a cell, return the cell's style name
-  def cell_style(row, col, sheet=nil)
+  def cell_style_attribute(row, col, sheet=nil)
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     @style[sheet][[row,col]] || @style_defaults[sheet]
   end 
-  private :cell_style
+  private :cell_style_attribute
   
   # true if the cell style is bold
   def bold?(*args)
-    style_name = cell_style(*args)
+    style_name = cell_style_attribute(*args)
     return false if style_name == 'Default'
     @style_definitions[style_name][:bold] 
   end
   
   # true if the cell style is italic
   def italic?(*args)
-    style_name = cell_style(*args)
+    style_name = cell_style_attribute(*args)
     return false if style_name == 'Default'
     @style_definitions[style_name][:italic]
   end
   
   # true if the cell style is underline
   def underlined?(*args)
-    style_name = cell_style(*args)
+    style_name = cell_style_attribute(*args)
     return false if style_name == 'Default'
     @style_definitions[style_name][:underline]
   end

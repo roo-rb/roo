@@ -112,7 +112,7 @@ class Excelx < GenericSpreadsheet
         read_shared_strings(@sharedstring_doc)
       end
       @styles_table = []
-      @style_definitions = Hash.new { |h,k| h[k] = {} }
+      @style_definitions = Array.new { |h,k| h[k] = {} }
       if File.exist?(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml'))
         file = File.new(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml'))
         @styles_doc = REXML::Document.new file
@@ -146,7 +146,6 @@ class Excelx < GenericSpreadsheet
     @excelx_type = Hash.new
     @excelx_value = Hash.new
     @s_attribute = Hash.new # TODO: ggf. wieder entfernen nur lokal benoetigt
-    @style = Hash.new
   end
 
   # Returns the content of a spreadsheet-cell.
@@ -193,33 +192,32 @@ class Excelx < GenericSpreadsheet
   end
   
   # Given a cell, return the cell's style name
-   def cell_style(row, col, sheet=nil)
+   def cell_style_attribute(row, col, sheet=nil)
      sheet = @default_sheet unless sheet
      read_cells(sheet) unless @cells_read[sheet]
      row,col = normalize(row,col)
-     @style[sheet][[row,col]] 
+     s_attribute = @s_attribute[sheet][[row,col]]
+     s_attribute ||= 0
+     s_attribute = s_attribute.to_i
    end 
-   private :cell_style
+   private :cell_style_attribute
 
    # true if the cell style is bold
    def bold?(*args)
-     style_name = cell_style(*args)
-     return false unless style_name
-     @style_definitions[style_name][:bold] 
+     s_attribute = cell_style_attribute(*args)
+     @style_definitions[s_attribute][:bold] 
    end
 
    # true if the cell style is italic
    def italic?(*args)
-     style_name = cell_style(*args)
-     return false unless style_name
-     @style_definitions[style_name][:italic] 
+     s_attribute = cell_style_attribute(*args)
+     @style_definitions[s_attribute][:italic] 
    end
 
    # true if the cell style is underline
    def underlined?(*args)
-     style_name = cell_style(*args)
-     return false unless style_name
-     @style_definitions[style_name][:underline] 
+     s_attribute = cell_style_attribute(*args)
+     @style_definitions[s_attribute][:underline] 
    end
 
   # set a cell to a certain value
@@ -332,7 +330,7 @@ class Excelx < GenericSpreadsheet
   private
 
   # helper function to set the internal representation of cells
-  def set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v,style_name,
+  def set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v,
       excelx_type=nil,
       excelx_value=nil,
       s_attribute=nil)
@@ -342,8 +340,6 @@ class Excelx < GenericSpreadsheet
     @formula[sheet] = {} unless @formula[sheet]
     @formula[sheet][key] = formula  if formula
     @cell[sheet]    = {} unless @cell[sheet]
-    @style[sheet] = {} unless @style[sheet]
-    @style[sheet][key] = style_name
     case @cell_type[sheet][key]
     when :float
       @cell[sheet][key] = v.to_f
@@ -417,16 +413,15 @@ class Excelx < GenericSpreadsheet
             if sheetdata.name == 'row'
               sheetdata.each_element do |row|
                 if row.name == 'c'
+                  s_attribute = row.attributes['s']
                   if row.attributes['t'] == 's'
                     tmp_type = :shared
                   elsif row.attributes['t'] == 'b'
                     tmp_type = :boolean
                   else
-                    s_attribute = row.attributes['s']
                     format = attribute2format(s_attribute)
                     tmp_type = format2type(format)
                   end
-                  style_name = row.attributes['s'] || @default_style_name
                   formula = nil
                   row.each_element do |cell|
 #                    puts "cell.name: #{cell.name}" if cell.text.include? "22606.5120"
@@ -485,7 +480,7 @@ class Excelx < GenericSpreadsheet
                       #puts "vt: #{vt}" if cell.text.include? "22606.5120"
                       x,y = split_coordinate(row.attributes['r'])
                       tr=nil #TODO: ???s
-                      set_cell_values(sheet,x,y,0,v,vt,formula,tr,str_v,style_name,excelx_type,excelx_value,s_attribute)
+                      set_cell_values(sheet,x,y,0,v,vt,formula,tr,str_v,excelx_type,excelx_value,s_attribute)
                     end
                   end
                 end
@@ -630,13 +625,8 @@ class Excelx < GenericSpreadsheet
               if e3.name == 'xf'
                 numFmtId = e3.attributes['numFmtId'] 
                 @cellXfs << [numFmtId]
-                fontId = e3.attributes['fontId']
-                font_element = fonts.shift
-                @default_style_name ||= fontId
-                puts font_element.inspect
-                @style_definitions[fontId][:bold] = font_element[:bold]
-                @style_definitions[fontId][:italic] = font_element[:italic]
-                @style_definitions[fontId][:underline] = font_element[:underline]
+                fontId = e3.attributes['fontId'].to_i
+                @style_definitions << fonts[fontId]
               end
             end
           end
