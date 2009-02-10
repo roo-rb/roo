@@ -4908,6 +4908,10 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
       oo = Excelx.new(File.join(TESTDIR,"style.xlsx"))
       verify_cell_fonts(oo)
     end
+    if EXCEL
+      oo = Excel.new(File.join(TESTDIR,"style.xls"))
+      verify_cell_fonts(oo)
+    end
   end
   
 end # class

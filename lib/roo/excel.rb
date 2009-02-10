@@ -1,5 +1,5 @@
 require 'rubygems'
-gem 'parseexcel', '>= 0.5.2'
+gem 'parseexcel', '>= 0.5.3'
 require 'parseexcel'
 CHARGUESS = false
 require 'charguess' if CHARGUESS
@@ -57,6 +57,7 @@ class Excel < GenericSpreadsheet
     @last_column = Hash.new
     @header_line = 1
     @cells_read = Hash.new
+    @fonts = Hash.new
   end
 
   # returns an array of sheet names in the spreadsheet
@@ -168,6 +169,31 @@ class Excel < GenericSpreadsheet
   def formulas(sheet=nil)
     raise EXCEL_NO_FORMULAS
   end
+
+  # Given a cell, return the cell's style name
+   def cell_font(row, col, sheet=nil)
+     sheet = @default_sheet unless sheet
+     read_cells(sheet) unless @cells_read[sheet]
+     row,col = normalize(row,col)
+     @fonts[sheet][[row,col]]
+   end 
+   private :cell_font
+
+   # true if the cell style is bold
+   def bold?(*args)
+     cell_font(*args)[:bold]
+   end
+
+   # true if the cell style is italic
+   def italic?(*args)
+     cell_font(*args)[:italic]
+   end
+
+   # true if the cell style is underline
+   def underlined?(*args)
+     cell_font(*args)[:underline]
+   end
+
 
   # shows the internal representation of all cells
   # mainly for debugging purposes
@@ -291,7 +317,7 @@ class Excel < GenericSpreadsheet
   end
 
   # helper function to set the internal representation of cells
-  def set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v)
+  def set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v, font)
     #key = "#{y},#{x+i}"
     key = [y,x+i]
     @cell_type[sheet] = {} unless @cell_type[sheet]
@@ -299,6 +325,9 @@ class Excel < GenericSpreadsheet
     @formula[sheet] = {} unless @formula[sheet]
     @formula[sheet][key] = formula  if formula
     @cell[sheet]    = {} unless @cell[sheet]
+    @fonts[sheet] = {} unless @fonts[sheet]
+    @fonts[sheet][key] = font
+    
     case vt # @cell_type[sheet][key]
     when :float
       @cell[sheet][key] = v.to_f
@@ -378,7 +407,7 @@ class Excel < GenericSpreadsheet
               v = nil
             end # case
             formula = tr = nil #TODO:???
-            set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v)
+            set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v, cell.font)
           end # if cell
           
           x += 1
