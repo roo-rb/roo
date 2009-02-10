@@ -190,10 +190,9 @@ class Excel < GenericSpreadsheet
    end
 
    # true if the cell style is underline
-   def underlined?(*args)
+   def underline?(*args)
      cell_font(*args)[:underline]
    end
-
 
   # shows the internal representation of all cells
   # mainly for debugging purposes

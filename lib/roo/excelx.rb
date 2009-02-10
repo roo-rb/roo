@@ -215,7 +215,7 @@ class Excelx < GenericSpreadsheet
    end
 
    # true if the cell style is underline
-   def underlined?(*args)
+   def underline?(*args)
      s_attribute = cell_style_attribute(*args)
      @style_definitions[s_attribute][:underline] 
    end

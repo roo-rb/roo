@@ -4872,31 +4872,31 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
     oo.default_sheet = oo.sheets.first
     assert_equal true,  oo.bold?(1,1)
     assert_equal false, oo.italic?(1,1)
-    assert_equal false, oo.underlined?(1,1)
+    assert_equal false, oo.underline?(1,1)
     
     assert_equal false, oo.bold?(2,1)
     assert_equal true,  oo.italic?(2,1)
-    assert_equal false, oo.underlined?(2,1)
+    assert_equal false, oo.underline?(2,1)
 
     assert_equal false, oo.bold?(3,1)
     assert_equal false, oo.italic?(3,1)
-    assert_equal false, oo.underlined?(3,1)
+    assert_equal false, oo.underline?(3,1)
 
     assert_equal false, oo.bold?(4,1)
     assert_equal false, oo.italic?(4,1)
-    assert_equal true,  oo.underlined?(4,1)
+    assert_equal true,  oo.underline?(4,1)
 
     assert_equal true,  oo.bold?(5,1)
     assert_equal true,  oo.italic?(5,1)
-    assert_equal false, oo.underlined?(5,1)
+    assert_equal false, oo.underline?(5,1)
 
     assert_equal true,  oo.bold?(6,1)
     assert_equal false, oo.italic?(6,1)
-    assert_equal true,  oo.underlined?(6,1)
+    assert_equal true,  oo.underline?(6,1)
 
     assert_equal false, oo.bold?(7,1)
     assert_equal true,  oo.italic?(7,1)
-    assert_equal true,  oo.underlined?(7,1)
+    assert_equal true,  oo.underline?(7,1)
   end
   
   def test_cell_styles  

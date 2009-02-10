@@ -136,7 +136,7 @@ class Openoffice < GenericSpreadsheet
   end
   
   # true if the cell style is underline
-  def underlined?(*args)
+  def underline?(*args)
     style_name = cell_style_attribute(*args)
     return false if style_name == 'Default'
     @style_definitions[style_name][:underline]
