@@ -1,6 +1,6 @@
 require 'rubygems'
-gem 'parseexcel', '>= 0.5.3'
-require 'parseexcel'
+gem 'spreadsheet', '>= 0.6.3.1'
+require 'spreadsheet'
 CHARGUESS = false
 require 'charguess' if CHARGUESS
 
@@ -37,7 +37,7 @@ class Excel < GenericSpreadsheet
       unless File.file?(@filename)
         raise IOError, "file #{@filename} does not exist"
       end
-      @workbook = Spreadsheet::ParseExcel.parse(filename)
+      @workbook = Spreadsheet.open(filename)
       @default_sheet = nil
       # no need to set default_sheet if there is only one sheet in the document
       if self.sheets.size == 1
@@ -63,19 +63,18 @@ class Excel < GenericSpreadsheet
   # returns an array of sheet names in the spreadsheet
   def sheets
     result = []
-    #0.upto(@workbook.worksheets.size - 1) do |i| # spreadsheet
-    0.upto(@workbook.sheet_count - 1) do |i| # parseexcel
+    @workbook.worksheets.each do |worksheet| 
       # TODO: is there a better way to do conversion?
       if CHARGUESS
-        encoding = CharGuess::guess(@workbook.worksheet(i).name)
+        encoding = CharGuess::guess(worksheet.name)
         encoding = 'unicode' unless encoding
 
 
         result << Iconv.new('utf-8',encoding).iconv(
-          @workbook.worksheet(i).name
+          worksheet.name
         )
       else
-        result << platform_specific_iconv(@workbook.worksheet(i).name)
+        result << platform_specific_iconv(worksheet.name)
       end
     end
     return result
@@ -181,17 +180,23 @@ class Excel < GenericSpreadsheet
 
    # true if the cell style is bold
    def bold?(*args)
-     cell_font(*args)[:bold]
+     #From ruby-spreadsheet doc: 100 <= weight <= 1000, bold => 700, normal => 400
+     case cell_font(*args).weight
+     when 700    
+       true
+     else
+       false
+     end   
    end
 
    # true if the cell style is italic
    def italic?(*args)
-     cell_font(*args)[:italic]
+     cell_font(*args).italic
    end
 
    # true if the cell style is underline
    def underline?(*args)
-     cell_font(*args)[:underline]
+     cell_font(*args).underline != :none
    end
 
   # shows the internal representation of all cells
@@ -243,14 +248,15 @@ class Excel < GenericSpreadsheet
   # converts name of a sheet to index (0,1,2,..)
   def sheet_no(name)
     return name-1 if name.kind_of?(Fixnum)
-    0.upto(@workbook.sheet_count - 1) do |i|
-      #0.upto(@workbook.worksheets.size - 1) do |i|
+    i = 0
+    @workbook.worksheets.each do |worksheet|
       # TODO: is there a better way to do conversion?
       return i if name == platform_specific_iconv(
-        @workbook.worksheet(i).name)
+        worksheet.name)
       #Iconv.new('utf-8','unicode').iconv(
       #        @workbook.worksheet(i).name
       #      )
+      i += 1
     end
     raise StandardError, "sheet '#{name}' not found"
   end
@@ -316,9 +322,9 @@ class Excel < GenericSpreadsheet
   end
 
   # helper function to set the internal representation of cells
-  def set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v, font)
+  def set_cell_values(sheet,row,col,i,v,vt,formula,tr,font)
     #key = "#{y},#{x+i}"
-    key = [y,x+i]
+    key = [row,col+i]
     @cell_type[sheet] = {} unless @cell_type[sheet]
     @cell_type[sheet][key] = vt 
     @formula[sheet] = {} unless @formula[sheet]
@@ -331,7 +337,7 @@ class Excel < GenericSpreadsheet
     when :float
       @cell[sheet][key] = v.to_f
     when :string
-      @cell[sheet][key] = str_v
+      @cell[sheet][key] = v
     when :date
       @cell[sheet][key] = v 
     when :datetime
@@ -356,67 +362,89 @@ class Excel < GenericSpreadsheet
     end
     
     worksheet = @workbook.worksheet(sheet_no(sheet))
-    skip = 0
-    x =1
-    y=1
-    i=0
-    worksheet.each(skip) { |row_par| 
-      if row_par
-        x =1
-        row_par.each do # |void|
-          cell = row_par.at(x-1)
-          if cell
-            case cell.type
-            when :numeric
-              vt = :float
-              v = cell.to_f
-            when :text
-              vt = :string
-              if cell.to_s.downcase == 'true'
-                str_v = cell.to_s
-              else
-                str_v = cell.to_s('utf-8')
-              end       
-            when :date
-              if cell.to_s.to_f < 1.0
-                vt = :time
-                f = cell.to_s.to_f*24.0*60.0*60.0
-                secs = f.round
-                h = (secs / 3600.0).floor
-                secs = secs - 3600*h
-                m = (secs / 60.0).floor
-                secs = secs - 60*m
-                s = secs
-                v = h*3600+m*60+s
-              else
-                if cell.datetime.hour != 0 or
-                    cell.datetime.min  != 0 or
-                    cell.datetime.sec  != 0 or
-                    cell.datetime.msec != 0
-                  vt = :datetime
-                  v = cell.datetime
-                else
-                  vt = :date
-                  v = cell.date
-                  v = sprintf("%04d-%02d-%02d",v.year,v.month,v.day)
-                end
-              end
-            else
-              vt = cell.type.to_s.downcase.to_sym
-              v = nil
-            end # case
-            formula = tr = nil #TODO:???
-            set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v, cell.font)
-          end # if cell
-          
-          x += 1
+    row_index=1
+    worksheet.each(0) do |row| 
+      (0..row.size).each do |cell_index|
+        cell = row.at(cell_index)
+        next if cell.nil?  #skip empty cells
+        next if cell.class == Spreadsheet::Formula
+        if date_or_time?(row, cell_index)
+          vt, v = read_cell_date_or_time(row, cell_index)
+        else
+          vt, v = read_cell(row, cell_index)
         end
-      end
-      y += 1
-    }
+        formula = tr = nil #TODO:???
+        col_index = cell_index + 1
+        font = row.format(cell_index).font
+#puts [row_index, col_index].inspect
+#puts vt, v
+        set_cell_values(sheet,row_index,col_index,0,v,vt,formula,tr,font)
+      end #row
+      row_index += 1
+    end # worksheets
     @cells_read[sheet] = true
   end
-
+  
+  # Test the cell to see if it's a valid date/time. 
+  def date_or_time?(row, idx)
+    format = row.format(idx)
+    if format.date_or_time?
+      cell = row.at(idx)
+      cell.to_s.to_f > 0 ? true : false # cell value must be numeric
+    else
+      false
+    end  
+  end
+  private :date_or_time?
+  
+  def read_cell_date_or_time(row, idx)
+    cell = row.at(idx).to_s.to_f
+    if cell < 1.0
+      value_type = :time
+      f = cell*24.0*60.0*60.0
+      secs = f.round
+      h = (secs / 3600.0).floor
+      secs = secs - 3600*h
+      m = (secs / 60.0).floor
+      secs = secs - 60*m
+      s = secs
+      value = h*3600+m*60+s
+    else
+      datetime = row.datetime(idx)
+      if datetime.hour != 0 or
+         datetime.min != 0 or
+         datetime.sec != 0 
+        value_type = :datetime
+        value = datetime
+      else
+        value_type = :date
+        value = row.date(idx)
+        value = sprintf("%04d-%02d-%02d",value.year,value.month,value.day)
+      end
+    end  
+    return value_type, value
+  end
+  private :read_cell_date_or_time
+  
+  # Read the cell and based on the class, 
+  # return the value and value types for Roo
+  def read_cell(row, idx)
+    cell = row.at(idx)
+    case cell
+    when Float, Integer, Fixnum, Bignum 
+      value_type = :float
+      value = cell.to_f
+    when String, TrueClass, FalseClass
+      value_type = :string
+      value = cell.to_s
+    else
+      value_type = cell.class.to_s.downcase.to_sym
+      value = nil
+    end # case
+    return value_type, value
+  end
+  private :read_cell
+  
   #TODO: testing only
   #  def inject_null_characters(str)
   #    if str.class != String

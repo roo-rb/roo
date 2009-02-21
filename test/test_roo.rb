@@ -1864,8 +1864,8 @@ class TestRoo < Test::Unit::TestCase
   #  end
 
   #def test_create_spreadsheet1
-  #  name = File.join('test','createdspreadsheet.ods')
-  #  rm(name) if File.exists?(File.join('test','createdspreadsheet.ods'))
+  #  name = File.join(TESTDIR,'createdspreadsheet.ods')
+  #  rm(name) if File.exists?(File.join(TESTDIR,'createdspreadsheet.ods'))
   #  # anlegen, falls noch nicht existierend
   #  s = Openoffice.new(name,true)
   #  assert File.exists?(name)
@@ -1940,6 +1940,7 @@ class TestRoo < Test::Unit::TestCase
       if ONLINE
         url = 'http://stiny-leonhard.de/bode-v1.xls.zip'
         excel = Excel.new(url, :zip)
+        excel.default_sheet = excel.sheets.first
         assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
         excel.remove_tmp # don't forget to remove the temporary files
       end
@@ -3044,7 +3045,7 @@ class TestRoo < Test::Unit::TestCase
       expected = [1.0,5.0,nil,10.0,Date.new(1961,11,21),'tata',nil,nil,nil,nil,'thisisa11',41.0,nil,nil,41.0,'einundvierzig',nil,Date.new(2007,5,31)]
       if OPENOFFICE
         Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-          oo = Openoffice.new(File.join('test','numbers1.ods'))
+          oo = Openoffice.new(File.join(TESTDIR,'numbers1.ods'))
           oo.default_sheet = oo.sheets.first
           assert_equal expected, oo.column(1)
           assert_equal expected, oo.column('a')
@@ -3057,7 +3058,7 @@ class TestRoo < Test::Unit::TestCase
     expected = [1.0,5.0,nil,10.0,Date.new(1961,11,21),'tata',nil,nil,nil,nil,'thisisa11',41.0,nil,nil,41.0,'einundvierzig',nil,Date.new(2007,5,31)]
     if EXCEL
       Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-        oo = Excel.new(File.join('test','numbers1.xls'))
+        oo = Excel.new(File.join(TESTDIR,'numbers1.xls'))
         oo.default_sheet = oo.sheets.first
         assert_equal expected, oo.column(1)
         assert_equal expected, oo.column('a')
@@ -3069,7 +3070,7 @@ class TestRoo < Test::Unit::TestCase
     expected = [1.0,5.0,nil,10.0,Date.new(1961,11,21),'tata',nil,nil,nil,nil,'thisisa11',41.0,nil,nil,41.0,'einundvierzig',nil,Date.new(2007,5,31)]
     if EXCELX
       Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-        oo = Excelx.new(File.join('test','numbers1.xlsx'))
+        oo = Excelx.new(File.join(TESTDIR,'numbers1.xlsx'))
         oo.default_sheet = oo.sheets.first
         assert_equal expected, oo.column(1)
         assert_equal expected, oo.column('a')
@@ -3094,7 +3095,7 @@ class TestRoo < Test::Unit::TestCase
       if OPENOFFICE
         assert_nothing_raised(Timeout::Error) {
           Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-            oo = Openoffice.new(File.join('test','Bibelbund.ods'))
+            oo = Openoffice.new(File.join(TESTDIR,'Bibelbund.ods'))
             oo.default_sheet = oo.sheets.first
             assert_equal 3735, oo.column('a').size
             #assert_equal 499, oo.column('a').size
@@ -3109,7 +3110,7 @@ class TestRoo < Test::Unit::TestCase
       if EXCEL
         assert_nothing_raised(Timeout::Error) {
           Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-            oo = Excel.new(File.join('test','Bibelbund.xls'))
+            oo = Excel.new(File.join(TESTDIR,'Bibelbund.xls'))
             oo.default_sheet = oo.sheets.first
             assert_equal 3735, oo.column('a').size
             #assert_equal 499, oo.column('a').size
@@ -3124,7 +3125,7 @@ class TestRoo < Test::Unit::TestCase
       if EXCELX
         assert_nothing_raised(Timeout::Error) {
           Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-            oo = Excelx.new(File.join('test','Bibelbund.xlsx'))
+            oo = Excelx.new(File.join(TESTDIR,'Bibelbund.xlsx'))
             oo.default_sheet = oo.sheets.first
             assert_equal 3735, oo.column('a').size
             #assert_equal 499, oo.column('a').size
@@ -3233,7 +3234,7 @@ class TestRoo < Test::Unit::TestCase
   end
 
   def DONT_test_false_encoding
-    ex = Excel.new(File.join('test','false_encoding.xls'))
+    ex = Excel.new(File.join(TESTDIR,'false_encoding.xls'))
     ex.default_sheet = ex.sheets.first
     assert_equal "Sheet1", ex.sheets.first
     ex.first_row.upto(ex.last_row) do |row|
@@ -3252,7 +3253,7 @@ class TestRoo < Test::Unit::TestCase
   def test_bug_false_borders_with_formulas
     if EXCEL
       after Date.new(2008,9,15) do
-        ex = Excel.new(File.join('test','false_encoding.xls'))
+        ex = Excel.new(File.join(TESTDIR,'false_encoding.xls'))
         ex.default_sheet = ex.sheets.first
         #assert_equal 1, ex.first_row
 =begin
@@ -3272,7 +3273,7 @@ class TestRoo < Test::Unit::TestCase
   end
 
   def test_fe
-    ex = Excel.new(File.join('test','false_encoding.xls'))
+    ex = Excel.new(File.join(TESTDIR,'false_encoding.xls'))
     ex.default_sheet = ex.sheets.first
     #DOES NOT WORK IN EXCEL FILES: assert_equal Date.new(2007,11,1), ex.cell('a',1)
     #DOES NOT WORK IN EXCEL FILES: assert_equal true, ex.formula?('a',1)
@@ -3298,7 +3299,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_excel_does_not_support_formulas
     if EXCEL
-      ex = Excel.new(File.join('test','false_encoding.xls'))
+      ex = Excel.new(File.join(TESTDIR,'false_encoding.xls'))
       ex.default_sheet = ex.sheets.first
       assert_raise(RuntimeError) {
         void = ex.formula('a',1)
@@ -3491,7 +3492,7 @@ class TestRoo < Test::Unit::TestCase
   end
 
   def test_bug_bbu_openoffice
-    oo = Openoffice.new(File.join('test','bbu.ods'))
+    oo = Openoffice.new(File.join(TESTDIR,'bbu.ods'))
     assert_nothing_raised() {
       assert_equal "File: bbu.ods
 Number of sheets: 3
@@ -3516,7 +3517,7 @@ Sheet 3:
 
   def test_bug_bbu_excel
     if EXCEL
-      oo = Excel.new(File.join('test','bbu.xls'))
+      oo = Excel.new(File.join(TESTDIR,'bbu.xls'))
       assert_nothing_raised() {
         assert_equal "File: bbu.xls
 Number of sheets: 3
@@ -3542,7 +3543,7 @@ Sheet 3:
 
   def test_bug_bbu_excelx
     if EXCELX
-      oo = Excelx.new(File.join('test','bbu.xlsx'))
+      oo = Excelx.new(File.join(TESTDIR,'bbu.xlsx'))
       assert_nothing_raised() {
         assert_equal "File: bbu.xlsx
 Number of sheets: 3
@@ -3756,7 +3757,7 @@ Sheet 3:
 
   def test_no_remaining_tmp_files_excel
     if EXCEL
-      assert_raise(OLE::UnknownFormatError) {
+      assert_raise(Ole::Storage::FormatError) {
         # oo = Excel.new(File.join(TESTDIR,"no_spreadsheet_file.txt"))
         # es soll absichtlich ein Abbruch provoziert werden, deshalb :ignore
         oo = Excel.new(File.join(TESTDIR,"no_spreadsheet_file.txt"),
@@ -3842,28 +3843,28 @@ Sheet 3:
 
   def test_to_xml_openoffice
     if OPENOFFICE
-      oo = Openoffice.new(File.join('test','numbers1.ods'))
+      oo = Openoffice.new(File.join(TESTDIR,'numbers1.ods'))
       do_test_xml(oo)
     end
   end
 
   def test_to_xml_excel
     if EXCEL
-      oo = Excel.new(File.join('test','numbers1.xls'))
+      oo = Excel.new(File.join(TESTDIR,'numbers1.xls'))
       do_test_xml(oo)
     end
   end
 
   def test_to_xml_excelx
     if EXCELX
-      oo = Excelx.new(File.join('test','numbers1.xlsx'))
+      oo = Excelx.new(File.join(TESTDIR,'numbers1.xlsx'))
       do_test_xml(oo)
     end
   end
 
   def test_to_xml_google
     if GOOGLE
-      oo = Google.new(key_of(File.join('test','numbers1.xlsx')))
+      oo = Google.new(key_of(File.join(TESTDIR,'numbers1.xlsx')))
       do_test_xml(oo)
     end
   end
@@ -3879,7 +3880,7 @@ Sheet 3:
 
   def test_bug_row_column_fixnum_float
     if EXCEL
-      ex = Excel.new(File.join('test','bug-row-column-fixnum-float.xls'))
+      ex = Excel.new(File.join(TESTDIR,'bug-row-column-fixnum-float.xls'))
       ex.default_sheet = ex.sheets.first
       assert_equal 42.5, ex.cell('b',2)
       assert_equal 43  , ex.cell('c',2)
@@ -3900,7 +3901,7 @@ Sheet 3:
             'Fish','Love','Feelgood ES','Feelgood','GTwin','Troop',
             'Lux','Stigma','Feather','Stria','Alpha','Feelgood ICS']
           result = []
-          @e = Excel.new(File.join('test',"problem.xls"))
+          @e = Excel.new(File.join(TESTDIR,"problem.xls"))
           @e.sheets[2..@e.sheets.length].each do |s|
             #(13..13).each do |s|
             @e.default_sheet = s
@@ -3919,7 +3920,7 @@ Sheet 3:
     after Date.new(2009,1,10) do
       local_only do
         #-- this is OK
-        @workbook = Spreadsheet::ParseExcel.parse(File.join('test',"problem.xls"))
+        @workbook = Spreadsheet::ParseExcel.parse(File.join(TESTDIR,"problem.xls"))
         worksheet = @workbook.worksheet(11)
         skip = 0
         line = 1
@@ -3937,7 +3938,7 @@ Sheet 3:
           line += 1
         }
         #-- worksheet 12 does not work
-        @workbook = Spreadsheet::ParseExcel.parse(File.join('test',"problem.xls"))
+        @workbook = Spreadsheet::ParseExcel.parse(File.join(TESTDIR,"problem.xls"))
         worksheet = @workbook.worksheet(12)
         skip = 0
         line = 1
@@ -3968,7 +3969,7 @@ Sheet 3:
           'Fish','Love','Feelgood ES','Feelgood','GTwin','Troop',
           'Lux','Stigma','Feather','Stria','Alpha','Feelgood ICS']
         result = []
-        @e = Excelx.new(File.join('test',"problem.xlsx"))
+        @e = Excelx.new(File.join(TESTDIR,"problem.xlsx"))
         @e.sheets[2..@e.sheets.length].each do |s|
           @e.default_sheet = s
           #  assert_equal "A.",@e.cell('a',13)
@@ -3981,7 +3982,7 @@ Sheet 3:
         end
         assert_equal expected, result
 
-        @e = Excelx.new(File.join('test',"problem.xlsx"))
+        @e = Excelx.new(File.join(TESTDIR,"problem.xlsx"))
         #@e.sheets[2..@e.sheets.length].each do |s|
         (13..13).each do |s|
           @e.default_sheet = s
@@ -4107,11 +4108,11 @@ Sheet 3:
     end
     if EXCEL
       assert_nothing_raised(TypeError) {
-        assert_raises(OLE::UnknownFormatError) {
+        assert_raises(Ole::Storage::FormatError) {
           oo = Excel.new(File.join(TESTDIR,"numbers1.ods"),false, :warning) }
       }
       assert_nothing_raised(TypeError) {
-        assert_raises(OLE::UnknownFormatError) {
+        assert_raises(Ole::Storage::FormatError) {
           oo = Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false, :warning) }
       }
       assert_equal [], Dir.glob("oo_*")
@@ -4143,11 +4144,11 @@ Sheet 3:
     end
     if EXCEL
       assert_nothing_raised(TypeError) {
-        assert_raises(OLE::UnknownFormatError) {
+        assert_raises(Ole::Storage::FormatError) {
           oo = Excel.new(File.join(TESTDIR,"numbers1.ods"),false, :ignore) }
       }
       assert_nothing_raised(TypeError) {
-        assert_raises(OLE::UnknownFormatError) {oo = Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false, :ignore) }}
+        assert_raises(Ole::Storage::FormatError) {oo = Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false, :ignore) }}
       assert_equal [], Dir.glob("oo_*")
     end
     if EXCELX
@@ -4335,7 +4336,7 @@ Sheet 3:
     after Date.new(2008,12,15) do
       local_only do
         if EXCEL
-          ex = Excel.new(File.join('test','problem.xls'))
+          ex = Excel.new(File.join(TESTDIR,'problem.xls'))
           ex.default_sheet = ex.sheets.first
           assert_equal 2, ex.first_row
           assert_equal 30, ex.last_row
@@ -4343,7 +4344,7 @@ Sheet 3:
           assert_equal 'J', ex.last_column_as_letter
         end
         if EXCELX
-          ex = Excelx.new(File.join('test','problem.xlsx'))
+          ex = Excelx.new(File.join(TESTDIR,'problem.xlsx'))
           ex.default_sheet = ex.sheets.first
           assert_equal 2, ex.first_row
           assert_equal 30, ex.last_row
@@ -4374,13 +4375,13 @@ Sheet 3:
       after Date.new(2009,1,6) do
         # warten auf Bugfix in parseexcel
         if EXCEL
-          ex = Excel.new(File.join('test','problem.xls'))
+          ex = Excel.new(File.join(TESTDIR,'problem.xls'))
           ex.default_sheet = 'Custom X'
           common_possible_bug_snowboard_cells(ex)
         end
       end
       if EXCELX
-        ex = Excelx.new(File.join('test','problem.xlsx'))
+        ex = Excelx.new(File.join(TESTDIR,'problem.xlsx'))
         ex.default_sheet = 'Custom X'
         common_possible_bug_snowboard_cells(ex)
       end
@@ -4597,7 +4598,7 @@ Even stranger is if I save this file as ".XLS" and parse it the cells parse out 
 This attached file is the newer format of Microsoft Excel (.xlsx).
 
 =end
-        xx = Excelx.new(File.join('test','sample_file_2008-09-13.xlsx'))
+        xx = Excelx.new(File.join(TESTDIR,'sample_file_2008-09-13.xlsx'))
         assert_equal 1, xx.sheets.size
 
         assert_equal 1, xx.first_row
@@ -4850,8 +4851,8 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
     if EXCEL
       oo = Excel.new(File.join(TESTDIR,"boolean.xls"))
       oo.default_sheet = oo.sheets.first
-      assert_equal "TRUE", oo.cell(1,1)
-      assert_equal "FALSE", oo.cell(2,1)
+      assert_equal "true", oo.cell(1,1)
+      assert_equal "false", oo.cell(2,1)
     end  
     if OPENOFFICE
       oo = Openoffice.new(File.join(TESTDIR,"boolean.ods"))
