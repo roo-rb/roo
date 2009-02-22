@@ -112,34 +112,29 @@ class Openoffice < GenericSpreadsheet
     formula(row,col) != nil
   end
 
-  # Given a cell, return the cell's style name
-  def cell_style_attribute(row, col, sheet=nil)
+  # Given a cell, return the cell's style 
+  def cell_style(row, col, sheet=nil)
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
-    @style[sheet][[row,col]] || @style_defaults[sheet]
+    style_name = @style[sheet][[row,col]] || @style_defaults[sheet]
+    @style_definitions[style_name]
   end 
-  private :cell_style_attribute
+  private :cell_style
   
   # true if the cell style is bold
   def bold?(*args)
-    style_name = cell_style_attribute(*args)
-    return false if style_name == 'Default'
-    @style_definitions[style_name][:bold] 
+    cell_style(*args)[:bold] 
   end
   
   # true if the cell style is italic
   def italic?(*args)
-    style_name = cell_style_attribute(*args)
-    return false if style_name == 'Default'
-    @style_definitions[style_name][:italic]
+    cell_style(*args)[:italic]
   end
   
   # true if the cell style is underline
   def underline?(*args)
-    style_name = cell_style_attribute(*args)
-    return false if style_name == 'Default'
-    @style_definitions[style_name][:underline]
+    cell_style(*args)[:underline]
   end
 
   # set a cell to a certain value
@@ -399,6 +394,7 @@ class Openoffice < GenericSpreadsheet
   end
 
   def read_styles(style_elements)
+    @style_definitions['Default'] = {:bold => false, :italic => false, :underline => false} 
     style_elements.each do |style|
       next unless style.name == 'style'
       style_name = style.attributes['name']

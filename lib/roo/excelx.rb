@@ -191,33 +191,31 @@ class Excelx < GenericSpreadsheet
     formula(row,col) != nil
   end
   
-  # Given a cell, return the cell's style name
-   def cell_style_attribute(row, col, sheet=nil)
+  # Given a cell, return the cell's style
+   def cell_style(row, col, sheet=nil)
      sheet = @default_sheet unless sheet
      read_cells(sheet) unless @cells_read[sheet]
      row,col = normalize(row,col)
      s_attribute = @s_attribute[sheet][[row,col]]
      s_attribute ||= 0
      s_attribute = s_attribute.to_i
+     @style_definitions[s_attribute]
    end 
-   private :cell_style_attribute
+   private :cell_style
 
    # true if the cell style is bold
    def bold?(*args)
-     s_attribute = cell_style_attribute(*args)
-     @style_definitions[s_attribute][:bold] 
+     cell_style(*args)[:bold] 
    end
 
    # true if the cell style is italic
    def italic?(*args)
-     s_attribute = cell_style_attribute(*args)
-     @style_definitions[s_attribute][:italic] 
+     cell_style(*args)[:italic] 
    end
 
    # true if the cell style is underline
    def underline?(*args)
-     s_attribute = cell_style_attribute(*args)
-     @style_definitions[s_attribute][:underline] 
+     cell_style(*args)[:underline] 
    end
 
   # set a cell to a certain value

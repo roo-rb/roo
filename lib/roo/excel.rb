@@ -4,15 +4,6 @@ require 'spreadsheet'
 CHARGUESS = false
 require 'charguess' if CHARGUESS
 
-module Spreadsheet # :nodoc
-  module ParseExcel
-    class Worksheet
-      include Enumerable
-      attr_reader :min_row, :max_row, :min_col, :max_col
-    end
-  end
-end
-
 # Class for handling Excel-Spreadsheets
 class Excel < GenericSpreadsheet 
 
@@ -169,35 +160,35 @@ class Excel < GenericSpreadsheet
     raise EXCEL_NO_FORMULAS
   end
 
-  # Given a cell, return the cell's style name
-   def cell_font(row, col, sheet=nil)
-     sheet = @default_sheet unless sheet
-     read_cells(sheet) unless @cells_read[sheet]
-     row,col = normalize(row,col)
-     @fonts[sheet][[row,col]]
-   end 
-   private :cell_font
+  # Given a cell, return the cell's style
+  def cell_style(row, col, sheet=nil)
+    sheet = @default_sheet unless sheet
+    read_cells(sheet) unless @cells_read[sheet]
+    row,col = normalize(row,col)
+    @fonts[sheet][[row,col]]
+  end 
+  private :cell_style
 
-   # true if the cell style is bold
-   def bold?(*args)
-     #From ruby-spreadsheet doc: 100 <= weight <= 1000, bold => 700, normal => 400
-     case cell_font(*args).weight
-     when 700    
-       true
-     else
-       false
-     end   
-   end
+  # true if the cell style is bold
+  def bold?(*args)
+    #From ruby-spreadsheet doc: 100 <= weight <= 1000, bold => 700, normal => 400
+    case cell_style(*args).weight
+    when 700    
+     true
+    else
+     false
+    end   
+  end
 
-   # true if the cell style is italic
-   def italic?(*args)
-     cell_font(*args).italic
-   end
+  # true if the cell style is italic
+  def italic?(*args)
+   cell_style(*args).italic
+  end
 
-   # true if the cell style is underline
-   def underline?(*args)
-     cell_font(*args).underline != :none
-   end
+  # true if the cell style is underline
+  def underline?(*args)
+   cell_style(*args).underline != :none
+  end
 
   # shows the internal representation of all cells
   # mainly for debugging purposes
@@ -376,12 +367,10 @@ class Excel < GenericSpreadsheet
         formula = tr = nil #TODO:???
         col_index = cell_index + 1
         font = row.format(cell_index).font
-#puts [row_index, col_index].inspect
-#puts vt, v
         set_cell_values(sheet,row_index,col_index,0,v,vt,formula,tr,font)
       end #row
       row_index += 1
-    end # worksheets
+    end # worksheet
     @cells_read[sheet] = true
   end
   
@@ -397,6 +386,8 @@ class Excel < GenericSpreadsheet
   end
   private :date_or_time?
   
+  # Read the date-time cell and convert to, 
+  # the date-time values for Roo
   def read_cell_date_or_time(row, idx)
     cell = row.at(idx).to_s.to_f
     if cell < 1.0
@@ -427,7 +418,7 @@ class Excel < GenericSpreadsheet
   private :read_cell_date_or_time
   
   # Read the cell and based on the class, 
-  # return the value and value types for Roo
+  # return the values for Roo
   def read_cell(row, idx)
     cell = row.at(idx)
     case cell
