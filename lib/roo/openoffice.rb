@@ -58,8 +58,8 @@ class Openoffice < GenericSpreadsheet
     @first_column = Hash.new
     @last_column = Hash.new
     @style = Hash.new
-    @style_defaults = Hash.new
-    @style_definitions = Hash.new { |h,k| h[k] = {} }
+    @style_defaults = Hash.new { |h,k| h[k] = [] }
+    @style_definitions = Hash.new 
     @header_line = 1
   end
 
@@ -133,7 +133,7 @@ class Openoffice < GenericSpreadsheet
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
-    style_name = @style[sheet][[row,col]] || @style_defaults[sheet]
+    style_name = @style[sheet][[row,col]] || @style_defaults[sheet][col - 1] || 'Default'
     @style_definitions[style_name]
   end 
   
@@ -308,7 +308,7 @@ class Openoffice < GenericSpreadsheet
                     se.each_element do |te|
                       if te.name == "table-column"
                         rep = te.attributes["number-columns-repeated"]
-                        @style_defaults[sheet] = te.attributes["default-cell-style-name"]
+                        @style_defaults[sheet] << te.attributes["default-cell-style-name"] 
                       elsif te.name == "table-row"
                         if te.attributes['number-rows-repeated']
                           skip_y = te.attributes['number-rows-repeated'].to_i
