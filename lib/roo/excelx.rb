@@ -191,8 +191,24 @@ class Excelx < GenericSpreadsheet
     formula(row,col) != nil
   end
   
+  class Font
+    attr_accessor :bold, :italic, :underline
+    
+    def bold?
+      @bold == true
+    end
+        
+    def italic? 
+     @italic == true
+    end
+    
+    def underline?
+      @underline == true
+    end    
+  end
+  
   # Given a cell, return the cell's style
-  def cell_style(row, col, sheet=nil)
+  def font(row, col, sheet=nil)
    sheet = @default_sheet unless sheet
    read_cells(sheet) unless @cells_read[sheet]
    row,col = normalize(row,col)
@@ -201,22 +217,6 @@ class Excelx < GenericSpreadsheet
    s_attribute = s_attribute.to_i
    @style_definitions[s_attribute]
   end 
-  private :cell_style
-
-  # true if the cell style is bold
-  def bold?(*args)
-   cell_style(*args)[:bold] 
-  end
-
-  # true if the cell style is italic
-  def italic?(*args)
-   cell_style(*args)[:italic] 
-  end
-
-  # true if the cell style is underline
-  def underline?(*args)
-   cell_style(*args)[:underline] 
-  end
 
   # set a cell to a certain value
   # (this will not be saved back to the spreadsheet file!)
@@ -604,15 +604,15 @@ class Excelx < GenericSpreadsheet
           elsif e2.name == "fonts"  
             e2.each_element do |e3|
               if e3.name == 'font'
-                font = {:bold => false, :italic => false, :underline => false}
+                font = Excelx::Font.new
                 e3.each do |e4|
                   case e4.name
                   when 'b'
-                    font[:bold] = true
+                    font.bold = true
                   when 'i'
-                    font[:italic] = true
+                    font.italic = true
                   when 'u'
-                    font[:underline] = true
+                    font.underline = true
                   end  
                 end             
                 fonts << font

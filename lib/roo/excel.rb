@@ -4,6 +4,30 @@ require 'spreadsheet'
 CHARGUESS = false
 require 'charguess' if CHARGUESS
 
+# ruby-spreadsheet has a font object so we're extending it 
+# with our own functionality but still providing full access
+# to the user for other font information
+module ExcelFontExtensions
+  def bold?(*args)
+    #From ruby-spreadsheet doc: 100 <= weight <= 1000, bold => 700, normal => 400
+    case weight
+    when 700    
+     true
+    else
+     false
+    end   
+  end
+
+  def italic?
+    italic
+  end
+
+  def underline?
+    underline != :none
+  end
+
+end
+
 # Class for handling Excel-Spreadsheets
 class Excel < GenericSpreadsheet 
 
@@ -161,35 +185,13 @@ class Excel < GenericSpreadsheet
   end
 
   # Given a cell, return the cell's style
-  def cell_style(row, col, sheet=nil)
+  def font(row, col, sheet=nil)
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     @fonts[sheet][[row,col]]
   end 
-  private :cell_style
-
-  # true if the cell style is bold
-  def bold?(*args)
-    #From ruby-spreadsheet doc: 100 <= weight <= 1000, bold => 700, normal => 400
-    case cell_style(*args).weight
-    when 700    
-     true
-    else
-     false
-    end   
-  end
-
-  # true if the cell style is italic
-  def italic?(*args)
-   cell_style(*args).italic
-  end
-
-  # true if the cell style is underline
-  def underline?(*args)
-   cell_style(*args).underline != :none
-  end
-
+  
   # shows the internal representation of all cells
   # mainly for debugging purposes
   def to_s(sheet=nil)
@@ -367,6 +369,7 @@ class Excel < GenericSpreadsheet
         formula = tr = nil #TODO:???
         col_index = cell_index + 1
         font = row.format(cell_index).font
+        font.extend(ExcelFontExtensions)
         set_cell_values(sheet,row_index,col_index,0,v,vt,formula,tr,font)
       end #row
       row_index += 1

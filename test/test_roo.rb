@@ -4871,39 +4871,45 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   # for test_cell_styles
   def verify_cell_fonts(oo)
     oo.default_sheet = oo.sheets.first
-    assert_equal true,  oo.bold?(1,1)
-    assert_equal false, oo.italic?(1,1)
-    assert_equal false, oo.underline?(1,1)
+    assert_equal true,  oo.font(1,1).bold?
+    assert_equal false, oo.font(1,1).italic?
+    assert_equal false, oo.font(1,1).underline?
     
-    assert_equal false, oo.bold?(2,1)
-    assert_equal true,  oo.italic?(2,1)
-    assert_equal false, oo.underline?(2,1)
+    assert_equal false, oo.font(2,1).bold?
+    assert_equal true,  oo.font(2,1).italic?
+    assert_equal false, oo.font(2,1).underline?
 
-    assert_equal false, oo.bold?(3,1)
-    assert_equal false, oo.italic?(3,1)
-    assert_equal false, oo.underline?(3,1)
+    assert_equal false, oo.font(3,1).bold?
+    assert_equal false, oo.font(3,1).italic?
+    assert_equal false, oo.font(3,1).underline?
 
-    assert_equal false, oo.bold?(4,1)
-    assert_equal false, oo.italic?(4,1)
-    assert_equal true,  oo.underline?(4,1)
+    assert_equal false, oo.font(4,1).bold?
+    assert_equal false, oo.font(4,1).italic?
+    assert_equal true,  oo.font(4,1).underline?
 
-    assert_equal true,  oo.bold?(5,1)
-    assert_equal true,  oo.italic?(5,1)
-    assert_equal false, oo.underline?(5,1)
+    assert_equal true,  oo.font(5,1).bold?
+    assert_equal true,  oo.font(5,1).italic?
+    assert_equal false, oo.font(5,1).underline?
 
-    assert_equal true,  oo.bold?(6,1)
-    assert_equal false, oo.italic?(6,1)
-    assert_equal true,  oo.underline?(6,1)
+    assert_equal true,  oo.font(6,1).bold?
+    assert_equal false, oo.font(6,1).italic?
+    assert_equal true,  oo.font(6,1).underline?
 
-    assert_equal false, oo.bold?(7,1)
-    assert_equal true,  oo.italic?(7,1)
-    assert_equal true,  oo.underline?(7,1)
+    assert_equal false, oo.font(7,1).bold?
+    assert_equal true,  oo.font(7,1).italic?
+    assert_equal true,  oo.font(7,1).underline?
   end
   
   def test_cell_styles  
     if OPENOFFICE
       oo = Openoffice.new(File.join(TESTDIR,"style.ods"))
       verify_cell_fonts(oo)
+      # assert_equal true, oo.font(8,1).bold?
+      #     assert_equal false,  oo.font(8,1).italic?
+      #     assert_equal false,  oo.font(8,1).underline?
+      #     assert_equal true, oo.font(9,2).bold?
+      #     assert_equal false,  oo.font(9,2).italic?
+      #     assert_equal false,  oo.font(9,2).underline?
     end
     if EXCELX
       oo = Excelx.new(File.join(TESTDIR,"style.xlsx"))

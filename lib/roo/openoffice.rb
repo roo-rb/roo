@@ -111,32 +111,32 @@ class Openoffice < GenericSpreadsheet
     row,col = normalize(row,col)
     formula(row,col) != nil
   end
+  
+  class Font
+    attr_accessor :bold, :italic, :underline
+    
+    def bold? 
+      @bold == 'bold'
+    end
+
+    def italic? 
+      @italic == 'italic'
+    end
+    
+    def underline? 
+      @underline != nil
+    end
+  end
 
   # Given a cell, return the cell's style 
-  def cell_style(row, col, sheet=nil)
+  def font(row, col, sheet=nil)
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     style_name = @style[sheet][[row,col]] || @style_defaults[sheet]
     @style_definitions[style_name]
   end 
-  private :cell_style
   
-  # true if the cell style is bold
-  def bold?(*args)
-    cell_style(*args)[:bold] 
-  end
-  
-  # true if the cell style is italic
-  def italic?(*args)
-    cell_style(*args)[:italic]
-  end
-  
-  # true if the cell style is underline
-  def underline?(*args)
-    cell_style(*args)[:underline]
-  end
-
   # set a cell to a certain value
   # (this will not be saved back to the spreadsheet file!)
   def set(row,col,value,sheet=nil) #:nodoc:
@@ -394,14 +394,16 @@ class Openoffice < GenericSpreadsheet
   end
 
   def read_styles(style_elements)
-    @style_definitions['Default'] = {:bold => false, :italic => false, :underline => false} 
+    @style_definitions['Default'] = Openoffice::Font.new
     style_elements.each do |style|
       next unless style.name == 'style'
       style_name = style.attributes['name']
       style.each do |properties|
-        @style_definitions[style_name][:bold] = (properties.attributes['font-weight']  == 'bold')
-        @style_definitions[style_name][:italic] = (properties.attributes['font-style'] == 'italic')
-        @style_definitions[style_name][:underline] = (properties.attributes['text-underline-style'] != nil)
+        font = Openoffice::Font.new
+        font.bold = properties.attributes['font-weight']
+        font.italic = properties.attributes['font-style']
+        font.underline = properties.attributes['text-underline-style']
+        @style_definitions[style_name] = font
       end    
     end
   end
