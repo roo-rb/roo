@@ -4907,39 +4907,36 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
     assert_equal true,  oo.font(7,1).italic?
     assert_equal true,  oo.font(7,1).underline?
 
+    # bolded row
+    assert_equal true, oo.font(8,1).bold?
+    assert_equal false,  oo.font(8,1).italic?
+    assert_equal false,  oo.font(8,1).underline?
 
-    
+    # bolded col
+    assert_equal true, oo.font(9,2).bold?
+    assert_equal false,  oo.font(9,2).italic?
+    assert_equal false,  oo.font(9,2).underline?
+
+    # bolded row, italic col
+    assert_equal true, oo.font(10,3).bold?
+    assert_equal true,  oo.font(10,3).italic?
+    assert_equal false,  oo.font(10,3).underline?
+
+    # normal
+    assert_equal false, oo.font(11,4).bold?
+    assert_equal false,  oo.font(11,4).italic?
+    assert_equal false,  oo.font(11,4).underline?
   end
   
   def test_cell_styles  
     if OPENOFFICE
       oo = Openoffice.new(File.join(TESTDIR,"style.ods"))
       verify_cell_fonts(oo)
-
-      # bolded row
-      assert_equal true, oo.font(8,1).bold?
-      assert_equal false,  oo.font(8,1).italic?
-      assert_equal false,  oo.font(8,1).underline?
-
-      # bolded col
-      assert_equal true, oo.font(9,2).bold?
-      assert_equal false,  oo.font(9,2).italic?
-      assert_equal false,  oo.font(9,2).underline?
-
-      # bolded row, italic col
-      assert_equal true, oo.font(10,3).bold?
-      assert_equal true,  oo.font(10,3).italic?
-      assert_equal false,  oo.font(10,3).underline?
-
-      # normal
-      assert_equal false, oo.font(11,4).bold?
-      assert_equal false,  oo.font(11,4).italic?
-      assert_equal false,  oo.font(11,4).underline?       
     end
     if EXCELX
       oo = Excelx.new(File.join(TESTDIR,"style.xlsx"))
-        verify_cell_fonts(oo)
-      end
+      verify_cell_fonts(oo)
+    end
     if EXCEL
       oo = Excel.new(File.join(TESTDIR,"style.xls"))
         verify_cell_fonts(oo)
