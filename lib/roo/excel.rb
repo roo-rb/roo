@@ -184,7 +184,7 @@ class Excel < GenericSpreadsheet
     raise EXCEL_NO_FORMULAS
   end
 
-  # Given a cell, return the cell's style
+  # Given a cell, return the cell's font
   def font(row, col, sheet=nil)
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
@@ -244,8 +244,7 @@ class Excel < GenericSpreadsheet
     i = 0
     @workbook.worksheets.each do |worksheet|
       # TODO: is there a better way to do conversion?
-      return i if name == platform_specific_iconv(
-        worksheet.name)
+      return i if name == platform_specific_iconv(worksheet.name)
       #Iconv.new('utf-8','unicode').iconv(
       #        @workbook.worksheet(i).name
       #      )

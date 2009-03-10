@@ -7,9 +7,9 @@ begin
   Jeweler::Tasks.new do |s|
     s.name               = 'roo'
     s.rubyforge_project  = 'roo'
-    s.platform           = Gem::Platform::CURRENT
+    s.platform           = Gem::Platform::RUBY
     s.email              = 'thopre@gmail.com' 
-    s.homepage           = "http://raa.ruby-lang.org/project/parseexcel/"
+    s.homepage           = "http://roo.rubyforge.org"
     s.summary            = "roo"
     s.description        = "roo can access the contents of OpenOffice-, Excel- or Google-Spreadsheets"
     s.authors            = ['Thomas Preymesser']
