@@ -1,8 +1,12 @@
 require 'rubygems'
 gem 'spreadsheet', '>= 0.6.3.1'
 require 'spreadsheet'
-CHARGUESS = false
-require 'charguess' if CHARGUESS
+CHARGUESS = begin
+  require 'charguess'
+  true
+rescue LoadError => e
+  false
+end
 
 # ruby-spreadsheet has a font object so we're extending it 
 # with our own functionality but still providing full access
@@ -79,18 +83,7 @@ class Excel < GenericSpreadsheet
   def sheets
     result = []
     @workbook.worksheets.each do |worksheet| 
-      # TODO: is there a better way to do conversion?
-      if CHARGUESS
-        encoding = CharGuess::guess(worksheet.name)
-        encoding = 'unicode' unless encoding
-
-
-        result << Iconv.new('utf-8',encoding).iconv(
-          worksheet.name
-        )
-      else
-        result << platform_specific_iconv(worksheet.name)
-      end
+      result << normalize_string(worksheet.name)
     end
     return result
   end
@@ -243,11 +236,7 @@ class Excel < GenericSpreadsheet
     return name-1 if name.kind_of?(Fixnum)
     i = 0
     @workbook.worksheets.each do |worksheet|
-      # TODO: is there a better way to do conversion?
-      return i if name == platform_specific_iconv(worksheet.name)
-      #Iconv.new('utf-8','unicode').iconv(
-      #        @workbook.worksheet(i).name
-      #      )
+      return i if name == normalize_string(worksheet.name)
       i += 1
     end
     raise StandardError, "sheet '#{name}' not found"
@@ -272,7 +261,16 @@ class Excel < GenericSpreadsheet
     }
     ! content
   end
-
+  
+  def normalize_string(value)
+    value = every_second_null?(value) ? remove_every_second_null(value) : value
+    if CHARGUESS && encoding = CharGuess::guess(value)
+      Iconv.new('utf-8', encoding)
+    else
+      platform_specific_iconv(value)
+    end
+  end
+  
   def platform_specific_iconv(value)
     case RUBY_PLATFORM.downcase
     when /darwin/
