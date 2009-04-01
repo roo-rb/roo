@@ -1,11 +1,19 @@
-README for roo
-==============
+# README for Roo
 
-Installation:
+This is not the official roo repository. The maintainer unfortunately uses a 
+private repository and has been unresponsive. If you'd like to contribute 
+to this code, I'm happy to pull your changes in and will make sure they get
+to the developer if/when he resurfaces. 
 
+
+## Installation
+
+    # Run the following if you haven't done so before:
+    gem sources -a http://gems.github.com
+    # Install the gem:
     sudo gem install roo
 
-Usage:
+## Usage:
 
     require 'rubygems'
     require 'roo'
