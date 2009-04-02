@@ -1,7 +1,7 @@
 # README for Roo
 
 This is not the official roo repository. The maintainer unfortunately uses a 
-private repository and has been unresponsive. If you'd like to contribute 
+private repository and has been unresponsive so I've put the code here to at least continue in the interim. If you'd like to contribute 
 to this code, I'm happy to pull your changes in and will make sure they get
 to the developer if/when he resurfaces. 
 
