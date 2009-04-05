@@ -379,7 +379,7 @@ class Excel < GenericSpreadsheet
     format = row.format(idx)
     if format.date_or_time?
       cell = row.at(idx)
-      cell.to_s.to_f > 0 ? true : false # cell value must be numeric
+      true if Float(object) rescue false
     else
       false
     end  

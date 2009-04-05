@@ -4940,7 +4940,21 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
     if EXCEL
       oo = Excel.new(File.join(TESTDIR,"style.xls"))
         verify_cell_fonts(oo)
-      end
     end
+  end
+
+  # If a cell has a date-like string but is preceeded by a ' 
+  # to force that date to be treated like a string, we were getting an exception.
+  # This test just checks for that exception to make sure it's not raised in this case
+  def test_date_to_float_conversion
+     if EXCEL
+       assert_nothing_raised(NoMethodError) do
+         oo = Excel.new(File.join(TESTDIR,"datetime_floatconv.xls"))
+         oo.default_sheet = oo.sheets.first
+         oo.cell('a',1)
+         oo.cell('a',2)
+       end
+     end
+  end  
   
 end # class

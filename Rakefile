@@ -15,8 +15,8 @@ begin
     s.authors            = ['Thomas Preymesser']
     s.files              =  FileList[ "{lib,test}/**/*"]
     s.has_rdoc = true
-    s.extra_rdoc_files = ["README.txt", "History.txt"]
-    s.rdoc_options = ["--main","README.txt"]
+    s.extra_rdoc_files = ["README.markdown", "History.txt"]
+    s.rdoc_options = ["--main","README.markdown"]
     s.add_dependency "spreadsheet", [">= 0.6.3.1"]
     s.add_dependency "rubyzip", [">= 0.9.1"]
     s.add_dependency "hpricot", [">= 0.5"]
