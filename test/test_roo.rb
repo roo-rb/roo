@@ -4945,7 +4945,7 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
 
   # If a cell has a date-like string but is preceeded by a ' 
   # to force that date to be treated like a string, we were getting an exception.
-  # This test just checks for that exception to make sure it's not raised in this case
+  # This test just checks for that exception to make sure it's not raised in this cas
   def test_date_to_float_conversion
      if EXCEL
        assert_nothing_raised(NoMethodError) do
