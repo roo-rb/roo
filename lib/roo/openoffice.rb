@@ -331,7 +331,7 @@ class Openoffice < GenericSpreadsheet
                                   str_v += "\n" if para_count > 0
                                   para_count += 1
                                   if str.children.size > 1
-                                    str_v = children_to_string(str.children)
+                                    str_v += children_to_string(str.children)
                                   else
                                     str.children.each {|child|
                                       str_v = str_v + child.to_s #.text
