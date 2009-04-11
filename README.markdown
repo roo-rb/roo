@@ -1,9 +1,9 @@
 # README for Roo
 
-This is not the official roo repository. The maintainer unfortunately uses a 
-private repository and has been unresponsive so I've put the code here to at least continue in the interim. If you'd like to contribute 
-to this code, I'm happy to pull your changes in and will make sure they get
-to the developer if/when he resurfaces. 
+This is the semi-official roo repository. I've been unable to contact the maintainer so this
+repository should allow us to continue in the interim. If you'd like to contribute I'm happy 
+to pull your changes in and will be making periodic releases from here until we can get
+the gems on RubyForge. 
 
 
 ## Installation
