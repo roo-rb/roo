@@ -1,6 +1,7 @@
 
 require 'rubygems'
-require 'rexml/document'
+gem 'libxml-ruby', '>= 0.8.3'
+require 'xml'
 require 'fileutils'
 require 'zip/zipfilesystem'
 require 'date'
@@ -102,12 +103,12 @@ class Excelx < GenericSpreadsheet
       @file_nr = @@nr
       extract_content(@filename)
       file = File.new(File.join(@tmpdir, @file_nr.to_s+"_roo_workbook.xml"))
-      @workbook_doc = REXML::Document.new file
+      @workbook_doc = XML::Parser.io(file).parse
       file.close
       @shared_table = []
       if File.exist?(File.join(@tmpdir, @file_nr.to_s+'_roo_sharedStrings.xml'))
         file = File.new(File.join(@tmpdir, @file_nr.to_s+'_roo_sharedStrings.xml'))
-        @sharedstring_doc = REXML::Document.new file
+        @sharedstring_doc = XML::Parser.io(file).parse
         file.close
         read_shared_strings(@sharedstring_doc)
       end
@@ -115,14 +116,14 @@ class Excelx < GenericSpreadsheet
       @style_definitions = Array.new { |h,k| h[k] = {} }
       if File.exist?(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml'))
         file = File.new(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml'))
-        @styles_doc = REXML::Document.new file
+        @styles_doc = XML::Parser.io(file).parse
         file.close
         read_styles(@styles_doc)
       end
       @sheet_doc = []
       @sheet_files.each_with_index do |item, i|
         file = File.new(item)
-        @sheet_doc[i] = REXML::Document.new file
+        @sheet_doc[i] = XML::Parser.io(file).parse
         file.close
       end
     ensure
@@ -288,18 +289,11 @@ class Excelx < GenericSpreadsheet
   # returns an array of sheet names in the spreadsheet
   def sheets
     return_sheets = []
-    @workbook_doc.each_element do |workbook|
-      workbook.each_element do |el|
-        if el.name == "sheets"
-          el.each_element do |sheet|
-            return_sheets << sheet.attributes['name']
-          end
-        end
-      end
+    @workbook_doc.find("//*[local-name()='sheet']").each do |sheet|
+      return_sheets << sheet.attributes.to_h['name']
     end
     return_sheets
   end
-
   # shows the internal representation of all cells
   # for debugging purposes
   def to_s(sheet=nil)
@@ -404,87 +398,62 @@ class Excelx < GenericSpreadsheet
     raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
     raise RangeError unless self.sheets.include? sheet
     n = self.sheets.index(sheet)
-    @sheet_doc[n].each_element do |worksheet|
-      worksheet.each_element do |elem|
-        if elem.name == 'sheetData'
-          elem.each_element do |sheetdata|
-            if sheetdata.name == 'row'
-              sheetdata.each_element do |row|
-                if row.name == 'c'
-                  s_attribute = row.attributes['s']
-                  if row.attributes['t'] == 's'
-                    tmp_type = :shared
-                  elsif row.attributes['t'] == 'b'
-                    tmp_type = :boolean
-                  else
-                    format = attribute2format(s_attribute)
-                    tmp_type = format2type(format)
-                  end
-                  formula = nil
-                  row.each_element do |cell|
-#                    puts "cell.name: #{cell.name}" if cell.text.include? "22606.5120"
-#                    puts "cell.text: #{cell.text}" if cell.text.include? "22606.5120"
-                    if cell.name == 'f'
-                      formula = cell.text
-                    end
-                    if cell.name == 'v'
-                      #puts "tmp_type: #{tmp_type}" if cell.text.include? "22606.5120"
-                      #puts cell.name
-                      if tmp_type == :time or tmp_type == :datetime #2008-07-26
-                        #p cell.text
-                       # p cell.text.to_f if cell.text.include? "22606.5120"
-                        if cell.text.to_f >= 1.0 # 2008-07-26
-                        #  puts ">= 1.0" if cell.text.include? "22606.5120"
-                         # puts "cell.text.to_f: #{cell.text.to_f}" if cell.text.include? "22606.5120"
-                          #puts "cell.text.to_f.floor: #{cell.text.to_f.floor}" if cell.text.include? "22606.5120"
-                          if (cell.text.to_f - cell.text.to_f.floor).abs > 0.000001 #TODO: 
-                           # puts "abs ist groesser"  if cell.text.include? "22606.5120"
-                            # @cell[sheet][key] = DateTime.parse(tr.attributes['date-value'])
-                            tmp_type = :datetime
-                            
-                          else
-                            #puts ":date"
-                            tmp_type = :date # 2008-07-26
-                          end
-                        else
-                          #puts "<1.0"
-                        end # 2008-07-26
-                      end # 2008-07-26
-                      excelx_type = [:numeric_or_formula,format]
-                      excelx_value = cell.text
-                      if tmp_type == :shared
-                        vt = :string
-                        str_v = @shared_table[cell.text.to_i]
-                        excelx_type = :string
-                      elsif tmp_type == :boolean
-                        vt = :boolean
-                        cell.text.to_i == 1 ? v = 'TRUE' : v = 'FALSE'
-                      elsif tmp_type == :date
-                        vt = :date
-                        v = cell.text
-                      elsif tmp_type == :time
-                        vt = :time
-                        v = cell.text
-                      elsif tmp_type == :datetime
-                        vt = :datetime
-                        v = cell.text
-                      elsif tmp_type == :formula
-                        vt = :formula
-                        v = cell.text.to_f #TODO: !!!!
-                      else
-                        vt = :float
-                        v = cell.text
-                      end
-                      #puts "vt: #{vt}" if cell.text.include? "22606.5120"
-                      x,y = split_coordinate(row.attributes['r'])
-                      tr=nil #TODO: ???s
-                      set_cell_values(sheet,x,y,0,v,vt,formula,tr,str_v,excelx_type,excelx_value,s_attribute)
-                    end
-                  end
-                end
+    @sheet_doc[n].find("//*[local-name()='c']").each do |c|
+       s_attribute = c.attributes.to_h['s'].to_i   # should be here
+       if (c.attributes.to_h['t'] == 's')
+         tmp_type = :shared
+       elsif (c.attributes.to_h['t'] == 'b')
+         tmp_type = :boolean
+       else
+       #  s_attribute = c.attributes.to_h['s'].to_i     # was here
+         format = attribute2format(s_attribute)
+         tmp_type = format2type(format)
+       end
+      formula = nil
+      c.each_element do |cell|
+        if cell.name == 'f'
+          formula = cell.content
+        end
+        if cell.name == 'v'
+          if tmp_type == :time or tmp_type == :datetime
+            if cell.content.to_f >= 1.0 
+              if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001 
+                tmp_type = :datetime 
+              else
+                tmp_type = :date
               end
-            end
+            else
+            end 
           end
+          excelx_type = [:numeric_or_formula,format]
+          excelx_value = cell.content
+          if tmp_type == :shared
+            vt = :string
+            str_v = @shared_table[cell.content.to_i]
+            excelx_type = :string
+          elsif tmp_type == :boolean
+            vt = :boolean
+            cell.content.to_i == 1 ? v = 'TRUE' : v = 'FALSE'
+          elsif tmp_type == :date
+            vt = :date
+            v = cell.content
+          elsif tmp_type == :time
+            vt = :time
+            v = cell.content
+          elsif tmp_type == :datetime
+            vt = :datetime
+            v = cell.content
+          elsif tmp_type == :formula
+            vt = :formula
+            v = cell.content.to_f #TODO: !!!!
+          else
+            vt = :float
+            v = cell.content
+          end
+          #puts "vt: #{vt}" if cell.text.include? "22606.5120"
+          x,y = split_coordinate(c.attributes.to_h['r'])
+          tr=nil #TODO: ???s
+          set_cell_values(sheet,x,y,0,v,vt,formula,tr,str_v,excelx_type,excelx_value,s_attribute)
         end
       end
     end
@@ -500,17 +469,9 @@ class Excelx < GenericSpreadsheet
   def check_default_sheet
     sheet_found = false
     raise ArgumentError, "Error: default_sheet not set" if @default_sheet == nil
-    @workbook_doc.each_element do |workbook|
-      workbook.each_element do |el|
-        if el.name == "sheets"
-          el.each_element do |sheet|
-            if @default_sheet == sheet.attributes['name']
-              sheet_found = true
-            end
-          end
-        end
-      end
-    end
+    
+    sheet_found = true if sheets.include?(@default_sheet)
+    
     if ! sheet_found
       raise RangeError, "sheet '#{@default_sheet}' not found"
     end
@@ -570,18 +531,21 @@ class Excelx < GenericSpreadsheet
 
   # read the shared strings xml document
   def read_shared_strings(doc)
-    doc.each_element do |sst|
-      if sst.name == 'sst'
-        sst.each_element do |si|
-          if si.name == 'si'
-            si.each_element do |elem|
-              if elem.name == 't'
-                @shared_table << elem.text
-              end
+    doc.find("//*[local-name()='si']").each do |si|
+      shared_table_entry = ''
+      si.each_element do |elem|
+        if (elem.name == 'r')
+          elem.each_element do |r_elem|
+            if (r_elem.name == 't')
+              shared_table_entry << r_elem.content
             end
           end
         end
+        if (elem.name == 't')
+          shared_table_entry = elem.content
+        end
       end
+      @shared_table << shared_table_entry
     end
   end
 
@@ -590,46 +554,38 @@ class Excelx < GenericSpreadsheet
     @numFmts = []
     @cellXfs = []
     fonts = []
-    doc.each_element do |e1|
-      if e1.name == "styleSheet"
-        e1.each_element do |e2|
-          if e2.name == "numFmts"
-            e2.each_element do |e3|
-              if e3.name == 'numFmt'
-                numFmtId = e3.attributes['numFmtId']
-                formatCode = e3.attributes['formatCode']
-                @numFmts << [numFmtId, formatCode]
+    
+    doc.find("//*[local-name()='numFmt']").each do |numFmt|
+      numFmtId = numFmt.attributes.to_h['numFmtId']
+      formatCode = numFmt.attributes.to_h['formatCode']
+      @numFmts << [numFmtId, formatCode]
+    end
+    doc.find("//*[local-name()='fonts']").each do |fonts_el|
+      fonts_el.each_element do |font_el|
+        if font_el.name == 'font'
+          font = Excelx::Font.new
+          font_el.each_element do |font_sub_el|
+            case font_sub_el.name
+              when 'b'
+                font.bold = true
+              when 'i'
+                font.italic = true
+              when 'u'
+                font.underline = true
               end
-            end
-          elsif e2.name == "fonts"  
-            e2.each_element do |e3|
-              if e3.name == 'font'
-                font = Excelx::Font.new
-                e3.each do |e4|
-                  case e4.name
-                  when 'b'
-                    font.bold = true
-                  when 'i'
-                    font.italic = true
-                  when 'u'
-                    font.underline = true
-                  end  
-                end             
-                fonts << font
-              end
-            end
-          elsif e2.name == "cellXfs"
-            e2.each_element do |e3|
-              if e3.name == 'xf'
-                numFmtId = e3.attributes['numFmtId'] 
-                @cellXfs << [numFmtId]
-                fontId = e3.attributes['fontId'].to_i
-                @style_definitions << fonts[fontId]
-              end
-            end
           end
+          fonts << font
         end
       end
+    end
+    
+    doc.find("//*[local-name()='cellXfs']").each do |xfs|
+        xfs.each do |xf|
+          numFmtId = xf.attributes.to_h['numFmtId']
+          @cellXfs << [numFmtId]
+          fontId = xf.attributes.to_h['fontId'].to_i
+          @style_definitions << fonts[fontId]
+        end
     end
   end
 
