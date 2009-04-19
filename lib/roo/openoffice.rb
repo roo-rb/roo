@@ -305,17 +305,18 @@ class Openoffice < GenericSpreadsheet
                   if str.name == 'p'
                     v = str.content
                     str_v += "\n" if para_count > 0
+                    para_count += 1
                     if str.children.size > 1
                       str_v = children_to_string(str.children)
                     else
-                      str.children.each {|child|
+                      str.children.each do |child|
                         str_v = str_v + child.to_s #.text
-                      }
+                      end
                     end
                     str_v.gsub!(/&apos;/,"'")  # special case not supported by unescapeHTML
                     str_v = CGI.unescapeHTML(str_v)
                   end # == 'p'
-                end
+                 end
               elsif vt == 'time'
                 cell.each_element do |str|
                   if str.name == 'p'
