@@ -231,10 +231,6 @@ class Openoffice < GenericSpreadsheet
   # helper function to set the internal representation of cells
   def set_cell_values(sheet,x,y,i,v,vt,formula,table_cell,str_v,style_name)
     key = [y,x+i]    
- #   puts key.inspect
-#    puts v
-#    puts vt
-#    puts '--'
     @cell_type[sheet] = {} unless @cell_type[sheet]
     @cell_type[sheet][key] = Openoffice.oo_type_2_roo_type(vt)
     @formula[sheet] = {} unless @formula[sheet]
@@ -276,7 +272,7 @@ class Openoffice < GenericSpreadsheet
     sheet_found = false
     raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
     raise RangeError unless self.sheets.include? sheet
-    
+
     @doc.find("//*[local-name()='table']").each do |ws|
       if sheet == ws.attributes['name']
         sheet_found = true
@@ -307,7 +303,7 @@ class Openoffice < GenericSpreadsheet
                     str_v += "\n" if para_count > 0
                     para_count += 1
                     if str.children.size > 1
-                      str_v = children_to_string(str.children)
+                      str_v += children_to_string(str.children)
                     else
                       str.children.each do |child|
                         str_v = str_v + child.to_s #.text
