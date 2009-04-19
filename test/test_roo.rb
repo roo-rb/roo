@@ -4879,6 +4879,7 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
        oo = Openoffice.new(File.join(TESTDIR,"paragraph.ods"))
        oo.default_sheet = oo.sheets.first
        assert_equal "This is a test\nof a multiline\nCell", oo.cell(1,1)
+       assert_equal "This is a test\n¶\nof a multiline\n\nCell", oo.cell(1,2)
      end  
      # if EXCELX
      #       oo = Excelx.new(File.join(TESTDIR,"boolean.xlsx"))
