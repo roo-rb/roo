@@ -3817,7 +3817,7 @@ Sheet 3:
   def do_test_xml(oo)
     assert_nothing_raised {oo.to_xml}
     sheetname = oo.sheets.first
-    doc = REXML::Document.new(oo.to_xml)
+    doc = XML::Parser.string(oo.to_xml).parse
     doc.root.each_element {|xml_sheet|
       all_cells = init_all_cells(oo, sheetname)
       x = 0
@@ -3831,7 +3831,7 @@ Sheet 3:
         result = [
           cell.attributes['row'],
           cell.attributes['column'],
-          cell.text,
+          cell.content,
           cell.attributes['type'],
         ]
         assert_equal expected, result

@@ -1,6 +1,6 @@
-
 require 'rubygems'
-require 'rexml/document'
+gem 'libxml-ruby', '>= 0.8.3'
+require 'xml'
 require 'fileutils'
 require 'zip/zipfilesystem'
 require 'date'
@@ -38,7 +38,7 @@ class Openoffice < GenericSpreadsheet
       @file_nr = @@nr
       extract_content
       file = File.new(File.join(@tmpdir, @file_nr.to_s+"_roo_content.xml"))
-      @doc = REXML::Document.new file
+      @doc = XML::Parser.io(file).parse
       file.close
     ensure
       #if ENV["roo_local"] != "thomas-p"
@@ -174,31 +174,14 @@ class Openoffice < GenericSpreadsheet
     end
   end
 
-  # returns an array of sheet names in the spreadsheet
   def sheets
     return_sheets = []
-    oo_document_count = 0
-    @doc.each_element do |oo_document|
-      oo_document_count += 1
-      oo_element_count = 0
-      oo_document.each_element do |oo_element|
-        oo_element_count += 1
-        if oo_element.name == "body"
-          oo_element.each_element do |be|
-            if be.name == "spreadsheet"
-              be.each_element do |se|
-                if se.name == "table"
-                  return_sheets << se.attributes['name']
-                end
-              end
-            end
-          end
-        end
-      end
+    @doc.find("//*[local-name()='table']").each do |sheet|
+      return_sheets << sheet.attributes['name']
     end
     return_sheets
   end
-
+    
   # version of the openoffice document
   # at 2007 this is always "1.0"
   def officeversion
@@ -240,14 +223,18 @@ class Openoffice < GenericSpreadsheet
 
   # read the version of the OO-Version
   def oo_version
-    @doc.each_element do |oo_document|
-      @officeversion = oo_document.attributes['version']
+    @doc.find("//*[local-name()='document-content']").each do |office|
+      @officeversion = office.attributes['version']
     end
   end
 
   # helper function to set the internal representation of cells
-  def set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v,style_name)
-    key = [y,x+i]
+  def set_cell_values(sheet,x,y,i,v,vt,formula,table_cell,str_v,style_name)
+    key = [y,x+i]    
+ #   puts key.inspect
+#    puts v
+#    puts vt
+#    puts '--'
     @cell_type[sheet] = {} unless @cell_type[sheet]
     @cell_type[sheet][key] = Openoffice.oo_type_2_roo_type(vt)
     @formula[sheet] = {} unless @formula[sheet]
@@ -261,13 +248,13 @@ class Openoffice < GenericSpreadsheet
     when :string
       @cell[sheet][key] = str_v
     when :date
-      if tr.attributes['date-value'].size != "XXXX-XX-XX".size
+      if table_cell.attributes['date-value'].size != "XXXX-XX-XX".size
         #-- dann ist noch eine Uhrzeit vorhanden
         #-- "1961-11-21T12:17:18"
-        @cell[sheet][key] = DateTime.parse(tr.attributes['date-value'])
+        @cell[sheet][key] = DateTime.parse(table_cell.attributes['date-value'])
         @cell_type[sheet][key] = :datetime
       else
-        @cell[sheet][key] = tr.attributes['date-value']
+        @cell[sheet][key] = table_cell.attributes['date-value']
       end
     when :percentage
       @cell[sheet][key] = v.to_f
@@ -289,103 +276,86 @@ class Openoffice < GenericSpreadsheet
     sheet_found = false
     raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
     raise RangeError unless self.sheets.include? sheet
-    oo_document_count = 0
-    @doc.each_element do |oo_document|
-      # @officeversion = oo_document.attributes['version']
-      oo_document_count += 1
-      oo_element_count = 0
-      oo_document.each_element do |oo_element|
-        oo_element_count += 1
-        if oo_element.name == "body"
-          oo_element.each_element do |be|
-            if be.name == "spreadsheet"
-              be.each_element do |se|
-                if se.name == "table"
-                  if se.attributes['name']==sheet
-                    sheet_found = true
-                    x=1
-                    y=1
-                    se.each_element do |te|
-                      if te.name == "table-column"
-                        rep = te.attributes["number-columns-repeated"]
-                        @style_defaults[sheet] << te.attributes["default-cell-style-name"] 
-                      elsif te.name == "table-row"
-                        if te.attributes['number-rows-repeated']
-                          skip_y = te.attributes['number-rows-repeated'].to_i
-                          y = y + skip_y - 1 # minus 1 because this line will be counted as a line element
-                        end
-                        te.each_element do |tr|
-                          if tr.name == 'table-cell'
-                            skip = tr.attributes['number-columns-repeated']
-                            formula = tr.attributes['formula']
-                            vt = tr.attributes['value-type']
-                            v  = tr.attributes['value']
-                            style_name = tr.attributes['style-name']
-                            if vt == 'string'
-                              str_v  = ''
-                              # insert \n if there is more than one paragraph
-                              para_count = 0
-                              tr.each_element do |str|
-                                if str.name == 'p'
-                                  v = str.text
-                                  str_v += "\n" if para_count > 0
-                                  para_count += 1
-                                  if str.children.size > 1
-                                    str_v = children_to_string(str.children)
-                                  else
-                                    str.children.each {|child|
-                                      str_v = str_v + child.to_s #.text
-                                    }
-                                  end
-                                  str_v.gsub!(/&apos;/,"'")  # special case not supported by unescapeHTML
-                                  str_v = CGI.unescapeHTML(str_v)
-                                end # == 'p'
-                              end
-                            elsif vt == 'time'
-                              tr.each_element do |str|
-                                if str.name == 'p'
-                                  v = str.text
-                                end
-                              end
-                            elsif vt == '' or vt == nil
-                              #
-                            elsif vt == 'date'
-                              #
-                            elsif vt == 'percentage'
-                              #
-                            elsif vt == 'float'
-                              #
-                            elsif vt == 'boolean'
-                              v = tr.attributes['boolean-value']
-                              #
-                            else
-                              # raise "unknown type #{vt}"
-                            end
-                            if skip
-                              if v != nil or tr.attributes['date-value']
-                                0.upto(skip.to_i-1) do |i|
-                                  set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v,style_name)
-                                end
-                              end
-                              x += (skip.to_i - 1)
-                            end # if skip
-                            set_cell_values(sheet,x,y,0,v,vt,formula,tr,str_v,style_name)
-                            x += 1
-                          end
-                        end
-                        y += 1
-                        x = 1
-                      end
-                    end
-                  end # sheet
-                end
-              end
+    
+    @doc.find("//*[local-name()='table']").each do |ws|
+      if sheet == ws.attributes['name']
+        sheet_found = true
+        col = 1
+        row = 1
+        ws.each_element do |table_element|
+          case table_element.name
+          when 'table-column'
+            @style_defaults[sheet] << table_element.attributes['default-cell-style-name'] 
+          when 'table-row'
+            if table_element.attributes['number-rows-repeated']
+              skip_row = table_element.attributes['number-rows-repeated'].to_i
+              row = row + skip_row - 1
             end
+            table_element.each_element do |cell|
+              skip_col = cell.attributes['number-columns-repeated']
+              formula = cell.attributes['formula']
+              vt = cell.attributes['value-type']
+              v =  cell.attributes['value']
+              style_name = cell.attributes['style-name']
+              if vt == 'string'
+                str_v  = ''
+                # insert \n if there is more than one paragraph
+                para_count = 0
+                cell.each_element do |str|
+                  if str.name == 'p'
+                    v = str.content
+                    str_v += "\n" if para_count > 0
+                    if str.children.size > 1
+                      str_v = children_to_string(str.children)
+                    else
+                      str.children.each {|child|
+                        str_v = str_v + child.to_s #.text
+                      }
+                    end
+                    str_v.gsub!(/&apos;/,"'")  # special case not supported by unescapeHTML
+                    str_v = CGI.unescapeHTML(str_v)
+                  end # == 'p'
+                end
+              elsif vt == 'time'
+                cell.each_element do |str|
+                  if str.name == 'p'
+                    v = str.content
+                  end
+                end
+              elsif vt == '' or vt == nil
+                #
+              elsif vt == 'date'
+                #
+              elsif vt == 'percentage'
+                #
+              elsif vt == 'float'
+                #
+              elsif vt == 'boolean'
+                v = cell.attributes['boolean-value']
+                #
+              else
+                # raise "unknown type #{vt}"
+              end
+              if skip_col
+                if v != nil or cell.attributes['date-value']
+                  0.upto(skip_col.to_i-1) do |i|
+                    set_cell_values(sheet,col,row,i,v,vt,formula,cell,str_v,style_name)
+                  end
+                end
+                col += (skip_col.to_i - 1)
+              end # if skip
+              set_cell_values(sheet,col,row,0,v,vt,formula,cell,str_v,style_name)
+              col += 1
+            end    
+            row += 1
+            col = 1
           end
-        elsif oo_element.name == "automatic-styles" 
-          read_styles(oo_element)
         end
       end
+    end
+    
+    @doc.find("//*[local-name()='automatic-styles']").each do |style|
+      read_styles(style)
     end
     if !sheet_found
       raise RangeError
@@ -413,25 +383,7 @@ class Openoffice < GenericSpreadsheet
   def check_default_sheet
     sheet_found = false
     raise ArgumentError, "Error: default_sheet not set" if @default_sheet == nil
-    @doc.each_element do |oo_document|
-      oo_element_count = 0
-      oo_document.each_element do |oo_element|
-        oo_element_count += 1
-        if oo_element.name == "body"
-          oo_element.each_element do |be|
-            if be.name == "spreadsheet"
-              be.each_element do |se|
-                if se.name == "table"
-                  if se.attributes['name'] == @default_sheet
-                    sheet_found = true
-                  end # sheet
-                end
-              end
-            end
-          end
-        end
-      end
-    end
+    sheet_found = true if sheets.include?(@default_sheet)
     if ! sheet_found
       raise RangeError, "sheet '#{@default_sheet}' not found"
     end
@@ -487,8 +439,8 @@ class Openoffice < GenericSpreadsheet
   def children_to_string(children)
     result = ''
     children.each {|child|
-      if child.class == REXML::Text
-        result = result + child.to_s
+      if child.text?
+        result = result + child.content
       else
         if child.name == 's'
           compressed_spaces = child.attributes['c'].to_i
