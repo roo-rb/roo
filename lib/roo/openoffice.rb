@@ -306,7 +306,7 @@ class Openoffice < GenericSpreadsheet
                       str_v += children_to_string(str.children)
                     else
                       str.children.each do |child|
-                        str_v = str_v + child.content #.text
+                        str_v += child.content #.text
                       end
                     end
                     str_v.gsub!(/&apos;/,"'")  # special case not supported by unescapeHTML

@@ -4869,12 +4869,13 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   end
   
    def test_cell_multiline
-     # if EXCEL
-     #     oo = Excel.new(File.join(TESTDIR,"boolean.xls"))
-     #     oo.default_sheet = oo.sheets.first
-     #     assert_equal "true", oo.cell(1,1)
-     #     assert_equal "false", oo.cell(2,1)
-     #   end  
+     if EXCEL
+        oo = Excel.new(File.join(TESTDIR,"paragraph.xls"))
+        oo.default_sheet = oo.sheets.first
+        assert_equal "This is a test\nof a multiline\nCell", oo.cell(1,1)
+        assert_equal "This is a test\n¶\nof a multiline\n\nCell", oo.cell(1,2)
+        assert_equal "first p\n\nsecond p\n\nlast p", oo.cell(2,1)
+     end  
      if OPENOFFICE
        oo = Openoffice.new(File.join(TESTDIR,"paragraph.ods"))
        oo.default_sheet = oo.sheets.first
@@ -4882,12 +4883,13 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
        assert_equal "This is a test\n¶\nof a multiline\n\nCell", oo.cell(1,2)
        assert_equal "first p\n\nsecond p\n\nlast p", oo.cell(2,1)
      end  
-     # if EXCELX
-     #       oo = Excelx.new(File.join(TESTDIR,"boolean.xlsx"))
-     #       oo.default_sheet = oo.sheets.first
-     #       assert_equal "TRUE", oo.cell(1,1)
-     #       assert_equal "FALSE", oo.cell(2,1)
-     #     end
+     if EXCELX
+        oo = Excelx.new(File.join(TESTDIR,"paragraph.xlsx"))
+        oo.default_sheet = oo.sheets.first
+        assert_equal "This is a test\nof a multiline\nCell", oo.cell(1,1)
+        assert_equal "This is a test\n¶\nof a multiline\n\nCell", oo.cell(1,2)
+        assert_equal "first p\n\nsecond p\n\nlast p", oo.cell(2,1)
+     end
    end
   
   
