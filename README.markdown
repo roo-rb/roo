@@ -10,13 +10,14 @@ the gems on RubyForge.
 
     # Run the following if you haven't done so before:
     gem sources -a http://gems.github.com
+
     # Install the gem:
     sudo gem install hmcgowan-roo
 
 ## Usage:
 
     require 'rubygems'
-    require 'hmcgowan-roo'
+    require 'roo'
 
     s = Openoffice.new("myspreadsheet.ods")      # creates an Openoffice Spreadsheet instance
     s = Excel.new("myspreadsheet.xls")           # creates an Excel Spreadsheet instance
