@@ -9,7 +9,7 @@ the gems on RubyForge.
 ## Installation
 
     # Run the following if you haven't done so before:
-    gem sources -a http://gems.github.com
+    gem sources -a http://gems.github.com/
 
     # Install the gem:
     sudo gem install hmcgowan-roo
