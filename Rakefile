@@ -8,11 +8,11 @@ begin
     s.name               = 'roo'
     s.rubyforge_project  = 'roo'
     s.platform           = Gem::Platform::RUBY
-    s.email              = 'thopre@gmail.com' 
+    s.email              = 'hmcgowan@yahoo.com' 
     s.homepage           = "http://roo.rubyforge.org"
     s.summary            = "roo"
     s.description        = "roo can access the contents of OpenOffice-, Excel- or Google-Spreadsheets"
-    s.authors            = ['Thomas Preymesser']
+    s.authors            = ['Hugh McGowan','Thomas Preymesser']
     s.files              =  FileList[ "{lib,test}/**/*"]
     s.has_rdoc = true
     s.extra_rdoc_files = ["README.markdown", "History.txt"]
