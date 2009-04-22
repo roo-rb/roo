@@ -8,7 +8,7 @@ begin
     s.name               = 'roo'
     s.rubyforge_project  = 'roo'
     s.platform           = Gem::Platform::RUBY
-    s.email              = 'hmcgowan@yahoo.com' 
+    s.email              = 'hugh_mcgowan@yahoo.com' 
     s.homepage           = "http://roo.rubyforge.org"
     s.summary            = "roo"
     s.description        = "roo can access the contents of OpenOffice-, Excel- or Google-Spreadsheets"
