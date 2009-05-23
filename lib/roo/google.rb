@@ -344,8 +344,8 @@ class Google < GenericSpreadsheet
     (doc/"gs:cell").each {|item|
       row = item['row']
       col = item['col']
-      value = item['inputvalue']
-      numericvalue = item['numericvalue']
+      value = item['inputValue']
+      numericvalue = item['numericValue']
       if value[0,1] == '='
         formula = value
       else
