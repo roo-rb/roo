@@ -44,17 +44,27 @@ end
 class Test::Unit::TestCase
   def key_of(spreadsheetname)
     begin
+      
       return {
-        'numbers1' => "o10837434939102457526.4784396906364855777",
-        'borders' => "o10837434939102457526.664868920231926255",
-        'simple_spreadsheet' => "ptu6bbahNZpYe-L1vEBmgGA",
+        'formula' => 'rt4Pw1WmjxFtyfrqqy94wPw',
+        "write.me" => 'r6m7HFlUOwst0RTUTuhQ0Ow',
+        'numbers1' => "r_SR5y7YzonNsGBRLI6CCpg",
+        'borders' => "r_nLYMft6uWg_PT9Rc2urXw",
+        'simple_spreadsheet' => "r3aMMCBCA153TmU_wyIaxfw",
         'testnichtvorhandenBibelbund.ods' => "invalidkeyforanyspreadsheet", # !!! intentionally false key
-        "only_one_sheet" => "o10837434939102457526.762705759906130135",
-        "write.me" => 'ptu6bbahNZpY0N0RrxQbWdw&hl',
-        'formula' => 'o10837434939102457526.3022866619437760118',
-        'time-test' => 'ptu6bbahNZpYBMhk01UfXSg',
-        'datetime' => "ptu6bbahNZpYQEtZwzL_dZQ",
+        "only_one_sheet" => "rqRtkcPJ97nhQ0m9ksDw2rA",
+        'time-test' => 'r2XfDBJMrLPjmuLrPQQrEYw',
+        'datetime' => "r2kQpXWr6xOSUpw9MyXavYg",
       }[spreadsheetname]
+        # 'numbers1' => "o10837434939102457526.4784396906364855777",
+        # 'borders' => "o10837434939102457526.664868920231926255",
+        # 'simple_spreadsheet' => "ptu6bbahNZpYe-L1vEBmgGA",
+        # 'testnichtvorhandenBibelbund.ods' => "invalidkeyforanyspreadsheet", # !!! intentionally false key
+        # "only_one_sheet" => "o10837434939102457526.762705759906130135",
+        # "write.me" => 'ptu6bbahNZpY0N0RrxQbWdw&hl',
+        # 'formula' => 'o10837434939102457526.3022866619437760118',
+        # 'time-test' => 'ptu6bbahNZpYBMhk01UfXSg',
+        # 'datetime' => "ptu6bbahNZpYQEtZwzL_dZQ",
     rescue
       raise "unknown spreadsheetname: #{spreadsheetname}"
     end
@@ -109,10 +119,10 @@ end
 class TestRoo < Test::Unit::TestCase
 
   OPENOFFICE   = true  	# do Openoffice-Spreadsheet Tests?
-  EXCEL        = true	  # do Excel Tests?
-  GOOGLE       = false 	# do Google-Spreadsheet Tests?
+  EXCEL        = false	  # do Excel Tests?
+  GOOGLE       = true 	# do Google-Spreadsheet Tests?
   GNUMERIC_ODS = false  # do gnumeric with ods files Tests?
-  EXCELX       = true  	# do Excel-X Tests? (.xlsx-files)
+  EXCELX       = false  	# do Excel-X Tests? (.xlsx-files)
 
   OPENOFFICEWRITE = false # experimental: write access with OO-Documents
   ONLINE = true
@@ -459,6 +469,8 @@ class TestRoo < Test::Unit::TestCase
 
       # assert_equal "date", oo.celltype(5,1)
       assert_equal :date, oo.celltype(5,1)
+      puts oo.cell(5,1)
+      puts oo.cell(5,1).to_s
       assert_equal Date.new(1961,11,21), oo.cell(5,1)
       assert_equal "1961-11-21", oo.cell(5,1).to_s
     end # GOOGLE
@@ -1974,7 +1986,7 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  def SKIP_test_excel_zipped
+  def test_excel_zipped
     after Date.new(2009,1,10) do
       if EXCEL
         $log.level = Logger::DEBUG
@@ -3441,7 +3453,7 @@ class TestRoo < Test::Unit::TestCase
   def test_write_google
     # write.me: http://spreadsheets.google.com/ccc?key=ptu6bbahNZpY0N0RrxQbWdw&hl=en_GB
     if GOOGLE
-      oo = Google.new('ptu6bbahNZpY0N0RrxQbWdw')
+      oo = Google.new(key_of('write.me'))
       oo.default_sheet = oo.sheets.first
       oo.set_value(1,1,"hello from the tests")
       #oo.set_value(1,1,"sin(1)")
@@ -3454,7 +3466,7 @@ class TestRoo < Test::Unit::TestCase
     if GOOGLE
       content1 = 'AAA'
       content2 = 'BBB'
-      oo = Google.new('ptu6bbahNZpY0N0RrxQbWdw')
+      oo = Google.new(key_of('write.me'))
       oo.default_sheet = oo.sheets.first
       oo.set_value(1,1,content1)
       oo.default_sheet = oo.sheets[1]
