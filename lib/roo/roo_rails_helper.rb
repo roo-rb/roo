@@ -1,4 +1,5 @@
 def spreadsheet(spreadsheet, sheets, options={})
+  @rspreadsheet = spreadsheet
   coordinates = true # default
   o=""
   if options[:coordinates] != nil
