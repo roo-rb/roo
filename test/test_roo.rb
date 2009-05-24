@@ -3456,8 +3456,9 @@ class TestRoo < Test::Unit::TestCase
       oo = Google.new(key_of('write.me'))
       oo.default_sheet = oo.sheets.first
       oo.set_value(1,1,"hello from the tests")
-      #oo.set_value(1,1,"sin(1)")
       assert_equal "hello from the tests", oo.cell(1,1)
+      oo.set_value(1,1, 1.0)
+      assert_equal 1.0, oo.cell(1,1)
     end
   end
 

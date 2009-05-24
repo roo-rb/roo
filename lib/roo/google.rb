@@ -1,4 +1,6 @@
 require 'gdata/spreadsheet'
+gem 'libxml-ruby', '>= 0.8.3'
+require 'xml'
 
 # overwrite some methods from the gdata-gem:
 module GData
@@ -45,7 +47,7 @@ XML
     def add_to_cell_roo(row,col,value, sheet_no=1)
       save_entry_roo(entry_roo(value,row,col), sheet_no)
     end
-
+   
     #-- new
     def get_one_sheet
       path = "/feeds/cells/#{@spreadsheet_id}/1/private/full"
@@ -70,6 +72,13 @@ XML
       doc = Hpricot(request(path))
       return doc
     end
+
+    def celldoc(sheet_no, cell_name)
+      path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/private/full" + cell_name
+      doc = Hpricot(request(path))
+      return doc
+    end
+
   end # class
 end # module
 
@@ -89,6 +98,7 @@ class Google < GenericSpreadsheet
     end
     @default_sheet = nil
     @cell = Hash.new
+    @cell_name = Hash.new
     @cell_type = Hash.new
     @formula = Hash.new
     @first_row = Hash.new
@@ -97,10 +107,8 @@ class Google < GenericSpreadsheet
     @last_column = Hash.new
     @cells_read = Hash.new
     @header_line = 1
-
     @gs = GData::Spreadsheet.new(spreadsheetkey)
     @gs.authenticate(user, password)
-
     #-- ----------------------------------------------------------------------
     #-- TODO: Behandlung von Berechtigungen hier noch einbauen ???
     #-- ----------------------------------------------------------------------
@@ -135,7 +143,6 @@ class Google < GenericSpreadsheet
     return true if string.class == Date
     return string.strip =~ /^([0-9]+)\/([0-9]+)\/([0-9]+)\ ([0-9]+):([0-9]+):([0-9]+)$/
   end
-
 
   def Google.timestring_to_seconds(value)
     hms = value.split(':')
@@ -291,8 +298,13 @@ class Google < GenericSpreadsheet
     end
     row,col = normalize(row,col)
     @gs.add_to_cell_roo(row,col,value,sheet_no)
+    # re-read the portion of the document that has changed
+    if @cells_read[sheet] 
+      cell_name = @cell_name[sheet]["#{row},#{col}"] 
+      read_cells(sheet, cell_name) 
+    end
   end
-
+  
   # returns the first non-empty row in a sheet
   def first_row(sheet=nil)
     sheet = @default_sheet unless sheet
@@ -335,61 +347,81 @@ class Google < GenericSpreadsheet
 
   private
 
-  # read all cells in a sheet
-  def read_cells(sheet=nil)
+  # read all cells in a sheet. if the cell_name is 
+  # specified, only return the XML pertaining to that cell
+  def read_cells(sheet=nil, cell_name=nil)
     sheet = @default_sheet unless sheet
     raise RangeError, "illegal sheet <#{sheet}>" unless sheets.index(sheet)
     sheet_no = sheets.index(sheet)+1
-    doc = @gs.fulldoc(sheet_no)
-    (doc/"gs:cell").each {|item|
-      row = item['row']
-      col = item['col']
-      value = item['inputValue']
-      numericvalue = item['numericValue']
-      if value[0,1] == '='
-        formula = value
-      else
-        formula = nil
-      end
-      @cell_type[sheet] = {} unless @cell_type[sheet]
-      if formula
-        ty = :formula
-        if numeric?(numericvalue)
-          value = numericvalue.to_f
-        else
-          value = numericvalue
+    @cell_name[sheet] ||= {}
+    if cell_name
+      doc = XML::Parser.string(@gs.celldoc(sheet_no, cell_name).to_s).parse
+    else
+      doc = XML::Parser.string(@gs.fulldoc(sheet_no).to_s).parse
+    end
+    doc.find("//*[local-name()='entry']").each do |entry|
+      key = nil; 
+      cell_name = nil;      
+      entry.each do |element|
+        next unless element.name == 'category'
+        cell_name = nil
+        element.each do |item|
+          case item.name
+          when 'link'
+            cell_name = item['href'][/\/R\d+C\d+/] if item['rel'] == 'self'
+          when 'cell'
+            row = item['row']
+            col = item['col']
+            value =  item['inputvalue'] ||  item['inputValue'] 
+            numericvalue = item['numericvalue']  ||  item['numericValue'] 
+            if value[0,1] == '='
+              formula = value
+            else
+              formula = nil
+            end
+            @cell_type[sheet] ||= {} 
+            if formula
+              ty = :formula
+              if numeric?(numericvalue)
+                value = numericvalue.to_f
+              else
+                value = numericvalue
+              end
+            elsif Google.date?(value)
+              ty = :date
+            elsif Google.datetime?(value)
+              ty = :datetime
+            elsif numeric?(value) # or o.class ???
+              ty = :float
+              value = value.to_f
+            elsif Google.time?(value)
+              ty = :time
+              value = Google.timestring_to_seconds(value)
+            else
+              ty = :string
+            end
+            key = "#{row},#{col}"
+            @cell[sheet] ||= {} 
+            if ty == :date
+              dd,mm,yyyy = value.split('/')
+              @cell[sheet][key] = sprintf("%04d-%02d-%02d",yyyy.to_i,mm.to_i,dd.to_i)
+            elsif ty == :datetime
+              date_part,time_part = value.split(' ')
+              dd,mm,yyyy = date_part.split('/')
+              hh,mi,ss = time_part.split(':')
+              @cell[sheet][key] = sprintf("%04d-%02d-%02d %02d:%02d:%02d",
+                yyyy.to_i,mm.to_i,dd.to_i,hh.to_i,mi.to_i,ss.to_i)
+            else
+              @cell[sheet][key] = value unless value == "" or value == nil
+            end
+            @cell_type[sheet][key] = ty # Openoffice.oo_type_2_roo_type(vt)
+          end
+          @formula[sheet] = {} unless @formula[sheet]
+          @formula[sheet][key] = formula  if formula
         end
-      elsif Google.date?(value)
-        ty = :date
-      elsif Google.datetime?(value)
-        ty = :datetime
-      elsif numeric?(value) # or o.class ???
-        ty = :float
-        value = value.to_f
-      elsif Google.time?(value)
-        ty = :time
-        value = Google.timestring_to_seconds(value)
-      else
-        ty = :string
       end
-      key = "#{row},#{col}"
-      @cell[sheet] = {} unless @cell[sheet]
-      if ty == :date
-        dd,mm,yyyy = value.split('/')
-        @cell[sheet][key] = sprintf("%04d-%02d-%02d",yyyy.to_i,mm.to_i,dd.to_i)
-      elsif ty == :datetime
-        date_part,time_part = value.split(' ')
-        dd,mm,yyyy = date_part.split('/')
-        hh,mi,ss = time_part.split(':')
-        @cell[sheet][key] = sprintf("%04d-%02d-%02d %02d:%02d:%02d",
-          yyyy.to_i,mm.to_i,dd.to_i,hh.to_i,mi.to_i,ss.to_i)
-      else
-        @cell[sheet][key] = value unless value == "" or value == nil
-      end
-      @cell_type[sheet][key] = ty # Openoffice.oo_type_2_roo_type(vt)
-      @formula[sheet] = {} unless @formula[sheet]
-      @formula[sheet][key] = formula  if formula
-    }
+      @cell_name[sheet][key] = cell_name if cell_name && key
+    end  
     @cells_read[sheet] = true
   end
 
