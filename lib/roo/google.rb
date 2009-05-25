@@ -83,7 +83,8 @@ XML
 end # module
 
 class Google < GenericSpreadsheet
-
+  attr_accessor :date_format, :datetime_format
+  
   # Creates a new Google spreadsheet object.
   def initialize(spreadsheetkey,user=nil,password=nil)
     @filename = spreadsheetkey
@@ -107,6 +108,9 @@ class Google < GenericSpreadsheet
     @last_column = Hash.new
     @cells_read = Hash.new
     @header_line = 1
+    @date_format = '%d/%m/%Y'
+    @datetime_format = '%d/%m/%Y %H:%M:%S' 
+    @time_format = '%H:%M:%S'
     @gs = GData::Spreadsheet.new(spreadsheetkey)
     @gs.authenticate(user, password)
     #-- ----------------------------------------------------------------------
@@ -123,28 +127,41 @@ class Google < GenericSpreadsheet
     return @gs.sheetlist
   end
 
-  # is String a date with format DD/MM/YYYY
-  def Google.date?(string)
+  def date?(string)
     return false if string.class == Float
     return true if string.class == Date
-    return string.strip =~ /^([0-9]+)\/([0-9]+)\/([0-9]+)$/
+    begin
+      Date.strptime(string, @date_format)
+      true
+    rescue
+      false
+    end
   end
 
   # is String a time with format HH:MM:SS?
-  def Google.time?(string)
+  def time?(string)
     return false if string.class == Float
     return true if string.class == Date
-    return string.strip =~ /^([0-9]+):([0-9]+):([0-9]+)$/
+    begin
+      DateTime.strptime(string, @time_format)
+      true
+    rescue
+      false
+    end
   end
 
-  # is String a date+time with format DD/MM/YYYY HH:MM:SS
-  def Google.datetime?(string)
+  def datetime?(string)
     return false if string.class == Float
     return true if string.class == Date
-    return string.strip =~ /^([0-9]+)\/([0-9]+)\/([0-9]+)\ ([0-9]+):([0-9]+):([0-9]+)$/
+    begin
+      DateTime.strptime(string, @datetime_format)
+      true
+    rescue
+      false
+    end
   end
 
-  def Google.timestring_to_seconds(value)
+  def timestring_to_seconds(value)
     hms = value.split(':')
     hms[0].to_i*3600 + hms[1].to_i*60 + hms[2].to_i
   end
@@ -158,24 +175,21 @@ class Google < GenericSpreadsheet
     check_default_sheet #TODO: 2007-12-16
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
+    value = @cell[sheet]["#{row},#{col}"]
     if celltype(row,col,sheet) == :date
-      yyyy,mm,dd = @cell[sheet]["#{row},#{col}"].split('-')
       begin
-        return Date.new(yyyy.to_i,mm.to_i,dd.to_i)
+        return  Date.strptime(value, @date_format)
       rescue ArgumentError
-        raise "Invalid date parameter: #{yyyy}, #{mm}, #{dd}"
+        raise "Invalid Date #{sheet}[#{row},#{col}] #{value} using format '{@date_format}'"
       end
     elsif celltype(row,col,sheet) == :datetime
       begin
-        date_part,time_part = @cell[sheet]["#{row},#{col}"].split(' ')
-        yyyy,mm,dd = date_part.split('-')
-        hh,mi,ss = time_part.split(':')
-        return DateTime.civil(yyyy.to_i,mm.to_i,dd.to_i,hh.to_i,mi.to_i,ss.to_i)
+        return  DateTime.strptime(value, @datetime_format)
       rescue ArgumentError
-        raise "Invalid date parameter: #{yyyy}, #{mm}, #{dd}, #{hh}, #{mi}, #{ss}"
+        raise "Invalid DateTime #{sheet}[#{row},#{col}] #{value} using format '{@datetime_format}'"
       end
     end 
-    return @cell[sheet]["#{row},#{col}"]
+    return value
   end
 
   # returns the type of a cell:
@@ -354,11 +368,8 @@ class Google < GenericSpreadsheet
     raise RangeError, "illegal sheet <#{sheet}>" unless sheets.index(sheet)
     sheet_no = sheets.index(sheet)+1
     @cell_name[sheet] ||= {}
-    if cell_name
-      doc = XML::Parser.string(@gs.celldoc(sheet_no, cell_name).to_s).parse
-    else
-      doc = XML::Parser.string(@gs.fulldoc(sheet_no).to_s).parse
-    end
+    xml = cell_name ? @gs.celldoc(sheet_no, cell_name).to_s : @gs.fulldoc(sheet_no).to_s
+    doc = XML::Parser.string(xml).parse
     doc.find("//*[local-name()='entry']").each do |entry|
       key = nil; 
       cell_name = nil;      
@@ -387,33 +398,22 @@ class Google < GenericSpreadsheet
               else
                 value = numericvalue
               end
-            elsif Google.date?(value)
-              ty = :date
-            elsif Google.datetime?(value)
+            elsif datetime?(value)
               ty = :datetime
+            elsif date?(value)
+              ty = :date
             elsif numeric?(value) # or o.class ???
               ty = :float
               value = value.to_f
-            elsif Google.time?(value)
+            elsif time?(value)
               ty = :time
-              value = Google.timestring_to_seconds(value)
+              value = timestring_to_seconds(value)
             else
               ty = :string
             end
             key = "#{row},#{col}"
             @cell[sheet] ||= {} 
-            if ty == :date
-              dd,mm,yyyy = value.split('/')
-              @cell[sheet][key] = sprintf("%04d-%02d-%02d",yyyy.to_i,mm.to_i,dd.to_i)
-            elsif ty == :datetime
-              date_part,time_part = value.split(' ')
-              dd,mm,yyyy = date_part.split('/')
-              hh,mi,ss = time_part.split(':')
-              @cell[sheet][key] = sprintf("%04d-%02d-%02d %02d:%02d:%02d",
-                yyyy.to_i,mm.to_i,dd.to_i,hh.to_i,mi.to_i,ss.to_i)
-            else
-              @cell[sheet][key] = value unless value == "" or value == nil
-            end
+            @cell[sheet][key] = value unless value == "" or value == nil
             @cell_type[sheet][key] = ty # Openoffice.oo_type_2_roo_type(vt)
           end
           @formula[sheet] = {} unless @formula[sheet]
@@ -429,15 +429,6 @@ class Google < GenericSpreadsheet
     string =~ /^[0-9]+[\.]*[0-9]*$/
   end
 
-  # convert string DD/MM/YYYY into a Date-object
-  #TODO: was ist mit verschiedenen Typen der Datumseingabe bei Google?
-  def Google.to_date(string)
-    if string.strip =~ /^([0-9]+)\/([0-9]+)\/([0-9]+)$/
-      return Date.new($3.to_i,$2.to_i,$1.to_i)
-    else
-      return nil
-    end
-  end
 
 
 end # class

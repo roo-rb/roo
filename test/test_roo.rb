@@ -48,7 +48,7 @@ class Test::Unit::TestCase
       return {
         'formula' => 'rt4Pw1WmjxFtyfrqqy94wPw',
         "write.me" => 'r6m7HFlUOwst0RTUTuhQ0Ow',
-        'numbers1' => "r_SR5y7YzonNsGBRLI6CCpg",
+        'numbers1' => "rYraCzjxTtkxw1NxHJgDU8Q",
         'borders' => "r_nLYMft6uWg_PT9Rc2urXw",
         'simple_spreadsheet' => "r3aMMCBCA153TmU_wyIaxfw",
         'testnichtvorhandenBibelbund.ods' => "invalidkeyforanyspreadsheet", # !!! intentionally false key
@@ -139,18 +139,19 @@ class TestRoo < Test::Unit::TestCase
     assert_equal 42*60, 42.minutes
   end
 
+  # Using Date.strptime so check that it's using the method
+  # with the value set in date_format
   def test_date
-    assert Google.date?("21/11/1962")
-    assert_equal Date.new(1962,11,21), Google.to_date("21/11/1962")
-
-    assert !Google.date?("21")
-    assert_nil Google.to_date("21")
-
-    assert !Google.date?("21/11")
-    assert_nil Google.to_date("21/11")
-
-    assert !Google.date?("Mittwoch/21/1961")
-    assert_nil Google.to_date("Mittwoch/21/1961")
+    oo = Google.new(key_of("numbers1"))
+    # should default to  DDMMYYYY
+    assert oo.date?("21/11/1962") == true
+    assert oo.date?("11/21/1962") == false
+    oo.date_format = '%m/%d/%Y'
+    assert oo.date?("21/11/1962") == false
+    assert oo.date?("11/21/1962") == true
+    oo.date_format = '%Y-%m-%d'
+    assert oo.date?("1962-11-21") == true
+    assert oo.date?("1962-21-11") == false
   end
 
   def test_classes
@@ -449,28 +450,20 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 8, oo.cell(2,4)
       assert_equal 9, oo.cell(2,5)
       assert_equal "test", oo.cell(2,6)
-      # assert_equal "string", oo.celltype(2,6)
       assert_equal :string, oo.celltype(2,6)
       assert_equal 11, oo.cell(2,7)
-      # assert_equal "float", oo.celltype(2,7)
       assert_equal :float, oo.celltype(2,7), "Inhalt: --#{oo.cell(2,7)}--"
-
       assert_equal 10, oo.cell(4,1)
       assert_equal 11, oo.cell(4,2)
       assert_equal 12, oo.cell(4,3)
       assert_equal 13, oo.cell(4,4)
       assert_equal 14, oo.cell(4,5)
-
       assert_equal 10, oo.cell(4,'A')
       assert_equal 11, oo.cell(4,'B')
       assert_equal 12, oo.cell(4,'C')
       assert_equal 13, oo.cell(4,'D')
       assert_equal 14, oo.cell(4,'E')
-
-      # assert_equal "date", oo.celltype(5,1)
       assert_equal :date, oo.celltype(5,1)
-      puts oo.cell(5,1)
-      puts oo.cell(5,1).to_s
       assert_equal Date.new(1961,11,21), oo.cell(5,1)
       assert_equal "1961-11-21", oo.cell(5,1).to_s
     end # GOOGLE
@@ -2271,12 +2264,12 @@ class TestRoo < Test::Unit::TestCase
         oo.default_sheet = oo.sheets.first
         assert oo.to_csv("/tmp/numbers1.csv")
         assert File.exists?("/tmp/numbers1.csv")
-        assert_equal "", `diff test/numbers1.csv /tmp/numbers1.csv`
+        assert_equal "", `diff #{File.join(TESTDIR,"numbers1.csv")} /tmp/numbers1.csv`
 
         # bug?, 2008-01-15 from Troy Davis
         assert oo.to_csv("/tmp/numbers1.csv",oo.sheets.first)
         assert File.exists?("/tmp/numbers1.csv")
-        assert_equal "", `diff test/numbers1.csv /tmp/numbers1.csv`
+        assert_equal "", `diff #{File.join(TESTDIR,"numbers1.csv")} /tmp/numbers1.csv`
 
       end # Timeout
       #} # nothing_raised
@@ -3234,6 +3227,7 @@ class TestRoo < Test::Unit::TestCase
       oo = Google.new(key_of("simple_spreadsheet"))
       oo.default_sheet = oo.sheets.first
       oo.header_line = 3
+      oo.date_format = '%m/%d/%Y'
       erg = oo.find(:all, :conditions => {'Comment' => 'Task 1'})
       assert_equal Date.new(2007,05,07), erg[1]['Date']
       assert_equal 10.75       , erg[1]['Start time']
@@ -3429,12 +3423,10 @@ class TestRoo < Test::Unit::TestCase
       }
     end
     if GOOGLE
-      after Date.new(2009,1,15) do
-        assert_raise(IOError) {
-          # oo = Google.new(key_of('testnichtvorhanden'+'Bibelbund.ods'))
-          oo = Google.new('testnichtvorhanden')
-        }
-      end
+ #     assert_raise(Net::HTTPServerException) {
+        # oo = Google.new(key_of('testnichtvorhanden'+'Bibelbund.ods'))
+#        oo = Google.new('testnichtvorhanden')
+#      }
     end
   end
   
@@ -3483,7 +3475,7 @@ class TestRoo < Test::Unit::TestCase
     if GOOGLE
       random_row = rand(10)+1
       random_column = rand(10)+1
-      oo = Google.new('ptu6bbahNZpY0N0RrxQbWdw')
+      oo = Google.new(key_of('write.me'))
       oo.default_sheet = oo.sheets.first
       content1 = 'ABC'
       content2 = 'DEF'
@@ -3710,7 +3702,7 @@ Sheet 3:
       oo.default_sheet = oo.sheets.first
       assert oo.to_csv("/tmp/time-test.csv")
       assert File.exists?("/tmp/time-test.csv")
-      assert_equal "", `diff test/time-test.csv /tmp/time-test.csv`
+      assert_equal "", `diff #{File.join(TESTDIR,"time-test.csv")} /tmp/time-test.csv`
     end # GOOGLE
   end
 
@@ -4645,7 +4637,7 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   end
 
   def do_datetime_tests(oo)
-    val = oo.cell('c',3)
+     val = oo.cell('c',3)
     assert_kind_of DateTime, val
     assert_equal :datetime, oo.celltype('c',3)
     assert_equal DateTime.new(1961,11,21,12,17,18), val
