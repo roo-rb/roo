@@ -119,10 +119,10 @@ end
 class TestRoo < Test::Unit::TestCase
 
   OPENOFFICE   = true  	# do Openoffice-Spreadsheet Tests?
-  EXCEL        = false	  # do Excel Tests?
-  GOOGLE       = true 	# do Google-Spreadsheet Tests?
+  EXCEL        = true	  # do Excel Tests?
+  GOOGLE       = false 	# do Google-Spreadsheet Tests?
   GNUMERIC_ODS = false  # do gnumeric with ods files Tests?
-  EXCELX       = false  	# do Excel-X Tests? (.xlsx-files)
+  EXCELX       = true  	# do Excel-X Tests? (.xlsx-files)
 
   OPENOFFICEWRITE = false # experimental: write access with OO-Documents
   ONLINE = true
