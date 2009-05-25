@@ -142,16 +142,18 @@ class TestRoo < Test::Unit::TestCase
   # Using Date.strptime so check that it's using the method
   # with the value set in date_format
   def test_date
-    oo = Google.new(key_of("numbers1"))
-    # should default to  DDMMYYYY
-    assert oo.date?("21/11/1962") == true
-    assert oo.date?("11/21/1962") == false
-    oo.date_format = '%m/%d/%Y'
-    assert oo.date?("21/11/1962") == false
-    assert oo.date?("11/21/1962") == true
-    oo.date_format = '%Y-%m-%d'
-    assert oo.date?("1962-11-21") == true
-    assert oo.date?("1962-21-11") == false
+    if GOOGLE
+      oo = Google.new(key_of("numbers1"))
+      # should default to  DDMMYYYY
+      assert oo.date?("21/11/1962") == true
+      assert oo.date?("11/21/1962") == false
+      oo.date_format = '%m/%d/%Y'
+      assert oo.date?("21/11/1962") == false
+      assert oo.date?("11/21/1962") == true
+      oo.date_format = '%Y-%m-%d'
+      assert oo.date?("1962-11-21") == true
+      assert oo.date?("1962-21-11") == false
+    end
   end
 
   def test_classes
