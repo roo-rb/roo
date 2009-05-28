@@ -113,6 +113,7 @@ class Google < GenericSpreadsheet
     @time_format = '%H:%M:%S'
     @gs = GData::Spreadsheet.new(spreadsheetkey)
     @gs.authenticate(user, password)
+    @sheetlist = @gs.sheetlist
     #-- ----------------------------------------------------------------------
     #-- TODO: Behandlung von Berechtigungen hier noch einbauen ???
     #-- ----------------------------------------------------------------------
@@ -124,7 +125,7 @@ class Google < GenericSpreadsheet
 
   # returns an array of sheet names in the spreadsheet
   def sheets
-    return @gs.sheetlist
+    @sheetlist
   end
 
   def date?(string)
