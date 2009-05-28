@@ -165,7 +165,6 @@ class Excelx < GenericSpreadsheet
       yyyy,mm,dd = date_part.split('-')
       hh,mi,ss = time_part.split(':')
       return DateTime.civil(yyyy.to_i,mm.to_i,dd.to_i,hh.to_i,mi.to_i,ss.to_i)
-      
     end
     @cell[sheet][[row,col]]
   end

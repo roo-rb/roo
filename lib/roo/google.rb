@@ -73,12 +73,6 @@ XML
       return doc
     end
 
-    def celldoc(sheet_no, cell_name)
-      path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/private/full" + cell_name
-      doc = Hpricot(request(path))
-      return doc
-    end
-
   end # class
 end # module
 
@@ -98,9 +92,8 @@ class Google < GenericSpreadsheet
       password = ENV['GOOGLE_PASSWORD']
     end
     @default_sheet = nil
-    @cell = Hash.new
-    @cell_name = Hash.new
-    @cell_type = Hash.new
+    @cell = Hash.new {|h,k| h[k]=Hash.new}
+    @cell_type = Hash.new {|h,k| h[k]=Hash.new}
     @formula = Hash.new
     @first_row = Hash.new
     @last_row = Hash.new
@@ -129,8 +122,6 @@ class Google < GenericSpreadsheet
   end
 
   def date?(string)
-    return false if string.class == Float
-    return true if string.class == Date
     begin
       Date.strptime(string, @date_format)
       true
@@ -141,8 +132,6 @@ class Google < GenericSpreadsheet
 
   # is String a time with format HH:MM:SS?
   def time?(string)
-    return false if string.class == Float
-    return true if string.class == Date
     begin
       DateTime.strptime(string, @time_format)
       true
@@ -152,14 +141,16 @@ class Google < GenericSpreadsheet
   end
 
   def datetime?(string)
-    return false if string.class == Float
-    return true if string.class == Date
     begin
       DateTime.strptime(string, @datetime_format)
       true
     rescue
       false
     end
+  end
+
+  def numeric?(string)
+    string =~ /^[0-9]+[\.]*[0-9]*$/
   end
 
   def timestring_to_seconds(value)
@@ -314,9 +305,11 @@ class Google < GenericSpreadsheet
     row,col = normalize(row,col)
     @gs.add_to_cell_roo(row,col,value,sheet_no)
     # re-read the portion of the document that has changed
-    if @cells_read[sheet] 
-      cell_name = @cell_name[sheet]["#{row},#{col}"] 
-      read_cells(sheet, cell_name) 
+    if @cells_read[sheet]
+      key = "#{row},#{col}"
+      (value, value_type) = determine_datatype(value.to_s)
+      @cell[sheet][key] = value 
+      @cell_type[sheet][key] = value_type 
     end
   end
   
@@ -362,74 +355,60 @@ class Google < GenericSpreadsheet
 
   private
 
-  # read all cells in a sheet. if the cell_name is 
-  # specified, only return the XML pertaining to that cell
-  def read_cells(sheet=nil, cell_name=nil)
+  # read all cells in a sheet. 
+  def read_cells(sheet=nil)
     sheet = @default_sheet unless sheet
     raise RangeError, "illegal sheet <#{sheet}>" unless sheets.index(sheet)
     sheet_no = sheets.index(sheet)+1
-    @cell_name[sheet] ||= {}
-    xml = cell_name ? @gs.celldoc(sheet_no, cell_name).to_s : @gs.fulldoc(sheet_no).to_s
+    xml = @gs.fulldoc(sheet_no).to_s
     doc = XML::Parser.string(xml).parse
     doc.find("//*[local-name()='entry']").each do |entry|
       key = nil; 
-      cell_name = nil;      
       entry.each do |element|
         next unless element.name == 'category'
-        cell_name = nil
         element.each do |item|
-          case item.name
-          when 'link'
-            cell_name = item['href'][/\/R\d+C\d+/] if item['rel'] == 'self'
-          when 'cell'
+          if item.name == 'cell'
             row = item['row']
             col = item['col']
-            value =  item['inputvalue'] ||  item['inputValue'] 
-            numericvalue = item['numericvalue']  ||  item['numericValue'] 
-            if value[0,1] == '='
-              formula = value
-            else
-              formula = nil
-            end
-            @cell_type[sheet] ||= {} 
-            if formula
-              ty = :formula
-              if numeric?(numericvalue)
-                value = numericvalue.to_f
-              else
-                value = numericvalue
-              end
-            elsif datetime?(value)
-              ty = :datetime
-            elsif date?(value)
-              ty = :date
-            elsif numeric?(value) # or o.class ???
-              ty = :float
-              value = value.to_f
-            elsif time?(value)
-              ty = :time
-              value = timestring_to_seconds(value)
-            else
-              ty = :string
-            end
             key = "#{row},#{col}"
-            @cell[sheet] ||= {} 
+            string_value =  item['inputvalue'] ||  item['inputValue'] 
+            numeric_value = item['numericvalue']  ||  item['numericValue'] 
+            (value, value_type) = determine_datatype(string_value, numeric_value)
             @cell[sheet][key] = value unless value == "" or value == nil
-            @cell_type[sheet][key] = ty # Openoffice.oo_type_2_roo_type(vt)
+            @cell_type[sheet][key] = value_type 
           end
           @formula[sheet] = {} unless @formula[sheet]
-          @formula[sheet][key] = formula  if formula
+          @formula[sheet][key] = string_value if value_type == :formula
         end
       end
-      @cell_name[sheet][key] = cell_name if cell_name && key
     end  
     @cells_read[sheet] = true
   end
-
-  def numeric?(string)
-    string =~ /^[0-9]+[\.]*[0-9]*$/
+  
+  def determine_datatype(val, numval=nil)
+    if val[0,1] == '='
+      ty = :formula
+      if numeric?(numval)
+        val = numval.to_f
+      else
+        val = numval
+      end
+    else
+      if datetime?(val)
+        ty = :datetime
+      elsif date?(val)
+        ty = :date
+      elsif numeric?(val) 
+        ty = :float
+        val = val.to_f
+      elsif time?(val)
+        ty = :time
+        val = timestring_to_seconds(val)
+      else
+        ty = :string
+      end
+    end  
+    return val, ty 
   end
-
-
-
+  
 end # class
