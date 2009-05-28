@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{roo}
-  s.version = "1.3.2"
+  s.version = "1.3.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Hugh McGowan", "Thomas Preymesser"]
-  s.date = %q{2009-05-25}
+  s.date = %q{2009-05-28}
   s.description = %q{roo can access the contents of OpenOffice-, Excel- or Google-Spreadsheets}
   s.email = %q{hugh_mcgowan@yahoo.com}
   s.extra_rdoc_files = ["README.markdown", "History.txt"]
