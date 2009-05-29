@@ -362,26 +362,18 @@ class Google < GenericSpreadsheet
     sheet_no = sheets.index(sheet)+1
     xml = @gs.fulldoc(sheet_no).to_s
     doc = XML::Parser.string(xml).parse
-    doc.find("//*[local-name()='entry']").each do |entry|
-      key = nil; 
-      entry.each do |element|
-        next unless element.name == 'category'
-        element.each do |item|
-          if item.name == 'cell'
-            row = item['row']
-            col = item['col']
-            key = "#{row},#{col}"
-            string_value =  item['inputvalue'] ||  item['inputValue'] 
-            numeric_value = item['numericvalue']  ||  item['numericValue'] 
-            (value, value_type) = determine_datatype(string_value, numeric_value)
-            @cell[sheet][key] = value unless value == "" or value == nil
-            @cell_type[sheet][key] = value_type 
-          end
-          @formula[sheet] = {} unless @formula[sheet]
-          @formula[sheet][key] = string_value if value_type == :formula
-        end
-      end
-    end  
+    doc.find("//*[local-name()='cell']").each do |item|
+      row = item['row']
+      col = item['col']
+      key = "#{row},#{col}"
+      string_value =  item['inputvalue'] ||  item['inputValue'] 
+      numeric_value = item['numericvalue']  ||  item['numericValue'] 
+      (value, value_type) = determine_datatype(string_value, numeric_value)
+      @cell[sheet][key] = value unless value == "" or value == nil
+      @cell_type[sheet][key] = value_type 
+      @formula[sheet] = {} unless @formula[sheet]
+      @formula[sheet][key] = string_value if value_type == :formula
+    end
     @cells_read[sheet] = true
   end
   
