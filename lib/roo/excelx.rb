@@ -1,6 +1,3 @@
-
-require 'rubygems'
-gem 'libxml-ruby', '>= 0.8.3'
 require 'xml'
 require 'fileutils'
 require 'zip/zipfilesystem'

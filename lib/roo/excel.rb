@@ -1,5 +1,3 @@
-require 'rubygems'
-gem 'spreadsheet', '>= 0.6.3.1'
 require 'spreadsheet'
 CHARGUESS = begin
   require 'charguess'

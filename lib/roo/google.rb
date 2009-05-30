@@ -1,5 +1,4 @@
 require 'gdata/spreadsheet'
-gem 'libxml-ruby', '>= 0.8.3'
 require 'xml'
 
 # overwrite some methods from the gdata-gem:
