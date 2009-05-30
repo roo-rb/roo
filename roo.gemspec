@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{roo}
-  s.version = "1.3.4"
+  s.version = "1.3.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Hugh McGowan", "Thomas Preymesser"]
@@ -25,18 +25,21 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<spreadsheet>, [">= 0.6.3.1"])
       s.add_runtime_dependency(%q<rubyzip>, [">= 0.9.1"])
-      s.add_runtime_dependency(%q<hpricot>, [">= 0.5"])
-      s.add_runtime_dependency(%q<GData>, [">= 0.0.3"])
+      s.add_runtime_dependency(%q<hpricot>, [">= 0.6"])
+      s.add_runtime_dependency(%q<GData>, [">= 0.0.4"])
+      s.add_runtime_dependency(%q<libxml-ruby>, [">= 1.1.3"])
     else
       s.add_dependency(%q<spreadsheet>, [">= 0.6.3.1"])
       s.add_dependency(%q<rubyzip>, [">= 0.9.1"])
-      s.add_dependency(%q<hpricot>, [">= 0.5"])
-      s.add_dependency(%q<GData>, [">= 0.0.3"])
+      s.add_dependency(%q<hpricot>, [">= 0.6"])
+      s.add_dependency(%q<GData>, [">= 0.0.4"])
+      s.add_dependency(%q<libxml-ruby>, [">= 1.1.3"])
     end
   else
     s.add_dependency(%q<spreadsheet>, [">= 0.6.3.1"])
     s.add_dependency(%q<rubyzip>, [">= 0.9.1"])
-    s.add_dependency(%q<hpricot>, [">= 0.5"])
-    s.add_dependency(%q<GData>, [">= 0.0.3"])
+    s.add_dependency(%q<hpricot>, [">= 0.6"])
+    s.add_dependency(%q<GData>, [">= 0.0.4"])
+    s.add_dependency(%q<libxml-ruby>, [">= 1.1.3"])
   end
 end
