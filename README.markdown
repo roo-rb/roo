@@ -35,7 +35,7 @@
     s.cell(1,'A',s.sheets[0])                   # same cell
 
     # almost all methods have an optional argument 'sheet'.
-    # If this parameter is ommitted, the default_sheet will be used.
+    # If this parameter is omitted, the default_sheet will be used.
     
     s.info                                      # prints infos about the spreadsheet file
 
@@ -43,6 +43,12 @@
     s.last_row                                  # the number of the last row
     s.first_column                              # the number of the first column
     s.last_column                               # the number of the last column
+
+    # limited font information is available
+
+    s.font(1,1).bold?
+    s.font(1,1).italic?
+    s.font(1,1).underline?
 
 
 see http://roo.rubyforge.org for a more complete tutorial
