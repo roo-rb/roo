@@ -1,6 +1,6 @@
 # README for Roo
 
-This is now the official roo repository and I'll be making a release on RubyForge in the next few weeks.  
+1.3.5 is now available on Rubyforge. You can install the official release with 'gem install roo' or refer to the installation instructions below for the latest development gem. 
 
 
 ## Installation
