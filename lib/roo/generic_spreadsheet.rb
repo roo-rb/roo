@@ -258,18 +258,8 @@ class GenericSpreadsheet
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
     result = []
-    tmp_arr = []
-    @cell[sheet].each_pair {|key,value|
-      y,x = key # _to_string(key).split(',')
-      x = x.to_i
-      y = y.to_i
-      if y == rownumber
-        tmp_arr[x] = value
-      end
-    }
-    result = tmp_arr[1..-1]
-    while result && result[-1] == nil
-      result = result[0..-2]
+    first_column(sheet).upto(last_column(sheet)) do |col|
+      result << cell(rownumber,col,sheet)
     end
     result
   end
