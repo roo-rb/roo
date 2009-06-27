@@ -10,10 +10,13 @@
 #
 
 
-
 #TODO
 # Look at formulas
 # Look at these before/after dates (seems unnecessary)
+
+# Dump warnings that come from the test to open files
+# with the wrong spreadsheet class
+STDERR.reopen "/dev/null","w"
 
 TESTDIR =  File.dirname(__FILE__) 
 require TESTDIR + '/test_helper.rb'
