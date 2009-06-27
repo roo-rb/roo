@@ -264,7 +264,6 @@ class TestRoo < Test::Unit::TestCase
       assert_equal "tata", oo.cell('A',6)
       assert_equal "tata", oo.cell(6,'a')
       assert_equal "tata", oo.cell('a',6)
-
       assert_raise(ArgumentError) {
         assert_equal "tata", oo.cell('a','f')
       }
@@ -1900,7 +1899,6 @@ Sheet 3:
     end
   end
 
-
   def test_bug_simple_spreadsheet_time_bug
     # really a bug? are cells really of type time?
     # No! :float must be the correct type
@@ -2093,7 +2091,7 @@ Sheet 3:
   end  
 
 # Need to extend to other formats
-  def test_row_values
+  def test_row_whitespace
     with_each_spreadsheet(:name=>'row_col', :format=>:openoffice) do |oo|    
       oo.default_sheet = "Sheet1"
       assert_equal [nil, nil, nil, nil, nil, nil], oo.row(1)
@@ -2109,7 +2107,7 @@ Sheet 3:
     end
   end
   
-  def verify_col_values(oo)
+  def test_col_whitespace
     with_each_spreadsheet(:name=>'row_col', :format=>:openoffice) do |oo|    
       oo.default_sheet = "Sheet1"
       assert_equal ["Date", Date.new(2007,5,7), nil, Date.new(2007,5,7)], oo.column(1)
@@ -2127,38 +2125,20 @@ Sheet 3:
     end
   end
   
-  # def test_white_space
-  #   if OPENOFFICE
-  #     oo = Openoffice.new(File.join(TESTDIR,"whitespace.ods"))
-  #     oo.default_sheet = "Sheet1"
-  #     assert_equal [], oo.row(1)
-  #     assert_equal [], oo.row(2)
-  #     assert_equal ["Date", "Start time", "End time", "Pause", "Sum", "Comment"], oo.row(3)
-  #     assert_equal [Date.new(2007,5,7), 9.25, 10.25, 0.0, 1.0, "Task 1"], oo.row(4)
-  #     assert_equal [], oo.row(5)
-  #     assert_equal [Date.new(2007,5,7), 10.75, 10.75, 0.0, 0.0, "Task 1"], oo.row(6)
-  #     oo.default_sheet = "Sheet2"
-  #     assert_equal [nil, nil, nil], oo.column(1)
-  #     assert_equal [nil, nil, nil], oo.column(2)
-  #     assert_equal ["Date", Date.new(2007,5,7), Date.new(2007,5,7)], oo.column(3)
-  #     assert_equal [nil, nil, nil], oo.column(4)
-  #     assert_equal [ "Start time", 9.25, 10.75], oo.column(5)
-  #     
-  #   end
-  # end
-  # def test_invlaid_dates
-  #      if EXCEL
-  #         oo = Excel.new(File.join(TESTDIR,"invalid_dates2.xls"))
-  #         oo.default_sheet = oo.sheets.first
-  #         puts oo.cell(1,1)
-  #         puts oo.celltype(1,1)
-  #        oo = Excel.new(File.join(TESTDIR,"datetime.xls"))
-  #        oo.default_sheet = oo.sheets.first
-  #       puts oo.cell('c',9)
-  #       puts oo.celltype('c',9)
-  #      end
-  #    end
+  # Excel has two base date formats one from 1900 and the other from 1904. 
+  # There's a MS bug that 1900 base dates include an extra day due to erroneously
+  # including 1900 as a leap yar. 
+  def test_base_dates_in_excel
+    with_each_spreadsheet(:name=>'1900_base', :format=>:excel) do |oo|    
+      oo.default_sheet = oo.sheets.first
+      assert_equal Date.new(2009,06,15), oo.cell(1,1)
+      assert_equal :date, oo.celltype(1,1)
+    end  
+    with_each_spreadsheet(:name=>'1904_base', :format=>:excel) do |oo|    
+      oo.default_sheet = oo.sheets.first
+      assert_equal Date.new(2009,06,15), oo.cell(1,1)
+      assert_equal :date, oo.celltype(1,1)
+    end  
+  end
    
-  
-
 end # class

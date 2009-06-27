@@ -6,6 +6,25 @@ rescue LoadError => e
   false
 end
 
+# The Spreadsheet library has a bug in handling Excel 
+# base dates so if the file is a 1904 base date then 
+# dates are off by a day. 1900 base dates work fine
+module Spreadsheet
+  module Excel
+    class Row < Spreadsheet::Row
+      def _date data # :nodoc:
+        return data if data.is_a?(Date)
+        date = @worksheet.date_base + data.to_i
+        if LEAP_ERROR > @worksheet.date_base
+          date -= 1
+        end
+        date
+      end
+    end
+  end
+end
+
+
 # ruby-spreadsheet has a font object so we're extending it 
 # with our own functionality but still providing full access
 # to the user for other font information
