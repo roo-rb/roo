@@ -1,6 +1,6 @@
 # README for Roo
 
-This is now the official roo repository and I'll be making a release on RubyForge in the next few weeks.  
+1.3.5 is now available on Rubyforge. You can install the official release with 'gem install roo' or refer to the installation instructions below for the latest development gem. 
 
 
 ## Installation
@@ -35,7 +35,7 @@ This is now the official roo repository and I'll be making a release on RubyForg
     s.cell(1,'A',s.sheets[0])                   # same cell
 
     # almost all methods have an optional argument 'sheet'.
-    # If this parameter is ommitted, the default_sheet will be used.
+    # If this parameter is omitted, the default_sheet will be used.
     
     s.info                                      # prints infos about the spreadsheet file
 
@@ -43,6 +43,12 @@ This is now the official roo repository and I'll be making a release on RubyForg
     s.last_row                                  # the number of the last row
     s.first_column                              # the number of the first column
     s.last_column                               # the number of the last column
+
+    # limited font information is available
+
+    s.font(1,1).bold?
+    s.font(1,1).italic?
+    s.font(1,1).underline?
 
 
 see http://roo.rubyforge.org for a more complete tutorial
