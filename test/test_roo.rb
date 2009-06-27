@@ -2092,7 +2092,7 @@ Sheet 3:
 
 # Need to extend to other formats
   def test_row_whitespace
-    with_each_spreadsheet(:name=>'row_col', :format=>:openoffice) do |oo|    
+    with_each_spreadsheet(:name=>'whitespace', :format=>:openoffice) do |oo|    
       oo.default_sheet = "Sheet1"
       assert_equal [nil, nil, nil, nil, nil, nil], oo.row(1)
       assert_equal [nil, nil, nil, nil, nil, nil], oo.row(2)
@@ -2108,7 +2108,7 @@ Sheet 3:
   end
   
   def test_col_whitespace
-    with_each_spreadsheet(:name=>'row_col', :format=>:openoffice) do |oo|    
+    with_each_spreadsheet(:name=>'whitespace', :format=>:openoffice) do |oo|    
       oo.default_sheet = "Sheet1"
       assert_equal ["Date", Date.new(2007,5,7), nil, Date.new(2007,5,7)], oo.column(1)
       assert_equal ["Start time", 9.25, nil, 10.75], oo.column(2)
