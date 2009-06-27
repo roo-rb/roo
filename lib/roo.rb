@@ -1,4 +1,22 @@
 module Roo
+  class Spreadsheet
+    class << self
+      def open(file)
+        case File.extname(file)
+        when '.xls'
+          Excel.new(file)
+        when '.xlsx'
+          Excelx.new(file)
+        when '.ods'
+          Openoffice.new(file)
+        when ''
+          Google.new(file)
+        else
+          raise ArgumentError, "Don't know how to open file #{filename}"
+        end      
+      end
+    end
+  end
 end
 
 require 'roo/version'
