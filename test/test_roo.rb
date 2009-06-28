@@ -64,6 +64,7 @@ class Test::Unit::TestCase
         "only_one_sheet" => "rqRtkcPJ97nhQ0m9ksDw2rA",
         'time-test' => 'r2XfDBJMrLPjmuLrPQQrEYw',
         'datetime' => "r2kQpXWr6xOSUpw9MyXavYg",
+        'whitespace' => "rZyQaoFebVGeHKzjG6e9gRQ"
       }[spreadsheetname]
         # 'numbers1' => "o10837434939102457526.4784396906364855777",
         # 'borders' => "o10837434939102457526.664868920231926255",
@@ -1076,11 +1077,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_to_csv
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      if oo.class == Excel
-        master = "#{TESTDIR}/numbers1_excel.csv"
-      else    
-        master = "#{TESTDIR}/numbers1.csv"
-      end
+      master = "#{TESTDIR}/numbers1.csv"
       File.delete_if_exist("/tmp/numbers1.csv")
       oo.default_sheet = oo.sheets.first if oo.class == Google
       assert oo.to_csv("/tmp/numbers1.csv",oo.sheets.first)
@@ -1365,20 +1362,13 @@ class TestRoo < Test::Unit::TestCase
     end
   end
   
+  # Ruby-spreadsheet now allows us to at least give the current value 
+  # from a cell with a formula (no possible with parseexcel)
   def test_bug_false_borders_with_formulas
     with_each_spreadsheet(:name=>'false_encoding', :format=>:excel) do |oo|
       after Date.new(2008,9,15) do
         oo.default_sheet = oo.sheets.first
-        #assert_equal 1, oo.first_row
-=begin
-  korrigiert auf Zeile 2. Zeile 1 enthaelt nur Formeln, die in parseexcel nicht
-  ausgewertet werden koennen. D. h. der Nutzer hat keinen Vorteil davon, wenn
-  er von Zeile 1 ab iterieren kann, da er auf die Formeln sowieso nicht zugreifen
-  kann. Ideal waere aber noch eine Loesung, die auch diese Zeilen bei Excel
-  als nichtleere Zeile liefert.
-  TODO:
-=end
-        assert_equal 2, oo.first_row
+        assert_equal 1, oo.first_row
         assert_equal 3, oo.last_row
         assert_equal 1, oo.first_column
         assert_equal 4, oo.last_column
@@ -2095,7 +2085,7 @@ Sheet 3:
 
 # Need to extend to other formats
   def test_row_whitespace
-    with_each_spreadsheet(:name=>'whitespace', :format=>:openoffice) do |oo|    
+    with_each_spreadsheet(:name=>'whitespace') do |oo| 
       oo.default_sheet = "Sheet1"
       assert_equal [nil, nil, nil, nil, nil, nil], oo.row(1)
       assert_equal [nil, nil, nil, nil, nil, nil], oo.row(2)
@@ -2111,7 +2101,7 @@ Sheet 3:
   end
   
   def test_col_whitespace
-    with_each_spreadsheet(:name=>'whitespace', :format=>:openoffice) do |oo|    
+    with_each_spreadsheet(:name=>'whitespace') do |oo|    
       oo.default_sheet = "Sheet1"
       assert_equal ["Date", Date.new(2007,5,7), nil, Date.new(2007,5,7)], oo.column(1)
       assert_equal ["Start time", 9.25, nil, 10.75], oo.column(2)
