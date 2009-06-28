@@ -241,28 +241,6 @@ class Google < GenericSpreadsheet
     theformulas
   end
 
-  # returns all values in this row as an array
-  # row numbers are 1,2,3,... like in the spreadsheet
-  def row(rownumber,sheet=nil)
-    sheet = @default_sheet unless sheet
-    read_cells(sheet) unless @cells_read[sheet]
-    result = []
-    tmp_arr = []
-    @cell[sheet].each_pair {|key,value|
-      y,x = key.split(',')
-      x = x.to_i
-      y = y.to_i
-      if y == rownumber
-        tmp_arr[x] = value
-      end
-    }
-    result = tmp_arr[1..-1]
-    while result[-1] == nil
-      result = result[0..-2]
-    end
-    result
-  end
-
   # true, if the cell is empty
   def empty?(row, col, sheet=nil)
     value = cell(row, col, sheet)
@@ -271,23 +249,6 @@ class Google < GenericSpreadsheet
     return false if value.class == Float
     return false if celltype(row,col,sheet) == :time
     value.empty?
-  end
-
-  # returns all values in this column as an array
-  # column numbers are 1,2,3,... like in the spreadsheet
-  #--
-  #TODO: refactoring nach GenericSpreadsheet?
-  def column(columnnumber, sheet=nil)
-    if columnnumber.class == String
-      columnnumber = GenericSpreadsheet.letter_to_number(columnnumber)
-    end
-    sheet = @default_sheet unless sheet
-    read_cells(sheet) unless @cells_read[sheet]
-    result = []
-    first_row(sheet).upto(last_row(sheet)) do |row|
-      result << cell(row,columnnumber,sheet)
-    end
-    result
   end
 
   # sets the cell to the content of 'value'
