@@ -374,7 +374,7 @@ class Excel < GenericSpreadsheet
       (0..row.size).each do |cell_index|
         cell = row.at(cell_index)
         next if cell.nil?  #skip empty cells
-        next if cell.class == Spreadsheet::Formula
+        next if cell.class == Spreadsheet::Formula && cell.value.nil? # skip empty formla cells
         if date_or_time?(row, cell_index)
           vt, v = read_cell_date_or_time(row, cell_index)
         else
@@ -438,6 +438,7 @@ class Excel < GenericSpreadsheet
   # return the values for Roo
   def read_cell(row, idx)
     cell = row.at(idx)
+    cell = cell.value if cell.class == Spreadsheet::Formula
     case cell
     when Float, Integer, Fixnum, Bignum 
       value_type = :float
