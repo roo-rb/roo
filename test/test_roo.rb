@@ -11,9 +11,8 @@
 
 
 #TODO
-# Look at formulas
-# Look at these before/after dates (seems unnecessary)
-# can now remove default_sheet always needing to be set
+# Look at formulas in excel - does not work with date/time
+
 
 # Dump warnings that come from the test to open files
 # with the wrong spreadsheet class
@@ -131,7 +130,7 @@ class TestRoo < Test::Unit::TestCase
 
   OPENOFFICE   = true  	# do Openoffice-Spreadsheet Tests?
   EXCEL        = true	  # do Excel Tests?
-  GOOGLE       = false 	# do Google-Spreadsheet Tests?
+  GOOGLE       = true 	# do Google-Spreadsheet Tests?
   EXCELX       = true  	# do Excel-X Tests? (.xlsx-files)
 
   ONLINE = true
@@ -208,13 +207,8 @@ class TestRoo < Test::Unit::TestCase
   def test_sheets
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       assert_equal ["Tabelle1","Name of Sheet 2","Sheet3","Sheet4","Sheet5"], oo.sheets
-      assert_raise(RangeError) {
-        oo.default_sheet = "no_sheet"
-      }
-      assert_raise(TypeError) {
-        oo.default_sheet = [1,2,3]
-      }
-
+      assert_raise(RangeError) { oo.default_sheet = "no_sheet" }
+      assert_raise(TypeError)  { oo.default_sheet = [1,2,3] }
       oo.sheets.each { |sh|
         oo.default_sheet = sh
         assert_equal sh, oo.default_sheet
@@ -224,7 +218,6 @@ class TestRoo < Test::Unit::TestCase
   
   def test_cells
     with_each_spreadsheet(:name=>'numbers1') do |oo| 
-      oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.cell(1,1)
       assert_equal 2, oo.cell(1,2)
       assert_equal 3, oo.cell(1,3)
@@ -256,31 +249,24 @@ class TestRoo < Test::Unit::TestCase
   
   def test_celltype
     with_each_spreadsheet(:name=>'numbers1') do |oo| 
-      oo.default_sheet = oo.sheets.first
       assert_equal :string, oo.celltype(2,6)
     end  
   end
 
   def test_cell_address
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
       assert_equal "tata", oo.cell(6,1)
       assert_equal "tata", oo.cell(6,'A')
       assert_equal "tata", oo.cell('A',6)
       assert_equal "tata", oo.cell(6,'a')
       assert_equal "tata", oo.cell('a',6)
-      assert_raise(ArgumentError) {
-        assert_equal "tata", oo.cell('a','f')
-      }
-      assert_raise(ArgumentError) {
-        assert_equal "tata", oo.cell('f','a')
-      }
+      assert_raise(ArgumentError) { assert_equal "tata", oo.cell('a','f') }
+      assert_raise(ArgumentError) { assert_equal "tata", oo.cell('f','a') }
       assert_equal "thisisc8", oo.cell(8,3)
       assert_equal "thisisc8", oo.cell(8,'C')
       assert_equal "thisisc8", oo.cell('C',8)
       assert_equal "thisisc8", oo.cell(8,'c')
       assert_equal "thisisc8", oo.cell('c',8)
-
       assert_equal "thisisd9", oo.cell('d',9)
       assert_equal "thisisa11", oo.cell('a',11)
     end
@@ -295,7 +281,6 @@ class TestRoo < Test::Unit::TestCase
   #TODO: inkonsequente Lieferung Fixnum/Float
   def test_rows
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
       assert_equal 41, oo.cell('a',12)
       assert_equal 42, oo.cell('b',12)
       assert_equal 43, oo.cell('c',12)
@@ -313,42 +298,36 @@ class TestRoo < Test::Unit::TestCase
 
   def test_last_row
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
       assert_equal 18, oo.last_row
     end
   end
 
   def test_last_column
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
       assert_equal 7, oo.last_column
     end
   end
 
   def test_last_column_as_letter
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
       assert_equal 'G', oo.last_column_as_letter
     end
   end
 
   def test_first_row
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.first_row
     end
   end
 
   def test_first_column
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.first_column
     end
   end
 
   def test_first_column_as_letter
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
       assert_equal 'A', oo.first_column_as_letter
     end
   end
@@ -357,9 +336,7 @@ class TestRoo < Test::Unit::TestCase
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       oo.default_sheet = "Name of Sheet 2"
       assert_equal 'I am sheet 2', oo.cell('C',5)
-      assert_raise(RangeError) {
-        oo.default_sheet = "non existing sheet name"
-      }
+      assert_raise(RangeError) { oo.default_sheet = "non existing sheet name" }
       assert_raise(RangeError) { oo.default_sheet = "non existing sheet name" }
       assert_raise(RangeError) { dummy = oo.cell('C',5,"non existing sheet name")}
       assert_raise(RangeError) { dummy = oo.celltype('C',5,"non existing sheet name")}
@@ -401,20 +378,12 @@ class TestRoo < Test::Unit::TestCase
 
   def test_argument_error
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      before Date.new(2007,7,20) do
-        assert_raise(ArgumentError) {
-          oo.default_sheet = "Tabelle1"
-        }
-      end
-      assert_nothing_raised(ArgumentError) {
-        oo.default_sheet = "Tabelle1"
-      }
+      assert_nothing_raised(ArgumentError) {  oo.default_sheet = "Tabelle1" }
     end
   end
 
   def test_empty_eh
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
       assert oo.empty?('a',14)
       assert ! oo.empty?('a',15)
       assert oo.empty?('a',20)
@@ -423,7 +392,6 @@ class TestRoo < Test::Unit::TestCase
 
   def test_reload
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
       assert_equal 1, oo.cell(1,1)
       oo.reload
       assert_equal 1, oo.cell(1,1)
@@ -452,44 +420,24 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  #2008-01-30  #local_only
   def test_italo_table
-    with_each_spreadsheet(:name=>'simple_spreadsheet_from_italo', :format=>:openoffice) do |oo|
-      oo.default_sheet = oo.sheets.first
-
+    with_each_spreadsheet(:name=>'simple_spreadsheet_from_italo', :format=>[:openoffice, :excel]) do |oo|
       assert_equal  '1', oo.cell('A',1)
       assert_equal  '1', oo.cell('B',1)
       assert_equal  '1', oo.cell('C',1)
-
-      # assert_equal  1, oo.cell('A',2)
-      # assert_equal  2, oo.cell('B',2)
-      # assert_equal  1, oo.cell('C',2)
-      # are stored as strings, not numbers
-
       assert_equal  1, oo.cell('A',2).to_i
       assert_equal  2, oo.cell('B',2).to_i
       assert_equal  1, oo.cell('C',2).to_i
-
       assert_equal  1, oo.cell('A',3)
       assert_equal  3, oo.cell('B',3)
       assert_equal  1, oo.cell('C',3)
-
       assert_equal  'A', oo.cell('A',4)
       assert_equal  'A', oo.cell('B',4)
       assert_equal  'A', oo.cell('C',4)
-
-      # assert_equal  '0.01', oo.cell('A',5)
-      # assert_equal  '0.01', oo.cell('B',5)
-      # assert_equal  '0.01', oo.cell('C',5)
-      #
       assert_equal  0.01, oo.cell('A',5)
       assert_equal  0.01, oo.cell('B',5)
       assert_equal  0.01, oo.cell('C',5)
-
       assert_equal 0.03, oo.cell('a',5)+oo.cell('b',5)+oo.cell('c',5)
-
-
-      #   1.0
 
       # Cells values in row 1:
       assert_equal "1:string", oo.cell(1, 1)+":"+oo.celltype(1, 1).to_s
@@ -512,86 +460,20 @@ class TestRoo < Test::Unit::TestCase
       assert_equal "A:string",oo.cell(4, 3)+":"+oo.celltype(4, 3).to_s
 
       # Cells values in row 5:
-      assert_equal "0.01:percentage",oo.cell(5, 1).to_s+":"+oo.celltype(5, 1).to_s
-      assert_equal "0.01:percentage",oo.cell(5, 2).to_s+":"+oo.celltype(5, 2).to_s
-      assert_equal "0.01:percentage",oo.cell(5, 3).to_s+":"+oo.celltype(5, 3).to_s
-
-      oo = Excel.new(File.join(TESTDIR,"simple_spreadsheet_from_italo.xls"))
-      oo.default_sheet = oo.sheets.first
-
-      assert_equal  '1', oo.cell('A',1)
-      assert_equal  '1', oo.cell('B',1)
-      assert_equal  '1', oo.cell('C',1)
-
-      # assert_equal  1, oo.cell('A',2)
-      # assert_equal  2, oo.cell('B',2)
-      # assert_equal  1, oo.cell('C',2)
-      # are stored as strings, not numbers
-
-      assert_equal  1, oo.cell('A',2).to_i
-      assert_equal  2, oo.cell('B',2).to_i
-      assert_equal  1, oo.cell('C',2).to_i
-
-      assert_equal  1, oo.cell('A',3)
-      assert_equal  3, oo.cell('B',3)
-      assert_equal  1, oo.cell('C',3)
-
-      assert_equal  'A', oo.cell('A',4)
-      assert_equal  'A', oo.cell('B',4)
-      assert_equal  'A', oo.cell('C',4)
-
-      # assert_equal  '0.01', oo.cell('A',5)
-      # assert_equal  '0.01', oo.cell('B',5)
-      # assert_equal  '0.01', oo.cell('C',5)
-      #
-      assert_equal  0.01, oo.cell('A',5)
-      assert_equal  0.01, oo.cell('B',5)
-      assert_equal  0.01, oo.cell('C',5)
-
-      assert_equal 0.03, oo.cell('a',5)+oo.cell('b',5)+oo.cell('c',5)
-
-
-      #   1.0
-
-      # Cells values in row 1:
-      assert_equal "1:string", oo.cell(1, 1)+":"+oo.celltype(1, 1).to_s
-      assert_equal "1:string",oo.cell(1, 2)+":"+oo.celltype(1, 2).to_s
-      assert_equal "1:string",oo.cell(1, 3)+":"+oo.celltype(1, 3).to_s
-
-      # Cells values in row 2:
-      assert_equal "1:string",oo.cell(2, 1)+":"+oo.celltype(2, 1).to_s
-      assert_equal "2:string",oo.cell(2, 2)+":"+oo.celltype(2, 2).to_s
-      assert_equal "1:string",oo.cell(2, 3)+":"+oo.celltype(2, 3).to_s
-
-      # Cells values in row 3:
-      assert_equal "1.0:float",oo.cell(3, 1).to_s+":"+oo.celltype(3, 1).to_s
-      assert_equal "3.0:float",oo.cell(3, 2).to_s+":"+oo.celltype(3, 2).to_s
-      assert_equal "1.0:float",oo.cell(3, 3).to_s+":"+oo.celltype(3, 3).to_s
-
-      # Cells values in row 4:
-      assert_equal "A:string",oo.cell(4, 1)+":"+oo.celltype(4, 1).to_s
-      assert_equal "A:string",oo.cell(4, 2)+":"+oo.celltype(4, 2).to_s
-      assert_equal "A:string",oo.cell(4, 3)+":"+oo.celltype(4, 3).to_s
-
-      # Cells values in row 5:
-      #assert_equal "0.01:percentage",oo.cell(5, 1).to_s+":"+oo.celltype(5, 1).to_s
-      #assert_equal "0.01:percentage",oo.cell(5, 2).to_s+":"+oo.celltype(5, 2).to_s
-      #assert_equal "0.01:percentage",oo.cell(5, 3).to_s+":"+oo.celltype(5, 3).to_s
-      # why do we get floats here? in the spreadsheet the cells were defined
-      # to be percentage
-      # TODO: should be fixed
-      # the excel gem does not support the cell type 'percentage' these
-      # cells are returned to be of the type float.
-      assert_equal "0.01:float",oo.cell(5, 1).to_s+":"+oo.celltype(5, 1).to_s
-      assert_equal "0.01:float",oo.cell(5, 2).to_s+":"+oo.celltype(5, 2).to_s
-      assert_equal "0.01:float",oo.cell(5, 3).to_s+":"+oo.celltype(5, 3).to_s
+      if oo.class == Openoffice
+        assert_equal "0.01:percentage",oo.cell(5, 1).to_s+":"+oo.celltype(5, 1).to_s
+        assert_equal "0.01:percentage",oo.cell(5, 2).to_s+":"+oo.celltype(5, 2).to_s
+        assert_equal "0.01:percentage",oo.cell(5, 3).to_s+":"+oo.celltype(5, 3).to_s
+      else
+        assert_equal "0.01:float",oo.cell(5, 1).to_s+":"+oo.celltype(5, 1).to_s
+        assert_equal "0.01:float",oo.cell(5, 2).to_s+":"+oo.celltype(5, 2).to_s
+        assert_equal "0.01:float",oo.cell(5, 3).to_s+":"+oo.celltype(5, 3).to_s
+      end
     end
   end
 
   def test_formula_openoffice
-    if OPENOFFICE
-      oo = Openoffice.new(File.join(TESTDIR,"formula.ods"))
-      oo.default_sheet = oo.sheets.first
+    with_each_spreadsheet(:name=>'formula', :format=>:openoffice) do |oo|
       assert_equal 1, oo.cell('A',1)
       assert_equal 2, oo.cell('A',2)
       assert_equal 3, oo.cell('A',3)
@@ -618,43 +500,8 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  def test_formula_excel
-    if defined? excel_supports_formulas
-      if EXCEL
-        oo = Excel.new(File.join(TESTDIR,"formula.xls"))
-        oo.default_sheet = oo.sheets.first
-        assert_equal 1, oo.cell('A',1)
-        assert_equal 2, oo.cell('A',2)
-        assert_equal 3, oo.cell('A',3)
-        assert_equal 4, oo.cell('A',4)
-        assert_equal 5, oo.cell('A',5)
-        assert_equal 6, oo.cell('A',6)
-        assert_equal :formula, oo.celltype('A',7)
-        assert_equal 21, oo.cell('A',7)
-        assert_equal " = [Sheet2.A1]", oo.formula('C',7)
-        assert_nil oo.formula('A',6)
-        assert_equal [[7, 1, " = SUM([.A1:.A6])"],
-          [7, 2, " = SUM([.$A$1:.B6])"],
-          [7, 3, " = [Sheet2.A1]"],
-          [8, 2, " = SUM([.$A$1:.B7])"],
-        ], oo.formulas
-
-        # setting a cell
-        oo.set('A',15, 41)
-        assert_equal 41, oo.cell('A',15)
-        oo.set('A',16, "41")
-        assert_equal "41", oo.cell('A',16)
-        oo.set('A',17, 42.5)
-        assert_equal 42.5, oo.cell('A',17)
-
-      end
-    end
-  end
-  
   def test_formula_google
-    if GOOGLE
-      oo = Google.new(key_of("formula"))
-      oo.default_sheet = oo.sheets.first
+    with_each_spreadsheet(:name=>'formula', :format=>:google) do |oo|
       assert_equal 1, oo.cell('A',1)
       assert_equal 2, oo.cell('A',2)
       assert_equal 3, oo.cell('A',3)
@@ -687,13 +534,11 @@ class TestRoo < Test::Unit::TestCase
         [7, 3, "=Sheet2!R[-6]C[-2]"],
         [8, 2, "=SUM(R1C1:R[-1]C)"]],
         oo.formulas(oo.sheets.first)
-    end # GOOGLE
+    end
   end
 
   def test_formula_excelx
-    if EXCELX
-      oo = Excelx.new(File.join(TESTDIR,"formula.xlsx"))
-      oo.default_sheet = oo.sheets.first
+    with_each_spreadsheet(:name=>'formula', :format=>:excelx) do |oo|
       assert_equal 1, oo.cell('A',1)
       assert_equal 2, oo.cell('A',2)
       assert_equal 3, oo.cell('A',3)
@@ -702,11 +547,9 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 6, oo.cell('A',6)
       assert_equal 21, oo.cell('A',7)
       assert_equal :formula, oo.celltype('A',7)
-      after Date.new(9999,12,31) do
-        #steht nicht in Datei, oder?
-        #nein, diesen Bezug habe ich nur in der Openoffice-Datei
-        assert_equal "=[Sheet2.A1]", oo.formula('C',7)
-      end
+      #steht nicht in Datei, oder?
+      #nein, diesen Bezug habe ich nur in der Openoffice-Datei
+      #assert_equal "=[Sheet2.A1]", oo.formula('C',7)
       assert_nil oo.formula('A',6)
       # assert_equal [[7, 1, "=SUM([.A1:.A6])"],
       #  [7, 2, "=SUM([.$A$1:.B6])"],
@@ -757,7 +600,6 @@ class TestRoo < Test::Unit::TestCase
 
   def test_to_yaml
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
       assert_equal "--- \n"+yaml_entry(5,1,"date","1961-11-21"), oo.to_yaml({}, 5,1,5,1)
       assert_equal "--- \n"+yaml_entry(8,3,"string","thisisc8"), oo.to_yaml({}, 8,3,8,3)
       assert_equal "--- \n"+yaml_entry(12,3,"float",43.0), oo.to_yaml({}, 12,3,12,3)
@@ -778,123 +620,6 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  if false
-    def test_soap_server
-      #threads = []
-      #threads << Thread.new("serverthread") do
-      fork do
-        p "serverthread started"
-        puts "in child, pid = #$$"
-        puts `/usr/bin/ruby rooserver.rb`
-        p "serverthread finished"
-      end
-      #threads << Thread.new("clientthread") do
-      p "clientthread started"
-      sleep 10
-      proxy = SOAP::RPC::Driver.new("http://localhost:12321","spreadsheetserver")
-      proxy.add_method('cell','row','col')
-      proxy.add_method('officeversion')
-      proxy.add_method('last_row')
-      proxy.add_method('last_column')
-      proxy.add_method('first_row')
-      proxy.add_method('first_column')
-      proxy.add_method('sheets')
-      proxy.add_method('set_default_sheet','s')
-      proxy.add_method('ferien_fuer_region', 'region')
-
-      sheets = proxy.sheets
-      p sheets
-      proxy.set_default_sheet(sheets.first)
-
-      assert_equal 1, proxy.first_row
-      assert_equal 1, proxy.first_column
-      assert_equal 187, proxy.last_row
-      assert_equal 7, proxy.last_column
-      assert_equal 42, proxy.cell('C',8)
-      assert_equal 43, proxy.cell('F',12)
-      assert_equal "1.0", proxy.officeversion
-      p "clientthread finished"
-      #end
-      #threads.each {|t| t.join }
-      puts "fertig"
-      Process.kill("INT",pid)
-      pid = Process.wait
-      puts "child terminated, pid= #{pid}, status= #{$?.exitstatus}"
-    end
-  end # false
-
-  def split_coord(s)
-    letter = ""
-    number = 0
-    i = 0
-    while i<s.length and "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".include?(s[i,1])
-      letter += s[i,1]
-      i+=1
-    end
-    while i<s.length and "01234567890".include?(s[i,1])
-      number = number*10 + s[i,1].to_i
-      i+=1
-    end
-    if letter=="" or number==0
-      raise ArgumentError
-    end
-    return letter,number
-  end
-
-  #def sum(s,expression)
-  #  arg = expression.split(':')
-  #  b,z = split_coord(arg[0])
-  #  first_row = z
-  #  first_col = Openoffice.letter_to_number(b)
-  #  b,z = split_coord(arg[1])
-  #  last_row = z
-  #  last_col = Openoffice.letter_to_number(b)
-  #  result = 0
-  #  first_row.upto(last_row) {|row|
-  #    first_col.upto(last_col) {|col|
-  #      result = result + s.cell(row,col)
-  #    }
-  #  }
-  #  result
-  #end
-
-  #def test_dsl
-  #  s = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
-  #  s.default_sheet = s.sheets.first
-  #
-  #    s.set 'a',1, 5
-  #    s.set 'b',1, 3
-  #    s.set 'c',1, 7
-  #    s.set('a',2, s.cell('a',1)+s.cell('b',1))
-  #    assert_equal 8, s.cell('a',2)
-  #
-  #    assert_equal 15, sum(s,'A1:C1')
-  #  end
-
-  #def test_create_spreadsheet1
-  #  name = File.join(TESTDIR,'createdspreadsheet.ods')
-  #  rm(name) if File.exists?(File.join(TESTDIR,'createdspreadsheet.ods'))
-  #  # anlegen, falls noch nicht existierend
-  #  s = Openoffice.new(name,true)
-  #  assert File.exists?(name)
-  #end
-
-  #def test_create_spreadsheet2
-  #  # anlegen, falls noch nicht existierend
-  #  s = Openoffice.new(File.join(TESTDIR,"createdspreadsheet.ods"),true)
-  #  s.set 'a',1,42
-  #  s.set 'b',1,43
-  #  s.set 'c',1,44
-  #  s.save
-  #
-  #  #after Date.new(2007,7,3) do
-  #  #  t = Openoffice.new(File.join(TESTDIR,"createdspreadsheet.ods"))
-  #  #  assert_equal 42, t.cell(1,'a')
-  #  #  assert_equal 43, t.cell('b',1)
-  #  #  assert_equal 44, t.cell('c',3)
-  #  #end
-  #end
-
   def test_only_one_sheet
     with_each_spreadsheet(:name=>'only_one_sheet') do |oo|
       assert_equal 42, oo.cell('B',4)
@@ -910,26 +635,14 @@ class TestRoo < Test::Unit::TestCase
   def test_excel_open_from_uri_and_zipped
     if EXCEL
       if ONLINE
-        url = 'http://stiny-leonhard.de/bode-v1.xls.zip'
-        excel = Excel.new(url, :zip)
-        excel.default_sheet = excel.sheets.first
-        assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-        excel.remove_tmp # don't forget to remove the temporary files
-      end
-    end
-  end
-
-  #TODO: xlsx-Datei anpassen!
-  def test_excelx_open_from_uri_and_zipped
-    #TODO: gezippte xlsx Datei online zum Testen suchen
-    after Date.new(2999,6,30) do
-      if EXCELX
-        if ONLINE
-          url = 'http://stiny-leonhard.de/bode-v1.xlsx.zip'
-          excel = Excelx.new(url, :zip)
+        begin
+          url = 'http://stiny-leonhard.de/bode-v1.xls.zip'
+          excel = Excel.new(url, :zip)
+          excel.default_sheet = excel.sheets.first
           assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-          excel.remove_tmp # don't forget to remove the temporary files
-        end
+        ensure  
+          excel.remove_tmp
+        end  
       end
     end
   end
@@ -937,64 +650,44 @@ class TestRoo < Test::Unit::TestCase
   def test_openoffice_open_from_uri_and_zipped
     if OPENOFFICE
       if ONLINE
-        url = 'http://spazioinwind.libero.it/s2/rata.ods.zip'
-        sheet = Openoffice.new(url, :zip)
-        #has been changed: assert_equal 'ist "e" im Nenner von H(s)', sheet.cell('b', 5)
-        assert_in_delta 0.001, 505.14, sheet.cell('c', 33).to_f
-        sheet.remove_tmp # don't forget to remove the temporary files
+        begin
+          url = 'http://spazioinwind.libero.it/s2/rata.ods.zip'
+          sheet = Openoffice.new(url, :zip)
+          #has been changed: assert_equal 'ist "e" im Nenner von H(s)', sheet.cell('b', 5)
+          assert_in_delta 0.001, 505.14, sheet.cell('c', 33).to_f
+        ensure
+          sheet.remove_tmp
+        end  
       end
     end
   end
 
   def test_excel_zipped
-    after Date.new(2009,1,10) do
-      if EXCEL
-        $log.level = Logger::DEBUG
-        excel = Excel.new(File.join(TESTDIR,"bode-v1.xls.zip"), :zip)
-        assert excel
-        $log.level = Logger::WARN
-        excel.default_sheet = excel.sheets.first
-        assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-        excel.remove_tmp # don't forget to remove the temporary files
-      end
-    end
-  end
-
-  def test_excelx_zipped
-    # TODO: bode...xls bei Gelegenheit nach .xlsx konverieren lassen und zippen!
-    if EXCELX
-      after Date.new(2999,7,30) do
-        # diese Datei gibt es noch nicht gezippt
-        excel = Excelx.new(File.join(TESTDIR,"bode-v1.xlsx.zip"), :zip)
-        assert excel
-        assert_raises (ArgumentError) {
-          assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-        }
-        excel.default_sheet = excel.sheets.first
-        assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-        excel.remove_tmp # don't forget to remove the temporary files
-      end
+    if EXCEL
+      begin
+        oo = Excel.new(File.join(TESTDIR,"bode-v1.xls.zip"), :zip)
+        assert oo
+        assert_equal 'ist "e" im Nenner von H(s)', oo.cell('b', 5)
+      ensure
+        oo.remove_tmp 
+      end  
     end
   end
 
   def test_openoffice_zipped
     if OPENOFFICE
-      oo = Openoffice.new(File.join(TESTDIR,"bode-v1.ods.zip"), :zip)
-      assert oo
-      # muss Fehler bringen, weil kein default_sheet gesetzt wurde
-      assert_raises (ArgumentError) {
+      begin
+        oo = Openoffice.new(File.join(TESTDIR,"bode-v1.ods.zip"), :zip)
+        assert oo
         assert_equal 'ist "e" im Nenner von H(s)', oo.cell('b', 5)
-
-      }
-      oo.default_sheet = oo.sheets.first
-      assert_equal 'ist "e" im Nenner von H(s)', oo.cell('b', 5)
-      oo.remove_tmp # don't forget to remove the temporary files
+      ensure  
+        oo.remove_tmp
+      end  
     end
   end
 
   def test_bug_ric
     with_each_spreadsheet(:name=>'ric', :format=>:openoffice) do |oo|
-      oo.default_sheet = oo.sheets.first
       assert oo.empty?('A',1)
       assert oo.empty?('B',1)
       assert oo.empty?('C',1)
@@ -1040,16 +733,13 @@ class TestRoo < Test::Unit::TestCase
 
   def test_mehrteilig
     with_each_spreadsheet(:name=>'Bibelbund1', :format=>:openoffice) do |oo|
-      oo.default_sheet = oo.sheets.first
       assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
     end
     #if EXCELX
-    #  after Date.new(2008,6,1) do
     #    #Datei gibt es noch nicht
     #    oo = Excelx.new(File.join(TESTDIR,"Bibelbund1.xlsx"))
     #    oo.default_sheet = oo.sheets.first
     #    assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
-    #  end
     #end
   end
 
@@ -1059,16 +749,15 @@ class TestRoo < Test::Unit::TestCase
         assert_nothing_raised(Timeout::Error) {
           Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
             File.delete_if_exist("/tmp/Bibelbund.csv")
-            oo.default_sheet = oo.sheets.first
             assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
             assert_equal "Tagebuch des Sekret\303\244rs.  Nachrichten aus Chile", oo.cell(46,'A')
             assert_equal "Tagebuch aus Chile  Juli 1977", oo.cell(55,'A')
             assert oo.to_csv("/tmp/Bibelbund.csv")
             assert File.exists?("/tmp/Bibelbund.csv")
             assert_equal "", `diff test/Bibelbund.csv /tmp/Bibelbund.csv`
-          end # Timeout
-        } # nothing_raised
-      end # OPENOFFICE
+          end 
+        }
+      end
     end
   end
 
@@ -1076,11 +765,9 @@ class TestRoo < Test::Unit::TestCase
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       master = "#{TESTDIR}/numbers1.csv"
       File.delete_if_exist("/tmp/numbers1.csv")
-      oo.default_sheet = oo.sheets.first if oo.class == Google
       assert oo.to_csv("/tmp/numbers1.csv",oo.sheets.first)
       assert File.exists?("/tmp/numbers1.csv")
       assert_equal "", `diff #{master} /tmp/numbers1.csv`
-      oo.default_sheet = oo.sheets.first
       assert oo.to_csv("/tmp/numbers1.csv")
       assert File.exists?("/tmp/numbers1.csv")
       assert_equal "", `diff #{master} /tmp/numbers1.csv`
@@ -1124,7 +811,7 @@ class TestRoo < Test::Unit::TestCase
   end
 
   def test_multiple_sheets
-      with_each_spreadsheet(:name=>'numbers1') do |oo|
+    with_each_spreadsheet(:name=>'numbers1') do |oo|
       2.times do
         oo.default_sheet = "Tabelle1"
         assert_equal 1, oo.cell(1,1)
@@ -1170,9 +857,7 @@ class TestRoo < Test::Unit::TestCase
   def test_bug_empty_sheet
     with_each_spreadsheet(:name=>'formula', :format=>[:openoffice, :excelx]) do |oo|
       oo.default_sheet = 'Sheet3' # is an empty sheet
-      assert_nothing_raised(NoMethodError) {
-        oo.to_csv(File.join("/","tmp","emptysheet.csv"))
-      }
+      assert_nothing_raised(NoMethodError) {  oo.to_csv(File.join("/","tmp","emptysheet.csv"))  }
       assert_equal "", `cat /tmp/emptysheet.csv`
     end
   end
@@ -1187,7 +872,6 @@ class TestRoo < Test::Unit::TestCase
           # assert_equal "Brief aus dem Sekretariat", rec[0]
           #p rec
           assert_equal "Brief aus dem Sekretariat", rec[0]['TITEL']
-
           rec = oo.find 22
           assert rec
           # assert_equal "Brief aus dem Skretariat. Tagung in Amberg/Opf.",rec[0]
@@ -1199,7 +883,6 @@ class TestRoo < Test::Unit::TestCase
 
   def test_find_by_row
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
       oo.header_line = nil
       rec = oo.find 16
       assert rec
@@ -1207,7 +890,6 @@ class TestRoo < Test::Unit::TestCase
       # keine Headerlines in diesem Beispiel definiert
       assert_equal "einundvierzig", rec[0]
       #assert_equal false, rec
-
       rec = oo.find 15
       assert rec
       assert_equal 41,rec[0]
@@ -1219,7 +901,6 @@ class TestRoo < Test::Unit::TestCase
       with_each_spreadsheet(:name=>'Bibelbund') do |oo|
         assert_nothing_raised(Timeout::Error) {
           Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-            oo.default_sheet = oo.sheets.first
             #-----------------------------------------------------------------
             zeilen = oo.find(:all, :conditions => {
                 'TITEL' => 'Brief aus dem Sekretariat'
@@ -1310,7 +991,6 @@ class TestRoo < Test::Unit::TestCase
   #TODO: temporaerer Test
   def test_seiten_als_date
     with_each_spreadsheet(:name=>'Bibelbund', :format=>:excelx) do |oo|
-      oo.default_sheet = oo.sheets.first
       assert_equal 'Bericht aus dem Sekretariat', oo.cell(13,1)
       assert_equal '1981-4', oo.cell(13,'D')
       assert_equal [:numeric_or_formula,"General"], oo.excelx_type(13,'E')
@@ -1322,11 +1002,8 @@ class TestRoo < Test::Unit::TestCase
   def test_column
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       expected = [1.0,5.0,nil,10.0,Date.new(1961,11,21),'tata',nil,nil,nil,nil,'thisisa11',41.0,nil,nil,41.0,'einundvierzig',nil,Date.new(2007,5,31)]
-      Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-        oo.default_sheet = oo.sheets.first
-        assert_equal expected, oo.column(1)
-        assert_equal expected, oo.column('a')
-      end
+      assert_equal expected, oo.column(1)
+      assert_equal expected, oo.column('a')
     end
   end
 
@@ -1346,7 +1023,6 @@ class TestRoo < Test::Unit::TestCase
 
   def test_simple_spreadsheet_find_by_condition
     with_each_spreadsheet(:name=>'simple_spreadsheet') do |oo|
-      oo.default_sheet = oo.sheets.first
       oo.header_line = 3
       oo.date_format = '%m/%d/%Y' if oo.class == Google
       erg = oo.find(:all, :conditions => {'Comment' => 'Task 1'})
@@ -1363,20 +1039,16 @@ class TestRoo < Test::Unit::TestCase
   # from a cell with a formula (no possible with parseexcel)
   def test_bug_false_borders_with_formulas
     with_each_spreadsheet(:name=>'false_encoding', :format=>:excel) do |oo|
-      after Date.new(2008,9,15) do
-        oo.default_sheet = oo.sheets.first
-        assert_equal 1, oo.first_row
-        assert_equal 3, oo.last_row
-        assert_equal 1, oo.first_column
-        assert_equal 4, oo.last_column
-      end
+      assert_equal 1, oo.first_row
+      assert_equal 3, oo.last_row
+      assert_equal 1, oo.first_column
+      assert_equal 4, oo.last_column
     end
   end
 
   def test_fe
     with_each_spreadsheet(:name=>'false_encoding', :format=>:excel) do |oo|
-      oo.default_sheet = oo.sheets.first
-      #DOES NOT WORK IN EXCEL FILES: assert_equal Date.new(2007,11,1), oo.cell('a',1)
+      #DOES NOT WORK IN EXCEL FILES:  assert_equal Date.new(2007,11,1), oo.cell('a',1)
       #DOES NOT WORK IN EXCEL FILES: assert_equal true, oo.formula?('a',1)
       #DOES NOT WORK IN EXCEL FILES: assert_equal '=TODAY()', oo.formula('a',1)
 
@@ -1401,16 +1073,9 @@ class TestRoo < Test::Unit::TestCase
 
   def test_excel_does_not_support_formulas
     with_each_spreadsheet(:name=>'false_encoding', :format=>:excel) do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_raise(RuntimeError) {
-        void = oo.formula('a',1)
-      }
-      assert_raise(RuntimeError) {
-        void = oo.formula?('a',1)
-      }
-      assert_raise(RuntimeError) {
-        void = oo.formulas(oo.sheets.first)
-      }
+      assert_raise(RuntimeError) { void = oo.formula('a',1) }
+      assert_raise(RuntimeError) { void = oo.formula?('a',1) }
+      assert_raise(RuntimeError) { void = oo.formulas(oo.sheets.first) }
     end  
   end
 
@@ -1524,7 +1189,6 @@ class TestRoo < Test::Unit::TestCase
   def test_write_google
     # write.me: http://spreadsheets.google.com/ccc?key=ptu6bbahNZpY0N0RrxQbWdw&hl=en_GB
     with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|
-      oo.default_sheet = oo.sheets.first
       oo.set_value(1,1,"hello from the tests")
       assert_equal "hello from the tests", oo.cell(1,1)
       oo.set_value(1,1, 1.0)
@@ -1537,7 +1201,6 @@ class TestRoo < Test::Unit::TestCase
     with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|
       content1 = 'AAA'
       content2 = 'BBB'
-      oo = Google.new(key_of('write.me'))
       oo.default_sheet = oo.sheets.first
       oo.set_value(1,1,content1)
       oo.default_sheet = oo.sheets[1]
@@ -1553,7 +1216,6 @@ class TestRoo < Test::Unit::TestCase
     with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|
       random_row = rand(10)+1
       random_column = rand(10)+1
-      oo.default_sheet = oo.sheets.first
       content1 = 'ABC'
       content2 = 'DEF'
       oo.set_value(random_row,random_column,content1,oo.sheets.first)
@@ -1565,11 +1227,8 @@ class TestRoo < Test::Unit::TestCase
 
   def test_set_value_for_non_existing_sheet_google
     with_each_spreadsheet(:name=>'ptu6bbahNZpY0N0RrxQbWdw', :format=>:google) do |oo|
-      assert_raise(RangeError) {
-        #oo.default_sheet = "no_sheet"
-        oo.set_value(1,1,"dummy","no_sheet")
-      }
-    end # GOOGLE
+      assert_raise(RangeError) { oo.set_value(1,1,"dummy","no_sheet")   }
+    end 
   end
 
   def test_bug_bbu
@@ -1600,12 +1259,10 @@ Sheet 3:
 
   def test_bug_time_nil
     with_each_spreadsheet(:name=>'time-test') do |oo|
-      oo.default_sheet = oo.sheets.first
       assert_equal 12*3600+13*60+14, oo.cell('B',1) # 12:13:14 (secs since midnight)
       assert_equal :time, oo.celltype('B',1)
       assert_equal 15*3600+16*60, oo.cell('C',1) # 15:16    (secs since midnight)
       assert_equal :time, oo.celltype('C',1)
-
       assert_equal 23*3600, oo.cell('D',1) # 23:00    (secs since midnight)
       assert_equal :time, oo.celltype('D',1)
     end
@@ -1613,11 +1270,13 @@ Sheet 3:
 
   def test_date_time_to_csv
     with_each_spreadsheet(:name=>'time-test') do |oo|
-      File.delete_if_exist("/tmp/time-test.csv")
-      oo.default_sheet = oo.sheets.first
-      assert oo.to_csv("/tmp/time-test.csv")
-      assert File.exists?("/tmp/time-test.csv")
-      assert_equal "", `diff #{TESTDIR}/time-test.csv /tmp/time-test.csv`
+      begin
+        assert oo.to_csv("/tmp/time-test.csv")
+        assert File.exists?("/tmp/time-test.csv")
+        assert_equal "", `diff #{TESTDIR}/time-test.csv /tmp/time-test.csv`
+      ensure
+        File.delete_if_exist("/tmp/time-test.csv")
+      end  
     end 
   end
 
@@ -1625,7 +1284,6 @@ Sheet 3:
     with_each_spreadsheet(:name=>'time-test') do |oo|
       expected =
         "--- \ncell_1_1: \n  row: 1 \n  col: 1 \n  celltype: string \n  value: Mittags: \ncell_1_2: \n  row: 1 \n  col: 2 \n  celltype: time \n  value: 12:13:14 \ncell_1_3: \n  row: 1 \n  col: 3 \n  celltype: time \n  value: 15:16:00 \ncell_1_4: \n  row: 1 \n  col: 4 \n  celltype: time \n  value: 23:00:00 \ncell_2_1: \n  row: 2 \n  col: 1 \n  celltype: date \n  value: 2007-11-21 \n"
-      oo.default_sheet = oo.sheets.first
       assert_equal expected, oo.to_yaml
     end
   end
@@ -1734,7 +1392,6 @@ Sheet 3:
 
   def test_bug_row_column_fixnum_float
     with_each_spreadsheet(:name=>'bug-row-column-fixnum-float', :format=>:excel) do |oo|
-      oo.default_sheet = oo.sheets.first
       assert_equal 42.5, oo.cell('b',2)
       assert_equal 43  , oo.cell('c',2)
       assert_equal ['hij',42.5, 43], oo.row(2)
@@ -1854,7 +1511,6 @@ Sheet 3:
 
   def test_bug_last_row_excel
     with_each_spreadsheet(:name=>'time-test', :format=>:excel) do |oo|    
-      oo.default_sheet = oo.sheets.first
       assert_equal 2, oo.last_row
     end
   end
@@ -1862,7 +1518,6 @@ Sheet 3:
   def test_bug_to_xml_with_empty_sheets
     with_each_spreadsheet(:name=>'emptysheets', :format=>[:openoffice, :excel]) do |oo|    
       oo.sheets.each { |sheet|
-        oo.default_sheet = sheet
         assert_equal nil, oo.first_row, "first_row not nil in sheet #{sheet}"
         assert_equal nil, oo.last_row, "last_row not nil in sheet #{sheet}"
         assert_equal nil, oo.first_column, "first_column not nil in sheet #{sheet}"
@@ -1872,9 +1527,7 @@ Sheet 3:
         assert_equal nil, oo.first_column(sheet), "first_column not nil in sheet #{sheet}"
         assert_equal nil, oo.last_column(sheet), "last_column not nil in sheet #{sheet}"
       }
-      assert_nothing_raised() {
-        result = oo.to_xml
-      }
+      assert_nothing_raised() { result = oo.to_xml }
     end
   end
 
@@ -1882,12 +1535,10 @@ Sheet 3:
     # really a bug? are cells really of type time?
     # No! :float must be the correct type
     with_each_spreadsheet(:name=>'simple_spreadsheet', :format=>:excelx) do |oo|    
-      oo.default_sheet = oo.sheets.first
       # puts oo.cell('B',5).to_s
       # assert_equal :time, oo.celltype('B',5)
       assert_equal :float, oo.celltype('B',5)
       assert_equal 10.75, oo.cell('B',5)
-
       assert_equal 12.50, oo.cell('C',5)
       assert_equal 0, oo.cell('D',5)
       assert_equal 1.75, oo.cell('E',5)
@@ -1898,42 +1549,38 @@ Sheet 3:
 
   def test_simple2_excelx
     with_each_spreadsheet(:name=>'simple_spreadsheet', :format=>:excelx) do |oo|    
-      after Date.new(2008,8,2) do
-        oo.default_sheet = oo.sheets.first
-        assert_equal [:numeric_or_formula, "yyyy\\-mm\\-dd"], oo.excelx_type('A',4)
-        assert_equal [:numeric_or_formula, "#,##0.00"], oo.excelx_type('B',4)
-        assert_equal [:numeric_or_formula, "#,##0.00"], oo.excelx_type('c',4)
-        assert_equal [:numeric_or_formula, "General"], oo.excelx_type('d',4)
-        assert_equal [:numeric_or_formula, "General"], oo.excelx_type('e',4)
-        assert_equal :string, oo.excelx_type('f',4)
+      assert_equal [:numeric_or_formula, "yyyy\\-mm\\-dd"], oo.excelx_type('A',4)
+      assert_equal [:numeric_or_formula, "#,##0.00"], oo.excelx_type('B',4)
+      assert_equal [:numeric_or_formula, "#,##0.00"], oo.excelx_type('c',4)
+      assert_equal [:numeric_or_formula, "General"], oo.excelx_type('d',4)
+      assert_equal [:numeric_or_formula, "General"], oo.excelx_type('e',4)
+      assert_equal :string, oo.excelx_type('f',4)
 
-        assert_equal "39209", oo.excelx_value('a',4)
-        assert_equal "yyyy\\-mm\\-dd", oo.excelx_format('a',4)
-        assert_equal "9.25", oo.excelx_value('b',4)
-        assert_equal "10.25", oo.excelx_value('c',4)
-        assert_equal "0", oo.excelx_value('d',4)
-        #... Sum-Spalte
-        # assert_equal "Task 1", oo.excelx_value('f',4)
-        assert_equal "Task 1", oo.cell('f',4)
-        assert_equal Date.new(2007,05,07), oo.cell('a',4)
-        assert_equal "9.25", oo.excelx_value('b',4)
-        assert_equal "#,##0.00", oo.excelx_format('b',4)
-        assert_equal 9.25, oo.cell('b',4)
-        assert_equal :float, oo.celltype('b',4)
-        assert_equal :float, oo.celltype('d',4)
-        assert_equal 0, oo.cell('d',4)
-        assert_equal :formula, oo.celltype('e',4)
-        assert_equal 1, oo.cell('e',4)
-        assert_equal 'C4-B4-D4', oo.formula('e',4)
-        assert_equal :string, oo.celltype('f',4)
-        assert_equal "Task 1", oo.cell('f',4)
-      end
+      assert_equal "39209", oo.excelx_value('a',4)
+      assert_equal "yyyy\\-mm\\-dd", oo.excelx_format('a',4)
+      assert_equal "9.25", oo.excelx_value('b',4)
+      assert_equal "10.25", oo.excelx_value('c',4)
+      assert_equal "0", oo.excelx_value('d',4)
+      #... Sum-Spalte
+      # assert_equal "Task 1", oo.excelx_value('f',4)
+      assert_equal "Task 1", oo.cell('f',4)
+      assert_equal Date.new(2007,05,07), oo.cell('a',4)
+      assert_equal "9.25", oo.excelx_value('b',4)
+      assert_equal "#,##0.00", oo.excelx_format('b',4)
+      assert_equal 9.25, oo.cell('b',4)
+      assert_equal :float, oo.celltype('b',4)
+      assert_equal :float, oo.celltype('d',4)
+      assert_equal 0, oo.cell('d',4)
+      assert_equal :formula, oo.celltype('e',4)
+      assert_equal 1, oo.cell('e',4)
+      assert_equal 'C4-B4-D4', oo.formula('e',4)
+      assert_equal :string, oo.celltype('f',4)
+      assert_equal "Task 1", oo.cell('f',4)
     end
   end
 
   def test_datetime
     with_each_spreadsheet(:name=>'datetime') do |oo|    
-      oo.default_sheet = oo.sheets.first
       val = oo.cell('c',3)
       assert_kind_of DateTime, val
       assert_equal :datetime, oo.celltype('c',3)
@@ -1963,19 +1610,17 @@ Sheet 3:
   
   def test_cell_openoffice_html_escape
     with_each_spreadsheet(:name=>'html-escape', :format=>:openoffice) do |oo|    
-      oo.default_sheet = oo.sheets.first
       assert_equal "'", oo.cell(1,1)
       assert_equal "&", oo.cell(2,1)
       assert_equal ">", oo.cell(3,1)
       assert_equal "<", oo.cell(4,1)
       assert_equal "`", oo.cell(5,1)
-      # test_openoffice_zipped catches the &quot;
+      # test_openoffice_zipped will catch issues with &quot;
     end  
   end    
   
   def test_cell_boolean
     with_each_spreadsheet(:name=>'boolean', :format=>[:openoffice, :excel, :excelx]) do |oo|    
-      oo.default_sheet = oo.sheets.first
       if oo.class == Excelx    
         assert_equal "TRUE", oo.cell(1,1)
         assert_equal "FALSE", oo.cell(2,1)
@@ -1988,7 +1633,6 @@ Sheet 3:
   
    def test_cell_multiline
      with_each_spreadsheet(:name=>'paragraph', :format=>[:openoffice, :excel, :excelx]) do |oo|    
-        oo.default_sheet = oo.sheets.first
         assert_equal "This is a test\nof a multiline\nCell", oo.cell(1,1)
         assert_equal "This is a test\n¶\nof a multiline\n\nCell", oo.cell(1,2)
         assert_equal "first p\n\nsecond p\n\nlast p", oo.cell(2,1)
@@ -1997,8 +1641,6 @@ Sheet 3:
   
   def test_cell_styles
     with_each_spreadsheet(:name=>'style', :format=>[:openoffice, :excel, :excelx]) do |oo|    
-      oo.default_sheet = oo.sheets.first
-    
       # bold
       assert_equal true,  oo.font(1,1).bold?
       assert_equal false, oo.font(1,1).italic?
@@ -2062,7 +1704,6 @@ Sheet 3:
   def test_date_to_float_conversion
     with_each_spreadsheet(:name=>'datetime_floatconv', :format=>:excel) do |oo|    
        assert_nothing_raised(NoMethodError) do
-         oo.default_sheet = oo.sheets.first
          oo.cell('a',1)
          oo.cell('a',2)
        end
@@ -2109,12 +1750,10 @@ Sheet 3:
   # including 1900 as a leap yar. 
   def test_base_dates_in_excel
     with_each_spreadsheet(:name=>'1900_base', :format=>:excel) do |oo|    
-      oo.default_sheet = oo.sheets.first
       assert_equal Date.new(2009,06,15), oo.cell(1,1)
       assert_equal :date, oo.celltype(1,1)
     end  
     with_each_spreadsheet(:name=>'1904_base', :format=>:excel) do |oo|    
-      oo.default_sheet = oo.sheets.first
       assert_equal Date.new(2009,06,15), oo.cell(1,1)
       assert_equal :date, oo.celltype(1,1)
     end  

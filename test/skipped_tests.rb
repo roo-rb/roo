@@ -618,22 +618,172 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
     end
   end
 
-    def SKIP_test_to_ascii_openoffice #file does not exist
-      after Date.new(9999,12,31) do
-        with_each_spreadsheet(:name=>'verysimple_spreadsheet', :format=>:openoffice) do |oo|    
-          oo.default_sheet = oo.sheets.first
-          expected="
-    A    |   B   |  C   |
-  -------+-------+------|
-        7|      8|     9|
-  -------+-------+------|
-        4|      5|     6|
-  -------+-------+------|
-        1|      2|     3|
-  ----------------------/
-          "
-          assert_equal expected, oo.to_ascii
+  def SKIP_test_to_ascii_openoffice #file does not exist
+    after Date.new(9999,12,31) do
+      with_each_spreadsheet(:name=>'verysimple_spreadsheet', :format=>:openoffice) do |oo|    
+        oo.default_sheet = oo.sheets.first
+        expected="
+  A    |   B   |  C   |
+-------+-------+------|
+      7|      8|     9|
+-------+-------+------|
+      4|      5|     6|
+-------+-------+------|
+      1|      2|     3|
+----------------------/
+        "
+        assert_equal expected, oo.to_ascii
+      end
+    end
+  end
+  if false
+    def test_soap_server
+      #threads = []
+      #threads << Thread.new("serverthread") do
+      fork do
+        p "serverthread started"
+        puts "in child, pid = #$$"
+        puts `/usr/bin/ruby rooserver.rb`
+        p "serverthread finished"
+      end
+      #threads << Thread.new("clientthread") do
+      p "clientthread started"
+      sleep 10
+      proxy = SOAP::RPC::Driver.new("http://localhost:12321","spreadsheetserver")
+      proxy.add_method('cell','row','col')
+      proxy.add_method('officeversion')
+      proxy.add_method('last_row')
+      proxy.add_method('last_column')
+      proxy.add_method('first_row')
+      proxy.add_method('first_column')
+      proxy.add_method('sheets')
+      proxy.add_method('set_default_sheet','s')
+      proxy.add_method('ferien_fuer_region', 'region')
+
+      sheets = proxy.sheets
+      p sheets
+      proxy.set_default_sheet(sheets.first)
+
+      assert_equal 1, proxy.first_row
+      assert_equal 1, proxy.first_column
+      assert_equal 187, proxy.last_row
+      assert_equal 7, proxy.last_column
+      assert_equal 42, proxy.cell('C',8)
+      assert_equal 43, proxy.cell('F',12)
+      assert_equal "1.0", proxy.officeversion
+      p "clientthread finished"
+      #end
+      #threads.each {|t| t.join }
+      puts "fertig"
+      Process.kill("INT",pid)
+      pid = Process.wait
+      puts "child terminated, pid= #{pid}, status= #{$?.exitstatus}"
+    end
+  end # false
+
+  def split_coord(s)
+    letter = ""
+    number = 0
+    i = 0
+    while i<s.length and "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".include?(s[i,1])
+      letter += s[i,1]
+      i+=1
+    end
+    while i<s.length and "01234567890".include?(s[i,1])
+      number = number*10 + s[i,1].to_i
+      i+=1
+    end
+    if letter=="" or number==0
+      raise ArgumentError
+    end
+    return letter,number
+  end
+
+  #def sum(s,expression)
+  #  arg = expression.split(':')
+  #  b,z = split_coord(arg[0])
+  #  first_row = z
+  #  first_col = Openoffice.letter_to_number(b)
+  #  b,z = split_coord(arg[1])
+  #  last_row = z
+  #  last_col = Openoffice.letter_to_number(b)
+  #  result = 0
+  #  first_row.upto(last_row) {|row|
+  #    first_col.upto(last_col) {|col|
+  #      result = result + s.cell(row,col)
+  #    }
+  #  }
+  #  result
+  #end
+
+  #def test_dsl
+  #  s = Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
+  #  s.default_sheet = s.sheets.first
+  #
+  #    s.set 'a',1, 5
+  #    s.set 'b',1, 3
+  #    s.set 'c',1, 7
+  #    s.set('a',2, s.cell('a',1)+s.cell('b',1))
+  #    assert_equal 8, s.cell('a',2)
+  #
+  #    assert_equal 15, sum(s,'A1:C1')
+  #  end
+
+  #def test_create_spreadsheet1
+  #  name = File.join(TESTDIR,'createdspreadsheet.ods')
+  #  rm(name) if File.exists?(File.join(TESTDIR,'createdspreadsheet.ods'))
+  #  # anlegen, falls noch nicht existierend
+  #  s = Openoffice.new(name,true)
+  #  assert File.exists?(name)
+  #end
+
+  #def test_create_spreadsheet2
+  #  # anlegen, falls noch nicht existierend
+  #  s = Openoffice.new(File.join(TESTDIR,"createdspreadsheet.ods"),true)
+  #  s.set 'a',1,42
+  #  s.set 'b',1,43
+  #  s.set 'c',1,44
+  #  s.save
+  #
+  #  #after Date.new(2007,7,3) do
+  #  #  t = Openoffice.new(File.join(TESTDIR,"createdspreadsheet.ods"))
+  #  #  assert_equal 42, t.cell(1,'a')
+  #  #  assert_equal 43, t.cell('b',1)
+  #  #  assert_equal 44, t.cell('c',3)
+  #  #end
+  #end
+   
+  #TODO: xlsx-Datei anpassen!
+  def test_excelx_open_from_uri_and_zipped
+    #TODO: gezippte xlsx Datei online zum Testen suchen
+    after Date.new(2999,6,30) do
+      if EXCELX
+        if ONLINE
+          url = 'http://stiny-leonhard.de/bode-v1.xlsx.zip'
+          excel = Excelx.new(url, :zip)
+          assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
+          excel.remove_tmp # don't forget to remove the temporary files
         end
       end
     end
+  end
+
+  def test_excelx_zipped
+    # TODO: bode...xls bei Gelegenheit nach .xlsx konverieren lassen und zippen!
+    if EXCELX
+      after Date.new(2999,7,30) do
+        # diese Datei gibt es noch nicht gezippt
+        excel = Excelx.new(File.join(TESTDIR,"bode-v1.xlsx.zip"), :zip)
+        assert excel
+        assert_raises (ArgumentError) {
+          assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
+        }
+        excel.default_sheet = excel.sheets.first
+        assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
+        excel.remove_tmp # don't forget to remove the temporary files
+      end
+    end
+  end
+
+    
 end
