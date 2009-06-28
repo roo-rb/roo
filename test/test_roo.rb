@@ -13,6 +13,7 @@
 #TODO
 # Look at formulas
 # Look at these before/after dates (seems unnecessary)
+# can now remove default_sheet always needing to be set
 
 # Dump warnings that come from the test to open files
 # with the wrong spreadsheet class
@@ -951,10 +952,6 @@ class TestRoo < Test::Unit::TestCase
         $log.level = Logger::DEBUG
         excel = Excel.new(File.join(TESTDIR,"bode-v1.xls.zip"), :zip)
         assert excel
-        # muss Fehler bringen, weil kein default_sheet gesetzt wurde
-        assert_raises (ArgumentError) {
-          assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-        }
         $log.level = Logger::WARN
         excel.default_sheet = excel.sheets.first
         assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
@@ -1524,17 +1521,6 @@ class TestRoo < Test::Unit::TestCase
     end
   end
   
-  def test_bug_cell_no_default_sheet
-    with_each_spreadsheet(:name=>'numbers1', :format=>:google) do |oo|
-      assert_raise(ArgumentError) {
-        # should complain about not set default-sheet
-        #assert_equal 1.0, oo.cell('A',1)
-        value = oo.cell('A',1)
-        assert_equal "ganz rechts  gehts noch wetier", oo.cell('A',1,"Sheet3")
-      }
-    end  
-  end
-
   def test_write_google
     # write.me: http://spreadsheets.google.com/ccc?key=ptu6bbahNZpY0N0RrxQbWdw&hl=en_GB
     with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|

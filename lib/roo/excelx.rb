@@ -128,11 +128,7 @@ class Excelx < GenericSpreadsheet
       FileUtils::rm_r(@tmpdir)
       #end
     end
-    @default_sheet = nil
-    # no need to set default_sheet if there is only one sheet in the document
-    if self.sheets.size == 1
-      @default_sheet = self.sheets.first
-    end
+    @default_sheet = self.sheets.first
     @cell = Hash.new
     @cell_type = Hash.new
     @formula = Hash.new

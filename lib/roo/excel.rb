@@ -74,11 +74,7 @@ class Excel < GenericSpreadsheet
         raise IOError, "file #{@filename} does not exist"
       end
       @workbook = Spreadsheet.open(filename)
-      @default_sheet = nil
-      # no need to set default_sheet if there is only one sheet in the document
-      if self.sheets.size == 1
-        @default_sheet = self.sheets.first
-      end
+      @default_sheet = self.sheets.first
     ensure
       #if ENV["roo_local"] != "thomas-p"
       FileUtils::rm_r(@tmpdir)

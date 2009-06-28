@@ -109,10 +109,7 @@ class Google < GenericSpreadsheet
     #-- ----------------------------------------------------------------------
     #-- TODO: Behandlung von Berechtigungen hier noch einbauen ???
     #-- ----------------------------------------------------------------------
-
-    if self.sheets.size  == 1
-      @default_sheet = self.sheets.first
-    end
+    @default_sheet = self.sheets.first
   end
 
   # returns an array of sheet names in the spreadsheet
