@@ -144,38 +144,6 @@ class Excel < GenericSpreadsheet
     end
   end
 
-  # returns the first non empty column
-  def first_column(sheet=nil)
-    sheet = @default_sheet unless sheet
-    return @first_column[sheet] if @first_column[sheet]
-    fr, lr, fc, lc = get_firsts_lasts(sheet)
-    fc
-  end
-
-  # returns the last non empty column
-  def last_column(sheet=nil)
-    sheet = @default_sheet unless sheet
-    return @last_column[sheet] if @last_column[sheet]
-    fr, lr, fc, lc = get_firsts_lasts(sheet)
-    lc
-  end
-
-  # returns the first non empty row
-  def first_row(sheet=nil)
-    sheet = @default_sheet unless sheet
-    return @first_row[sheet] if @first_row[sheet]
-    fr, lr, fc, lc = get_firsts_lasts(sheet)
-    fr
-  end
-
-  # returns the last non empty row
-  def last_row(sheet=nil)
-    sheet = @default_sheet unless sheet
-    return @last_row[sheet] if @last_row[sheet]
-    fr, lr, fc, lc = get_firsts_lasts(sheet)
-    lr
-  end
-
   # returns NO formula in excel spreadsheets
   def formula(row,col,sheet=nil)
     raise EXCEL_NO_FORMULAS
@@ -208,42 +176,6 @@ class Excel < GenericSpreadsheet
   end
 
   private
-  # determine the first and last boundaries
-  def get_firsts_lasts(sheet=nil)
-    
-    # 2008-09-14 BEGINf
-    fr=lr=fc=lc=nil
-    sheet = @default_sheet unless sheet
-    if ! @cells_read[sheet]
-      read_cells(sheet)
-    end
-    if @cell[sheet] # nur wenn ueberhaupt Zellen belegt sind
-      @cell[sheet].each {|cellitem|
-        key = cellitem.first
-        y,x = key
-
-        if cellitem[1].class != String or
-            (cellitem[1].class == String and cellitem[1] != "")
-          fr = y unless fr
-          fr = y if y < fr  
-      
-          lr = y unless lr
-          lr = y if y > lr 
-      
-          fc = x unless fc
-          fc = x if x < fc
-      
-          lc = x unless lc
-          lc = x if x > lc 
-        end
-      }
-    end
-    @first_row[sheet]    = fr
-    @last_row[sheet]     = lr
-    @first_column[sheet] = fc
-    @last_column[sheet]  = lc
-    return fr, lr, fc, lc
-  end
 
   # converts name of a sheet to index (0,1,2,..)
   def sheet_no(name)
