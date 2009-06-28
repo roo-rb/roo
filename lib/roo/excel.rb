@@ -389,6 +389,7 @@ class Excel < GenericSpreadsheet
   
   # Test the cell to see if it's a valid date/time. 
   def date_or_time?(row, idx)
+    return false if  row.at(idx).class == Spreadsheet::Formula
     format = row.format(idx)
     if format.date_or_time?
       cell = row.at(idx)
