@@ -130,7 +130,7 @@ class TestRoo < Test::Unit::TestCase
 
   OPENOFFICE   = true  	# do Openoffice-Spreadsheet Tests?
   EXCEL        = true	  # do Excel Tests?
-  GOOGLE       = false 	# do Google-Spreadsheet Tests?
+  GOOGLE       = true 	# do Google-Spreadsheet Tests?
   EXCELX       = true  	# do Excel-X Tests? (.xlsx-files)
 
   ONLINE = true
