@@ -20,6 +20,7 @@ module Spreadsheet
         end
         date
       end
+      public :_datetime
     end
   end
 end
@@ -386,13 +387,20 @@ class Excel < GenericSpreadsheet
     end # worksheet
     @cells_read[sheet] = true
   end
-  
+
+  # Get the contents of a cell, accounting for the
+  # way formula stores the value
+  def read_cell_content(row, idx)
+    cell = row.at(idx)
+    cell = cell.value if cell.class == Spreadsheet::Formula
+    cell
+  end
+    
   # Test the cell to see if it's a valid date/time. 
   def date_or_time?(row, idx)
-    return false if  row.at(idx).class == Spreadsheet::Formula
     format = row.format(idx)
     if format.date_or_time?
-      cell = row.at(idx)
+      cell = read_cell_content(row, idx)
       true if Float(cell) > 0 rescue false
     else
       false
@@ -403,7 +411,8 @@ class Excel < GenericSpreadsheet
   # Read the date-time cell and convert to, 
   # the date-time values for Roo
   def read_cell_date_or_time(row, idx)
-    cell = row.at(idx).to_s.to_f
+    cell = read_cell_content(row, idx)
+    cell = cell.to_s.to_f
     if cell < 1.0
       value_type = :time
       f = cell*24.0*60.0*60.0
@@ -415,7 +424,11 @@ class Excel < GenericSpreadsheet
       s = secs
       value = h*3600+m*60+s
     else
-      datetime = row.datetime(idx)
+      if row.at(idx).class == Spreadsheet::Formula
+        datetime = row._datetime(cell)
+      else
+        datetime = row.datetime(idx)
+      end    
       if datetime.hour != 0 or
          datetime.min != 0 or
          datetime.sec != 0 
@@ -423,7 +436,11 @@ class Excel < GenericSpreadsheet
         value = datetime
       else
         value_type = :date
-        value = row.date(idx)
+        if row.at(idx).class == Spreadsheet::Formula
+          value = row._date(cell)
+        else
+          value = row.date(idx)
+        end    
         value = sprintf("%04d-%02d-%02d",value.year,value.month,value.day)
       end
     end  
@@ -434,8 +451,7 @@ class Excel < GenericSpreadsheet
   # Read the cell and based on the class, 
   # return the values for Roo
   def read_cell(row, idx)
-    cell = row.at(idx)
-    cell = cell.value if cell.class == Spreadsheet::Formula
+    cell = read_cell_content(row, idx)
     case cell
     when Float, Integer, Fixnum, Bignum 
       value_type = :float

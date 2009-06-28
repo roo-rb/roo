@@ -130,7 +130,7 @@ class TestRoo < Test::Unit::TestCase
 
   OPENOFFICE   = true  	# do Openoffice-Spreadsheet Tests?
   EXCEL        = true	  # do Excel Tests?
-  GOOGLE       = true 	# do Google-Spreadsheet Tests?
+  GOOGLE       = false 	# do Google-Spreadsheet Tests?
   EXCELX       = true  	# do Excel-X Tests? (.xlsx-files)
 
   ONLINE = true
@@ -571,6 +571,15 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 42.5, oo.cell('A',17)
     end
   end
+  
+  # Excel can only read the cell's value
+  def test_formula_excel
+    with_each_spreadsheet(:name=>'formula', :format=>:excel) do |oo|
+      assert_equal 21, oo.cell('A',7)
+      assert_equal 21, oo.cell('B',7)
+    end
+  end
+
   
   def test_borders_sheets
     with_each_spreadsheet(:name=>'borders') do |oo|
@@ -1046,17 +1055,19 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
+  # We'ce added minimal formula support so we can now read these
+  # though not sure how the spreadsheet reports older values....
   def test_fe
     with_each_spreadsheet(:name=>'false_encoding', :format=>:excel) do |oo|
-      #DOES NOT WORK IN EXCEL FILES:  assert_equal Date.new(2007,11,1), oo.cell('a',1)
+      assert_equal Date.new(2007,11,1), oo.cell('a',1)
       #DOES NOT WORK IN EXCEL FILES: assert_equal true, oo.formula?('a',1)
       #DOES NOT WORK IN EXCEL FILES: assert_equal '=TODAY()', oo.formula('a',1)
 
-      #DOES NOT WORK IN EXCEL FILES: assert_equal Date.new(2008,2,9), oo.cell('B',1)
+      assert_equal Date.new(2008,2,9), oo.cell('B',1)
       #DOES NOT WORK IN EXCEL FILES: assert_equal true,               oo.formula?('B',1)
       #DOES NOT WORK IN EXCEL FILES: assert_equal "=A1+100",          oo.formula('B',1)
 
-      #DOES NOT WORK IN EXCEL FILES: assert_equal Date.new(2008,2,9), oo.cell('C',1)
+      assert_kind_of DateTime, oo.cell('C',1) 
       #DOES NOT WORK IN EXCEL FILES: assert_equal true,               oo.formula?('C',1)
       #DOES NOT WORK IN EXCEL FILES: assert_equal "=C1",          oo.formula('C',1)
 
@@ -1751,10 +1762,12 @@ Sheet 3:
   def test_base_dates_in_excel
     with_each_spreadsheet(:name=>'1900_base', :format=>:excel) do |oo|    
       assert_equal Date.new(2009,06,15), oo.cell(1,1)
+      assert_equal Date.new(Time.now.year,Time.now.month,Time.now.day), oo.cell(2,1) #formula for TODAY()
       assert_equal :date, oo.celltype(1,1)
     end  
     with_each_spreadsheet(:name=>'1904_base', :format=>:excel) do |oo|    
       assert_equal Date.new(2009,06,15), oo.cell(1,1)
+      assert_equal Date.new(Time.now.year,Time.now.month,Time.now.day), oo.cell(2,1) #formula for TODAY()
       assert_equal :date, oo.celltype(1,1)
     end  
   end
