@@ -12,7 +12,7 @@ module Roo
         when ''
           Google.new(file)
         else
-          raise ArgumentError, "Don't know how to open file #{filename}"
+          raise ArgumentError, "Don't know how to open file #{file}"
         end      
       end
     end
