@@ -130,7 +130,7 @@ class TestRoo < Test::Unit::TestCase
 
   OPENOFFICE   = true  	# do Openoffice-Spreadsheet Tests?
   EXCEL        = true	  # do Excel Tests?
-  GOOGLE       = true 	# do Google-Spreadsheet Tests?
+  GOOGLE       = false 	# do Google-Spreadsheet Tests?
   EXCELX       = true  	# do Excel-X Tests? (.xlsx-files)
 
   ONLINE = true
@@ -1756,18 +1756,27 @@ Sheet 3:
     end
   end
   
+
+  def test_ruby_spreadsheet_formula_bug
+     with_each_spreadsheet(:name=>'formula_parse_error', :format=>:excel) do |oo|
+       assert_equal '5026', oo.cell(2,3)
+       assert_equal '5026', oo.cell(3,3)
+     end
+   end
+
+
   # Excel has two base date formats one from 1900 and the other from 1904. 
   # There's a MS bug that 1900 base dates include an extra day due to erroneously
   # including 1900 as a leap yar. 
   def test_base_dates_in_excel
     with_each_spreadsheet(:name=>'1900_base', :format=>:excel) do |oo|    
       assert_equal Date.new(2009,06,15), oo.cell(1,1)
-      assert_equal Date.new(Time.now.year,Time.now.month,Time.now.day), oo.cell(2,1) #formula for TODAY()
+      assert_equal Date.new(2009,06,28), oo.cell(2,1) #formula for TODAY(), last calculated on 06.28
       assert_equal :date, oo.celltype(1,1)
     end  
     with_each_spreadsheet(:name=>'1904_base', :format=>:excel) do |oo|    
       assert_equal Date.new(2009,06,15), oo.cell(1,1)
-      assert_equal Date.new(Time.now.year,Time.now.month,Time.now.day), oo.cell(2,1) #formula for TODAY()
+      assert_equal Date.new(2009,06,28), oo.cell(2,1) #formula for TODAY(), last calculated on 06.28
       assert_equal :date, oo.celltype(1,1)
     end  
   end
