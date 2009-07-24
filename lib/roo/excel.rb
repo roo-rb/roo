@@ -12,42 +12,68 @@ end
 module Spreadsheet
   module Excel
     class Row < Spreadsheet::Row
+      def _datetime data # :nodoc:
+        return data if data.is_a?(DateTime)
+        base = @worksheet.date_base
+        date = base + data.to_f
+        hour = (data % 1) * 24
+        min  = (hour % 1) * 60
+        sec  = ((min % 1) * 60).round
+        min = min.floor
+        hour = hour.floor
+        if sec > 59
+          sec = 0
+          min += 1
+        end
+        if min > 59
+          min = 0
+          hour += 1
+        end
+        if hour > 23
+          hour = 0
+          date += 1
+        end
+        if LEAP_ERROR > base
+          date -= 1
+        end
+        DateTime.new(date.year, date.month, date.day, hour, min, sec)
+      end
       public :_date
       public :_datetime
     end
-      # patch for ruby-spreadsheet parsing formulas
-      class Reader
-        def read_formula worksheet, addr, work
-          row, column, xf, rtype, rval, rcheck, opts = work.unpack 'v3CxCx3v2'
-          formula = Formula.new
-          formula.shared = (opts & 0x08) > 0
-          formula.data = work[20..-1]
-          if rcheck != 0xffff || rtype > 3 
-            value, = work.unpack 'x6E'
-            unless value
-              # on architectures where sizeof(double) > 8
-              value, = work.unpack 'x6e'
-            end
-            formula.value = value
-          elsif rtype == 0
-            pos, op, len, work = get_next_chunk
-            if op == :string
-              formula.value = client read_string(work, 2), @workbook.encoding
-            else
-              # This seems to work but I don't know why :). It at least
-              # seems to correct the case we saw but doubtful it's the right fix
-              formula.value = client read_string(work[10..-1], 2), @workbook.encoding
-            end
-          elsif rtype == 1
-            formula.value = rval > 0
-          elsif rtype == 2
-            formula.value = Error.new rval
-          else
-            # leave the Formula value blank
+    # patch for ruby-spreadsheet parsing formulas
+    class Reader
+      def read_formula worksheet, addr, work
+        row, column, xf, rtype, rval, rcheck, opts = work.unpack 'v3CxCx3v2'
+        formula = Formula.new
+        formula.shared = (opts & 0x08) > 0
+        formula.data = work[20..-1]
+        if rcheck != 0xffff || rtype > 3 
+          value, = work.unpack 'x6E'
+          unless value
+            # on architectures where sizeof(double) > 8
+            value, = work.unpack 'x6e'
           end
-          set_cell worksheet, row, column, xf, formula
+          formula.value = value
+        elsif rtype == 0
+          pos, op, len, work = get_next_chunk
+          if op == :string
+            formula.value = client read_string(work, 2), @workbook.encoding
+          else
+            # This seems to work but I don't know why :). It at least
+            # seems to correct the case we saw but doubtful it's the right fix
+            formula.value = client read_string(work[10..-1], 2), @workbook.encoding
+          end
+        elsif rtype == 1
+          formula.value = rval > 0
+        elsif rtype == 2
+          formula.value = Error.new rval
+        else
+          # leave the Formula value blank
         end
+        set_cell worksheet, row, column, xf, formula
       end
+    end
   end
 end
 
