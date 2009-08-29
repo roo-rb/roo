@@ -1,44 +1,64 @@
 require 'gdata/spreadsheet'
 require 'xml'
 
+class GoogleHTTPError < RuntimeError; end
+class GoogleReadError < RuntimeError; end
+class GoogleWriteError < RuntimeError; end
+
 # overwrite some methods from the gdata-gem:
 module GData
   class Spreadsheet < GData::Base
+    
+    def visibility
+      @headers ? "private" : "public"
+    end
+   
+    def projection
+      @headers ? "full" : "values"
+    end
+    
     #-- modified
     def evaluate_cell(cell, sheet_no=1)
       raise ArgumentError, "invalid cell: #{cell}" unless cell
       raise ArgumentError, "invalid sheet_no: #{sheet_no}" unless sheet_no >0 and sheet_no.class == Fixnum
-      path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/#{@headers ? "private" : "public"}/basic/#{cell}"
-
+      path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/#{visibility}/#{projection}/#{cell}"
       doc = Hpricot(request(path))
       result = (doc/"content").inner_html
     end
 
     #-- new
     def sheetlist
-      path = "/feeds/worksheets/#{@spreadsheet_id}/private/basic"
+      path = "/feeds/worksheets/#{@spreadsheet_id}/#{visibility}/#{projection}"
       doc = Hpricot(request(path))
       result = []
       (doc/"content").each { |elem|
         result << elem.inner_html
       }
+      if result.size == 0 
+        if (doc/"h2").inner_html =~ /Error/
+          raise GoogleHTTPError, "#{(doc/'h2').inner_html}: #{(doc/'title').inner_html} [key '#{@spreadsheet_id}']"
+        else
+          raise GoogleReadError, "#{doc} [key '#{@spreadsheet_id}']"
+        end  
+      end
       result
     end
 
     #-- new
     #@@ added sheet_no to definition
     def save_entry_roo(entry, sheet_no)
-      path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/#{@headers ? 'private' : 'public'}/full"
+      raise GoogleWriteError, "unable to write to public spreadsheets" if visibility == 'public'
+      path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/#{visibility}/#{projection}"
       post(path, entry)
     end
 
     #-- new
     def entry_roo(formula, row=1, col=1)
-      <<XML
+    <<-XML
     <entry xmlns='http://www.w3.org/2005/Atom' xmlns:gs='http://schemas.google.com/spreadsheets/2006'>
       <gs:cell row='#{row}' col='#{col}' inputValue='#{formula}' />
     </entry>
-XML
+    XML
     end
 
     #-- new
@@ -49,13 +69,13 @@ XML
    
     #-- new
     def get_one_sheet
-      path = "/feeds/cells/#{@spreadsheet_id}/1/private/full"
+      path = "/feeds/cells/#{@spreadsheet_id}/1/#{visibility}/#{projection}"
       doc = Hpricot(request(path))
     end
 
     #new
     def oben_unten_links_rechts(sheet_no)
-      path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/private/full"
+      path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/#{visibility}/#{projection}"
       doc = Hpricot(request(path))
       rows = []
       cols = []
@@ -67,7 +87,7 @@ XML
     end
 
     def fulldoc(sheet_no)
-      path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/private/full"
+      path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/#{visibility}/#{projection}"
       doc = Hpricot(request(path))
       return doc
     end
@@ -90,7 +110,6 @@ class Google < GenericSpreadsheet
     unless password
       password = ENV['GOOGLE_PASSWORD']
     end
-    @default_sheet = nil
     @cell = Hash.new {|h,k| h[k]=Hash.new}
     @cell_type = Hash.new {|h,k| h[k]=Hash.new}
     @formula = Hash.new
@@ -104,11 +123,8 @@ class Google < GenericSpreadsheet
     @datetime_format = '%d/%m/%Y %H:%M:%S' 
     @time_format = '%H:%M:%S'
     @gs = GData::Spreadsheet.new(spreadsheetkey)
-    @gs.authenticate(user, password)
+    @gs.authenticate(user, password) unless user.empty? || password.empty?
     @sheetlist = @gs.sheetlist
-    #-- ----------------------------------------------------------------------
-    #-- TODO: Behandlung von Berechtigungen hier noch einbauen ???
-    #-- ----------------------------------------------------------------------
     @default_sheet = self.sheets.first
   end
 
@@ -192,7 +208,7 @@ class Google < GenericSpreadsheet
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
-    if @formula[sheet]["#{row},#{col}"]
+    if @formula.size > 0 && @formula[sheet]["#{row},#{col}"]
       return :formula
     else
       @cell_type[sheet]["#{row},#{col}"]
@@ -335,7 +351,7 @@ class Google < GenericSpreadsheet
   end
   
   def determine_datatype(val, numval=nil)
-    if val[0,1] == '='
+    if val.nil? || val[0,1] == '='
       ty = :formula
       if numeric?(numval)
         val = numval.to_f

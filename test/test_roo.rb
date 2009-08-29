@@ -158,6 +158,16 @@ class TestRoo < Test::Unit::TestCase
      yield Roo::Spreadsheet.open(key_of(options[:name]) || options[:name]) if GOOGLE && options[:format].include?(:google)
   end
 
+  def with_public_google_spreadsheet(&block)
+    user = ENV['GOOGLE_MAIL']
+    pass = ENV['GOOGLE_PASSWORD']
+    ENV['GOOGLE_MAIL'] = ''
+    ENV['GOOGLE_PASSWORD'] = ''
+    block.call
+    ENV['GOOGLE_MAIL'] = user
+    ENV['GOOGLE_PASSWORD'] = pass
+  end
+  
   # Using Date.strptime so check that it's using the method
   # with the value set in date_format
   def test_date
@@ -385,7 +395,7 @@ class TestRoo < Test::Unit::TestCase
   def test_empty_eh
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       assert oo.empty?('a',14)
-      assert ! oo.empty?('a',15)
+      assert !oo.empty?('a',15)
       assert oo.empty?('a',20)
     end
   end
@@ -1199,6 +1209,7 @@ class TestRoo < Test::Unit::TestCase
   
   def test_write_google
     # write.me: http://spreadsheets.google.com/ccc?key=ptu6bbahNZpY0N0RrxQbWdw&hl=en_GB
+    
     with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|
       oo.set_value(1,1,"hello from the tests")
       assert_equal "hello from the tests", oo.cell(1,1)
@@ -1345,7 +1356,7 @@ Sheet 3:
 
   def test_no_remaining_tmp_files_google
     if GOOGLE
-      assert_nothing_raised() {
+      assert_raise(GoogleReadError) {
         oo = Google.new(key_of("no_spreadsheet_file.txt"))
       }
       a=Dir.glob("oo_*")
@@ -1790,5 +1801,22 @@ Sheet 3:
     end
   end
   
+  def test_public_google_doc
+    with_public_google_spreadsheet do 
+      assert_raise(GoogleHTTPError) { Google.new("foo") }
+      assert_raise(GoogleReadError) { Google.new(key_of('numbers1'))}
+      assert_nothing_raised { Google.new("0AncOJVyN5MMMcjZtN0hGbFVPd3N0MFJUVVR1aFEwT3c") } # use spreadsheet key (private)
+      assert_nothing_raised { Google.new(key_of('write.me')) } # use spreadsheet key (public)
+    end
+  end    
+
+  def test_public_google_doc_write
+    with_public_google_spreadsheet do 
+      assert_raise(GoogleWriteError) {
+        oo = Google.new(key_of('write.me'))
+        oo.set_value(1,1,'test')
+      }  
+    end
+  end    
    
 end # class
