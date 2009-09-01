@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{roo}
-  s.version = "1.3.10"
+  s.version = "1.3.11"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Hugh McGowan", "Thomas Preymesser"]
-  s.date = %q{2009-08-29}
+  s.date = %q{2009-08-31}
   s.description = %q{roo can access the contents of OpenOffice-, Excel- or Google-Spreadsheets}
   s.email = %q{hugh_mcgowan@yahoo.com}
   s.extra_rdoc_files = [
@@ -92,7 +92,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--main", "README.markdown"]
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{roo}
-  s.rubygems_version = %q{1.3.3}
+  s.rubygems_version = %q{1.3.5}
   s.summary = %q{roo}
   s.test_files = [
     "test/skipped_tests.rb",
