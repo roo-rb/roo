@@ -128,10 +128,10 @@ end
 
 class TestRoo < Test::Unit::TestCase
 
-  OPENOFFICE   = true  	# do Openoffice-Spreadsheet Tests?
+  OPENOFFICE   = false  	# do Openoffice-Spreadsheet Tests?
   EXCEL        = true	  # do Excel Tests?
   GOOGLE       = false 	# do Google-Spreadsheet Tests?
-  EXCELX       = true  	# do Excel-X Tests? (.xlsx-files)
+  EXCELX       = false  	# do Excel-X Tests? (.xlsx-files)
 
   ONLINE = true
   LONG_RUN = false
@@ -155,6 +155,7 @@ class TestRoo < Test::Unit::TestCase
      yield Roo::Spreadsheet.open(File.join(TESTDIR, options[:name] + '.xls')) if EXCEL && options[:format].include?(:excel)
      yield Roo::Spreadsheet.open(File.join(TESTDIR, options[:name] + '.xlsx')) if EXCELX && options[:format].include?(:excelx)
      yield Roo::Spreadsheet.open(File.join(TESTDIR, options[:name] + '.ods')) if OPENOFFICE && options[:format].include?(:openoffice)
+     yield Roo::Spreadsheet.open(File.join(TESTDIR, options[:name] + '.xml')) if EXCEL && options[:format].include?(:excel2003)
      yield Roo::Spreadsheet.open(key_of(options[:name]) || options[:name]) if GOOGLE && options[:format].include?(:google)
   end
 
@@ -1800,6 +1801,15 @@ Sheet 3:
       }
     end
   end
+
+  def test_foo
+    with_each_spreadsheet(:name=>'excel2003', :format=>:excel2003) do |oo|   
+      oo.default_sheet = 'SiteData'
+      puts oo.cell(1,1)
+      puts oo.cell(1,2)
+    end
+  end
+
   
   def test_public_google_doc
     with_public_google_spreadsheet do 

@@ -9,6 +9,8 @@ module Roo
           Excelx.new(file)
         when '.ods'
           Openoffice.new(file)
+        when '.xml'
+          Excel2003.new(file)
         when ''
           Google.new(file)
         else
@@ -26,4 +28,5 @@ require 'roo/openoffice'
 require 'roo/excel'
 require 'roo/excelx'
 require 'roo/google'
+require 'roo/excel2003'
 require 'roo/roo_rails_helper'

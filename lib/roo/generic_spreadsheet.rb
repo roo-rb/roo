@@ -366,9 +366,10 @@ class GenericSpreadsheet
       '.ods' => 'Openoffice.new',
       '.xls' => 'Excel.new',
       '.xlsx' => 'Excelx.new',
+      '.xml' => 'Excel2003.new'
     }
     case ext
-    when '.ods', '.xls', '.xlsx'
+    when '.ods', '.xls', '.xlsx', '.xml'
       correct_class = "use #{new_expression[ext]} to handle #{ext} spreadsheet files"
     else
       raise "unknown file type: #{ext}"

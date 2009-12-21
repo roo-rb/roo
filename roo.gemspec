@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Hugh McGowan", "Thomas Preymesser"]
-  s.date = %q{2009-08-31}
+  s.date = %q{2009-12-21}
   s.description = %q{roo can access the contents of OpenOffice-, Excel- or Google-Spreadsheets}
   s.email = %q{hugh_mcgowan@yahoo.com}
   s.extra_rdoc_files = [
@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.files = [
     "lib/roo.rb",
      "lib/roo/excel.rb",
+     "lib/roo/excel2003.rb",
      "lib/roo/excelx.rb",
      "lib/roo/generic_spreadsheet.rb",
      "lib/roo/google.rb",
@@ -51,6 +52,7 @@ Gem::Specification.new do |s|
      "test/datetime_floatconv.xls",
      "test/emptysheets.ods",
      "test/emptysheets.xls",
+     "test/excel2003.xml",
      "test/false_encoding.xls",
      "test/formula.ods",
      "test/formula.xls",
