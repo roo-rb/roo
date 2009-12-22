@@ -129,9 +129,10 @@ end
 class TestRoo < Test::Unit::TestCase
 
   OPENOFFICE   = false  	# do Openoffice-Spreadsheet Tests?
-  EXCEL        = true	  # do Excel Tests?
-  GOOGLE       = false 	# do Google-Spreadsheet Tests?
+  EXCEL        = false	  # do Excel Tests?
+  GOOGLE       = false 	  # do Google-Spreadsheet Tests?
   EXCELX       = false  	# do Excel-X Tests? (.xlsx-files)
+  EXCEL2003XML = true     # do MS2003 XML tests
 
   ONLINE = true
   LONG_RUN = false
@@ -150,12 +151,19 @@ class TestRoo < Test::Unit::TestCase
   # call a block of code for each spreadsheet type 
   # and yield a reference to the roo object
   def with_each_spreadsheet(options)
-     options[:format] ||= [:excel, :excelx, :openoffice, :google]
-     options[:format] = [options[:format]] if options[:format].class == Symbol
+     options[:format] ||= [:excel, :excelx, :excel2003xml, :openoffice, :google]
+     options[:format] = [options[:format]] if Symbol === options[:format]
+     if options[:ignore]
+       if Symbol === options[:ignore]
+         options[:format] = (options[:format] - [options[:ignore]]) 
+       else
+         options[:format] = (options[:format] - options[:ignore]) 
+       end
+     end
      yield Roo::Spreadsheet.open(File.join(TESTDIR, options[:name] + '.xls')) if EXCEL && options[:format].include?(:excel)
      yield Roo::Spreadsheet.open(File.join(TESTDIR, options[:name] + '.xlsx')) if EXCELX && options[:format].include?(:excelx)
      yield Roo::Spreadsheet.open(File.join(TESTDIR, options[:name] + '.ods')) if OPENOFFICE && options[:format].include?(:openoffice)
-     yield Roo::Spreadsheet.open(File.join(TESTDIR, options[:name] + '.xml')) if EXCEL && options[:format].include?(:excel2003)
+     yield Roo::Spreadsheet.open(File.join(TESTDIR, options[:name] + '.xml')) if EXCEL2003XML && options[:format].include?(:excel2003xml)
      yield Roo::Spreadsheet.open(key_of(options[:name]) || options[:name]) if GOOGLE && options[:format].include?(:google)
   end
 
@@ -252,9 +260,14 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 12, oo.cell(4,'C')
       assert_equal 13, oo.cell(4,'D')
       assert_equal 14, oo.cell(4,'E')
-      assert_equal :date, oo.celltype(5,1)
+      if EXCEL2003XML
+        assert_equal :datetime, oo.celltype(5,1)
+        assert_equal "1961-11-21T00:00:00+00:00", oo.cell(5,1).to_s
+      else
+        assert_equal :date, oo.celltype(5,1)
+        assert_equal "1961-11-21", oo.cell(5,1).to_s
+      end
       assert_equal Date.new(1961,11,21), oo.cell(5,1)
-      assert_equal "1961-11-21", oo.cell(5,1).to_s
     end
   end
   
@@ -620,7 +633,11 @@ class TestRoo < Test::Unit::TestCase
 
   def test_to_yaml
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      assert_equal "--- \n"+yaml_entry(5,1,"date","1961-11-21"), oo.to_yaml({}, 5,1,5,1)
+      if EXCEL2003XML
+        assert_equal "--- \n"+yaml_entry(5,1,"datetime","1961-11-21T00:00:00+00:00"), oo.to_yaml({}, 5,1,5,1)
+      else
+        assert_equal "--- \n"+yaml_entry(5,1,"date","1961-11-21"), oo.to_yaml({}, 5,1,5,1)
+      end
       assert_equal "--- \n"+yaml_entry(8,3,"string","thisisc8"), oo.to_yaml({}, 8,3,8,3)
       assert_equal "--- \n"+yaml_entry(12,3,"float",43.0), oo.to_yaml({}, 12,3,12,3)
       assert_equal \
@@ -782,7 +799,7 @@ class TestRoo < Test::Unit::TestCase
   end
 
   def test_to_csv
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
+    with_each_spreadsheet(:name=>'numbers1', :ignore=>:excel2003xml) do |oo|
       master = "#{TESTDIR}/numbers1.csv"
       File.delete_if_exist("/tmp/numbers1.csv")
       assert oo.to_csv("/tmp/numbers1.csv",oo.sheets.first)
@@ -797,11 +814,19 @@ class TestRoo < Test::Unit::TestCase
   def test_bug_mehrere_datum
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       oo.default_sheet = 'Sheet5'
-      assert_equal :date, oo.celltype('A',4)
-      assert_equal :date, oo.celltype('B',4)
-      assert_equal :date, oo.celltype('C',4)
-      assert_equal :date, oo.celltype('D',4)
-      assert_equal :date, oo.celltype('E',4)
+      if EXCEL2003XML
+        assert_equal :datetime, oo.celltype('A',4)
+        assert_equal :datetime, oo.celltype('B',4)
+        assert_equal :datetime, oo.celltype('C',4)
+        assert_equal :datetime, oo.celltype('D',4)
+        assert_equal :datetime, oo.celltype('E',4)
+      else
+        assert_equal :date, oo.celltype('A',4)
+        assert_equal :date, oo.celltype('B',4)
+        assert_equal :date, oo.celltype('C',4)
+        assert_equal :date, oo.celltype('D',4)
+        assert_equal :date, oo.celltype('E',4)
+      end
       assert_equal Date.new(2007,11,21), oo.cell('A',4)
       assert_equal Date.new(2007,11,21), oo.cell('B',4)
       assert_equal Date.new(2007,11,21), oo.cell('C',4)
@@ -1281,7 +1306,7 @@ Sheet 3:
 
 
   def test_bug_time_nil
-    with_each_spreadsheet(:name=>'time-test') do |oo|
+    with_each_spreadsheet(:name=>'time-test', :ignore=>:excel2003xml) do |oo|
       assert_equal 12*3600+13*60+14, oo.cell('B',1) # 12:13:14 (secs since midnight)
       assert_equal :time, oo.celltype('B',1)
       assert_equal 15*3600+16*60, oo.cell('C',1) # 15:16    (secs since midnight)
@@ -1803,7 +1828,7 @@ Sheet 3:
   end
 
   def test_foo
-    with_each_spreadsheet(:name=>'excel2003', :format=>:excel2003) do |oo|   
+    with_each_spreadsheet(:name=>'excel2003xml', :format=>:excel2003xml) do |oo|   
       oo.default_sheet = 'SiteData'
       puts oo.cell(1,1)
       puts oo.cell(1,2)
