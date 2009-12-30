@@ -5,7 +5,7 @@ require 'date'
 require 'base64'
 require 'cgi'
 
-class Excel2003 < GenericSpreadsheet
+class Excel2003XML < GenericSpreadsheet
 
   @@nr = 0
 
@@ -244,7 +244,8 @@ class Excel2003 < GenericSpreadsheet
         ws.find('.//ss:Row').each do |r|
           skip_to_row = r.attributes['Index'].to_i
           row = skip_to_row if skip_to_row > 0
-          r.each do |c|            
+          r.each do |c|    
+            next unless c.name == 'Cell'        
             skip_to_col = c.attributes['Index'].to_i
             col = skip_to_col if skip_to_col > 0
             c.each_element do |cell|
@@ -279,7 +280,14 @@ class Excel2003 < GenericSpreadsheet
                 when :number
                   v = v.to_f   
                   vt = :float
-                when :string, :datetime,'', nil
+                when :datetime
+                  if v =~ /^1899-12-31T(\d{2}:\d{2}:\d{2})/
+                    v = $1
+                    vt = :time
+                  elsif v =~ /([^T]+)T00:00:00.000/
+                    v = $1
+                    vt = :date
+                  end
                 when :boolean
                   v = cell.attributes['boolean-value']
                 else
@@ -291,10 +299,10 @@ class Excel2003 < GenericSpreadsheet
                 #   puts row
                 #   puts col 
                 #   puts '---'
-                set_cell_values(sheet,col,row,0,v,vt.to_sym,formula,cell,str_v,style_name)
               end
+              set_cell_values(sheet,col,row,0,v,vt.to_sym,formula,cell,str_v,style_name)
             end    
-            col += 1 if c.name == 'Cell'
+            col += 1 
           end
           row += 1
           col = 1
