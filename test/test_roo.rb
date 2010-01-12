@@ -1805,7 +1805,7 @@ Sheet 3:
   
   
   def test_bad_excel_date
-    with_each_spreadsheet(:name=>'bad_exceL_date', :format=>:excel) do |oo|   
+    with_each_spreadsheet(:name=>'bad_excel_date', :format=>:excel) do |oo|   
       assert_nothing_raised(ArgumentError) {
         assert_equal DateTime.new(2006,2,2,10,0,0), oo.cell('a',1)
       }

@@ -604,7 +604,7 @@ class GenericSpreadsheet
         else
           raise "unhandled onecell-class "+onecell.class.to_s
         end
-      when :date
+      when :date,:datetime
         str << onecell.to_s
       when :time
         str << GenericSpreadsheet.integer_to_timestring(onecell)
