@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.files = [
     "lib/roo.rb",
      "lib/roo/excel.rb",
-     "lib/roo/excel2003.rb",
+     "lib/roo/excel2003xml.rb",
      "lib/roo/excelx.rb",
      "lib/roo/generic_spreadsheet.rb",
      "lib/roo/google.rb",
