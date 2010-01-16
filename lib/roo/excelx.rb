@@ -391,13 +391,12 @@ class Excelx < GenericSpreadsheet
     raise RangeError unless self.sheets.include? sheet
     n = self.sheets.index(sheet)
     @sheet_doc[n].find("//*[local-name()='c']").each do |c|
-       s_attribute = c.attributes.to_h['s'].to_i   # should be here
+       s_attribute = c.attributes.to_h['s'].to_i   
        if (c.attributes.to_h['t'] == 's')
          tmp_type = :shared
        elsif (c.attributes.to_h['t'] == 'b')
          tmp_type = :boolean
        else
-       #  s_attribute = c.attributes.to_h['s'].to_i     # was here
          format = attribute2format(s_attribute)
          tmp_type = format2type(format)
        end

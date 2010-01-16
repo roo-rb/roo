@@ -1673,7 +1673,7 @@ Sheet 3:
    end
   
   def test_cell_styles
-    with_each_spreadsheet(:name=>'style', :format=>[:openoffice, :excel, :excelx]) do |oo|    
+    with_each_spreadsheet(:name=>'style', :format=>[:openoffice, :excel, :excelx, :excel2003xml]) do |oo|    
       # bold
       assert_equal true,  oo.font(1,1).bold?
       assert_equal false, oo.font(1,1).italic?
@@ -1716,8 +1716,8 @@ Sheet 3:
 
       # bolded col
       assert_equal true, oo.font(9,2).bold?
-      assert_equal false,  oo.font(9,2).italic?
-      assert_equal false,  oo.font(9,2).underline?
+      assert_equal false, oo.font(9,2).italic?
+      assert_equal false, oo.font(9,2).underline?
 
       # bolded row, italic col
       assert_equal true, oo.font(10,3).bold?

@@ -40,10 +40,11 @@ class Excel2003XML < GenericSpreadsheet
     @last_row = Hash.new
     @first_column = Hash.new
     @last_column = Hash.new
+    @header_line = 1
     @style = Hash.new
     @style_defaults = Hash.new { |h,k| h[k] = [] }
     @style_definitions = Hash.new 
-    @header_line = 1
+    read_styles
   end
 
   # Returns the content of a spreadsheet-cell.
@@ -87,11 +88,11 @@ class Excel2003XML < GenericSpreadsheet
     attr_accessor :bold, :italic, :underline
     
     def bold? 
-      @bold == 'bold'
+      @bold == '1'
     end
 
     def italic? 
-      @italic == 'italic'
+      @italic == '1'
     end
     
     def underline? 
@@ -241,42 +242,32 @@ class Excel2003XML < GenericSpreadsheet
         sheet_found = true
         row = 1
         col = 1
+        column_attributes = {}   
+        idx = 0
+        ws.find('.//ss:Column').each do |c|
+          column_attributes[(idx += 1).to_s] = c.attributes['StyleID'] 
+        end  
         ws.find('.//ss:Row').each do |r|
           skip_to_row = r.attributes['Index'].to_i
           row = skip_to_row if skip_to_row > 0
+          style_name = r.attributes['StyleID'] if r.attributes['StyleID'] 
           r.each do |c|    
             next unless c.name == 'Cell'        
             skip_to_col = c.attributes['Index'].to_i
             col = skip_to_col if skip_to_col > 0
+            if c.attributes['StyleID'] 
+              style_name = c.attributes['StyleID'] 
+            elsif 
+              style_name ||= column_attributes[c.attributes['Index']]
+            end  
             c.each_element do |cell|
               formula = nil
-              style_name = cell.attributes['StyleID']
               if cell.name == 'Data'
                 formula = cell.attributes['Formula']
                 vt = cell.attributes['Type'].downcase.to_sym
                 v =  cell.content
                 str_v = v
                 case vt 
-                # when :string
-                #   str_v  = ''
-                #   # insert \n if there is more than one paragraph
-                #   para_count = 0
-                #   cell.each_element do |str|
-                #     if str.name == 'p'
-                #       v = str.content
-                #       str_v += "\n" if para_count > 0
-                #       para_count += 1
-                #       if str.children.size > 1
-                #         str_v += children_to_string(str.children)
-                #       else
-                #         str.children.each do |child|
-                #           str_v += child.content #.text
-                #         end
-                #       end
-                #       str_v.gsub!(/&apos;/,"'")  # special case not supported by unescapeHTML
-                #       str_v = CGI.unescapeHTML(str_v)
-                #     end # == 'p'
-                #    end
                 when :number
                   v = v.to_f   
                   vt = :float
@@ -290,17 +281,9 @@ class Excel2003XML < GenericSpreadsheet
                   end
                 when :boolean
                   v = cell.attributes['boolean-value']
-                else
-                  # raise "unknown type #{vt}"
                 end
-                # puts vt
-                #   puts v
-                #   puts str_v
-                #   puts row
-                #   puts col 
-                #   puts '---'
               end
-              set_cell_values(sheet,col,row,0,v,vt.to_sym,formula,cell,str_v,style_name)
+              set_cell_values(sheet,col,row,0,v,vt,formula,cell,str_v,style_name)
             end    
             col += 1 
           end
@@ -314,19 +297,19 @@ class Excel2003XML < GenericSpreadsheet
     @cells_read[sheet] = true
   end
 
-  def read_styles(style_elements)
-    @style_definitions['Default'] = Openoffice::Font.new
-    style_elements.each do |style|
-      next unless style.name == 'style'
-      style_name = style.attributes['name']
-      style.each do |properties|
-        font = Openoffice::Font.new
-        font.bold = properties.attributes['font-weight']
-        font.italic = properties.attributes['font-style']
-        font.underline = properties.attributes['text-underline-style']
-        @style_definitions[style_name] = font
-      end    
-    end
+  def read_styles
+    @doc.find("ss:Styles").each do |styles|
+       styles.find('.//ss:Style').each do |style|
+         style_id = style.attributes['ID']
+         @style_definitions[style_id] = Excel2003XML::Font.new
+         font = style.find_first('.//ss:Font')
+         if font
+           @style_definitions[style_id].bold = font.attributes['Bold']
+           @style_definitions[style_id].italic = font.attributes['Italic']
+           @style_definitions[style_id].underline = font.attributes['Underline']
+        end
+      end
+    end  
   end
   
   # Checks if the default_sheet exists. If not an RangeError exception is
