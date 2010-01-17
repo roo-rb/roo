@@ -2,6 +2,9 @@
 
 Roo is available here and on Rubyforge. You can install the official release with 'gem install roo' or refer to the installation instructions below for the latest development gem. 
 
+NOTE: Roo 1.9 was released by Thomas and I think it was intended for Ruby 1.9 but the dependencies are not working properly so everyone gets it with a gem install Roo. I'm trying to get a hold of him to work out how to fix things.
+
+In the meantime, Roo 1.3.11 should be on gemcutter and works with Ruby 1.8 with no known issues. I'll continue to maintain this version in the interim.  
 
 ## Installation
 
@@ -9,7 +12,7 @@ Roo is available here and on Rubyforge. You can install the official release wit
     gem sources -a http://gems.github.com/
 
     # Install the gem:
-    sudo gem install hmcgowan-roo
+    sudo gem install roo -v 1.3.11
 
 ## Usage:
 
