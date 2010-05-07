@@ -1,4 +1,4 @@
-require 'xml'
+require 'nokogiri'
 require 'fileutils'
 require 'zip/zipfilesystem'
 require 'date'
@@ -100,12 +100,12 @@ class Excelx < GenericSpreadsheet
       @file_nr = @@nr
       extract_content(@filename)
       file = File.new(File.join(@tmpdir, @file_nr.to_s+"_roo_workbook.xml"))
-      @workbook_doc = XML::Parser.io(file).parse
+      @workbook_doc = Nokogiri::XML(file)
       file.close
       @shared_table = []
       if File.exist?(File.join(@tmpdir, @file_nr.to_s+'_roo_sharedStrings.xml'))
         file = File.new(File.join(@tmpdir, @file_nr.to_s+'_roo_sharedStrings.xml'))
-        @sharedstring_doc = XML::Parser.io(file).parse
+        @sharedstring_doc = Nokogiri::XML(file)
         file.close
         read_shared_strings(@sharedstring_doc)
       end
@@ -113,14 +113,14 @@ class Excelx < GenericSpreadsheet
       @style_definitions = Array.new { |h,k| h[k] = {} }
       if File.exist?(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml'))
         file = File.new(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml'))
-        @styles_doc = XML::Parser.io(file).parse
+        @styles_doc = Nokogiri::XML(file)
         file.close
         read_styles(@styles_doc)
       end
       @sheet_doc = []
       @sheet_files.each_with_index do |item, i|
         file = File.new(item)
-        @sheet_doc[i] = XML::Parser.io(file).parse
+        @sheet_doc[i] = Nokogiri::XML(file)
         file.close
       end
     ensure
@@ -281,8 +281,8 @@ class Excelx < GenericSpreadsheet
   # returns an array of sheet names in the spreadsheet
   def sheets
     return_sheets = []
-    @workbook_doc.find("//*[local-name()='sheet']").each do |sheet|
-      return_sheets << sheet.attributes.to_h['name']
+    @workbook_doc.xpath("//*[local-name()='sheet']").each do |sheet|
+      return_sheets << sheet['name']
     end
     return_sheets
   end
@@ -390,18 +390,18 @@ class Excelx < GenericSpreadsheet
     raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
     raise RangeError unless self.sheets.include? sheet
     n = self.sheets.index(sheet)
-    @sheet_doc[n].find("//*[local-name()='c']").each do |c|
-       s_attribute = c.attributes.to_h['s'].to_i   
-       if (c.attributes.to_h['t'] == 's')
+    @sheet_doc[n].xpath("//*[local-name()='c']").each do |c|
+       s_attribute = c['s'].to_i
+       if (c['t'] == 's')
          tmp_type = :shared
-       elsif (c.attributes.to_h['t'] == 'b')
+       elsif (c['t'] == 'b')
          tmp_type = :boolean
        else
          format = attribute2format(s_attribute)
          tmp_type = format2type(format)
        end
       formula = nil
-      c.each_element do |cell|
+      c.element_children.each do |cell|
         if cell.name == 'f'
           formula = cell.content
         end
@@ -442,7 +442,7 @@ class Excelx < GenericSpreadsheet
             v = cell.content
           end
           #puts "vt: #{vt}" if cell.text.include? "22606.5120"
-          x,y = split_coordinate(c.attributes.to_h['r'])
+          x,y = split_coordinate(c['r'])
           tr=nil #TODO: ???s
           set_cell_values(sheet,x,y,0,v,vt,formula,tr,str_v,excelx_type,excelx_value,s_attribute)
         end
@@ -522,11 +522,11 @@ class Excelx < GenericSpreadsheet
 
   # read the shared strings xml document
   def read_shared_strings(doc)
-    doc.find("//*[local-name()='si']").each do |si|
+    doc.xpath("//*[local-name()='si']").each do |si|
       shared_table_entry = ''
-      si.each_element do |elem|
+      si.element_children.each do |elem|
         if (elem.name == 'r')
-          elem.each_element do |r_elem|
+          elem.element_children.each do |r_elem|
             if (r_elem.name == 't')
               shared_table_entry << r_elem.content
             end
@@ -546,16 +546,16 @@ class Excelx < GenericSpreadsheet
     @cellXfs = []
     fonts = []
     
-    doc.find("//*[local-name()='numFmt']").each do |numFmt|
-      numFmtId = numFmt.attributes.to_h['numFmtId']
-      formatCode = numFmt.attributes.to_h['formatCode']
+    doc.xpath("//*[local-name()='numFmt']").each do |numFmt|
+      numFmtId = numFmt['numFmtId']
+      formatCode = numFmt['formatCode']
       @numFmts << [numFmtId, formatCode]
     end
-    doc.find("//*[local-name()='fonts']").each do |fonts_el|
-      fonts_el.each_element do |font_el|
+    doc.xpath("//*[local-name()='fonts']").each do |fonts_el|
+      fonts_el.element_children.each do |font_el|
         if font_el.name == 'font'
           font = Excelx::Font.new
-          font_el.each_element do |font_sub_el|
+          font_el.element_children.each do |font_sub_el|
             case font_sub_el.name
               when 'b'
                 font.bold = true
@@ -570,11 +570,11 @@ class Excelx < GenericSpreadsheet
       end
     end
     
-    doc.find("//*[local-name()='cellXfs']").each do |xfs|
-        xfs.each do |xf|
-          numFmtId = xf.attributes.to_h['numFmtId']
+    doc.xpath("//*[local-name()='cellXfs']").each do |xfs|
+        xfs.children.each do |xf|
+          numFmtId = xf['numFmtId']
           @cellXfs << [numFmtId]
-          fontId = xf.attributes.to_h['fontId'].to_i
+          fontId = xf['fontId'].to_i
           @style_definitions << fonts[fontId]
         end
     end
