@@ -1,5 +1,5 @@
 require 'gdata/spreadsheet'
-require 'xml'
+require 'nokogiri'
 
 class GoogleHTTPError < RuntimeError; end
 class GoogleReadError < RuntimeError; end
@@ -334,8 +334,8 @@ class Google < GenericSpreadsheet
     raise RangeError, "illegal sheet <#{sheet}>" unless sheets.index(sheet)
     sheet_no = sheets.index(sheet)+1
     xml = @gs.fulldoc(sheet_no).to_s
-    doc = XML::Parser.string(xml).parse
-    doc.find("//*[local-name()='cell']").each do |item|
+    doc = Nokogiri::XML(xml)
+    doc.xpath("//*[local-name()='cell']").each do |item|
       row = item['row']
       col = item['col']
       key = "#{row},#{col}"

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #damit keine falschen Vermutungen aufkommen: Ich habe religioes rein gar nichts
 # mit diesem Bibelbund zu tun, aber die hatten eine ziemlich grosse
 # Spreadsheet-Datei mit ca. 3500 Zeilen oeffentlich im Netz, die sich ganz gut
@@ -16,7 +17,7 @@
 
 # Dump warnings that come from the test to open files
 # with the wrong spreadsheet class
-STDERR.reopen "/dev/null","w"
+STDERR.reopen "/dev/null","w" unless $0 == __FILE__
 
 TESTDIR =  File.dirname(__FILE__) 
 require TESTDIR + '/test_helper.rb'
@@ -1398,22 +1399,22 @@ Sheet 3:
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       assert_nothing_raised {oo.to_xml}
       sheetname = oo.sheets.first
-      doc = XML::Parser.string(oo.to_xml).parse
-      doc.root.each_element {|xml_sheet|
+      doc = Nokogiri::XML(oo.to_xml)
+      doc.root.element_children.each {|xml_sheet|
         all_cells = init_all_cells(oo, sheetname)
         x = 0
-        assert_equal sheetname, xml_sheet.attributes['name']
-        xml_sheet.each_element {|cell|
+        assert_equal sheetname, xml_sheet['name']
+        xml_sheet.element_children.each {|cell|
           expected = [all_cells[x][:row],
             all_cells[x][:column],
             all_cells[x][:content],
             all_cells[x][:type],
           ]
           result = [
-            cell.attributes['row'],
-            cell.attributes['column'],
+            cell['row'],
+            cell['column'],
             cell.content,
-            cell.attributes['type'],
+            cell['type'],
           ]
           assert_equal expected, result
           x += 1

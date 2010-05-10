@@ -1,4 +1,4 @@
-require 'xml'
+require 'nokogiri'
 require 'fileutils'
 require 'zip/zipfilesystem'
 require 'date'
@@ -36,7 +36,7 @@ class Openoffice < GenericSpreadsheet
       @file_nr = @@nr
       extract_content
       file = File.new(File.join(@tmpdir, @file_nr.to_s+"_roo_content.xml"))
-      @doc = XML::Parser.io(file).parse
+      @doc = Nokogiri::XML(file)
       file.close
     ensure
       #if ENV["roo_local"] != "thomas-p"
@@ -170,8 +170,8 @@ class Openoffice < GenericSpreadsheet
 
   def sheets
     return_sheets = []
-    @doc.find("//*[local-name()='table']").each do |sheet|
-      return_sheets << sheet.attributes['name']
+    @doc.xpath("//*[local-name()='table']").each do |sheet|
+      return_sheets << sheet['name']
     end
     return_sheets
   end
@@ -217,8 +217,8 @@ class Openoffice < GenericSpreadsheet
 
   # read the version of the OO-Version
   def oo_version
-    @doc.find("//*[local-name()='document-content']").each do |office|
-      @officeversion = office.attributes['version']
+    @doc.xpath("//*[local-name()='document-content']").each do |office|
+      @officeversion = office['version']
     end
   end
 
@@ -238,13 +238,13 @@ class Openoffice < GenericSpreadsheet
     when :string
       @cell[sheet][key] = str_v
     when :date
-      if table_cell.attributes['date-value'].size != "XXXX-XX-XX".size
+      if table_cell['date-value'].size != "XXXX-XX-XX".size
         #-- dann ist noch eine Uhrzeit vorhanden
         #-- "1961-11-21T12:17:18"
-        @cell[sheet][key] = DateTime.parse(table_cell.attributes['date-value'])
+        @cell[sheet][key] = DateTime.parse(table_cell['date-value'])
         @cell_type[sheet][key] = :datetime
       else
-        @cell[sheet][key] = table_cell.attributes['date-value']
+        @cell[sheet][key] = table_cell['date-value']
       end
     when :percentage
       @cell[sheet][key] = v.to_f
@@ -267,31 +267,31 @@ class Openoffice < GenericSpreadsheet
     raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
     raise RangeError unless self.sheets.include? sheet
 
-    @doc.find("//*[local-name()='table']").each do |ws|
-      if sheet == ws.attributes['name']
+    @doc.xpath("//*[local-name()='table']").each do |ws|
+      if sheet == ws['name']
         sheet_found = true
         col = 1
         row = 1
-        ws.each_element do |table_element|
+        ws.element_children.each do |table_element|
           case table_element.name
           when 'table-column'
-            @style_defaults[sheet] << table_element.attributes['default-cell-style-name'] 
+            @style_defaults[sheet] << table_element['default-cell-style-name'] 
           when 'table-row'
-            if table_element.attributes['number-rows-repeated']
-              skip_row = table_element.attributes['number-rows-repeated'].to_i
+            if table_element['number-rows-repeated']
+              skip_row = table_element['number-rows-repeated'].to_i
               row = row + skip_row - 1
             end
-            table_element.each_element do |cell|
-              skip_col = cell.attributes['number-columns-repeated']
-              formula = cell.attributes['formula']
-              vt = cell.attributes['value-type']
-              v =  cell.attributes['value']
-              style_name = cell.attributes['style-name']
+            table_element.element_children.each do |cell|
+              skip_col = cell['number-columns-repeated']
+              formula = cell['formula']
+              vt = cell['value-type']
+              v =  cell['value']
+              style_name = cell['style-name']
               if vt == 'string'
                 str_v  = ''
                 # insert \n if there is more than one paragraph
                 para_count = 0
-                cell.each_element do |str|
+                cell.element_children.each do |str|
                   if str.name == 'p'
                     v = str.content
                     str_v += "\n" if para_count > 0
@@ -308,7 +308,7 @@ class Openoffice < GenericSpreadsheet
                   end # == 'p'
                  end
               elsif vt == 'time'
-                cell.each_element do |str|
+                cell.element_children.each do |str|
                   if str.name == 'p'
                     v = str.content
                   end
@@ -322,13 +322,13 @@ class Openoffice < GenericSpreadsheet
               elsif vt == 'float'
                 #
               elsif vt == 'boolean'
-                v = cell.attributes['boolean-value']
+                v = cell['boolean-value']
                 #
               else
                 # raise "unknown type #{vt}"
               end
               if skip_col
-                if v != nil or cell.attributes['date-value']
+                if v != nil or cell['date-value']
                   0.upto(skip_col.to_i-1) do |i|
                     set_cell_values(sheet,col,row,i,v,vt,formula,cell,str_v,style_name)
                   end
@@ -345,7 +345,7 @@ class Openoffice < GenericSpreadsheet
       end
     end
     
-    @doc.find("//*[local-name()='automatic-styles']").each do |style|
+    @doc.xpath("//*[local-name()='automatic-styles']").each do |style|
       read_styles(style)
     end
     if !sheet_found
@@ -356,14 +356,14 @@ class Openoffice < GenericSpreadsheet
 
   def read_styles(style_elements)
     @style_definitions['Default'] = Openoffice::Font.new
-    style_elements.each do |style|
+    style_elements.children.each do |style|
       next unless style.name == 'style'
-      style_name = style.attributes['name']
-      style.each do |properties|
+      style_name = style['name']
+      style.children.each do |properties|
         font = Openoffice::Font.new
-        font.bold = properties.attributes['font-weight']
-        font.italic = properties.attributes['font-style']
-        font.underline = properties.attributes['text-underline-style']
+        font.bold = properties['font-weight']
+        font.italic = properties['font-style']
+        font.underline = properties['text-underline-style']
         @style_definitions[style_name] = font
       end    
     end
@@ -434,7 +434,7 @@ class Openoffice < GenericSpreadsheet
         result = result + child.content
       else
         if child.name == 's'
-          compressed_spaces = child.attributes['c'].to_i
+          compressed_spaces = child['c'].to_i
           # no explicit number means a count of 1:
           if compressed_spaces == 0
             compressed_spaces = 1
