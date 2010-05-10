@@ -5,7 +5,7 @@ require 'date'
 require 'base64'
 require 'cgi'
 
-class Excel2003XML < GenericSpreadsheet
+class Roo::Excel2003XML < Roo::GenericSpreadsheet
 
   @@nr = 0
 
@@ -301,7 +301,7 @@ class Excel2003XML < GenericSpreadsheet
     @doc.find("ss:Styles").each do |styles|
        styles.find('.//ss:Style').each do |style|
          style_id = style.attributes['ID']
-         @style_definitions[style_id] = Excel2003XML::Font.new
+         @style_definitions[style_id] = Roo::Excel2003XML::Font.new
          font = style.find_first('.//ss:Font')
          if font
            @style_definitions[style_id].bold = font.attributes['Bold']
@@ -364,7 +364,7 @@ class Excel2003XML < GenericSpreadsheet
     "time"       => :time,
   }
 
-  def Openoffice.oo_type_2_roo_type(ootype)
+  def self.oo_type_2_roo_type(ootype)
     return A_ROO_TYPE[ootype]
   end
  

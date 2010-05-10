@@ -103,7 +103,7 @@ module ExcelFontExtensions
 end
 
 # Class for handling Excel-Spreadsheets
-class Excel < GenericSpreadsheet 
+class Roo::Excel < Roo::GenericSpreadsheet 
 
   EXCEL_NO_FORMULAS = 'formulas are not supported for excel spreadsheets'
 

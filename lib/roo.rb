@@ -4,15 +4,15 @@ module Roo
       def open(file)
         case File.extname(file)
         when '.xls'
-          Excel.new(file)
+          Roo::Excel.new(file)
         when '.xlsx'
-          Excelx.new(file)
+          Roo::Excelx.new(file)
         when '.ods'
-          Openoffice.new(file)
+          Roo::Openoffice.new(file)
         when '.xml'
-          Excel2003XML.new(file)
+          Roo::Excel2003XML.new(file)
         when ''
-          Google.new(file)
+          Roo::Google.new(file)
         else
           raise ArgumentError, "Don't know how to open file #{file}"
         end      

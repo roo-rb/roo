@@ -5,7 +5,7 @@ require 'date'
 require 'base64'
 require 'cgi'
 
-class Openoffice < GenericSpreadsheet
+class Roo::Openoffice < Roo::GenericSpreadsheet
 
   @@nr = 0
 
@@ -226,7 +226,7 @@ class Openoffice < GenericSpreadsheet
   def set_cell_values(sheet,x,y,i,v,vt,formula,table_cell,str_v,style_name)
     key = [y,x+i]    
     @cell_type[sheet] = {} unless @cell_type[sheet]
-    @cell_type[sheet][key] = Openoffice.oo_type_2_roo_type(vt)
+    @cell_type[sheet][key] = Roo::Openoffice.oo_type_2_roo_type(vt)
     @formula[sheet] = {} unless @formula[sheet]
     @formula[sheet][key] = formula  if formula
     @cell[sheet]    = {} unless @cell[sheet]
@@ -355,12 +355,12 @@ class Openoffice < GenericSpreadsheet
   end
 
   def read_styles(style_elements)
-    @style_definitions['Default'] = Openoffice::Font.new
+    @style_definitions['Default'] = Roo::Openoffice::Font.new
     style_elements.children.each do |style|
       next unless style.name == 'style'
       style_name = style['name']
       style.children.each do |properties|
-        font = Openoffice::Font.new
+        font = Roo::Openoffice::Font.new
         font.bold = properties['font-weight']
         font.italic = properties['font-style']
         font.underline = properties['text-underline-style']
@@ -421,7 +421,7 @@ class Openoffice < GenericSpreadsheet
     "time"       => :time,
   }
 
-  def Openoffice.oo_type_2_roo_type(ootype)
+  def self.oo_type_2_roo_type(ootype)
     return A_ROO_TYPE[ootype]
   end
  

@@ -2,7 +2,7 @@ require 'rubygems'
 require 'builder'
 
 # Base class for all other types of spreadsheets
-class GenericSpreadsheet
+class Roo::GenericSpreadsheet
 
   attr_reader :default_sheet
 
@@ -33,12 +33,12 @@ class GenericSpreadsheet
 
   # first non-empty column as a letter
   def first_column_as_letter(sheet=nil)
-    GenericSpreadsheet.number_to_letter(first_column(sheet))
+    Roo::GenericSpreadsheet.number_to_letter(first_column(sheet))
   end
 
   # last non-empty column as a letter
   def last_column_as_letter(sheet=nil)
-    GenericSpreadsheet.number_to_letter(last_column(sheet))
+    Roo::GenericSpreadsheet.number_to_letter(last_column(sheet))
   end
 
   # returns the number of the first non-empty row
@@ -138,7 +138,7 @@ class GenericSpreadsheet
           result << "  col: #{col} \n"
           result << "  celltype: #{self.celltype(row,col,sheet)} \n"
           if self.celltype(row,col,sheet) == :time
-            result << "  value: #{GenericSpreadsheet.integer_to_timestring( self.cell(row,col,sheet))} \n"
+            result << "  value: #{Roo::GenericSpreadsheet.integer_to_timestring( self.cell(row,col,sheet))} \n"
           else
             result << "  value: #{self.cell(row,col,sheet)} \n"
           end
@@ -268,7 +268,7 @@ class GenericSpreadsheet
   # column numbers are 1,2,3,... like in the spreadsheet
   def column(columnnumber,sheet=nil)
     if columnnumber.class == String
-      columnnumber = Excel.letter_to_number(columnnumber)
+      columnnumber = Roo::Excel.letter_to_number(columnnumber)
     end
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
@@ -282,9 +282,8 @@ class GenericSpreadsheet
   # reopens and read a spreadsheet document
   def reload
     ds = @default_sheet
-    initialize(@filename) if self.class == Openoffice or
-      self.class == Excel
-    initialize(@spreadsheetkey,@user,@password) if self.class == Google
+    initialize(@filename) if self.class == Roo::Openoffice or self.class == Roo::Excel
+    initialize(@spreadsheetkey,@user,@password) if self.class == Roo::Google
     self.default_sheet = ds
     #@first_row = @last_row = @first_column = @last_column = nil
   end
@@ -292,7 +291,7 @@ class GenericSpreadsheet
   # true if cell is empty
   def empty?(row, col, sheet=nil)
     sheet = @default_sheet unless sheet
-    read_cells(sheet) unless @cells_read[sheet] or self.class == Excel
+    read_cells(sheet) unless @cells_read[sheet] or self.class == Roo::Excel
     row,col = normalize(row,col)
     return true unless cell(row, col, sheet)
     return true if celltype(row, col, sheet) == :string && cell(row, col, sheet).empty?
@@ -323,8 +322,8 @@ class GenericSpreadsheet
       else
         result << "  First row: #{first_row}\n"
         result << "  Last row: #{last_row}\n"
-        result << "  First column: #{GenericSpreadsheet.number_to_letter(first_column)}\n"
-        result << "  Last column: #{GenericSpreadsheet.number_to_letter(last_column)}"
+        result << "  First column: #{Roo::GenericSpreadsheet.number_to_letter(first_column)}\n"
+        result << "  Last column: #{Roo::GenericSpreadsheet.number_to_letter(last_column)}"
       end
       result << "\n" if sheet != sheets.last
       n += 1
@@ -363,10 +362,10 @@ class GenericSpreadsheet
 
   def file_type_check(filename, ext, name)
     new_expression = {
-      '.ods' => 'Openoffice.new',
-      '.xls' => 'Excel.new',
-      '.xlsx' => 'Excelx.new',
-      '.xml' => 'Excel2003.new'
+      '.ods' => 'Roo::Openoffice.new',
+      '.xls' => 'Roo::Excel.new',
+      '.xlsx' => 'Roo::Excelx.new',
+      '.xml' => 'Roo::Excel2003.new'
     }
     case ext
     when '.ods', '.xls', '.xlsx', '.xml'
@@ -420,7 +419,7 @@ class GenericSpreadsheet
       end
     end
     if col.class == String
-      col = GenericSpreadsheet.letter_to_number(col)
+      col = Roo::GenericSpreadsheet.letter_to_number(col)
     end
     return row,col
   end
@@ -607,7 +606,7 @@ class GenericSpreadsheet
       when :date
         str << onecell.to_s
       when :time
-        str << GenericSpreadsheet.integer_to_timestring(onecell)
+        str << Roo::GenericSpreadsheet.integer_to_timestring(onecell)
       else
         raise "unhandled celltype "+onecelltype.to_s
       end

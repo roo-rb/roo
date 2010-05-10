@@ -9,7 +9,7 @@ class  String
   end
 end
 
-class Excelx < GenericSpreadsheet
+class Roo::Excelx < Roo::GenericSpreadsheet
   FORMATS = {
     'General' => :float,
     '0' => :float,
@@ -369,7 +369,7 @@ class Excelx < GenericSpreadsheet
 
   def split_coordinate(str)
     letter,number = split_coord(str)
-    x = GenericSpreadsheet.letter_to_number(letter)
+    x = Roo::GenericSpreadsheet.letter_to_number(letter)
     y = number
     return x,y
   end
@@ -554,7 +554,7 @@ class Excelx < GenericSpreadsheet
     doc.xpath("//*[local-name()='fonts']").each do |fonts_el|
       fonts_el.element_children.each do |font_el|
         if font_el.name == 'font'
-          font = Excelx::Font.new
+          font = Roo::Excelx::Font.new
           font_el.element_children.each do |font_sub_el|
             case font_sub_el.name
               when 'b'
