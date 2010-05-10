@@ -1812,13 +1812,31 @@ Sheet 3:
       }
     end
   end
-
-  def test_public_google_doc
+  
+  def test_public_google_doc_1
     return unless GOOGLE
     with_public_google_spreadsheet do 
       assert_raise(GoogleHTTPError) { Google.new("foo") }
+    end
+  end
+
+  def test_public_google_doc_2
+    return unless GOOGLE
+    with_public_google_spreadsheet do 
       assert_raise(GoogleReadError) { Google.new(key_of('numbers1'))}
+    end
+  end
+
+  def test_public_google_doc_3
+    return unless GOOGLE
+    with_public_google_spreadsheet do 
       assert_nothing_raised { Google.new("0AncOJVyN5MMMcjZtN0hGbFVPd3N0MFJUVVR1aFEwT3c") } # use spreadsheet key (private)
+    end
+  end
+
+  def test_public_google_doc_4
+    return unless GOOGLE
+    with_public_google_spreadsheet do 
       assert_nothing_raised { Google.new(key_of('write.me')) } # use spreadsheet key (public)
     end
   end    

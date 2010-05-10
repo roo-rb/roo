@@ -17,28 +17,20 @@ module GData
       @headers ? "full" : "values"
     end
     
-    #-- modified
-    def evaluate_cell(cell, sheet_no=1)
-      raise ArgumentError, "invalid cell: #{cell}" unless cell
-      raise ArgumentError, "invalid sheet_no: #{sheet_no}" unless sheet_no >0 and sheet_no.class == Fixnum
-      path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/#{visibility}/#{projection}/#{cell}"
-      doc = Hpricot(request(path))
-      result = (doc/"content").inner_html
-    end
-
     #-- new
     def sheetlist
       path = "/feeds/worksheets/#{@spreadsheet_id}/#{visibility}/#{projection}"
-      doc = Hpricot(request(path))
+      string = request(path)
+      doc = Nokogiri::XML(string)
       result = []
-      (doc/"content").each { |elem|
-        result << elem.inner_html
+      doc.css("content").each { |elem|
+        result << elem.content
       }
       if result.size == 0 
-        if (doc/"h2").inner_html =~ /Error/
-          raise GoogleHTTPError, "#{(doc/'h2').inner_html}: #{(doc/'title').inner_html} [key '#{@spreadsheet_id}']"
+        if doc.at_css("h2") =~ /Error/
+          raise GoogleHTTPError, "#{doc.at_css('h2')}: #{doc.at_css('title')} [key '#{@spreadsheet_id}']"
         else
-          raise GoogleReadError, "#{doc} [key '#{@spreadsheet_id}']"
+          raise GoogleReadError, "#{doc.to_xml} [key '#{@spreadsheet_id}']"
         end  
       end
       result
@@ -67,19 +59,13 @@ module GData
       save_entry_roo(entry_roo(value,row,col), sheet_no)
     end
    
-    #-- new
-    def get_one_sheet
-      path = "/feeds/cells/#{@spreadsheet_id}/1/#{visibility}/#{projection}"
-      doc = Hpricot(request(path))
-    end
-
     #new
     def oben_unten_links_rechts(sheet_no)
       path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/#{visibility}/#{projection}"
-      doc = Hpricot(request(path))
+      doc = Nokogiri::XML(request(path))
       rows = []
       cols = []
-      (doc/"gs:cell").each {|item|
+      doc.xpath("//gs:cell", "gs" => "http://schemas.google.com/spreadsheets/2006").each {|item|
         rows.push item['row'].to_i
         cols.push item['col'].to_i
       }
@@ -88,7 +74,7 @@ module GData
 
     def fulldoc(sheet_no)
       path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/#{visibility}/#{projection}"
-      doc = Hpricot(request(path))
+      doc = Nokogiri::XML(request(path))
       return doc
     end
 
@@ -333,8 +319,7 @@ class Google < GenericSpreadsheet
     sheet = @default_sheet unless sheet
     raise RangeError, "illegal sheet <#{sheet}>" unless sheets.index(sheet)
     sheet_no = sheets.index(sheet)+1
-    xml = @gs.fulldoc(sheet_no).to_s
-    doc = Nokogiri::XML(xml)
+    doc = @gs.fulldoc(sheet_no)
     doc.xpath("//*[local-name()='cell']").each do |item|
       row = item['row']
       col = item['col']
