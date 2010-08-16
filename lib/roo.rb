@@ -15,18 +15,19 @@ module Roo
           Roo::Google.new(file)
         else
           raise ArgumentError, "Don't know how to open file #{file}"
-        end      
+        end
       end
     end
   end
+
+  # autoload :Spreadsheetparser, 'roo/spreadsheetparser' TODO:
+  autoload :GenericSpreadsheet, 'roo/generic_spreadsheet'
+  autoload :Openoffice,         'roo/openoffice'
+  autoload :Excel,              'roo/excel'
+  autoload :Excelx,             'roo/excelx'
+  autoload :Google,             'roo/google'
+  autoload :Excel2003XML,       'roo/excel2003xml'
+  autoload :RooRailsHelper,     'roo/roo_rails_helper'
 end
 
 require 'roo/version'
-# require 'roo/spreadsheetparser' TODO:
-require 'roo/generic_spreadsheet' 
-require 'roo/openoffice'
-require 'roo/excel'
-require 'roo/excelx'
-require 'roo/google'
-require 'roo/excel2003xml'
-require 'roo/roo_rails_helper'
