@@ -42,7 +42,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
     @fonts = Hash.new
   end
 
-  def encoding= (codepage)
+  def encoding=(codepage)
     @workbook.encoding = codepage
   end
 
