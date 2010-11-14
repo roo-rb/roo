@@ -135,6 +135,10 @@ class Roo::Excel < Roo::GenericSpreadsheet
     @fonts = Hash.new
   end
 
+  def encoding= (codepage)
+    @workbook.encoding = codepage    
+  end
+
   # returns an array of sheet names in the spreadsheet
   def sheets
     @workbook.worksheets.collect {|worksheet| normalize_string(worksheet.name)}
