@@ -17,7 +17,7 @@
     # this excel file has multiple worksheets, let's iterate through each of them and process
 
     xls.each_with_pagename do |name,sheet|
-    puts sheet.row_count
+      puts sheet.row_count
     end
 
     # pull out a hash of exclusive column data (get rid of useless columns and save memory)
