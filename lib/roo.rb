@@ -29,6 +29,7 @@ module Roo
   autoload :Google,             'roo/google'
   autoload :Excel2003XML,       'roo/excel2003xml'
   autoload :RooRailsHelper,     'roo/roo_rails_helper'
+  autoload :Worksheet,          'roo/worksheet'
 end
 
 require 'roo/version'
