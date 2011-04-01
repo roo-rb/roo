@@ -2,7 +2,7 @@ module Roo
   class Spreadsheet
     class << self
       def open(file)
-        file = File === file ? file.path : file
+        file = String === file ? file : file.path
         case File.extname(file)
         when '.xls'
           Roo::Excel.new(file)
