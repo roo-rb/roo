@@ -1,14 +1,15 @@
+# encoding: utf-8
+require 'matrix'
 require 'rubygems'
 require 'builder'
 
 # Base class for all other types of spreadsheets
-class Roo::GenericSpreadsheet
+class GenericSpreadsheet
 
   attr_reader :default_sheet
 
   # sets the line with attribute names (default: 1)
   attr_accessor :header_line
-
   def initialize
   end
 

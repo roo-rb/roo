@@ -1,87 +1,11 @@
-require 'gdata/spreadsheet'
-require 'nokogiri'
+#require 'xml'
+require "google_spreadsheet"
 
 class GoogleHTTPError < RuntimeError; end
 class GoogleReadError < RuntimeError; end
 class GoogleWriteError < RuntimeError; end
 
-# overwrite some methods from the gdata-gem:
-module GData
-  class Spreadsheet < GData::Base
-    
-    def visibility
-      @headers ? "private" : "public"
-    end
-   
-    def projection
-      @headers ? "full" : "values"
-    end
-    
-    #-- new
-    def sheetlist
-      path = "/feeds/worksheets/#{@spreadsheet_id}/#{visibility}/#{projection}"
-      string = request(path)
-      doc = Nokogiri::XML(string)
-      result = []
-      doc.css("content").each { |elem|
-        result << elem.content
-      }
-      if result.size == 0 
-        if doc.at_css("h2") =~ /Error/
-          raise GoogleHTTPError, "#{doc.at_css('h2')}: #{doc.at_css('title')} [key '#{@spreadsheet_id}']"
-        else
-          raise GoogleReadError, "#{doc.to_xml} [key '#{@spreadsheet_id}']"
-        end  
-      end
-      result
-    end
-
-    #-- new
-    #@@ added sheet_no to definition
-    def save_entry_roo(entry, sheet_no)
-      raise GoogleWriteError, "unable to write to public spreadsheets" if visibility == 'public'
-      path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/#{visibility}/#{projection}"
-      post(path, entry)
-    end
-
-    #-- new
-    def entry_roo(formula, row=1, col=1)
-    <<-XML
-    <entry xmlns='http://www.w3.org/2005/Atom' xmlns:gs='http://schemas.google.com/spreadsheets/2006'>
-      <gs:cell row='#{row}' col='#{col}' inputValue='#{formula}' />
-    </entry>
-    XML
-    end
-
-    #-- new
-    #@@ added sheet_no to definition		
-    def add_to_cell_roo(row,col,value, sheet_no=1)
-      save_entry_roo(entry_roo(value,row,col), sheet_no)
-    end
-   
-    #new
-    def oben_unten_links_rechts(sheet_no)
-      path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/#{visibility}/#{projection}"
-      doc = Nokogiri::XML(request(path))
-      rows = []
-      cols = []
-      doc.xpath("//gs:cell", "gs" => "http://schemas.google.com/spreadsheets/2006").each {|item|
-        rows.push item['row'].to_i
-        cols.push item['col'].to_i
-      }
-      return rows.min, rows.max, cols.min, cols.max
-    end
-
-    def fulldoc(sheet_no)
-      path = "/feeds/cells/#{@spreadsheet_id}/#{sheet_no}/#{visibility}/#{projection}"
-      doc = Nokogiri::XML(request(path))
-      return doc
-    end
-
-  end # class
-end # module
-
-class Roo::Google < Roo::GenericSpreadsheet
+class Google < GenericSpreadsheet
   attr_accessor :date_format, :datetime_format
   
   # Creates a new Google spreadsheet object.
@@ -108,10 +32,13 @@ class Roo::Google < Roo::GenericSpreadsheet
     @date_format = '%d/%m/%Y'
     @datetime_format = '%d/%m/%Y %H:%M:%S' 
     @time_format = '%H:%M:%S'
-    @gs = GData::Spreadsheet.new(spreadsheetkey)
-    @gs.authenticate(user, password) unless user.empty? || password.empty?
-    @sheetlist = @gs.sheetlist
+    session = GoogleSpreadsheet.login(user, password)
+    @sheetlist = []
+    session.spreadsheet_by_key(@spreadsheetkey).worksheets.each { |sheet|
+      @sheetlist << sheet.title
+    }
     @default_sheet = self.sheets.first
+    @worksheets = session.spreadsheet_by_key(@spreadsheetkey).worksheets
   end
 
   # returns an array of sheet names in the spreadsheet
@@ -262,7 +189,7 @@ class Roo::Google < Roo::GenericSpreadsheet
       raise RangeError, "invalid sheet '"+sheet.to_s+"'"
     end
     row,col = normalize(row,col)
-    @gs.add_to_cell_roo(row,col,value,sheet_no)
+    add_to_cell_roo(row,col,value,sheet_no)
     # re-read the portion of the document that has changed
     if @cells_read[sheet]
       key = "#{row},#{col}"
@@ -277,7 +204,8 @@ class Roo::Google < Roo::GenericSpreadsheet
     sheet = @default_sheet unless sheet
     unless @first_row[sheet]
       sheet_no = sheets.index(sheet) + 1
-      @first_row[sheet], @last_row[sheet], @first_column[sheet], @last_column[sheet] = @gs.oben_unten_links_rechts(sheet_no)
+      @first_row[sheet], @last_row[sheet], @first_column[sheet], @last_column[sheet] =
+          oben_unten_links_rechts(sheet_no)
     end   
     return @first_row[sheet]
   end
@@ -287,7 +215,8 @@ class Roo::Google < Roo::GenericSpreadsheet
     sheet = @default_sheet unless sheet
     unless @last_row[sheet]
       sheet_no = sheets.index(sheet) + 1
-      @first_row[sheet], @last_row[sheet], @first_column[sheet], @last_column[sheet] = @gs.oben_unten_links_rechts(sheet_no)
+      @first_row[sheet], @last_row[sheet], @first_column[sheet], @last_column[sheet] =
+          oben_unten_links_rechts(sheet_no)
     end
     return @last_row[sheet]
   end
@@ -297,7 +226,8 @@ class Roo::Google < Roo::GenericSpreadsheet
     sheet = @default_sheet unless sheet
     unless @first_column[sheet]
       sheet_no = sheets.index(sheet) + 1
-      @first_row[sheet], @last_row[sheet], @first_column[sheet], @last_column[sheet] = @gs.oben_unten_links_rechts(sheet_no)
+      @first_row[sheet], @last_row[sheet], @first_column[sheet], @last_column[sheet] =
+          oben_unten_links_rechts(sheet_no)
     end
     return @first_column[sheet]
   end
@@ -307,7 +237,8 @@ class Roo::Google < Roo::GenericSpreadsheet
     sheet = @default_sheet unless sheet
     unless @last_column[sheet]
       sheet_no = sheets.index(sheet) + 1
-      @first_row[sheet], @last_row[sheet], @first_column[sheet], @last_column[sheet] = @gs.oben_unten_links_rechts(sheet_no)
+      @first_row[sheet], @last_row[sheet], @first_column[sheet], @last_column[sheet] =
+        oben_unten_links_rechts(sheet_no)
     end
     return @last_column[sheet]
   end
@@ -318,24 +249,31 @@ class Roo::Google < Roo::GenericSpreadsheet
   def read_cells(sheet=nil)
     sheet = @default_sheet unless sheet
     raise RangeError, "illegal sheet <#{sheet}>" unless sheets.index(sheet)
-    sheet_no = sheets.index(sheet)+1
-    doc = @gs.fulldoc(sheet_no)
-    doc.xpath("//*[local-name()='cell']").each do |item|
-      row = item['row']
-      col = item['col']
-      key = "#{row},#{col}"
-      string_value =  item['inputvalue'] ||  item['inputValue'] 
-      numeric_value = item['numericvalue']  ||  item['numericValue'] 
-      (value, value_type) = determine_datatype(string_value, numeric_value)
-      @cell[sheet][key] = value unless value == "" or value == nil
-      @cell_type[sheet][key] = value_type 
-      @formula[sheet] = {} unless @formula[sheet]
-      @formula[sheet][key] = string_value if value_type == :formula
+    sheet_no = sheets.index(sheet)
+    ws = @worksheets[sheet_no]
+    for row in 1..ws.num_rows
+      for col in 1..ws.num_cols
+        key = "#{row},#{col}"
+        string_value = ws.input_value(row,col) # item['inputvalue'] ||  item['inputValue']
+        numeric_value = ws[row,col] #item['numericvalue']  ||  item['numericValue']
+        (value, value_type) = determine_datatype(string_value, numeric_value)
+        @cell[sheet][key] = value unless value == "" or value == nil
+        @cell_type[sheet][key] = value_type
+        @formula[sheet] = {} unless @formula[sheet]
+        @formula[sheet][key] = string_value if value_type == :formula
+        ############
+        #$log.debug("key: #{key}")
+        #$log.debug "#{ws[row,col].inspect}"
+        #@cell[sheet][key] = ws[row,col]
+        #$log.debug "@cell[sheet][key]: #{@cell[sheet][key]}"
+        ############
+      end
     end
     @cells_read[sheet] = true
   end
   
   def determine_datatype(val, numval=nil)
+#    $log.debug "val: #{val} numval: #{numval}"
     if val.nil? || val[0,1] == '='
       ty = :formula
       if numeric?(numval)
@@ -357,8 +295,31 @@ class Roo::Google < Roo::GenericSpreadsheet
       else
         ty = :string
       end
-    end  
+    end
+    #$log.debug "val: #{val} ty: #{ty}" if ty == :date
     return val, ty 
   end
-  
+
+  def add_to_cell_roo(row,col,value, sheet_no=1)
+    sheet_no -= 1
+    @worksheets[sheet_no][row,col] = value
+    @worksheets[sheet_no].save
+  end
+  def entry_roo(value,row,col)
+    return value,row,col
+  end
+
+  def oben_unten_links_rechts(sheet_no)
+    ws = @worksheets[sheet_no-1]
+    rows = []
+    cols = []
+    for row in 1..ws.num_rows
+      for col in 1..ws.num_cols
+        rows << row if ws[row,col] and ws[row,col] != '' #TODO: besser?
+        cols << col if ws[row,col] and ws[row,col] != '' #TODO: besser?
+      end
+    end
+    return rows.min, rows.max, cols.min, cols.max
+  end
+
 end # class

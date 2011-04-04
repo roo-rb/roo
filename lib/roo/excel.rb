@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'spreadsheet'
 require 'iconv'
 CHARGUESS = begin
@@ -10,6 +11,26 @@ end
 # The Spreadsheet library has a bug in handling Excel 
 # base dates so if the file is a 1904 base date then 
 # dates are off by a day. 1900 base dates work fine
+module Spreadsheet
+  module Excel
+    class Row < Spreadsheet::Row
+      def _date data # :nodoc:
+        return data if data.is_a?(Date)
+        date = @worksheet.date_base + data.to_i
+        if LEAP_ERROR > @worksheet.date_base
+          date -= 1
+        end
+        date
+      end
+      public :_datetime
+    end
+  end
+end
+
+#=====================================================================
+# TODO:
+# redefinition of this method, the method in the spreadsheet gem has a bug
+# redefinition can be removed, if spreadsheet does it in the correct way
 module Spreadsheet
   module Excel
     class Row < Spreadsheet::Row
@@ -39,45 +60,10 @@ module Spreadsheet
         end
         DateTime.new(date.year, date.month, date.day, hour, min, sec)
       end
-      public :_date
-      public :_datetime
-    end
-    # patch for ruby-spreadsheet parsing formulas
-    class Reader
-      def read_formula worksheet, addr, work
-        row, column, xf, rtype, rval, rcheck, opts = work.unpack 'v3CxCx3v2'
-        formula = Formula.new
-        formula.shared = (opts & 0x08) > 0
-        formula.data = work[20..-1]
-        if rcheck != 0xffff || rtype > 3 
-          value, = work.unpack 'x6E'
-          unless value
-            # on architectures where sizeof(double) > 8
-            value, = work.unpack 'x6e'
-          end
-          formula.value = value
-        elsif rtype == 0
-          pos, op, len, work = get_next_chunk
-          if op == :string
-            formula.value = client read_string(work, 2), @workbook.encoding
-          else
-            # This seems to work but I don't know why :). It at least
-            # seems to correct the case we saw but doubtful it's the right fix
-            formula.value = client read_string(work[10..-1], 2), @workbook.encoding
-          end
-        elsif rtype == 1
-          formula.value = rval > 0
-        elsif rtype == 2
-          formula.value = Error.new rval
-        else
-          # leave the Formula value blank
-        end
-        set_cell worksheet, row, column, xf, formula
-      end
     end
   end
 end
-
+#=====================================================================
 
 # ruby-spreadsheet has a font object so we're extending it 
 # with our own functionality but still providing full access
@@ -87,9 +73,9 @@ module ExcelFontExtensions
     #From ruby-spreadsheet doc: 100 <= weight <= 1000, bold => 700, normal => 400
     case weight
     when 700    
-     true
+      true
     else
-     false
+      false
     end   
   end
 
@@ -104,7 +90,7 @@ module ExcelFontExtensions
 end
 
 # Class for handling Excel-Spreadsheets
-class Roo::Excel < Roo::GenericSpreadsheet 
+class Excel < GenericSpreadsheet 
 
   EXCEL_NO_FORMULAS = 'formulas are not supported for excel spreadsheets'
 
@@ -226,6 +212,22 @@ class Roo::Excel < Roo::GenericSpreadsheet
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
     @cell[sheet].inspect
+  end
+
+   # returns the row,col values of the labelled cell
+  # (nil,nil) if label is not defined
+  # sheet parameter is not really needed because label names are global
+  # to the whole spreadsheet
+  def label(labelname,sheet=nil)
+    sheet = @default_sheet unless sheet
+    read_cells(sheet) unless @cells_read[sheet]
+    if @labels.has_key? labelname
+      return @labels[labelname][1].to_i,
+        GenericSpreadsheet.letter_to_number(@labels[labelname][2]),
+        @labels[labelname][0]
+    else
+      return nil,nil,nil
+    end
   end
 
   private
@@ -414,8 +416,8 @@ class Roo::Excel < Roo::GenericSpreadsheet
         datetime = row.datetime(idx)
       end    
       if datetime.hour != 0 or
-         datetime.min != 0 or
-         datetime.sec != 0 
+          datetime.min != 0 or
+          datetime.sec != 0
         value_type = :datetime
         value = datetime
       else
