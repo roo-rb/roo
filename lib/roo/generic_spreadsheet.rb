@@ -6,7 +6,7 @@ require 'builder'
 # Base class for all other types of spreadsheets
 class GenericSpreadsheet
 
-  attr_reader :default_sheet
+  attr_reader :default_sheet, :headers
 
   # sets the line with attribute names (default: 1)
   attr_accessor :header_line
@@ -415,7 +415,8 @@ class GenericSpreadsheet
           @headers = nil
           @header_line = row_with(options[:header_search])
         elsif [:first_row,true].include?(options[:headers])
-          @headers = row(first_row).map_with_index.to_a
+          @headers = []
+          row(first_row).each_with_index {|x,i| @headers << [x,i + 1]}
         else
           set_headers(options)
         end
