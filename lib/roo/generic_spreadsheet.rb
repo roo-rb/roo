@@ -415,7 +415,7 @@ class GenericSpreadsheet
           @headers = nil
           @header_line = row_with(options[:header_search])
         elsif [:first_row,true].include?(options[:headers])
-          @headers = row(first_row)
+          @headers = row(first_row).map_with_index.to_a
         else
           set_headers(options)
         end
