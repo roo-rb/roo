@@ -505,6 +505,8 @@ class Roo::GenericSpreadsheet
         if options[:header_search]
           @headers = nil
           @header_line = row_with(options[:header_search])
+        elsif [:first_row,true].include?(options[:headers])
+          @headers = row(first_row)
         else
           set_headers(options)
         end
