@@ -404,6 +404,7 @@ class GenericSpreadsheet
 
     def each(options={})
       if options[:clean]
+        options.delete(:clean)
         @cleaned ||= {}
         @cleaned[@default_sheet] || clean_sheet
       end
