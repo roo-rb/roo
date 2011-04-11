@@ -23,6 +23,7 @@ module Roo
         end
       end
     end
+    autoload :HTML, 'roo/html'
   end
 
   # autoload :Spreadsheetparser, 'roo/spreadsheetparser' TODO:
