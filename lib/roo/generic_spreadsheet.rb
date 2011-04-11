@@ -528,7 +528,15 @@ class GenericSpreadsheet
   end
   
   def sanitize_value(v)
-    String === v ? v.strip.unpack('U*').select {|b| b < 127}.pack('U*') : v
+    case v
+      when String
+        v.strip.unpack('U*').select {|b| b < 127}.pack('U*')
+      when Float
+        int = v.to_i
+        int == v ? int : v
+      else
+        v
+    end
   end
   
   def set_headers(hash={})
