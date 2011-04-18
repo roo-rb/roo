@@ -447,7 +447,7 @@ class GenericSpreadsheet
     end
 
     def row_with(query,return_headers=false)
-      query.map! {|x| Array(x.split('*'))}
+      query = query.map {|x| Array(x.split('*'))}
       line_no = 0
       each do |row|
         line_no += 1
