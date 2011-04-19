@@ -603,7 +603,7 @@ class Roo::GenericSpreadsheet
         else
           raise "unhandled onecell-class "+onecell.class.to_s
         end
-      when :date
+      when :date,:datetime
         str << onecell.to_s
       when :time
         str << Roo::GenericSpreadsheet.integer_to_timestring(onecell)

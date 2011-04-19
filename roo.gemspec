@@ -146,4 +146,3 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<nokogiri>, [">= 1.4.1"])
   end
 end
-
