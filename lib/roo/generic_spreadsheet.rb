@@ -448,14 +448,18 @@ class GenericSpreadsheet
     end
 
     def row_with(query,return_headers=false)
-      query = query.map {|x| Array(x.split('*'))}
+      # make sure not to split numbers
+      query = query.map do |x|
+        String === x ? (x.split('*').map {|q| /#{q}/i}) : [x]
+      end
+      
       line_no = 0
       each do |row|
         line_no += 1
         # makes sure headers is the first part of wildcard search for priority
         # ex. if UPC and SKU exist for UPC*SKU search, UPC takes the cake
         headers = query.map do |q|
-          q.map {|i| row.grep(/#{i}/i)[0]}.compact[0]
+          q.map {|i| row.grep(i)[0]}.compact[0]
         end.compact
 
         if headers.length == query.length
