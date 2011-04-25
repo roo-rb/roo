@@ -11,6 +11,7 @@ class GenericSpreadsheet
   # sets the line with attribute names (default: 1)
   attr_accessor :header_line
   def initialize
+    @cleaned = {}
   end
 
   # set the working sheet in the document
@@ -30,6 +31,9 @@ class GenericSpreadsheet
     check_default_sheet
     @first_row[sheet] = @last_row[sheet] = @first_column[sheet] = @last_column[sheet] = nil
     @cells_read[sheet] = false
+    
+    # clean sheet
+    clean_sheet unless @cleaned[@default_sheet]
   end
 
   # first non-empty column as a letter
@@ -399,16 +403,13 @@ class GenericSpreadsheet
     # column titled either Price or Cost (regex characters allowed)
     # * is the wildcard character
 
-    # you can also pass in a :clean => true option to strip the sheet of
-    # odd unicode characters and white spaces around columns
-
     def each(options={})
-      unless options[:clean] == false
-        @cleaned ||= {}
-        @cleaned[@default_sheet] || clean_sheet
-      end
-      
-      options.delete(:clean)
+      # unless options[:clean] == false
+      #   @cleaned ||= {}
+      #   @cleaned[@default_sheet] || clean_sheet
+      # end
+      # 
+      # options.delete(:clean)
 
       if options.empty?
         @header_line = 1
@@ -520,6 +521,7 @@ class GenericSpreadsheet
   private
   
   def clean_sheet
+    puts 'Cleaning...'
     read_cells(@default_sheet) unless @cells_read[@default_sheet]
     @cell = Hash[
               @cell.map do |k,v|
