@@ -114,7 +114,7 @@ class Excel < GenericSpreadsheet
         raise IOError, "file #{@filename} does not exist"
       end
       @workbook = Spreadsheet.open(filename)
-      default_sheet = self.sheets.first
+      self.default_sheet = self.sheets.first
     ensure
       #if ENV["roo_local"] != "thomas-p"
       FileUtils::rm_r(@tmpdir)

@@ -138,7 +138,7 @@ class Excelx < GenericSpreadsheet
       FileUtils::rm_r(@tmpdir)
       #end
     end
-    default_sheet = self.sheets.first
+    self.default_sheet = self.sheets.first
     @cell = Hash.new
     @cell_type = Hash.new
     @formula = Hash.new
