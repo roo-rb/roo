@@ -114,7 +114,6 @@ class Excel < GenericSpreadsheet
         raise IOError, "file #{@filename} does not exist"
       end
       @workbook = Spreadsheet.open(filename)
-      self.default_sheet = self.sheets.first
     ensure
       #if ENV["roo_local"] != "thomas-p"
       FileUtils::rm_r(@tmpdir)
@@ -130,6 +129,7 @@ class Excel < GenericSpreadsheet
     @header_line = 1
     @cells_read = Hash.new
     @fonts = Hash.new
+    self.default_sheet = self.sheets.first
   end
 
   # returns an array of sheet names in the spreadsheet

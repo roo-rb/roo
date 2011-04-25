@@ -138,7 +138,6 @@ class Excelx < GenericSpreadsheet
       FileUtils::rm_r(@tmpdir)
       #end
     end
-    self.default_sheet = self.sheets.first
     @cell = Hash.new
     @cell_type = Hash.new
     @formula = Hash.new
@@ -150,6 +149,7 @@ class Excelx < GenericSpreadsheet
     @excelx_type = Hash.new
     @excelx_value = Hash.new
     @s_attribute = Hash.new # TODO: ggf. wieder entfernen nur lokal benoetigt
+    self.default_sheet = self.sheets.first
   end
 
   # Returns the content of a spreadsheet-cell.
