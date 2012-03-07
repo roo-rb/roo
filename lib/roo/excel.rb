@@ -271,16 +271,15 @@ class Roo::Excel < Roo::GenericSpreadsheet
   end
   
   def platform_specific_iconv(value)
-    case RUBY_PLATFORM.downcase
-    when /darwin/
-      result = Iconv.new('utf-8','utf-8').iconv(value)
-    when /solaris/
-      result = Iconv.new('utf-8','utf-8').iconv(value)
-    when /mswin32/
-      result = Iconv.new('utf-8','iso-8859-1').iconv(value)
-    else
-      result = value
-    end # case
+    result =
+      case RUBY_PLATFORM.downcase
+      when /darwin|solaris/
+        Iconv.new('utf-8','utf-8').iconv(value)
+      when /mswin32/
+        Iconv.new('utf-8','iso-8859-1').iconv(value)
+      else
+        value
+      end
     if every_second_null?(result)
       result = remove_every_second_null(result)
     end
