@@ -1,4 +1,5 @@
 require 'spreadsheet'
+require 'iconv'
 CHARGUESS = begin
   require 'charguess'
   true
