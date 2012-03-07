@@ -37,4 +37,3 @@ module Roo
 end
 
 require 'roo/version'
-require 'roo/worksheet'
