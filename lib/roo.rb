@@ -19,7 +19,7 @@ module Roo
             raise ArgumentError, "Don't know how to open file #{file}"
           end
         rescue Ole::Storage::FormatError
-          Roo::HTML.new(file)
+          HTML.new(file)
         end
       end
     end
@@ -32,9 +32,9 @@ module Roo
   autoload :Excelx,             'roo/excelx'
   autoload :Google,             'roo/google'
   autoload :Excel2003XML,       'roo/excel2003xml'
-  autoload :RooRailsHelper,     'roo/roo_rails_helper'
   autoload :Worksheet,          'roo/worksheet'
   autoload :HTML, 'roo/html'
 end
 
 require 'roo/version'
+require 'roo/worksheet'

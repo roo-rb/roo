@@ -4,7 +4,7 @@ require 'rubygems'
 require 'builder'
 
 # Base class for all other types of spreadsheets
-class GenericSpreadsheet
+class Roo::GenericSpreadsheet
 
   attr_reader :default_sheet, :headers
 

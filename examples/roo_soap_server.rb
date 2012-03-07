@@ -6,7 +6,7 @@ NS = "spreadsheetserver" # name of your service = namespace
 class Server2 < SOAP::RPC::StandaloneServer
 
   def on_init
-    spreadsheet = Openoffice.new("./Ferien-de.ods")
+    spreadsheet = Roo::Openoffice.new("./Ferien-de.ods")
     add_method(spreadsheet, 'cell', 'row', 'col')
     add_method(spreadsheet, 'officeversion')
     add_method(spreadsheet, 'first_row')

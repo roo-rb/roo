@@ -13,7 +13,7 @@ if RUBY_VERSION < '1.9.0'
   end
 end
 
-class Excelx < GenericSpreadsheet
+class Roo::Excelx < Roo::GenericSpreadsheet
   FORMATS = {
     'General' => :float,
     '0' => :float,
@@ -381,7 +381,7 @@ class Excelx < GenericSpreadsheet
 
   def split_coordinate(str)
     letter,number = split_coord(str)
-    x = GenericSpreadsheet.letter_to_number(letter)
+    x = Roo::GenericSpreadsheet.letter_to_number(letter)
     y = number
     return x,y
   end

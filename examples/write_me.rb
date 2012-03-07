@@ -10,7 +10,7 @@ print "where do you live? "
 my_location = gets.chomp
 print "your message? (if left blank, only your name and location will be inserted) "
 my_message = gets.chomp
-spreadsheet = Google.new('ptu6bbahNZpY0N0RrxQbWdw')
+spreadsheet = Roo::Google.new('ptu6bbahNZpY0N0RrxQbWdw')
 spreadsheet.default_sheet = 'Sheet1'
 success = false
 MAXTRIES.times do

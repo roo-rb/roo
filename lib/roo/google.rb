@@ -5,7 +5,7 @@ class GoogleHTTPError < RuntimeError; end
 class GoogleReadError < RuntimeError; end
 class GoogleWriteError < RuntimeError; end
 
-class Google < GenericSpreadsheet
+class Roo::Google < Roo::GenericSpreadsheet
   attr_accessor :date_format, :datetime_format
   
   # Creates a new Google spreadsheet object.
