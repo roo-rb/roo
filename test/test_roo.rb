@@ -136,7 +136,7 @@ class TestRoo < Test::Unit::TestCase
   EXCEL2003XML = true     # do MS2003 XML tests
 
   ONLINE = true
-  LONG_RUN = false
+  LONG_RUN = true
   GLOBAL_TIMEOUT = 48.minutes #*60 # 2*12*60 # seconds
 
   def setup
