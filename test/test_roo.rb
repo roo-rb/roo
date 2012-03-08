@@ -137,13 +137,6 @@ class TestRoo < Test::Unit::TestCase
 
   ONLINE = true
   LONG_RUN = true
-  GLOBAL_TIMEOUT = 48.minutes #*60 # 2*12*60 # seconds
-
-  def setup
-    #if DISPLAY_LOG
-    #  puts " GLOBAL_TIMEOUT = #{GLOBAL_TIMEOUT}"
-    #end
-  end
 
   def test_internal_minutes
     assert_equal 42*60, 42.minutes
@@ -775,17 +768,13 @@ class TestRoo < Test::Unit::TestCase
   def test_huge_document_to_csv
     if LONG_RUN
       with_each_spreadsheet(:name=>'Bibelbund') do |oo|
-        assert_nothing_raised(Timeout::Error) {
-          Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-            File.delete_if_exist("/tmp/Bibelbund.csv")
-            assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
-            assert_equal "Tagebuch des Sekret\303\244rs.  Nachrichten aus Chile", oo.cell(46,'A')
-            assert_equal "Tagebuch aus Chile  Juli 1977", oo.cell(55,'A')
-            assert oo.to_csv("/tmp/Bibelbund.csv")
-            assert File.exists?("/tmp/Bibelbund.csv")
-            assert_equal "", `diff test/Bibelbund.csv /tmp/Bibelbund.csv`
-          end 
-        }
+        File.delete_if_exist("/tmp/Bibelbund.csv")
+        assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
+        assert_equal "Tagebuch des Sekret\303\244rs.  Nachrichten aus Chile", oo.cell(46,'A')
+        assert_equal "Tagebuch aus Chile  Juli 1977", oo.cell(55,'A')
+        assert oo.to_csv("/tmp/Bibelbund.csv")
+        assert File.exists?("/tmp/Bibelbund.csv")
+        assert_equal "", `diff test/Bibelbund.csv /tmp/Bibelbund.csv`
       end
     end
   end
@@ -894,18 +883,16 @@ class TestRoo < Test::Unit::TestCase
   def test_find_by_row_huge_document
     if LONG_RUN
       with_each_spreadsheet(:name=>'Bibelbund') do |oo|
-        Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-          oo.default_sheet = oo.sheets.first
-          rec = oo.find 20
-          assert rec
-          # assert_equal "Brief aus dem Sekretariat", rec[0]
-          #p rec
-          assert_equal "Brief aus dem Sekretariat", rec[0]['TITEL']
-          rec = oo.find 22
-          assert rec
-          # assert_equal "Brief aus dem Skretariat. Tagung in Amberg/Opf.",rec[0]
-          assert_equal "Brief aus dem Skretariat. Tagung in Amberg/Opf.",rec[0]['TITEL']
-        end
+        oo.default_sheet = oo.sheets.first
+        rec = oo.find 20
+        assert rec
+        # assert_equal "Brief aus dem Sekretariat", rec[0]
+        #p rec
+        assert_equal "Brief aus dem Sekretariat", rec[0]['TITEL']
+        rec = oo.find 22
+        assert rec
+        # assert_equal "Brief aus dem Skretariat. Tagung in Amberg/Opf.",rec[0]
+        assert_equal "Brief aus dem Skretariat. Tagung in Amberg/Opf.",rec[0]['TITEL']
       end
     end
   end
@@ -928,90 +915,86 @@ class TestRoo < Test::Unit::TestCase
   def test_find_by_conditions
     if LONG_RUN
       with_each_spreadsheet(:name=>'Bibelbund') do |oo|
-        assert_nothing_raised(Timeout::Error) {
-          Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-            #-----------------------------------------------------------------
-            zeilen = oo.find(:all, :conditions => {
-                'TITEL' => 'Brief aus dem Sekretariat'
-              }
-            )
-            assert_equal 2, zeilen.size
-            assert_equal [{"VERFASSER"=>"Almassy, Annelene von",
-                "INTERNET"=>nil,
-                "SEITE"=>316.0,
-                "KENNUNG"=>"Aus dem Bibelbund",
-                "OBJEKT"=>"Bibel+Gem",
-                "PC"=>"#C:\\Bibelbund\\reprint\\BuG1982-3.pdf#",
-                "NUMMER"=>"1982-3",
-                "TITEL"=>"Brief aus dem Sekretariat"},
-              {"VERFASSER"=>"Almassy, Annelene von",
-                "INTERNET"=>nil,
-                "SEITE"=>222.0,
-                "KENNUNG"=>"Aus dem Bibelbund",
-                "OBJEKT"=>"Bibel+Gem",
-                "PC"=>"#C:\\Bibelbund\\reprint\\BuG1983-2.pdf#",
-                "NUMMER"=>"1983-2",
-                "TITEL"=>"Brief aus dem Sekretariat"}] , zeilen
+        #-----------------------------------------------------------------
+        zeilen = oo.find(:all, :conditions => {
+            'TITEL' => 'Brief aus dem Sekretariat'
+          }
+        )
+        assert_equal 2, zeilen.size
+        assert_equal [{"VERFASSER"=>"Almassy, Annelene von",
+            "INTERNET"=>nil,
+            "SEITE"=>316.0,
+            "KENNUNG"=>"Aus dem Bibelbund",
+            "OBJEKT"=>"Bibel+Gem",
+            "PC"=>"#C:\\Bibelbund\\reprint\\BuG1982-3.pdf#",
+            "NUMMER"=>"1982-3",
+            "TITEL"=>"Brief aus dem Sekretariat"},
+          {"VERFASSER"=>"Almassy, Annelene von",
+            "INTERNET"=>nil,
+            "SEITE"=>222.0,
+            "KENNUNG"=>"Aus dem Bibelbund",
+            "OBJEKT"=>"Bibel+Gem",
+            "PC"=>"#C:\\Bibelbund\\reprint\\BuG1983-2.pdf#",
+            "NUMMER"=>"1983-2",
+            "TITEL"=>"Brief aus dem Sekretariat"}] , zeilen
 
-            #----------------------------------------------------------
-            zeilen = oo.find(:all,
-              :conditions => { 'VERFASSER' => 'Almassy, Annelene von' }
-            )
-            assert_equal 13, zeilen.size
-            #----------------------------------------------------------
-            zeilen = oo.find(:all, :conditions => {
-                'TITEL' => 'Brief aus dem Sekretariat',
-                'VERFASSER' => 'Almassy, Annelene von',
-              }
-            )
-            assert_equal 2, zeilen.size
-            assert_equal [{"VERFASSER"=>"Almassy, Annelene von",
-                "INTERNET"=>nil,
-                "SEITE"=>316.0,
-                "KENNUNG"=>"Aus dem Bibelbund",
-                "OBJEKT"=>"Bibel+Gem",
-                "PC"=>"#C:\\Bibelbund\\reprint\\BuG1982-3.pdf#",
-                "NUMMER"=>"1982-3",
-                "TITEL"=>"Brief aus dem Sekretariat"},
-              {"VERFASSER"=>"Almassy, Annelene von",
-                "INTERNET"=>nil,
-                "SEITE"=>222.0,
-                "KENNUNG"=>"Aus dem Bibelbund",
-                "OBJEKT"=>"Bibel+Gem",
-                "PC"=>"#C:\\Bibelbund\\reprint\\BuG1983-2.pdf#",
-                "NUMMER"=>"1983-2",
-                "TITEL"=>"Brief aus dem Sekretariat"}] , zeilen
+        #----------------------------------------------------------
+        zeilen = oo.find(:all,
+          :conditions => { 'VERFASSER' => 'Almassy, Annelene von' }
+        )
+        assert_equal 13, zeilen.size
+        #----------------------------------------------------------
+        zeilen = oo.find(:all, :conditions => {
+            'TITEL' => 'Brief aus dem Sekretariat',
+            'VERFASSER' => 'Almassy, Annelene von',
+          }
+        )
+        assert_equal 2, zeilen.size
+        assert_equal [{"VERFASSER"=>"Almassy, Annelene von",
+            "INTERNET"=>nil,
+            "SEITE"=>316.0,
+            "KENNUNG"=>"Aus dem Bibelbund",
+            "OBJEKT"=>"Bibel+Gem",
+            "PC"=>"#C:\\Bibelbund\\reprint\\BuG1982-3.pdf#",
+            "NUMMER"=>"1982-3",
+            "TITEL"=>"Brief aus dem Sekretariat"},
+          {"VERFASSER"=>"Almassy, Annelene von",
+            "INTERNET"=>nil,
+            "SEITE"=>222.0,
+            "KENNUNG"=>"Aus dem Bibelbund",
+            "OBJEKT"=>"Bibel+Gem",
+            "PC"=>"#C:\\Bibelbund\\reprint\\BuG1983-2.pdf#",
+            "NUMMER"=>"1983-2",
+            "TITEL"=>"Brief aus dem Sekretariat"}] , zeilen
 
-            # Result as an array
-            zeilen = oo.find(:all,
-              :conditions => {
-                'TITEL' => 'Brief aus dem Sekretariat',
-                'VERFASSER' => 'Almassy, Annelene von',
-              }, :array => true)
-            assert_equal 2, zeilen.size
-            assert_equal [
-              [
-                "Brief aus dem Sekretariat",
-                "Almassy, Annelene von",
-                "Bibel+Gem",
-                "1982-3",
-                316.0,
-                nil,
-                "#C:\\Bibelbund\\reprint\\BuG1982-3.pdf#",
-                "Aus dem Bibelbund",
-              ],
-              [
-                "Brief aus dem Sekretariat",
-                "Almassy, Annelene von",
-                "Bibel+Gem",
-                "1983-2",
-                222.0,
-                nil,
-                "#C:\\Bibelbund\\reprint\\BuG1983-2.pdf#",
-                "Aus dem Bibelbund",
-              ]] , zeilen
-          end # Timeout
-        } # nothing_raised
+        # Result as an array
+        zeilen = oo.find(:all,
+          :conditions => {
+            'TITEL' => 'Brief aus dem Sekretariat',
+            'VERFASSER' => 'Almassy, Annelene von',
+          }, :array => true)
+        assert_equal 2, zeilen.size
+        assert_equal [
+          [
+            "Brief aus dem Sekretariat",
+            "Almassy, Annelene von",
+            "Bibel+Gem",
+            "1982-3",
+            316.0,
+            nil,
+            "#C:\\Bibelbund\\reprint\\BuG1982-3.pdf#",
+            "Aus dem Bibelbund",
+          ],
+          [
+            "Brief aus dem Sekretariat",
+            "Almassy, Annelene von",
+            "Bibel+Gem",
+            "1983-2",
+            222.0,
+            nil,
+            "#C:\\Bibelbund\\reprint\\BuG1983-2.pdf#",
+            "Aus dem Bibelbund",
+          ]] , zeilen
       end
     end
   end
@@ -1039,13 +1022,9 @@ class TestRoo < Test::Unit::TestCase
   def test_column_huge_document
     if LONG_RUN
       with_each_spreadsheet(:name=>'Bibelbund') do |oo|
-        assert_nothing_raised(Timeout::Error) {
-          Timeout::timeout(GLOBAL_TIMEOUT) do |timeout_length|
-            oo.default_sheet = oo.sheets.first
-            assert_equal 3735, oo.column('a').size
-            #assert_equal 499, oo.column('a').size
-          end
-        }
+        oo.default_sheet = oo.sheets.first
+        assert_equal 3735, oo.column('a').size
+        #assert_equal 499, oo.column('a').size
       end
     end
   end
