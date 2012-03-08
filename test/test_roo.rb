@@ -120,13 +120,6 @@ class File
   end
 end
 
-# :nodoc
-class Fixnum
-  def minutes
-    self * 60
-  end
-end
-
 class TestRoo < Test::Unit::TestCase
 
   OPENOFFICE   = true  	# do Openoffice-Spreadsheet Tests?
@@ -138,10 +131,6 @@ class TestRoo < Test::Unit::TestCase
   ONLINE = true
   LONG_RUN = true
 
-  def test_internal_minutes
-    assert_equal 42*60, 42.minutes
-  end
-  
   # call a block of code for each spreadsheet type 
   # and yield a reference to the roo object
   def with_each_spreadsheet(options)
