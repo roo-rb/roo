@@ -1,4 +1,3 @@
-require 'xml'
 require 'fileutils'
 require 'zip/zipfilesystem'
 require 'date'
@@ -28,7 +27,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
       unless File.file?(@filename)
         raise IOError, "file #{@filename} does not exist"
       end
-      @doc = XML::Parser.file(@filename).parse
+      @doc = Nokogiri::XML(@filename)
     ensure
       FileUtils::rm_r(@tmpdir)
     end
@@ -148,7 +147,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
 
   def sheets
     return_sheets = []
-    @doc.find("//ss:Worksheet").each do |sheet|
+    @doc.xpath("//Worksheet").each do |sheet|
       return_sheets << sheet.attributes['Name']
     end
     return_sheets
@@ -238,16 +237,16 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
     sheet_found = false
     raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
     raise RangeError unless self.sheets.include? sheet
-    @doc.find("ss:Worksheet[@ss:Name='#{sheet}']").each do |ws|
+    @doc.xpath("Worksheet[@ss:Name='#{sheet}']").each do |ws|
         sheet_found = true
         row = 1
         col = 1
         column_attributes = {}   
         idx = 0
-        ws.find('.//ss:Column').each do |c|
+        ws.xpath('.//ss:Column').each do |c|
           column_attributes[(idx += 1).to_s] = c.attributes['StyleID'] 
         end  
-        ws.find('.//ss:Row').each do |r|
+        ws.xpath('.//ss:Row').each do |r|
           skip_to_row = r.attributes['Index'].to_i
           row = skip_to_row if skip_to_row > 0
           style_name = r.attributes['StyleID'] if r.attributes['StyleID'] 
@@ -298,11 +297,11 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   end
 
   def read_styles
-    @doc.find("ss:Styles").each do |styles|
-       styles.find('.//ss:Style').each do |style|
+    @doc.xpath("Styles").each do |styles|
+       styles.xpath('.//ss:Style').each do |style|
          style_id = style.attributes['ID']
          @style_definitions[style_id] = Roo::Excel2003XML::Font.new
-         font = style.find_first('.//ss:Font')
+         font = style.xpath('.//ss:Font').first
          if font
            @style_definitions[style_id].bold = font.attributes['Bold']
            @style_definitions[style_id].italic = font.attributes['Italic']
