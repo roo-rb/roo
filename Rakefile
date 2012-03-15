@@ -19,7 +19,6 @@ begin
     s.rdoc_options = ["--main","README.markdown"]
     s.add_dependency "spreadsheet", [">= 0.6.4"]
     s.add_dependency "rubyzip", [">= 0.9.1"]
-    s.add_dependency "GData", [">= 0.0.4"]
     s.add_dependency "nokogiri", [">= 1.4.1"]
   end
 rescue LoadError
