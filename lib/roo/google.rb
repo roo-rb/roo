@@ -1,4 +1,3 @@
-#require 'xml'
 require "google_spreadsheet"
 
 class GoogleHTTPError < RuntimeError; end

@@ -1,4 +1,3 @@
-#TODO: require 'xml'
 require 'fileutils'
 require 'zip/zipfilesystem'
 require 'date'
