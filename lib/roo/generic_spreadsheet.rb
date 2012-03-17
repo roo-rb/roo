@@ -314,7 +314,7 @@ class Roo::GenericSpreadsheet
   def info
     result = "File: #{File.basename(@filename)}\n"+
       "Number of sheets: #{sheets.size}\n"+
-      "Sheets: #{sheets.map{|sheet| sheet+", "}.to_s[0..-3]}\n"
+      "Sheets: #{sheets.join(', ')}\n"
     n = 1
     sheets.each {|sheet|
       self.default_sheet = sheet
