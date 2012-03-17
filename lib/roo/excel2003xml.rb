@@ -295,15 +295,13 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   end
 
   def read_styles
-    @doc.xpath("/ss:Workbook/ss:Styles").each do |styles|
-      styles.xpath('./ss:Style').each do |style|
-        style_id = style['ID']
-        @style_definitions[style_id] = Roo::Excel2003XML::Font.new
-        if font = style.xpath('./ss:Font').first
-          @style_definitions[style_id].bold = font['Bold']
-          @style_definitions[style_id].italic = font['Italic']
-          @style_definitions[style_id].underline = font['Underline']
-        end
+    @doc.xpath("/ss:Workbook/ss:Styles/ss:Style").each do |style|
+      style_id = style['ID']
+      @style_definitions[style_id] = Roo::Excel2003XML::Font.new
+      if font = style.at_xpath('./ss:Font')
+        @style_definitions[style_id].bold = font['Bold']
+        @style_definitions[style_id].italic = font['Italic']
+        @style_definitions[style_id].underline = font['Underline']
       end
     end
   end
