@@ -248,8 +248,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
         skip_to_row = r['Index'].to_i
         row = skip_to_row if skip_to_row > 0
         style_name = r['StyleID'] if r['StyleID']
-        r.children.each do |c|
-          next unless c.name == 'Cell'
+        r.xpath('./ss:Cell').each do |c|
           skip_to_col = c['Index'].to_i
           col = skip_to_col if skip_to_col > 0
           if c['StyleID']
@@ -257,30 +256,27 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
           elsif
             style_name ||= column_attributes[c['Index']]
           end
-          c.children.each do |cell|
-            formula = nil
-            if cell.name == 'Data'
-              formula = cell['Formula']
-              vt = cell['Type'].downcase.to_sym
-              v =  cell.content
-              str_v = v
-              case vt
-              when :number
-                v = v.to_f
-                vt = :float
-              when :datetime
-                if v =~ /^1899-12-31T(\d{2}:\d{2}:\d{2})/
-                  v = $1
-                  vt = :time
-                elsif v =~ /([^T]+)T00:00:00.000/
-                  v = $1
-                  vt = :date
-                end
-              when :boolean
-                v = cell['boolean-value']
+          c.xpath('./ss:Data').each do |cell|
+            formula = cell['Formula']
+            vt = cell['Type'].downcase.to_sym
+            v =  cell.content
+            str_v = v
+            case vt
+            when :number
+              v = v.to_f
+              vt = :float
+            when :datetime
+              if v =~ /^1899-12-31T(\d{2}:\d{2}:\d{2})/
+                v = $1
+                vt = :time
+              elsif v =~ /([^T]+)T00:00:00.000/
+                v = $1
+                vt = :date
               end
-              set_cell_values(sheet,col,row,0,v,vt,formula,cell,str_v,style_name)
+            when :boolean
+              v = cell['boolean-value']
             end
+            set_cell_values(sheet,col,row,0,v,vt,formula,cell,str_v,style_name)
           end
           col += 1
         end
