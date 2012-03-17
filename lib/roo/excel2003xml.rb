@@ -279,8 +279,8 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
               when :boolean
                 v = cell['boolean-value']
               end
+              set_cell_values(sheet,col,row,0,v,vt,formula,cell,str_v,style_name)
             end
-            set_cell_values(sheet,col,row,0,v,vt,formula,cell,str_v,style_name)
           end
           col += 1
         end
