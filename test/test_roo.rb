@@ -19,7 +19,7 @@
 # with the wrong spreadsheet class
 STDERR.reopen "/dev/null","w" unless $0 == __FILE__
 
-TESTDIR =  File.dirname(__FILE__) 
+TESTDIR =  File.dirname(__FILE__)
 require TESTDIR + '/test_helper.rb'
 #require 'soap/rpc/driver'
 require 'fileutils'
@@ -54,7 +54,7 @@ end
 class Test::Unit::TestCase
   def key_of(spreadsheetname)
     begin
-      
+
       return {
         'formula' => 'rt4Pw1WmjxFtyfrqqy94wPw',
         "write.me" => 'r6m7HFlUOwst0RTUTuhQ0Ow',
@@ -131,16 +131,16 @@ class TestRoo < Test::Unit::TestCase
   ONLINE = true
   LONG_RUN = true
 
-  # call a block of code for each spreadsheet type 
+  # call a block of code for each spreadsheet type
   # and yield a reference to the roo object
   def with_each_spreadsheet(options)
      options[:format] ||= [:excel, :excelx, :excel2003xml, :openoffice, :google]
      options[:format] = [options[:format]] if Symbol === options[:format]
      if options[:ignore]
        if Symbol === options[:ignore]
-         options[:format] = (options[:format] - [options[:ignore]]) 
+         options[:format] = (options[:format] - [options[:ignore]])
        else
-         options[:format] = (options[:format] - options[:ignore]) 
+         options[:format] = (options[:format] - options[:ignore])
        end
      end
      yield Roo::Spreadsheet.open(File.join(TESTDIR, options[:name] + '.xls')) if EXCEL && options[:format].include?(:excel)
@@ -159,7 +159,7 @@ class TestRoo < Test::Unit::TestCase
     ENV['GOOGLE_MAIL'] = user
     ENV['GOOGLE_PASSWORD'] = pass
   end
-  
+
   # Using Date.strptime so check that it's using the method
   # with the value set in date_format
   def test_date
@@ -215,11 +215,11 @@ class TestRoo < Test::Unit::TestCase
         oo.default_sheet = sh
         assert_equal sh, oo.default_sheet
       }
-    end  
+    end
   end
-  
+
   def test_cells
-    with_each_spreadsheet(:name=>'numbers1') do |oo| 
+    with_each_spreadsheet(:name=>'numbers1') do |oo|
       assert_equal 1, oo.cell(1,1)
       assert_equal 2, oo.cell(1,2)
       assert_equal 3, oo.cell(1,3)
@@ -248,11 +248,11 @@ class TestRoo < Test::Unit::TestCase
       assert_equal Date.new(1961,11,21), oo.cell(5,1)
     end
   end
-  
+
   def test_celltype
-    with_each_spreadsheet(:name=>'numbers1') do |oo| 
+    with_each_spreadsheet(:name=>'numbers1') do |oo|
       assert_equal :string, oo.celltype(2,6)
-    end  
+    end
   end
 
   def test_cell_address
@@ -277,7 +277,7 @@ class TestRoo < Test::Unit::TestCase
   def test_office_version
     with_each_spreadsheet(:name=>'numbers1', :format=>:openoffice) do |oo|
       assert_equal "1.0", oo.officeversion
-    end  
+    end
   end
 
   #TODO: inkonsequente Lieferung Fixnum/Float
@@ -346,15 +346,15 @@ class TestRoo < Test::Unit::TestCase
       if oo.class == Roo::Excel
         assert_raise(RuntimeError) { dummy = oo.formula?('C',5,"non existing sheet name")}
         assert_raise(RuntimeError) { dummy = oo.formula('C',5,"non existing sheet name")}
-      else  
+      else
         assert_raise(RangeError) { dummy = oo.formula?('C',5,"non existing sheet name")}
         assert_raise(RangeError) { dummy = oo.formula('C',5,"non existing sheet name")}
         assert_raise(RangeError) { dummy = oo.set('C',5,42,"non existing sheet name")} unless oo.class == Roo::Google
-        assert_raise(RangeError) { dummy = oo.formulas("non existing sheet name")} 
+        assert_raise(RangeError) { dummy = oo.formulas("non existing sheet name")}
       end
       assert_raise(RangeError) { dummy = oo.to_yaml({},1,1,1,1,"non existing sheet name")}
     end
-  end  
+  end
 
   def test_boundaries
     with_each_spreadsheet(:name=>'numbers1') do |oo|
@@ -573,7 +573,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 42.5, oo.cell('A',17)
     end
   end
-  
+
   # Excel can only read the cell's value
   def test_formula_excel
     with_each_spreadsheet(:name=>'formula', :format=>:excel) do |oo|
@@ -582,7 +582,7 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  
+
   def test_borders_sheets
     with_each_spreadsheet(:name=>'borders') do |oo|
       oo.default_sheet = oo.sheets[1]
@@ -651,9 +651,9 @@ class TestRoo < Test::Unit::TestCase
           excel = Roo::Excel.new(url, :zip)
           excel.default_sheet = excel.sheets.first
           assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-        ensure  
+        ensure
           excel.remove_tmp
-        end  
+        end
       end
     end
   end
@@ -668,7 +668,7 @@ class TestRoo < Test::Unit::TestCase
           assert_in_delta 0.001, 505.14, sheet.cell('c', 33).to_f
         ensure
           sheet.remove_tmp
-        end  
+        end
       end
     end
   end
@@ -680,8 +680,8 @@ class TestRoo < Test::Unit::TestCase
         assert oo
         assert_equal 'ist "e" im Nenner von H(s)', oo.cell('b', 5)
       ensure
-        oo.remove_tmp 
-      end  
+        oo.remove_tmp
+      end
     end
   end
 
@@ -691,9 +691,9 @@ class TestRoo < Test::Unit::TestCase
         oo = Roo::Openoffice.new(File.join(TESTDIR,"bode-v1.ods.zip"), :zip)
         assert oo
         assert_equal 'ist "e" im Nenner von H(s)', oo.cell('b', 5)
-      ensure  
+      ensure
         oo.remove_tmp
-      end  
+      end
     end
   end
 
@@ -778,7 +778,7 @@ class TestRoo < Test::Unit::TestCase
       assert oo.to_csv("/tmp/numbers1.csv")
       assert File.exists?("/tmp/numbers1.csv")
       assert_equal "", `diff #{master} /tmp/numbers1.csv`
-    end 
+    end
   end
 
   def test_bug_mehrere_datum
@@ -814,7 +814,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal "ABC", oo.cell('C',6)
       assert_equal "ABC", oo.cell('D',6)
       assert_equal "ABC", oo.cell('E',6)
-    end 
+    end
   end
 
   def test_multiple_sheets
@@ -1031,8 +1031,8 @@ class TestRoo < Test::Unit::TestCase
       assert_equal "Task 1"    , erg[1]['Comment']
     end
   end
-  
-  # Ruby-spreadsheet now allows us to at least give the current value 
+
+  # Ruby-spreadsheet now allows us to at least give the current value
   # from a cell with a formula (no possible with parseexcel)
   def test_bug_false_borders_with_formulas
     with_each_spreadsheet(:name=>'false_encoding', :format=>:excel) do |oo|
@@ -1055,7 +1055,7 @@ class TestRoo < Test::Unit::TestCase
       #DOES NOT WORK IN EXCEL FILES: assert_equal true,               oo.formula?('B',1)
       #DOES NOT WORK IN EXCEL FILES: assert_equal "=A1+100",          oo.formula('B',1)
 
-      assert_kind_of DateTime, oo.cell('C',1) 
+      assert_kind_of DateTime, oo.cell('C',1)
       #DOES NOT WORK IN EXCEL FILES: assert_equal true,               oo.formula?('C',1)
       #DOES NOT WORK IN EXCEL FILES: assert_equal "=C1",          oo.formula('C',1)
 
@@ -1067,7 +1067,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 'R2', oo.cell('B',3)
       assert_equal 'R3', oo.cell('C',3)
       assert_equal 'R4', oo.cell('D',3)
-    end  
+    end
   end
 
   def test_excel_does_not_support_formulas
@@ -1075,7 +1075,7 @@ class TestRoo < Test::Unit::TestCase
       assert_raise(RuntimeError) { void = oo.formula('a',1) }
       assert_raise(RuntimeError) { void = oo.formula?('a',1) }
       assert_raise(RuntimeError) { void = oo.formulas(oo.sheets.first) }
-    end  
+    end
   end
 
   def get_extension(oo)
@@ -1088,11 +1088,11 @@ class TestRoo < Test::Unit::TestCase
       ".xlsx"
     when Roo::Excel2003XML
       ".xml"
-    when Roo::Google  
+    when Roo::Google
       ""
     end
   end
-  
+
   def test_info
     expected_templ = "File: numbers1%s\n"+
       "Number of sheets: 5\n"+
@@ -1125,7 +1125,7 @@ class TestRoo < Test::Unit::TestCase
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       ext = get_extension(oo)
       expected = sprintf(expected_templ,ext)
-      if oo.class == Roo::Google      
+      if oo.class == Roo::Google
         assert_equal expected.gsub(/numbers1/,key_of("numbers1")), oo.info
       else
         assert_equal expected, oo.info
@@ -1186,10 +1186,10 @@ class TestRoo < Test::Unit::TestCase
 #      }
     end
   end
-  
+
   def test_write_google
     # write.me: http://spreadsheets.google.com/ccc?key=ptu6bbahNZpY0N0RrxQbWdw&hl=en_GB
-    
+
     with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|
       oo.set_value(1,1,"hello from the tests")
       assert_equal "hello from the tests", oo.cell(1,1)
@@ -1230,7 +1230,7 @@ class TestRoo < Test::Unit::TestCase
   def test_set_value_for_non_existing_sheet_google
     with_each_spreadsheet(:name=>'ptu6bbahNZpY0N0RrxQbWdw', :format=>:google) do |oo|
       assert_raise(RangeError) { oo.set_value(1,1,"dummy","no_sheet")   }
-    end 
+    end
   end
 
   def test_bug_bbu
@@ -1255,7 +1255,7 @@ Sheet 3:
       assert_nil oo.last_row
       assert_nil oo.first_column
       assert_nil oo.last_column
-    end  
+    end
   end
 
 
@@ -1278,8 +1278,8 @@ Sheet 3:
         assert_equal "", `diff #{TESTDIR}/time-test.csv /tmp/time-test.csv`
       ensure
         File.delete_if_exist("/tmp/time-test.csv")
-      end  
-    end 
+      end
+    end
   end
 
   def test_date_time_yaml
@@ -1389,7 +1389,7 @@ Sheet 3:
         } # end of sheet
         sheetname = oo.sheets[oo.sheets.index(sheetname)+1]
       }
-    end  
+    end
   end
 
   def test_bug_row_column_fixnum_float
@@ -1512,13 +1512,13 @@ Sheet 3:
   end
 
   def test_bug_last_row_excel
-    with_each_spreadsheet(:name=>'time-test', :format=>:excel) do |oo|    
+    with_each_spreadsheet(:name=>'time-test', :format=>:excel) do |oo|
       assert_equal 2, oo.last_row
     end
   end
 
   def test_bug_to_xml_with_empty_sheets
-    with_each_spreadsheet(:name=>'emptysheets', :format=>[:openoffice, :excel]) do |oo|    
+    with_each_spreadsheet(:name=>'emptysheets', :format=>[:openoffice, :excel]) do |oo|
       oo.sheets.each { |sheet|
         assert_equal nil, oo.first_row, "first_row not nil in sheet #{sheet}"
         assert_equal nil, oo.last_row, "last_row not nil in sheet #{sheet}"
@@ -1536,7 +1536,7 @@ Sheet 3:
   def test_bug_simple_spreadsheet_time_bug
     # really a bug? are cells really of type time?
     # No! :float must be the correct type
-    with_each_spreadsheet(:name=>'simple_spreadsheet', :format=>:excelx) do |oo|    
+    with_each_spreadsheet(:name=>'simple_spreadsheet', :format=>:excelx) do |oo|
       # puts oo.cell('B',5).to_s
       # assert_equal :time, oo.celltype('B',5)
       assert_equal :float, oo.celltype('B',5)
@@ -1550,7 +1550,7 @@ Sheet 3:
   end
 
   def test_simple2_excelx
-    with_each_spreadsheet(:name=>'simple_spreadsheet', :format=>:excelx) do |oo|    
+    with_each_spreadsheet(:name=>'simple_spreadsheet', :format=>:excelx) do |oo|
       assert_equal [:numeric_or_formula, "yyyy\\-mm\\-dd"], oo.excelx_type('A',4)
       assert_equal [:numeric_or_formula, "#,##0.00"], oo.excelx_type('B',4)
       assert_equal [:numeric_or_formula, "#,##0.00"], oo.excelx_type('c',4)
@@ -1582,7 +1582,7 @@ Sheet 3:
   end
 
   def test_datetime
-    with_each_spreadsheet(:name=>'datetime') do |oo|    
+    with_each_spreadsheet(:name=>'datetime') do |oo|
       val = oo.cell('c',3)
       assert_kind_of DateTime, val
       assert_equal :datetime, oo.celltype('c',3)
@@ -1609,21 +1609,21 @@ Sheet 3:
       assert_equal Date.new(1961,11,21), oo.cell('c',7)
     end
   end
-  
+
   def test_cell_openoffice_html_escape
-    with_each_spreadsheet(:name=>'html-escape', :format=>:openoffice) do |oo|    
+    with_each_spreadsheet(:name=>'html-escape', :format=>:openoffice) do |oo|
       assert_equal "'", oo.cell(1,1)
       assert_equal "&", oo.cell(2,1)
       assert_equal ">", oo.cell(3,1)
       assert_equal "<", oo.cell(4,1)
       assert_equal "`", oo.cell(5,1)
       # test_openoffice_zipped will catch issues with &quot;
-    end  
-  end    
-  
+    end
+  end
+
   def test_cell_boolean
-    with_each_spreadsheet(:name=>'boolean', :format=>[:openoffice, :excel, :excelx]) do |oo|    
-      if oo.class == Roo::Excelx    
+    with_each_spreadsheet(:name=>'boolean', :format=>[:openoffice, :excel, :excelx]) do |oo|
+      if oo.class == Roo::Excelx
         assert_equal "TRUE", oo.cell(1,1)
         assert_equal "FALSE", oo.cell(2,1)
       else
@@ -1632,22 +1632,22 @@ Sheet 3:
       end
     end
   end
-  
+
    def test_cell_multiline
-     with_each_spreadsheet(:name=>'paragraph', :format=>[:openoffice, :excel, :excelx]) do |oo|    
+     with_each_spreadsheet(:name=>'paragraph', :format=>[:openoffice, :excel, :excelx]) do |oo|
         assert_equal "This is a test\nof a multiline\nCell", oo.cell(1,1)
         assert_equal "This is a test\n¶\nof a multiline\n\nCell", oo.cell(1,2)
         assert_equal "first p\n\nsecond p\n\nlast p", oo.cell(2,1)
      end
    end
-  
+
   def test_cell_styles
-    with_each_spreadsheet(:name=>'style', :format=>[:openoffice, :excel, :excelx, :excel2003xml]) do |oo|    
+    with_each_spreadsheet(:name=>'style', :format=>[:openoffice, :excel, :excelx, :excel2003xml]) do |oo|
       # bold
       assert_equal true,  oo.font(1,1).bold?
       assert_equal false, oo.font(1,1).italic?
       assert_equal false, oo.font(1,1).underline?
-    
+
       # italic
       assert_equal false, oo.font(2,1).bold?
       assert_equal true,  oo.font(2,1).italic?
@@ -1697,24 +1697,24 @@ Sheet 3:
       assert_equal false, oo.font(11,4).bold?
       assert_equal false,  oo.font(11,4).italic?
       assert_equal false,  oo.font(11,4).underline?
-    end  
+    end
   end
-  
-  # If a cell has a date-like string but is preceeded by a ' 
+
+  # If a cell has a date-like string but is preceeded by a '
   # to force that date to be treated like a string, we were getting an exception.
   # This test just checks for that exception to make sure it's not raised in this case
   def test_date_to_float_conversion
-    with_each_spreadsheet(:name=>'datetime_floatconv', :format=>:excel) do |oo|    
+    with_each_spreadsheet(:name=>'datetime_floatconv', :format=>:excel) do |oo|
        assert_nothing_raised(NoMethodError) do
          oo.cell('a',1)
          oo.cell('a',2)
        end
      end
-  end  
+  end
 
 # Need to extend to other formats
   def test_row_whitespace
-    with_each_spreadsheet(:name=>'whitespace') do |oo| 
+    with_each_spreadsheet(:name=>'whitespace') do |oo|
       oo.default_sheet = "Sheet1"
       assert_equal [nil, nil, nil, nil, nil, nil], oo.row(1)
       assert_equal [nil, nil, nil, nil, nil, nil], oo.row(2)
@@ -1728,9 +1728,9 @@ Sheet 3:
       assert_equal [Date.new(2007,5,7), nil,  10.75], oo.row(3)
     end
   end
-  
+
   def test_col_whitespace
-    with_each_spreadsheet(:name=>'whitespace') do |oo|    
+    with_each_spreadsheet(:name=>'whitespace') do |oo|
       oo.default_sheet = "Sheet1"
       assert_equal ["Date", Date.new(2007,5,7), nil, Date.new(2007,5,7)], oo.column(1)
       assert_equal ["Start time", 9.25, nil, 10.75], oo.column(2)
@@ -1746,7 +1746,7 @@ Sheet 3:
       assert_equal [ "Start time", 9.25, 10.75], oo.column(5)
     end
   end
-  
+
 
   def test_ruby_spreadsheet_formula_bug
      with_each_spreadsheet(:name=>'formula_parse_error', :format=>:excel) do |oo|
@@ -1756,66 +1756,66 @@ Sheet 3:
    end
 
 
-  # Excel has two base date formats one from 1900 and the other from 1904. 
+  # Excel has two base date formats one from 1900 and the other from 1904.
   # There's a MS bug that 1900 base dates include an extra day due to erroneously
-  # including 1900 as a leap yar. 
+  # including 1900 as a leap yar.
   def test_base_dates_in_excel
-    with_each_spreadsheet(:name=>'1900_base', :format=>:excel) do |oo|    
+    with_each_spreadsheet(:name=>'1900_base', :format=>:excel) do |oo|
       assert_equal Date.new(2009,06,15), oo.cell(1,1)
       assert_equal Date.new(2009,06,28), oo.cell(2,1) #formula for TODAY(), last calculated on 06.28
       assert_equal :date, oo.celltype(1,1)
-    end  
-    with_each_spreadsheet(:name=>'1904_base', :format=>:excel) do |oo|    
+    end
+    with_each_spreadsheet(:name=>'1904_base', :format=>:excel) do |oo|
       assert_equal Date.new(2009,06,15), oo.cell(1,1)
       assert_equal Date.new(2009,06,28), oo.cell(2,1) #formula for TODAY(), last calculated on 06.28
       assert_equal :date, oo.celltype(1,1)
-    end  
+    end
   end
-  
-  
+
+
   def test_bad_excel_date
-    with_each_spreadsheet(:name=>'bad_excel_date', :format=>:excel) do |oo|   
+    with_each_spreadsheet(:name=>'bad_excel_date', :format=>:excel) do |oo|
       assert_nothing_raised(ArgumentError) {
         assert_equal DateTime.new(2006,2,2,10,0,0), oo.cell('a',1)
       }
     end
   end
-  
+
   def test_public_google_doc_1
     return unless GOOGLE
-    with_public_google_spreadsheet do 
+    with_public_google_spreadsheet do
       assert_raise(GoogleHTTPError) { Roo::Google.new("foo") }
     end
   end
 
   def test_public_google_doc_2
     return unless GOOGLE
-    with_public_google_spreadsheet do 
+    with_public_google_spreadsheet do
       assert_raise(GoogleReadError) { Roo::Google.new(key_of('numbers1'))}
     end
   end
 
   def test_public_google_doc_3
     return unless GOOGLE
-    with_public_google_spreadsheet do 
+    with_public_google_spreadsheet do
       assert_nothing_raised { Roo::Google.new("0AncOJVyN5MMMcjZtN0hGbFVPd3N0MFJUVVR1aFEwT3c") } # use spreadsheet key (private)
     end
   end
 
   def test_public_google_doc_4
     return unless GOOGLE
-    with_public_google_spreadsheet do 
+    with_public_google_spreadsheet do
       assert_nothing_raised { Roo::Google.new(key_of('write.me')) } # use spreadsheet key (public)
     end
-  end    
+  end
 
   def test_public_google_doc_write
-    with_public_google_spreadsheet do 
+    with_public_google_spreadsheet do
       oo = Roo::Google.new(key_of('write.me'))
       assert_raise(GoogleWriteError) {
         oo.set_value(1,1,'test')
-      }  
+      }
     end
-  end    
-   
+  end
+
 end # class
