@@ -27,7 +27,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
       unless File.file?(@filename)
         raise IOError, "file #{@filename} does not exist"
       end
-      @doc = Nokogiri::XML(@filename)
+      @doc = Nokogiri::XML(open(@filename))
     ensure
       FileUtils::rm_r(@tmpdir)
     end
@@ -146,11 +146,9 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   end
 
   def sheets
-    return_sheets = []
-    @doc.xpath("//Worksheet").each do |sheet|
-      return_sheets << sheet.attributes['Name']
+    @doc.xpath("//ss:Worksheet").map do |sheet|
+      sheet['Name']
     end
-    return_sheets
   end
 
   # version of the openoffice document
@@ -195,7 +193,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   # read the version of the OO-Version
   def oo_version
     @doc.find("//*[local-name()='document-content']").each do |office|
-      @officeversion = office.attributes['version']
+      @officeversion = office['version']
     end
   end
 
@@ -237,33 +235,33 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
     sheet_found = false
     raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
     raise RangeError unless self.sheets.include? sheet
-    @doc.xpath("Worksheet[@ss:Name='#{sheet}']").each do |ws|
+    @doc.xpath("//ss:Worksheet[@ss:Name='#{sheet}']").each do |ws|
       sheet_found = true
       row = 1
       col = 1
       column_attributes = {}
       idx = 0
       ws.xpath('.//ss:Column').each do |c|
-        column_attributes[(idx += 1).to_s] = c.attributes['StyleID']
+        column_attributes[(idx += 1).to_s] = c['StyleID']
       end
       ws.xpath('.//ss:Row').each do |r|
-        skip_to_row = r.attributes['Index'].to_i
+        skip_to_row = r['Index'].to_i
         row = skip_to_row if skip_to_row > 0
-        style_name = r.attributes['StyleID'] if r.attributes['StyleID']
-        r.each do |c|
+        style_name = r['StyleID'] if r['StyleID']
+        r.children.each do |c|
           next unless c.name == 'Cell'
-          skip_to_col = c.attributes['Index'].to_i
+          skip_to_col = c['Index'].to_i
           col = skip_to_col if skip_to_col > 0
-          if c.attributes['StyleID']
-            style_name = c.attributes['StyleID']
+          if c['StyleID']
+            style_name = c['StyleID']
           elsif
-            style_name ||= column_attributes[c.attributes['Index']]
+            style_name ||= column_attributes[c['Index']]
           end
-          c.each_element do |cell|
+          c.children.each do |cell|
             formula = nil
             if cell.name == 'Data'
-              formula = cell.attributes['Formula']
-              vt = cell.attributes['Type'].downcase.to_sym
+              formula = cell['Formula']
+              vt = cell['Type'].downcase.to_sym
               v =  cell.content
               str_v = v
               case vt
@@ -279,7 +277,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
                   vt = :date
                 end
               when :boolean
-                v = cell.attributes['boolean-value']
+                v = cell['boolean-value']
               end
             end
             set_cell_values(sheet,col,row,0,v,vt,formula,cell,str_v,style_name)
@@ -297,15 +295,15 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   end
 
   def read_styles
-    @doc.xpath("Styles").each do |styles|
+    @doc.xpath("ss:Styles").each do |styles|
        styles.xpath('.//ss:Style').each do |style|
-         style_id = style.attributes['ID']
+         style_id = style['ID']
          @style_definitions[style_id] = Roo::Excel2003XML::Font.new
          font = style.xpath('.//ss:Font').first
          if font
-           @style_definitions[style_id].bold = font.attributes['Bold']
-           @style_definitions[style_id].italic = font.attributes['Italic']
-           @style_definitions[style_id].underline = font.attributes['Underline']
+           @style_definitions[style_id].bold = font['Bold']
+           @style_definitions[style_id].italic = font['Italic']
+           @style_definitions[style_id].underline = font['Underline']
         end
       end
     end
@@ -376,7 +374,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
         result = result + child.content
       else
         if child.name == 's'
-          compressed_spaces = child.attributes['c'].to_i
+          compressed_spaces = child['c'].to_i
           # no explicit number means a count of 1:
           if compressed_spaces == 0
             compressed_spaces = 1
