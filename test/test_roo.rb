@@ -1811,8 +1811,8 @@ Sheet 3:
 
   def test_public_google_doc_write
     with_public_google_spreadsheet do 
+      oo = Roo::Google.new(key_of('write.me'))
       assert_raise(GoogleWriteError) {
-        oo = Roo::Google.new(key_of('write.me'))
         oo.set_value(1,1,'test')
       }  
     end
