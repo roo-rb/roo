@@ -10,11 +10,11 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
 
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
-  def initialize(filename, packed=nil, file_warning=:error) 
+  def initialize(filename, packed=nil, file_warning=:error)
     @file_warning = file_warning
     super()
     @tmpdir = "oo_"+$$.to_s
-    @tmpdir = File.join(ENV['ROO_TMP'], @tmpdir) if ENV['ROO_TMP'] 
+    @tmpdir = File.join(ENV['ROO_TMP'], @tmpdir) if ENV['ROO_TMP']
     unless File.exists?(@tmpdir)
       FileUtils::mkdir(@tmpdir)
     end
@@ -42,7 +42,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
     @header_line = 1
     @style = Hash.new
     @style_defaults = Hash.new { |h,k| h[k] = [] }
-    @style_definitions = Hash.new 
+    @style_definitions = Hash.new
     read_styles
   end
 
@@ -82,32 +82,32 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
     row,col = normalize(row,col)
     formula(row,col) != nil
   end
-  
+
   class Font
     attr_accessor :bold, :italic, :underline
-    
-    def bold? 
+
+    def bold?
       @bold == '1'
     end
 
-    def italic? 
+    def italic?
       @italic == '1'
     end
-    
-    def underline? 
+
+    def underline?
       @underline != nil
     end
   end
 
-  # Given a cell, return the cell's style 
+  # Given a cell, return the cell's style
   def font(row, col, sheet=nil)
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     style_name = @style[sheet][[row,col]] || @style_defaults[sheet][col - 1] || 'Default'
     @style_definitions[style_name]
-  end 
-  
+  end
+
   # set a cell to a certain value
   # (this will not be saved back to the spreadsheet file!)
   def set(row,col,value,sheet=nil) #:nodoc:
@@ -152,7 +152,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
     end
     return_sheets
   end
-    
+
   # version of the openoffice document
   # at 2007 this is always "1.0"
   def officeversion
@@ -201,7 +201,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
 
   # helper function to set the internal representation of cells
   def set_cell_values(sheet,x,y,i,v,vt,formula,table_cell,str_v,style_name)
-    key = [y,x+i]    
+    key = [y,x+i]
     @cell_type[sheet] = {} unless @cell_type[sheet]
     @cell_type[sheet][key] = vt
     @formula[sheet] = {} unless @formula[sheet]
@@ -238,57 +238,57 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
     raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
     raise RangeError unless self.sheets.include? sheet
     @doc.xpath("Worksheet[@ss:Name='#{sheet}']").each do |ws|
-        sheet_found = true
-        row = 1
-        col = 1
-        column_attributes = {}   
-        idx = 0
-        ws.xpath('.//ss:Column').each do |c|
-          column_attributes[(idx += 1).to_s] = c.attributes['StyleID'] 
-        end  
-        ws.xpath('.//ss:Row').each do |r|
-          skip_to_row = r.attributes['Index'].to_i
-          row = skip_to_row if skip_to_row > 0
-          style_name = r.attributes['StyleID'] if r.attributes['StyleID'] 
-          r.each do |c|    
-            next unless c.name == 'Cell'        
-            skip_to_col = c.attributes['Index'].to_i
-            col = skip_to_col if skip_to_col > 0
-            if c.attributes['StyleID'] 
-              style_name = c.attributes['StyleID'] 
-            elsif 
-              style_name ||= column_attributes[c.attributes['Index']]
-            end  
-            c.each_element do |cell|
-              formula = nil
-              if cell.name == 'Data'
-                formula = cell.attributes['Formula']
-                vt = cell.attributes['Type'].downcase.to_sym
-                v =  cell.content
-                str_v = v
-                case vt 
-                when :number
-                  v = v.to_f   
-                  vt = :float
-                when :datetime
-                  if v =~ /^1899-12-31T(\d{2}:\d{2}:\d{2})/
-                    v = $1
-                    vt = :time
-                  elsif v =~ /([^T]+)T00:00:00.000/
-                    v = $1
-                    vt = :date
-                  end
-                when :boolean
-                  v = cell.attributes['boolean-value']
-                end
-              end
-              set_cell_values(sheet,col,row,0,v,vt,formula,cell,str_v,style_name)
-            end    
-            col += 1 
+      sheet_found = true
+      row = 1
+      col = 1
+      column_attributes = {}
+      idx = 0
+      ws.xpath('.//ss:Column').each do |c|
+        column_attributes[(idx += 1).to_s] = c.attributes['StyleID']
+      end
+      ws.xpath('.//ss:Row').each do |r|
+        skip_to_row = r.attributes['Index'].to_i
+        row = skip_to_row if skip_to_row > 0
+        style_name = r.attributes['StyleID'] if r.attributes['StyleID']
+        r.each do |c|
+          next unless c.name == 'Cell'
+          skip_to_col = c.attributes['Index'].to_i
+          col = skip_to_col if skip_to_col > 0
+          if c.attributes['StyleID']
+            style_name = c.attributes['StyleID']
+          elsif
+            style_name ||= column_attributes[c.attributes['Index']]
           end
-          row += 1
-          col = 1
-        end    
+          c.each_element do |cell|
+            formula = nil
+            if cell.name == 'Data'
+              formula = cell.attributes['Formula']
+              vt = cell.attributes['Type'].downcase.to_sym
+              v =  cell.content
+              str_v = v
+              case vt
+              when :number
+                v = v.to_f
+                vt = :float
+              when :datetime
+                if v =~ /^1899-12-31T(\d{2}:\d{2}:\d{2})/
+                  v = $1
+                  vt = :time
+                elsif v =~ /([^T]+)T00:00:00.000/
+                  v = $1
+                  vt = :date
+                end
+              when :boolean
+                v = cell.attributes['boolean-value']
+              end
+            end
+            set_cell_values(sheet,col,row,0,v,vt,formula,cell,str_v,style_name)
+          end
+          col += 1
+        end
+        row += 1
+        col = 1
+      end
     end
     if !sheet_found
       raise RangeError
@@ -308,9 +308,9 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
            @style_definitions[style_id].underline = font.attributes['Underline']
         end
       end
-    end  
+    end
   end
-  
+
   # Checks if the default_sheet exists. If not an RangeError exception is
   # raised
   def check_default_sheet
@@ -366,7 +366,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   def self.oo_type_2_roo_type(ootype)
     return A_ROO_TYPE[ootype]
   end
- 
+
   # helper method to convert compressed spaces and other elements within
   # an text into a string
   def children_to_string(children)
