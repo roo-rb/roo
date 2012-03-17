@@ -291,7 +291,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
       end
     end
     if !sheet_found
-      raise RangeError
+      raise RangeError, "Unable to find sheet #{sheet} for reading"
     end
     @cells_read[sheet] = true
   end

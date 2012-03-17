@@ -21,9 +21,11 @@ class Roo::GenericSpreadsheet
         raise RangeError
       end
     elsif sheet.kind_of?(String)
-      raise RangeError if ! self.sheets.include?(sheet)
+      if !self.sheets.include?(sheet)
+        raise RangeError, "Sheet #{sheet} not found in this spreadsheet. Consider: #{self.sheets.inspect}"
+      end
     else
-      raise TypeError, "what are you trying to set as default sheet?"
+      raise TypeError, "Default sheet must be set to a number or string. Recieved #{sheet.class.inspect}"
     end
     @default_sheet = sheet
     check_default_sheet
