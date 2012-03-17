@@ -146,7 +146,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   end
 
   def sheets
-    @doc.xpath("//ss:Worksheet").map do |sheet|
+    @doc.xpath("/ss:Workbook/ss:Worksheet").map do |sheet|
       sheet['Name']
     end
   end
@@ -235,16 +235,16 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
     sheet_found = false
     raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
     raise RangeError unless self.sheets.include? sheet
-    @doc.xpath("//ss:Worksheet[@ss:Name='#{sheet}']").each do |ws|
+    @doc.xpath("/ss:Workbook/ss:Worksheet[@ss:Name='#{sheet}']").each do |ws|
       sheet_found = true
       row = 1
       col = 1
       column_attributes = {}
       idx = 0
-      ws.xpath('.//ss:Column').each do |c|
+      ws.xpath('./ss:Table/ss:Column').each do |c|
         column_attributes[(idx += 1).to_s] = c['StyleID']
       end
-      ws.xpath('.//ss:Row').each do |r|
+      ws.xpath('./ss:Table/ss:Row').each do |r|
         skip_to_row = r['Index'].to_i
         row = skip_to_row if skip_to_row > 0
         style_name = r['StyleID'] if r['StyleID']
@@ -295,11 +295,11 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   end
 
   def read_styles
-    @doc.xpath("//ss:Styles").each do |styles|
-      styles.xpath('.//ss:Style').each do |style|
+    @doc.xpath("/ss:Workbook/ss:Styles").each do |styles|
+      styles.xpath('./ss:Style').each do |style|
         style_id = style['ID']
         @style_definitions[style_id] = Roo::Excel2003XML::Font.new
-        if font = style.xpath('.//ss:Font').first
+        if font = style.xpath('./ss:Font').first
           @style_definitions[style_id].bold = font['Bold']
           @style_definitions[style_id].italic = font['Italic']
           @style_definitions[style_id].underline = font['Underline']
