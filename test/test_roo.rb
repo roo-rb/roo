@@ -2260,7 +2260,7 @@ Sheet 3:
     end end
 
   def test_bug_date_mileszs
-    after Date.new(2011,12,7) do
+    local_only do
       # to do
       # "An richtige Stelle kopieren. Ist das Dokument vertraulich?"
       # 'ist auf dem Netbook nicht vorhanden'

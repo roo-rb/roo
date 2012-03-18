@@ -347,26 +347,28 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   #-- bei diesen Test bekomme ich seltsamerweise einen Fehler can't allocate
   #-- memory innerhalb der zip-Routinen => erstmal deaktiviert
   def SKIP_test_huge_table_timing_10_000_openoffice #no test file
-    with_each_spreadsheet(:name=>'/home/tp/ruby-test/too-testing/speedtest_10000') do |oo|    
-      after Date.new(2009,1,1) do
-        if LONG_RUN
-          assert_nothing_raised(Timeout::Error) {
-            Timeout::timeout(3.minutes) do |timeout_length|
-              # process every cell
-              sum = 0
-              oo.sheets.each {|sheet|
-                oo.default_sheet = sheet
-                for row in oo.first_row..oo.last_row do
-                  for col in oo.first_column..oo.last_column do
-                    c = oo.cell(row,col)
-                    sum += c.length if c
+    local_only do
+      with_each_spreadsheet(:name=>'/home/tp/ruby-test/too-testing/speedtest_10000') do |oo|
+        after Date.new(2009,1,1) do
+          if LONG_RUN
+            assert_nothing_raised(Timeout::Error) {
+              Timeout::timeout(3.minutes) do |timeout_length|
+                # process every cell
+                sum = 0
+                oo.sheets.each {|sheet|
+                  oo.default_sheet = sheet
+                  for row in oo.first_row..oo.last_row do
+                    for col in oo.first_column..oo.last_column do
+                      c = oo.cell(row,col)
+                      sum += c.length if c
+                    end
                   end
-                end
-                p sum
-                assert sum > 0
-              }
-            end
-          }
+                  p sum
+                  assert sum > 0
+                }
+              end
+            }
+          end
         end
       end
     end
