@@ -3,6 +3,7 @@ require 'matrix'
 
 # Base class for all other types of spreadsheets
 class Roo::GenericSpreadsheet
+  TEMP_PREFIX = "oo_"
 
   attr_reader :default_sheet
 
@@ -12,8 +13,7 @@ class Roo::GenericSpreadsheet
   protected
 
   def self.next_tmpdir
-    tmpdir = "oo_"+$$.to_s+"_"+sprintf("%010d",rand(10_000_000_000))
-    tmpdir
+    TEMP_PREFIX + $$.to_s + "_" + sprintf("%010d",rand(10_000_000_000))
   end
 
   def self.split_coordinate(str)

@@ -18,6 +18,14 @@ def local_only
   end
 end
 
+TMP_PREFIX = "#{Roo::GenericSpreadsheet::TEMP_PREFIX}*"
+def assert_no_temp_files_left_over
+  prev = Dir.glob(TMP_PREFIX)
+  yield
+  now = Dir.glob(TMP_PREFIX)
+  assert (now-prev).empty?, "temporary directory not removed"
+end
+
 # very simple diff implementation
 # output is an empty string if the files are equal
 # otherwise differences a printen (not compatible to
