@@ -148,14 +148,6 @@ class Test::Unit::TestCase
         :duration => t2-t1
       )
     end
-    # TODO
-    #if  Dir.glob("oo_*") != []
-    #	    puts "nicht alle temp. Dateien geloescht"
-    #	    puts Dir.glob("oo_*")
-    #	    print "? "
-    #      STDOUT.flush
-    #	    a = gets
-    #    end
   end
 end
 
