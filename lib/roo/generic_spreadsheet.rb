@@ -1,5 +1,5 @@
-require 'rubygems'
-require 'builder'
+# encoding: utf-8
+require 'matrix'
 
 # Base class for all other types of spreadsheets
 class Roo::GenericSpreadsheet
@@ -9,23 +9,62 @@ class Roo::GenericSpreadsheet
   # sets the line with attribute names (default: 1)
   attr_accessor :header_line
 
-  def initialize
+  protected
+
+  # Helper function for development
+  def fremdrechner? #nodoc
+    eigener = [
+      'C:\Users\thopre',
+      'c:/Users/thopre',
+      '/c/Users/thopre',
+      '/home/tp',
+    ].include? ENV['HOME']
+    #  if eigener
+    #	  puts "fremdrechner? ==> false"
+    #  else
+    #	  puts "fremdrechner? ==> true"
+    #  end
+    ! eigener
   end
 
-  # set the working sheet in the document
+  def self.next_tmpdir
+    tmpdir = "oo_"+$$.to_s+"_"+sprintf("%010d",rand(10_000_000_000))
+    tmpdir
+  end
+
+  def self.split_coordinate(str)
+    letter,number = Roo::GenericSpreadsheet.split_coord(str)
+    x = letter_to_number(letter)
+    y = number
+    return y, x
+  end
+
+  def self.split_coord(s)
+    if s =~ /([a-zA-Z]+)([0-9]+)/
+      letter = $1
+      number = $2.to_i
+    else
+      raise ArgumentError
+    end
+    return letter, number
+  end
+
+
+  public
+
+  # sets the working sheet in the document
+  # 'sheet' can be a number (1 = first sheet) or the name of a sheet.
   def default_sheet=(sheet)
     if sheet.kind_of? Fixnum
-      if sheet >= 0 and sheet <= sheets.length
+      if sheet > 0 and sheet <= sheets.length
         sheet = self.sheets[sheet-1]
       else
         raise RangeError
       end
     elsif sheet.kind_of?(String)
-      if !self.sheets.include?(sheet)
-        raise RangeError, "Sheet #{sheet} not found in this spreadsheet. Consider: #{self.sheets.inspect}"
-      end
+      raise RangeError if ! self.sheets.include?(sheet)
     else
-      raise TypeError, "Default sheet must be set to a number or string. Recieved #{sheet.class.inspect}"
+      raise TypeError, "what are you trying to set as default sheet?"
     end
     @default_sheet = sheet
     check_default_sheet
@@ -129,6 +168,8 @@ class Roo::GenericSpreadsheet
   def to_yaml(prefix={}, from_row=nil, from_column=nil, to_row=nil, to_column=nil,sheet=nil)
     sheet = @default_sheet unless sheet
     result = "--- \n"
+    return '' unless first_row # empty result if there is no first_row in a sheet
+
     (from_row||first_row(sheet)).upto(to_row||last_row(sheet)) do |row|
       (from_column||first_column(sheet)).upto(to_column||last_column(sheet)) do |col|
         unless empty?(row,col,sheet)
@@ -161,6 +202,25 @@ class Roo::GenericSpreadsheet
       write_csv_content(STDOUT,sheet)
     end
     true
+  end
+
+  # returns a matrix object from the whole sheet or a rectangular area of a sheet
+  def to_matrix(from_row=nil, from_column=nil, to_row=nil, to_column=nil,sheet=nil)
+    sheet = @default_sheet unless sheet
+    arr = []
+    pos = 0
+    return Matrix.rows([]) unless first_row
+
+    (from_row||first_row(sheet)).upto(to_row||last_row(sheet)) do |row|
+      line = []
+      (from_column||first_column(sheet)).upto(to_column||last_column(sheet)) do |col|
+
+        line << cell(row,col)
+      end
+      arr[pos] = line
+      pos += 1
+    end
+    Matrix.rows(arr)
   end
 
   # find a row either by row number or a condition
@@ -283,9 +343,13 @@ class Roo::GenericSpreadsheet
 
   # reopens and read a spreadsheet document
   def reload
+    # von Abfrage der Klasse direkt auf .to_s == '..' umgestellt
     ds = @default_sheet
-    initialize(@filename) if self.class == Roo::Openoffice or self.class == Roo::Excel
-    initialize(@spreadsheetkey,@user,@password) if self.class == Roo::Google
+    if self.class.to_s == 'Google'
+      initialize(@spreadsheetkey,@user,@password)
+    else
+      initialize(@filename)
+    end
     self.default_sheet = ds
     #@first_row = @last_row = @first_column = @last_column = nil
   end
@@ -309,7 +373,7 @@ class Roo::GenericSpreadsheet
     end
   end
 
-  # Returns information of the spreadsheet document and all sheets within
+  # returns information of the spreadsheet document and all sheets within
   # this document.
   def info
     result = "File: #{File.basename(@filename)}\n"+
@@ -333,44 +397,89 @@ class Roo::GenericSpreadsheet
     result
   end
 
+  # returns an XML representation of all sheets of a spreadsheet file
   def to_xml
-    xml_document = ''
-    xml = Builder::XmlMarkup.new(:target => xml_document, :indent => 2)
-    xml.instruct! :xml, :version =>"1.0", :encoding => "utf-8"
-    xml.spreadsheet {
-      self.sheets.each do |sheet|
-        self.default_sheet = sheet
-        xml.sheet(:name => sheet) { |x|
-          if first_row and last_row and first_column and last_column
-            # sonst gibt es Fehler bei leeren Blaettern
-            first_row.upto(last_row) do |row|
-              first_column.upto(last_column) do |col|
-                unless empty?(row,col)
-                  x.cell(cell(row,col),
-                    :row =>row,
-                    :column => col,
-                    :type => celltype(row,col))
+    builder = Nokogiri::XML::Builder.new do |xml|
+      xml.spreadsheet {
+        self.sheets.each do |sheet|
+          self.default_sheet = sheet
+          xml.sheet(:name => sheet) { |x|
+            if first_row and last_row and first_column and last_column
+              # sonst gibt es Fehler bei leeren Blaettern
+              first_row.upto(last_row) do |row|
+                first_column.upto(last_column) do |col|
+                  unless empty?(row,col)
+                    x.cell(cell(row,col),
+                      :row =>row,
+                      :column => col,
+                      :type => celltype(row,col))
+                  end
                 end
               end
             end
-          end
-        }
-      end
-    }
-    xml_document
+          }
+        end
+      }
+    end
+    return builder.to_xml
   end
+
+  # when a method like spreadsheet.a42 is called
+  # convert it to a call of spreadsheet.cell('a',42)
+  def method_missing(m, *args)
+    # #aa42 => #cell('aa',42)
+    # #aa42('Sheet1')  => #cell('aa',42,'Sheet1')
+    if m =~ /^([a-z]+)(\d)$/
+      col = Roo::GenericSpreadsheet.letter_to_number($1)
+      row = $2.to_i
+      if args.size > 0
+        return cell(row,col,args[0])
+      else
+        return cell(row,col)
+      end
+    else
+      super
+    end
+  end
+
+=begin
+#TODO: hier entfernen
+  # returns each formula in the selected sheet as an array of elements
+  # [row, col, formula]
+  def formulas(sheet=nil)
+    theformulas = Array.new
+    sheet = @default_sheet unless sheet
+    read_cells(sheet) unless @cells_read[sheet]
+    return theformulas unless first_row(sheet) # if there is no first row then
+    # there can't be formulas
+    first_row(sheet).upto(last_row(sheet)) {|row|
+      first_column(sheet).upto(last_column(sheet)) {|col|
+        if formula?(row,col,sheet)
+          theformulas << [row, col, formula(row,col,sheet)]
+        end
+      }
+    }
+    theformulas
+  end
+=end
 
   protected
 
-  def file_type_check(filename, ext, name)
+  def file_type_check(filename, ext, name, packed=nil)
     new_expression = {
       '.ods' => 'Roo::Openoffice.new',
-      '.xls' => 'Roo::Excel.new',
-      '.xlsx' => 'Roo::Excelx.new',
-      '.xml' => 'Roo::Excel2003.new'
+      '.xls' => 'Excel.new',
+      '.xlsx' => 'Excelx.new',
+      '.csv' => 'Csv.new',
     }
+    if packed == :zip
+	    # lalala.ods.zip => lalala.ods
+	    # hier wird KEIN unzip gemacht, sondern nur der Name der Datei
+	    # getestet, falls es eine gepackte Datei ist.
+	    filename = File.basename(filename,File.extname(filename))
+    end
     case ext
-    when '.ods', '.xls', '.xlsx', '.xml'
+    when '.ods', '.xls', '.xlsx', '.csv'
       correct_class = "use #{new_expression[ext]} to handle #{ext} spreadsheet files"
     else
       raise "unknown file type: #{ext}"
@@ -393,7 +502,7 @@ class Roo::GenericSpreadsheet
 
   # konvertiert einen Key in der Form "12,45" (=row,column) in
   # ein Array mit numerischen Werten ([12,45])
-  # Diese Methode ist eine temp. Loesung, um zu erforschen, ob der 
+  # Diese Methode ist eine temp. Loesung, um zu erforschen, ob der
   # Zugriff mit numerischen Keys schneller ist.
   def key_to_num(str)
     r,c = str.split(',')
@@ -402,10 +511,10 @@ class Roo::GenericSpreadsheet
     [r,c]
   end
 
-  # siehe: key_to_num
+  # see: key_to_num
   def key_to_string(arr)
     "#{arr[0]},#{arr[1]}"
-  end 
+  end
 
   private
 
@@ -426,45 +535,12 @@ class Roo::GenericSpreadsheet
     return row,col
   end
 
-  #  def open_from_uri(uri)
-  #    require 'open-uri' ;
-  #    tempfilename = File.join(@tmpdir, File.basename(uri))
-  #    f = File.open(tempfilename,"wb")
-  #    begin
-  #      open(uri) do |net|
-  #        f.write(net.read)
-  #      end
-  #    rescue
-  #      raise "could not open #{uri}"
-  #    end
-  #    f.close
-  #    File.join(@tmpdir, File.basename(uri))
-  #  end
-
-  #  OpenURI::HTTPError
-  #  def open_from_uri(uri)
-  #    require 'open-uri'
-  #    #existiert URL?
-  #    r = Net::HTTP.get_response(URI.parse(uri))
-  #    raise "URL nicht verfuegbar" unless r.is_a? Net::HTTPOK
-  #    tempfilename = File.join(@tmpdir, File.basename(uri))
-  #    f = File.open(tempfilename,"wb")
-  #    open(uri) do |net|
-  #      f.write(net.read)
-  #    end
-  #    #   rescue
-  #    #    raise "could not open #{uri}"
-  #    # end
-  #    f.close
-  #    File.join(@tmpdir, File.basename(uri))
-  #  end
-  
   def open_from_uri(uri)
     require 'open-uri'
     response = ''
     begin
-      open(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}") { |net| 
-        response = net.read 
+      open(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}") { |net|
+        response = net.read
         tempfilename = File.join(@tmpdir, File.basename(uri))
         f = File.open(tempfilename,"wb")
         f.write(response)
@@ -527,17 +603,12 @@ class Roo::GenericSpreadsheet
     if ! sheet_found
       raise RangeError, "sheet '#{@default_sheet}' not found"
     end
-    #raise ArgumentError, "Error: default_sheet not set" if @default_sheet == nil
   end
 
   def process_zipfile_packed(zip, path='')
     ret=nil
     if zip.file.file? path
       # extract and return filename
-      @tmpdir = "oo_"+$$.to_s
-      unless File.exists?(@tmpdir)
-        FileUtils::mkdir(@tmpdir)
-      end
       file = File.open(File.join(@tmpdir, path),"wb")
       file.write(zip.read(path))
       file.close
@@ -553,10 +624,11 @@ class Roo::GenericSpreadsheet
     ret
   end
 
+  # Write all cells to the csv file. File can be a filename or nil. If the this
+  # parameter is nil the output goes to STDOUT
   def write_csv_content(file=nil,sheet=nil)
     file = STDOUT unless file
     if first_row(sheet) # sheet is not empty
-      # first_row(sheet).upto(last_row(sheet)) do |row|
       1.upto(last_row(sheet)) do |row|
         1.upto(last_column(sheet)) do |col|
           file.print(",") if col > 1
@@ -569,20 +641,19 @@ class Roo::GenericSpreadsheet
     end
   end
 
-  def one_cell_output(onecelltype,onecell,empty)
+  # The content of a cell in the csv output  
+  def one_cell_output(onecelltype, onecell, empty)
     str = ""
     if empty
       str += ''
     else
       case onecelltype
       when :string
-        if onecell == ""
-          str << ''
-        else
-          onecell.gsub!(/"/,'""')
-          str << ('"'+onecell+'"')
+        unless onecell.empty?
+          one = onecell.gsub(/"/,'""')
+          str << ('"'+one+'"')
         end
-      when :float,:percentage
+      when :float, :percentage
         if onecell == onecell.to_i
           str << onecell.to_i.to_s
         else
@@ -590,11 +661,9 @@ class Roo::GenericSpreadsheet
         end
       when :formula
         if onecell.class == String
-          if onecell == ""
-            str << ''
-          else
-            onecell.gsub!(/"/,'""')
-            str << '"'+onecell+'"'
+          unless onecell.empty?
+            one = onecell.gsub(/"/,'""')
+            str << '"'+one+'"'
           end
         elsif onecell.class == Float
           if onecell == onecell.to_i
@@ -605,10 +674,12 @@ class Roo::GenericSpreadsheet
         else
           raise "unhandled onecell-class "+onecell.class.to_s
         end
-      when :date,:datetime
+      when :date
         str << onecell.to_s
       when :time
         str << Roo::GenericSpreadsheet.integer_to_timestring(onecell)
+      when :datetime
+        str << onecell.to_s
       else
         raise "unhandled celltype "+onecelltype.to_s
       end
@@ -618,7 +689,6 @@ class Roo::GenericSpreadsheet
 
   # converts an integer value to a time string like '02:05:06'
   def self.integer_to_timestring(content)
-    return content if String === content
     h = (content/3600.0).floor
     content = content - h*3600
     m = (content/60.0).floor
@@ -626,4 +696,5 @@ class Roo::GenericSpreadsheet
     s = content
     sprintf("%02d:%02d:%02d",h,m,s)
   end
+
 end

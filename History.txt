@@ -1,3 +1,90 @@
+== 1.10.1 2011-11-14
+
+* 2 bugfixes
+  * forgot dependency 'rubyzip'
+  * at least one external application does create xlsx-files with different internal file names which differ from the original file names of Excel. Solution: ignore lower-/upper case in file names. 
+
+== 1.10.0 2011-10-10
+
+* 4 enhancements
+  * New class Csv.
+  * Openoffice, Libreoffice: new method 'labels'
+  * Excelx: implemented all methods concerning labels
+  * Openoffice, Excelx: new methods concerning comments (comment, comment? and comments)
+  
+* 2 bugfixes
+  * XLSX: some cells were not recognized correctly from a spreadsheet file from a windows mobile phone.
+  * labels: Moved to a separate methode. There were problems if there was an access to a label before read_cells were called.
+
+== 1.9.7 2011-08-27
+
+* 1 bugfix
+  * Openoffice: Better way for extracting formula strings, some characters were deleted at the formula string.
+
+== 1.9.6 2011-08-03
+
+* 1 enhancement
+  * new class Libreoffice (Libreoffice should do exactly the same as the Openoffice
+    class. It's just another name. Technically, Libreoffice is inherited from
+    the Openoffice class with no new methods.
+* 3 bugfixes
+  * Openoffice: file type check, deletion of temporary files not in ensure clause
+  * Cell type :datetime was not handled in the to_csv method
+  * Better deletion of temporary directories if something went wrong
+
+== 1.9.5 2011-06-25
+
+* 1 enhancement
+  * Method #formulas moved to generic-spreadsheet class (the Excel version is
+    overwritten because the spreadsheet gem currently does not support
+    formulas.
+* 3 bugfixes
+  * Openoffice/Excelx/Google: #formulas of an empty sheet should not result
+    in an error message. Instead it should return an empty array.
+  * Openoffice/Excelx/Google: #to_yaml of an empty sheet should not result
+    in an error message. Instead it should return an empty string.
+  * Openoffice/Excelx/Google: #to_matrix of an empty sheet should not result
+    in an error message. Instead it should return an empty matrix.
+
+== 1.9.4 2011-06-23
+
+* 1 enhancement
+  * removed gem 'builder'. Functionality goes to gem 'nokogiri'.
+* 3 bugfixes
+  * Excel: remove temporary files if spreadsheed-file is not an excel file 
+    and an exception was raised
+  * Excelx: a referenced cell with a string had the content 0.0 not the
+    correct string
+  * Fixed a problem with a date cell which was not recognized as a Date 
+    object (see 2011-05-21 in excelx.rb)
+
+== 1.9.3 2010-02-12
+
+* 1 enhancements
+  * new method 'to_matrix'
+* 1 bugfix
+  * missing dependencies defined
+
+== 1.9.2 2009-12-08
+
+* 1 bugfix
+  * double quoting of '"' fixed
+
+== 1.9.1 2009-11-10
+
+* 2 bugfixes
+  * syntax in nokogiri methods
+  * missing dependency ...rubyzip
+
+== 1.9.0 2009-10-29
+
+* 4 enhancements
+  * Ruby 1.9 compatible
+  * oo.aa42 as a shortcut of oo.cell('aa',42)
+  * oo.aa42('sheet1') as a shortcut of oo.cell('aa',42,'sheet1')
+  * oo.anton as a reference to a cell labelled 'anton' (or any other label name)
+    (currently only for Openoffice spreadsheets)
+
 == 1.2.3 2009-01-04
 
 * bugfix
@@ -89,8 +176,8 @@
   * some methods common to more than one class were factored out to the GenericSpreadsheet (virtual) class
 == 0.7.0 2007-11-23
 * 6 enhancements:
-  * Openoffice/Excel: the most methods can be called with an option 'sheet' 
-    parameter which will be used instead of the default sheet 
+  * Openoffice/Excel: the most methods can be called with an option 'sheet'
+    parameter which will be used instead of the default sheet
   * Excel: improved the speed of CVS output
   * Openoffice/Excel: new method #column
   * Openoffice/Excel: new method #find
@@ -118,7 +205,7 @@
 == 0.5.1 2007-08-26
 * 4 enhancements:
   * Openoffice: Exception if an illegal sheet-name is selected
-  * Openoffice/Excel: no need to set a default_sheet if there is only one in 
+  * Openoffice/Excel: no need to set a default_sheet if there is only one in
     the document
   * Excel: can now read zip-ed files
   * Excel: can now read files from http://-URL over the net
@@ -136,7 +223,7 @@
 == 0.4.0 2007-06-27
 * 7 enhancements:
   * robustness: Exception if no default_sheet was set
-  * new method reload() implemented 
+  * new method reload() implemented
   * about 15 % more method documentation
   * optimization: huge increase of speed (no need to use fixed borders anymore)
   * added the method 'formulas' which gives you all formulas in a spreadsheet
@@ -158,7 +245,7 @@
 
 == 0.2.6 2007-06-19
 * 1 bugfix:
-  * Openoffice: two or more consecutive cells with string content failed 
+  * Openoffice: two or more consecutive cells with string content failed
 
 == 0.2.5 2007-06-17
 
@@ -188,7 +275,7 @@
 
 == 0.2.2 2007-06-01
 * 1 bugfix:
-  * incorrect dependencies fixed 
+  * incorrect dependencies fixed
 
 == 0.2.0 2007-06-01
 * 1 major enhancement:

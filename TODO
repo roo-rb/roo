@@ -1,0 +1,2 @@
+- replace builder gem with Nokogiri:Builder
+- New parameter at #new specifying the name of the directory for the roo temporary files

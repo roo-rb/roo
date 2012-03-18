@@ -1,36 +1,34 @@
-$:.unshift('lib')
- 
-require 'rake/testtask'
-
 begin
-  require 'jeweler'
-  Jeweler::Tasks.new do |s|
-    s.name               = 'roo'
-    s.rubyforge_project  = 'roo'
-    s.platform           = Gem::Platform::RUBY
-    s.email              = 'hugh_mcgowan@yahoo.com' 
-    s.homepage           = "http://roo.rubyforge.org"
-    s.summary            = "roo"
-    s.description        = "roo can access the contents of OpenOffice-, Excel- or Google-Spreadsheets"
-    s.authors            = ['Hugh McGowan','Thomas Preymesser']
-    s.files              =  FileList[ "{lib,test}/**/*"]
-    s.has_rdoc = true
-    s.extra_rdoc_files = ["README.markdown", "History.txt"]
-    s.rdoc_options = ["--main","README.markdown"]
-    s.add_dependency "spreadsheet", [">= 0.6.4"]
-    s.add_dependency "rubyzip", [">= 0.9.1"]
-    s.add_dependency "GData", [">= 0.0.4"]
-    s.add_dependency "nokogiri", [">= 1.4.1"]
-  end
+  require 'bones'
 rescue LoadError
-  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
+  puts '### Please install the "bones" gem ###'
 end
 
-Rake::TestTask.new do |t|
-  t.libs << "test"
-  t.test_files = FileList['test/test_roo.rb']
-  t.verbose = true
-end
+ensure_in_path 'lib'
+require 'roo'
 
+task :default => 'test:run'
+# task 'gem:release' => 'test:run'
 
-task :default => :test
+Bones {
+  name  'roo'
+  authors  'Thomas Preymesser'
+  email  'thopre@gmail.com'
+  url  'http://roo.rubyforge.org/'
+  version  Roo::VERSION
+  depend_on 'spreadsheet', '> 0.6.4'
+  #--
+  # rel. 0.6.4 causes an invalid Date error if we
+  # have a datetime value of 2006-02-02 10:00:00
+  #++
+  depend_on 'nokogiri' #, '>= 0.0.1'
+  #TODO: brauchen wir das noch? depend_on 'gimite-google-spreadsheet-ruby','>= 0.0.5'
+  #depend_on 'febeling-rubyzip','>= 0.9.2' # meine aktuelle Version
+  #TODO: warum brauchen wir das? es lief doch auch vorher ohne dieses spezielle gem
+  depend_on 'rubyzip' # rubyzip wird benoetigt
+  depend_on 'google-spreadsheet-ruby'
+  depend_on 'choice'
+  depend_on 'todonotes'
+}
+
+# EOF

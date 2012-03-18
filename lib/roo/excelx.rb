@@ -1,11 +1,14 @@
-require 'nokogiri'
 require 'fileutils'
 require 'zip/zipfilesystem'
 require 'date'
+require 'rubygems'
+require 'nokogiri'
 
-class  String
-  def end_with?(str)
-    self[-str.length,str.length] == str
+if RUBY_VERSION < '1.9.0'
+  class  String
+    def end_with?(str)
+      self[-str.length,str.length] == str
+    end
   end
 end
 
@@ -44,6 +47,9 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     'dd/mm/yy' => :date,
     'hh:mm:ss' => :time,
     "dd/mm/yy\\ hh:mm" => :datetime,
+    'dd/mmm/yy' => :date, # 2011-05-21
+    'yyyy-mm-dd' => :date, # 2011-09-16
+    # was used in a spreadsheet file from a windows phone
   }
   STANDARD_FORMATS = { 
     0 => 'General',
@@ -82,52 +88,55 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   def initialize(filename, packed=nil, file_warning = :error) #, create = false)
     super()
     @file_warning = file_warning
-    @tmpdir = "oo_"+$$.to_s
+    file_type_check(filename,'.xlsx','an Excel-xlsx',packed)
+    @tmpdir = Roo::GenericSpreadsheet.next_tmpdir
     @tmpdir = File.join(ENV['ROO_TMP'], @tmpdir) if ENV['ROO_TMP'] 
     unless File.exists?(@tmpdir)
       FileUtils::mkdir(@tmpdir)
     end
     filename = open_from_uri(filename) if filename[0,7] == "http://"
     filename = unzip(filename) if packed and packed == :zip
-    begin
-      file_type_check(filename,'.xlsx','an Excel-xlsx')
-      @cells_read = Hash.new
-      @filename = filename
-      unless File.file?(@filename)
-        raise IOError, "file #{@filename} does not exist"
-      end
-      @@nr += 1
-      @file_nr = @@nr
-      extract_content(@filename)
-      file = File.new(File.join(@tmpdir, @file_nr.to_s+"_roo_workbook.xml"))
-      @workbook_doc = Nokogiri::XML(file)
-      file.close
-      @shared_table = []
-      if File.exist?(File.join(@tmpdir, @file_nr.to_s+'_roo_sharedStrings.xml'))
-        file = File.new(File.join(@tmpdir, @file_nr.to_s+'_roo_sharedStrings.xml'))
-        @sharedstring_doc = Nokogiri::XML(file)
-        file.close
-        read_shared_strings(@sharedstring_doc)
-      end
-      @styles_table = []
-      @style_definitions = Array.new { |h,k| h[k] = {} }
-      if File.exist?(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml'))
-        file = File.new(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml'))
-        @styles_doc = Nokogiri::XML(file)
-        file.close
-        read_styles(@styles_doc)
-      end
-      @sheet_doc = []
-      @sheet_files.each_with_index do |item, i|
-        file = File.new(item)
-        @sheet_doc[i] = Nokogiri::XML(file)
-        file.close
-      end
-    ensure
-      #if ENV["roo_local"] != "thomas-p"
+    @cells_read = Hash.new
+    @filename = filename
+    unless File.file?(@filename)
       FileUtils::rm_r(@tmpdir)
-      #end
+      raise IOError, "file #{@filename} does not exist"
     end
+    @@nr += 1
+    @file_nr = @@nr
+    @comments_files = Array.new
+    extract_content(@filename)
+    file = File.new(File.join(@tmpdir, @file_nr.to_s+"_roo_workbook.xml"))
+    @workbook_doc = Nokogiri::XML(file)
+    file.close
+    @shared_table = []
+    if File.exist?(File.join(@tmpdir, @file_nr.to_s+'_roo_sharedStrings.xml'))
+      file = File.new(File.join(@tmpdir, @file_nr.to_s+'_roo_sharedStrings.xml'))
+      @sharedstring_doc = Nokogiri::XML(file)
+      file.close
+      read_shared_strings(@sharedstring_doc)
+    end
+    @styles_table = []
+    @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
+    if File.exist?(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml'))
+      file = File.new(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml'))
+      @styles_doc = Nokogiri::XML(file)
+      file.close
+      read_styles(@styles_doc)
+    end
+    @sheet_doc = []
+    @sheet_files.each_with_index do |item, i|
+      file = File.new(item)
+      @sheet_doc[i] = Nokogiri::XML(file)
+      file.close
+    end
+    @comments_doc = []
+    @comments_files.each_with_index do |item, i|
+      file = File.new(item)
+      @comments_doc[i] = Nokogiri::XML(file)
+      file.close
+    end
+    FileUtils::rm_r(@tmpdir)
     @default_sheet = self.sheets.first
     @cell = Hash.new
     @cell_type = Hash.new
@@ -140,6 +149,24 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @excelx_type = Hash.new
     @excelx_value = Hash.new
     @s_attribute = Hash.new # TODO: ggf. wieder entfernen nur lokal benoetigt
+    @label = Hash.new
+    @labels_read = false
+    @comment = Hash.new
+    @comments_read = Hash.new
+  end
+
+  def method_missing(m,*args)
+    # is method name a label name
+    read_labels unless @labels_read
+    if @label.has_key?(m.to_s)
+      sheet = @default_sheet unless sheet
+      read_cells(sheet) unless @cells_read[sheet]
+      row,col = label(m.to_s)
+      cell(row,col)
+    else
+      # call super for methods like #a1
+      super
+    end
   end
 
   # Returns the content of a spreadsheet-cell.
@@ -183,7 +210,21 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     row,col = normalize(row,col)
     formula(row,col) != nil
   end
-  
+
+    # returns each formula in the selected sheet as an array of elements
+  # [row, col, formula]
+  def formulas(sheet=nil)
+    sheet = @default_sheet unless sheet
+    read_cells(sheet) unless @cells_read[sheet]
+    if @formula[sheet]
+      @formula[sheet].each.collect do |elem|
+        [elem[0][0], elem[0][1], elem[1]]
+      end
+    else
+      []
+    end
+  end
+
   class Font
     attr_accessor :bold, :italic, :underline
     
@@ -192,7 +233,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     end
         
     def italic? 
-     @italic == true
+      @italic == true
     end
     
     def underline?
@@ -202,13 +243,13 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   
   # Given a cell, return the cell's style
   def font(row, col, sheet=nil)
-   sheet = @default_sheet unless sheet
-   read_cells(sheet) unless @cells_read[sheet]
-   row,col = normalize(row,col)
-   s_attribute = @s_attribute[sheet][[row,col]]
-   s_attribute ||= 0
-   s_attribute = s_attribute.to_i
-   @style_definitions[s_attribute]
+    sheet = @default_sheet unless sheet
+    read_cells(sheet) unless @cells_read[sheet]
+    row,col = normalize(row,col)
+    s_attribute = @s_attribute[sheet][[row,col]]
+    s_attribute ||= 0
+    s_attribute = s_attribute.to_i
+    @style_definitions[s_attribute]
   end 
 
   # set a cell to a certain value
@@ -274,7 +315,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     s = @s_attribute[sheet][[row,col]]
-    result = attribute2format(s)
+    result = attribute2format(s).to_s
     result
   end
   
@@ -286,6 +327,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     end
     return_sheets
   end
+
   # shows the internal representation of all cells
   # for debugging purposes
   def to_s(sheet=nil)
@@ -294,21 +336,71 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @cell[sheet].inspect
   end
 
-  # returns each formula in the selected sheet as an array of elements
-  # [row, col, formula]
-  def formulas(sheet=nil)
-    theformulas = Array.new
+  # returns the row,col values of the labelled cell
+  # (nil,nil) if label is not defined
+  def label(labelname)
+    read_labels unless @labels_read
+    unless @label.size > 0
+      return nil,nil,nil
+    end
+    if @label.has_key? labelname
+      return @label[labelname][1].to_i,
+        Roo::GenericSpreadsheet.letter_to_number(@label[labelname][2]),
+        @label[labelname][0]
+    else
+      return nil,nil,nil
+    end
+  end
+
+  # Returns an array which all labels. Each element is an array with
+  # [labelname, [sheetname,row,col]]
+  def labels
+    # sheet = @default_sheet unless sheet
+    # read_cells(sheet) unless @cells_read[sheet]
+    read_labels unless @labels_read
+    result = []
+    @label.each do |label|
+      result << [ label[0], # name
+        [ label[1][1].to_i, # row
+          Roo::GenericSpreadsheet.letter_to_number(label[1][2]), # column
+          label[1][0], # sheet
+        ] ]
+    end
+    result
+  end
+
+  # returns the comment at (row/col)
+  # nil if there is no comment
+  def comment(row,col,sheet=nil)
     sheet = @default_sheet unless sheet
-    read_cells(sheet) unless @cells_read[sheet]
-    first_row(sheet).upto(last_row(sheet)) {|row|
-      first_column(sheet).upto(last_column(sheet)) {|col|
-        if formula?(row,col,sheet)
-          f = [row, col, formula(row,col,sheet)]
-          theformulas << f
-        end
-      }
-    }
-    theformulas
+    #read_cells(sheet) unless @cells_read[sheet]
+    read_comments(sheet) unless @comments_read[sheet]
+    row,col = normalize(row,col)
+    return nil unless @comment[sheet]
+    @comment[sheet][[row,col]]
+  end
+
+  # true, if there is a comment
+  def comment?(row,col,sheet=nil)
+    sheet = @default_sheet unless sheet
+    # read_cells(sheet) unless @cells_read[sheet]
+    read_comments(sheet) unless @comments_read[sheet]
+    row,col = normalize(row,col)
+    comment(row,col) != nil
+  end
+
+  # returns each comment in the selected sheet as an array of elements
+  # [row, col, comment]
+  def comments(sheet=nil)
+    sheet = @default_sheet unless sheet
+    read_comments(sheet) unless @comments_read[sheet]
+    if @comment[sheet]
+      @comment[sheet].each.collect do |elem|
+        [elem[0][0],elem[0][1],elem[1]]
+      end
+    else
+      []
+    end
   end
 
   private
@@ -348,34 +440,8 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @s_attribute[sheet][key] = s_attribute
   end
 
-  # splits a coordinate like "AA12" into the parts "AA" (String) and 12 (Fixnum)
-  def split_coord(s)
-    letter = ""
-    number = 0
-    i = 0
-    while i<s.length and "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".include?(s[i,1])
-      letter += s[i,1]
-      i+=1
-    end
-    while i<s.length and "0123456789".include?(s[i,1])
-      number = number*10 + s[i,1].to_i
-      i+=1
-    end
-    if letter=="" or number==0
-      raise ArgumentError
-    end
-    return letter,number
-  end
-
-  def split_coordinate(str)
-    letter,number = split_coord(str)
-    x = Roo::GenericSpreadsheet.letter_to_number(letter)
-    y = number
-    return x,y
-  end
-
-  # read all cells in the selected sheet
   def format2type(format)
+    format = format.to_s # weil von Typ Nokogiri::XML::Attr
     if FORMATS.has_key? format
       FORMATS[format]
     else
@@ -391,17 +457,46 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     raise RangeError unless self.sheets.include? sheet
     n = self.sheets.index(sheet)
     @sheet_doc[n].xpath("//*[local-name()='c']").each do |c|
-       s_attribute = c['s'].to_i
-       if (c['t'] == 's')
-         tmp_type = :shared
-       elsif (c['t'] == 'b')
-         tmp_type = :boolean
-       else
-         format = attribute2format(s_attribute)
-         tmp_type = format2type(format)
-       end
+      s_attribute = c['s'].to_i   # should be here
+      # c: <c r="A5" s="2">
+      # <v>22606</v>
+      # </c>, format: , tmp_type: float
+      if c['t'] == 's'
+        tmp_type = :shared
+      elsif c['t'] == 'b'
+        tmp_type = :boolean
+        # 2011-02-25 BEGIN
+      elsif c['t'] == 'str'
+        tmp_type = :string
+        # 2011-02-25 END
+        # 2011-09-15 BEGIN
+      elsif c['t'] == 'inlineStr'
+	      tmp_type = :inlinestr
+        # 2011-09-15 END
+      else
+        s_attribute = c['s'].to_i
+        format = attribute2format(s_attribute)
+        tmp_type = format2type(format)
+      end
       formula = nil
-      c.element_children.each do |cell|
+      c.children.each do |cell|
+	      # 2011-09-15 BEGIN
+        if cell.name == 'is'
+          cell.children.each do |is|
+            if is.name == 't'
+              inlinestr_content = is.content
+              vt = :string
+              str_v = inlinestr_content
+              excelx_type = :string
+              y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
+              v = nil
+              tr=nil #TODO: ???s
+              excelx_value = inlinestr_content #cell.content
+              set_cell_values(sheet,x,y,0,v,vt,formula,tr,str_v,excelx_type,excelx_value,s_attribute)
+            end
+          end
+        end
+	      # 2011-09-15 END
         if cell.name == 'f'
           formula = cell.content
         end
@@ -416,7 +511,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
             else
             end 
           end
-          excelx_type = [:numeric_or_formula,format]
+          excelx_type = [:numeric_or_formula,format.to_s]
           excelx_value = cell.content
           if tmp_type == :shared
             vt = :string
@@ -437,12 +532,17 @@ class Roo::Excelx < Roo::GenericSpreadsheet
           elsif tmp_type == :formula
             vt = :formula
             v = cell.content.to_f #TODO: !!!!
+            # 2011-02-25 BEGIN
+          elsif tmp_type == :string
+            vt = :string
+            str_v = cell.content
+            excelx_type = :string
+            # 2011-02-25 END
           else
             vt = :float
             v = cell.content
           end
-          #puts "vt: #{vt}" if cell.text.include? "22606.5120"
-          x,y = split_coordinate(c['r'])
+          y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
           tr=nil #TODO: ???s
           set_cell_values(sheet,x,y,0,v,vt,formula,tr,str_v,excelx_type,excelx_value,s_attribute)
         end
@@ -453,52 +553,152 @@ class Roo::Excelx < Roo::GenericSpreadsheet
       raise RangeError
     end
     @cells_read[sheet] = true
+    # begin comments
+=begin
+Datei xl/comments1.xml
+  <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+  <comments xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+    <authors>
+      <author />
+    </authors>
+    <commentList>
+      <comment ref="B4" authorId="0">
+        <text>
+          <r>
+            <rPr>
+              <sz val="10" />
+              <rFont val="Arial" />
+              <family val="2" />
+            </rPr>
+            <t>Kommentar fuer B4</t>
+          </r>
+        </text>
+      </comment>
+      <comment ref="B5" authorId="0">
+        <text>
+          <r>
+            <rPr>
+            <sz val="10" />
+            <rFont val="Arial" />
+            <family val="2" />
+          </rPr>
+          <t>Kommentar fuer B5</t>
+        </r>
+      </text>
+    </comment>
+  </commentList>
+  </comments>
+=end
+=begin
+    if @comments_doc[self.sheets.index(sheet)]
+      read_comments(sheet)
+    end
+=end
+    #end comments
   end
-  
+
+  # Reads all comments from a sheet
+  def read_comments(sheet=nil)
+    sheet = @default_sheet unless sheet
+    #sheet_found = false
+    raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
+    raise RangeError unless self.sheets.include? sheet
+    n = self.sheets.index(sheet)
+    return unless @comments_doc[n] #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    @comments_doc[n].xpath("//*[local-name()='comments']").each do |comment|
+      comment.children.each do |cc|
+        if cc.name == 'commentList'
+          cc.children.each do |commentlist|
+            if commentlist.name == 'comment'
+              ref = commentlist.attributes['ref'].to_s
+              row,col = Roo::GenericSpreadsheet.split_coordinate(ref)
+              commentlist.children.each do |clc|
+                if clc.name == 'text'
+                  clc.children.each do |text|
+                    if text.name == 'r'
+                      text.children.each do |r|
+                        if r.name == 't'
+                          comment = r.text
+                          @comment[sheet] = Hash.new unless @comment[sheet]
+                          @comment[sheet][[row,col]] = comment
+                        end
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+    @comments_read[sheet] = true
+  end
+
+  def read_labels
+    @workbook_doc.xpath("//*[local-name()='definedName']").each do |defined_name|
+	    # "Sheet1!$C$5"
+      sheet = defined_name.text.split('!').first
+      coordinates = defined_name.text.split('!')[1]
+      dummy,col,row = coordinates.split('$')
+      @label[defined_name['name']] = [sheet,row,col]
+    end
+    @labels_read = true
+  end
+
   # Checks if the default_sheet exists. If not an RangeError exception is
   # raised
   def check_default_sheet
     sheet_found = false
     raise ArgumentError, "Error: default_sheet not set" if @default_sheet == nil
-    
     sheet_found = true if sheets.include?(@default_sheet)
-    
     if ! sheet_found
       raise RangeError, "sheet '#{@default_sheet}' not found"
     end
   end
 
-  # extracts all needed files from the zip file
+  # Extracts all needed files from the zip file
   def process_zipfile(zipfilename, zip, path='')
     @sheet_files = []
     Zip::ZipFile.open(zipfilename) {|zf|
       zf.entries.each {|entry|
-        #entry.extract
         if entry.to_s.end_with?('workbook.xml')
           open(@tmpdir+'/'+@file_nr.to_s+'_roo_workbook.xml','wb') {|f|
             f << zip.read(entry)
           }
         end
-        if entry.to_s.end_with?('sharedStrings.xml')
+        # if entry.to_s.end_with?('sharedStrings.xml')
+	# at least one application creates this file with another (incorrect?)
+	# casing. It doesn't hurt, if we ignore here the correct casing - there
+	# won't be both names in the archive.
+	# Changed the casing of all the following filenames.
+        if entry.to_s.downcase.end_with?('sharedstrings.xml')
           open(@tmpdir+'/'+@file_nr.to_s+'_roo_sharedStrings.xml','wb') {|f|
             f << zip.read(entry)
           }
         end
-        if entry.to_s.end_with?('styles.xml')
+        if entry.to_s.downcase.end_with?('styles.xml')
           open(@tmpdir+'/'+@file_nr.to_s+'_roo_styles.xml','wb') {|f|
             f << zip.read(entry)
           }
         end
-        if entry.to_s =~ /sheet([0-9]+).xml$/
+        if entry.to_s.downcase =~ /sheet([0-9]+).xml$/
           nr = $1
           open(@tmpdir+'/'+@file_nr.to_s+"_roo_sheet#{nr}",'wb') {|f|
             f << zip.read(entry)
           }
           @sheet_files[nr.to_i-1] = @tmpdir+'/'+@file_nr.to_s+"_roo_sheet#{nr}"
         end
+        if entry.to_s.downcase =~ /comments([0-9]+).xml$/
+          nr = $1
+          open(@tmpdir+'/'+@file_nr.to_s+"_roo_comments#{nr}",'wb') {|f|
+            f << zip.read(entry)
+          }
+          @comments_files[nr.to_i-1] = @tmpdir+'/'+@file_nr.to_s+"_roo_comments#{nr}"
+        end
       }
     }
-    return
+    # return
   end
 
   # extract files from the zip file
@@ -524,15 +724,15 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   def read_shared_strings(doc)
     doc.xpath("//*[local-name()='si']").each do |si|
       shared_table_entry = ''
-      si.element_children.each do |elem|
-        if (elem.name == 'r')
-          elem.element_children.each do |r_elem|
-            if (r_elem.name == 't')
+      si.children.each do |elem|
+        if elem.name == 'r' and elem.children
+          elem.children.each do |r_elem|
+            if r_elem.name == 't'
               shared_table_entry << r_elem.content
             end
           end
         end
-        if (elem.name == 't')
+        if elem.name == 't'
           shared_table_entry = elem.content
         end
       end
@@ -547,23 +747,23 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     fonts = []
     
     doc.xpath("//*[local-name()='numFmt']").each do |numFmt|
-      numFmtId = numFmt['numFmtId']
-      formatCode = numFmt['formatCode']
+      numFmtId = numFmt.attributes['numFmtId']
+      formatCode = numFmt.attributes['formatCode']
       @numFmts << [numFmtId, formatCode]
     end
     doc.xpath("//*[local-name()='fonts']").each do |fonts_el|
-      fonts_el.element_children.each do |font_el|
-        if font_el.name == 'font'
-          font = Roo::Excelx::Font.new
-          font_el.element_children.each do |font_sub_el|
+      fonts_el.children.each do |font_el|
+        if font_el == 'font'
+          font = Excelx::Font.new
+          font_el.each_element do |font_sub_el|
             case font_sub_el.name
-              when 'b'
-                font.bold = true
-              when 'i'
-                font.italic = true
-              when 'u'
-                font.underline = true
-              end
+            when 'b'
+              font.bold = true
+            when 'i'
+              font.italic = true
+            when 'u'
+              font.underline = true
+            end
           end
           fonts << font
         end
@@ -571,12 +771,12 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     end
     
     doc.xpath("//*[local-name()='cellXfs']").each do |xfs|
-        xfs.children.each do |xf|
-          numFmtId = xf['numFmtId']
-          @cellXfs << [numFmtId]
-          fontId = xf['fontId'].to_i
-          @style_definitions << fonts[fontId]
-        end
+      xfs.children.each do |xf|
+        numFmtId = xf['numFmtId']
+        @cellXfs << [numFmtId]
+        fontId = xf['fontId'].to_i
+        @style_definitions << fonts[fontId]
+      end
     end
   end
 
@@ -584,7 +784,9 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   def attribute2format(s)
     result = nil
     @numFmts.each {|nf|
-      if nf.first == @cellXfs[s.to_i].first
+      # to_s weil das eine Nokogiri::XML::Attr und das
+      # andere ein String ist
+      if nf.first.to_s == @cellXfs[s.to_i].first
         result = nf[1]
         break
       end

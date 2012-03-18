@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+
+require File.expand_path(
+    File.join(File.dirname(__FILE__), %w[.. lib roo]))
+require 'rubygems'
+require 'choice'
+
+Choice.options do
+	header ''
+	header 'Options:'
+	option :help do
+		long '--help'
+		desc 'Show this message'
+	end
+	option :version do
+		short '-v'
+		long '--version'
+		desc 'Show version'
+		action do
+			puts "Roo v#{Roo::VERSION}"
+			exit
+		end
+	end
+	option :info do
+		short '-i'
+		long '--info <spreadsheetfile>'
+		desc 'Show information about a spreadsheet file'
+		action do
+			puts '#'
+		end
+	end
+end
+# EOF
