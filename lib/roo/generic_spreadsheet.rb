@@ -11,22 +11,6 @@ class Roo::GenericSpreadsheet
 
   protected
 
-  # Helper function for development
-  def fremdrechner? #nodoc
-    eigener = [
-      'C:\Users\thopre',
-      'c:/Users/thopre',
-      '/c/Users/thopre',
-      '/home/tp',
-    ].include? ENV['HOME']
-    #  if eigener
-    #	  puts "fremdrechner? ==> false"
-    #  else
-    #	  puts "fremdrechner? ==> true"
-    #  end
-    ! eigener
-  end
-
   def self.next_tmpdir
     tmpdir = "oo_"+$$.to_s+"_"+sprintf("%010d",rand(10_000_000_000))
     tmpdir
