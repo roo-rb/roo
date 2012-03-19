@@ -109,7 +109,6 @@ class Test::Unit::TestCase
   alias unlogged_run run
   def run(result, &block)
     t1 = Time.now
-    #RAILS_DEFAULT_LOGGER.debug "RUNNING #{self.class} #{@method_name} \t#{Time.now.to_s}"
     if DISPLAY_LOG
 	    v1,v2,v3 = RUBY_VERSION.split('.')
 	    if v1.to_i > 1 or
