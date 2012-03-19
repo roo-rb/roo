@@ -46,24 +46,22 @@ module SkippedTests
   end
   
   def SKIP_test_possible_bug_snowboard_borders #no test file
-    after Date.new(2008,12,15) do
-      local_only do
-        if EXCEL
-          ex = Excel.new(File.join(TESTDIR,'problem.xls'))
-          ex.default_sheet = ex.sheets.first
-          assert_equal 2, ex.first_row
-          assert_equal 30, ex.last_row
-          assert_equal 'A', ex.first_column_as_letter
-          assert_equal 'J', ex.last_column_as_letter
-        end
-        if EXCELX
-          ex = Excelx.new(File.join(TESTDIR,'problem.xlsx'))
-          ex.default_sheet = ex.sheets.first
-          assert_equal 2, ex.first_row
-          assert_equal 30, ex.last_row
-          assert_equal 'A', ex.first_column_as_letter
-          assert_equal 'J', ex.last_column_as_letter
-        end
+    local_only do
+      if EXCEL
+        ex = Excel.new(File.join(TESTDIR,'problem.xls'))
+        ex.default_sheet = ex.sheets.first
+        assert_equal 2, ex.first_row
+        assert_equal 30, ex.last_row
+        assert_equal 'A', ex.first_column_as_letter
+        assert_equal 'J', ex.last_column_as_letter
+      end
+      if EXCELX
+        ex = Excelx.new(File.join(TESTDIR,'problem.xlsx'))
+        ex.default_sheet = ex.sheets.first
+        assert_equal 2, ex.first_row
+        assert_equal 30, ex.last_row
+        assert_equal 'A', ex.first_column_as_letter
+        assert_equal 'J', ex.last_column_as_letter
       end
     end
   end
@@ -85,13 +83,11 @@ module SkippedTests
 
   def SKIP_test_possible_bug_snowboard_cells # no test file
     local_only do
-      after Date.new(2009,1,6) do
-        # warten auf Bugfix in parseexcel
-        if EXCEL
-          ex = Excel.new(File.join(TESTDIR,'problem.xls'))
-          ex.default_sheet = 'Custom X'
-          common_possible_bug_snowboard_cells(ex)
-        end
+      # warten auf Bugfix in parseexcel
+      if EXCEL
+        ex = Excel.new(File.join(TESTDIR,'problem.xls'))
+        ex.default_sheet = 'Custom X'
+        common_possible_bug_snowboard_cells(ex)
       end
       if EXCELX
         ex = Excelx.new(File.join(TESTDIR,'problem.xlsx'))
@@ -349,26 +345,24 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   def SKIP_test_huge_table_timing_10_000_openoffice #no test file
     local_only do
       with_each_spreadsheet(:name=>'/home/tp/ruby-test/too-testing/speedtest_10000') do |oo|
-        after Date.new(2009,1,1) do
-          if LONG_RUN
-            assert_nothing_raised(Timeout::Error) {
-              Timeout::timeout(3.minutes) do |timeout_length|
-                # process every cell
-                sum = 0
-                oo.sheets.each {|sheet|
-                  oo.default_sheet = sheet
-                  for row in oo.first_row..oo.last_row do
-                    for col in oo.first_column..oo.last_column do
-                      c = oo.cell(row,col)
-                      sum += c.length if c
-                    end
+        if LONG_RUN
+          assert_nothing_raised(Timeout::Error) {
+            Timeout::timeout(3.minutes) do |timeout_length|
+              # process every cell
+              sum = 0
+              oo.sheets.each {|sheet|
+                oo.default_sheet = sheet
+                for row in oo.first_row..oo.last_row do
+                  for col in oo.first_column..oo.last_column do
+                    c = oo.cell(row,col)
+                    sum += c.length if c
                   end
-                  p sum
-                  assert sum > 0
-                }
-              end
-            }
-          end
+                end
+                p sum
+                assert sum > 0
+              }
+            end
+          }
         end
       end
     end
@@ -377,20 +371,18 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   # Eine Spreadsheetdatei wird nicht als Dateiname sondern direkt als Dokument
   # geoeffnettest_problemx_csv_imported
   def SKIP_test_from_stream_openoffice
-    after Date.new(2009,1,6) do
-      if OPENOFFICE
-        filecontent = nil
-        File.open(File.join(TESTDIR,"numbers1.ods")) do |f|
-          filecontent = f.read
-          p filecontent.class
-          p filecontent.size
-          #p filecontent
-          assert filecontent.size > 0
-          # #stream macht das gleiche wie #new liest abe aus Stream anstatt Datei
-          oo = Openoffice.stream(filecontent)
-        end
-        #oo = Openoffice.open()
+    if OPENOFFICE
+      filecontent = nil
+      File.open(File.join(TESTDIR,"numbers1.ods")) do |f|
+        filecontent = f.read
+        p filecontent.class
+        p filecontent.size
+        #p filecontent
+        assert filecontent.size > 0
+        # #stream macht das gleiche wie #new liest abe aus Stream anstatt Datei
+        oo = Openoffice.stream(filecontent)
       end
+      #oo = Openoffice.open()
     end
   end
   
@@ -437,74 +429,6 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   end
   def SKIP_test_bug_c2  # no test file
     with_each_spreadsheet(:name=>'problem', :foramt=>:excel) do |oo|
-      after Date.new(2009,1,6) do
-        local_only do
-          expected = ['Supermodel X','T6','Shaun White','Jeremy','Custom',
-            'Warhol','Twin','Malolo','Supermodel','Air','Elite',
-            'King','Dominant','Dominant Slick','Blunt','Clash',
-            'Bullet','Tadashi Fuse','Jussi','Royale','S-Series',
-            'Fish','Love','Feelgood ES','Feelgood','GTwin','Troop',
-            'Lux','Stigma','Feather','Stria','Alpha','Feelgood ICS']
-          result = []
-          oo.sheets[2..oo.sheets.length].each do |s|
-            #(13..13).each do |s|
-            oo.default_sheet = s
-            name = oo.cell(2,'C')
-            result << name
-            #puts "#{name} (sheet: #{s})"
-            #assert_equal "whatever (sheet: 13)",          "#{name} (sheet: #{s})"
-          end
-          assert_equal expected, result
-        end
-      end
-    end
-  end
-
-  def SKIP_test_bug_c2_parseexcel #no test file
-    after Date.new(2009,1,10) do
-      local_only do
-        #-- this is OK
-        @workbook = Spreadsheet::ParseExcel.parse(File.join(TESTDIR,"problem.xls"))
-        worksheet = @workbook.worksheet(11)
-        skip = 0
-        line = 1
-        row = 2
-        col = 3
-        worksheet.each(skip) { |row_par|
-          if line == row
-            if row_par == nil
-              raise "nil"
-            end
-            cell = row_par.at(col-1)
-            assert cell, "cell should not be nil"
-            assert_equal "Air", cell.to_s('utf-8')
-          end
-          line += 1
-        }
-        #-- worksheet 12 does not work
-        @workbook = Spreadsheet::ParseExcel.parse(File.join(TESTDIR,"problem.xls"))
-        worksheet = @workbook.worksheet(12)
-        skip = 0
-        line = 1
-        row = 2
-        col = 3
-        worksheet.each(skip) { |row_par|
-          if line == row
-            if row_par == nil
-              raise "nil"
-            end
-            cell = row_par.at(col-1)
-            assert cell, "cell should not be nil"
-            assert_equal "Elite", cell.to_s('utf-8')
-          end
-          line += 1
-        }
-      end
-    end
-  end
-
-  def SKIP_test_bug_c2_excelx  #no test file
-    after Date.new(2008,9,15) do
       local_only do
         expected = ['Supermodel X','T6','Shaun White','Jeremy','Custom',
           'Warhol','Twin','Malolo','Supermodel','Air','Elite',
@@ -513,86 +437,144 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
           'Fish','Love','Feelgood ES','Feelgood','GTwin','Troop',
           'Lux','Stigma','Feather','Stria','Alpha','Feelgood ICS']
         result = []
-        @e = Excelx.new(File.join(TESTDIR,"problem.xlsx"))
-        @e.sheets[2..@e.sheets.length].each do |s|
-          @e.default_sheet = s
-          #  assert_equal "A.",@e.cell('a',13)
-          name = @e.cell(2,'C')
+        oo.sheets[2..oo.sheets.length].each do |s|
+          #(13..13).each do |s|
+          oo.default_sheet = s
+          name = oo.cell(2,'C')
           result << name
           #puts "#{name} (sheet: #{s})"
-          #assert_equal :string, @e.celltype('c',2)
-          #assert_equal "Vapor (sheet: Vapor)", "#{name} (sheet: #{@e.sheets.first})"
-          assert @e.cell(2,'c')
+          #assert_equal "whatever (sheet: 13)",          "#{name} (sheet: #{s})"
         end
         assert_equal expected, result
+      end
+    end
+  end
 
-        @e = Excelx.new(File.join(TESTDIR,"problem.xlsx"))
-        #@e.sheets[2..@e.sheets.length].each do |s|
-        (13..13).each do |s|
-          @e.default_sheet = s
-          name = @e.cell(2,'C')
-          #puts "#{name} (sheet: #{s})"
-          assert_equal "Elite (sheet: 13)",          "#{name} (sheet: #{s})"
+  def SKIP_test_bug_c2_parseexcel #no test file
+    local_only do
+      #-- this is OK
+      @workbook = Spreadsheet::ParseExcel.parse(File.join(TESTDIR,"problem.xls"))
+      worksheet = @workbook.worksheet(11)
+      skip = 0
+      line = 1
+      row = 2
+      col = 3
+      worksheet.each(skip) { |row_par|
+        if line == row
+          if row_par == nil
+            raise "nil"
+          end
+          cell = row_par.at(col-1)
+          assert cell, "cell should not be nil"
+          assert_equal "Air", cell.to_s('utf-8')
         end
+        line += 1
+      }
+      #-- worksheet 12 does not work
+      @workbook = Spreadsheet::ParseExcel.parse(File.join(TESTDIR,"problem.xls"))
+      worksheet = @workbook.worksheet(12)
+      skip = 0
+      line = 1
+      row = 2
+      col = 3
+      worksheet.each(skip) { |row_par|
+        if line == row
+          if row_par == nil
+            raise "nil"
+          end
+          cell = row_par.at(col-1)
+          assert cell, "cell should not be nil"
+          assert_equal "Elite", cell.to_s('utf-8')
+        end
+        line += 1
+      }
+    end
+  end
+
+  def SKIP_test_bug_c2_excelx  #no test file
+    local_only do
+      expected = ['Supermodel X','T6','Shaun White','Jeremy','Custom',
+        'Warhol','Twin','Malolo','Supermodel','Air','Elite',
+        'King','Dominant','Dominant Slick','Blunt','Clash',
+        'Bullet','Tadashi Fuse','Jussi','Royale','S-Series',
+        'Fish','Love','Feelgood ES','Feelgood','GTwin','Troop',
+        'Lux','Stigma','Feather','Stria','Alpha','Feelgood ICS']
+      result = []
+      @e = Excelx.new(File.join(TESTDIR,"problem.xlsx"))
+      @e.sheets[2..@e.sheets.length].each do |s|
+        @e.default_sheet = s
+        #  assert_equal "A.",@e.cell('a',13)
+        name = @e.cell(2,'C')
+        result << name
+        #puts "#{name} (sheet: #{s})"
+        #assert_equal :string, @e.celltype('c',2)
+        #assert_equal "Vapor (sheet: Vapor)", "#{name} (sheet: #{@e.sheets.first})"
+        assert @e.cell(2,'c')
+      end
+      assert_equal expected, result
+
+      @e = Excelx.new(File.join(TESTDIR,"problem.xlsx"))
+      #@e.sheets[2..@e.sheets.length].each do |s|
+      (13..13).each do |s|
+        @e.default_sheet = s
+        name = @e.cell(2,'C')
+        #puts "#{name} (sheet: #{s})"
+        assert_equal "Elite (sheet: 13)",          "#{name} (sheet: #{s})"
       end
     end
   end
 
   def SKIP_test_compare_csv_excelx_excel  #no test file
     if EXCELX
-      after Date.new(2008,12,30) do
-        # parseexcel bug
-        local_only do
-          s1 = Excel.new(File.join(TESTDIR,"problem.xls"))
-          s2 = Excelx.new(File.join(TESTDIR,"problem.xlsx"))
-          s1.sheets.each {|sh| #TODO:
-            s1.default_sheet = sh
-            s2.default_sheet = sh
-            File.delete_if_exist("/tmp/problem.csv")
-            File.delete_if_exist("/tmp/problemx.csv")
-            assert s1.to_csv("/tmp/problem.csv")
-            assert s2.to_csv("/tmp/problemx.csv")
-            assert File.exists?("/tmp/problem.csv")
-            assert File.exists?("/tmp/problemx.csv")
-            assert_equal "", `diff /tmp/problem.csv /tmp/problemx.csv`, "Unterschied in Sheet #{sh} #{s1.sheets.index(sh)}"
-          }
-        end
+      # parseexcel bug
+      local_only do
+        s1 = Excel.new(File.join(TESTDIR,"problem.xls"))
+        s2 = Excelx.new(File.join(TESTDIR,"problem.xlsx"))
+        s1.sheets.each {|sh| #TODO:
+          s1.default_sheet = sh
+          s2.default_sheet = sh
+          File.delete_if_exist("/tmp/problem.csv")
+          File.delete_if_exist("/tmp/problemx.csv")
+          assert s1.to_csv("/tmp/problem.csv")
+          assert s2.to_csv("/tmp/problemx.csv")
+          assert File.exists?("/tmp/problem.csv")
+          assert File.exists?("/tmp/problemx.csv")
+          assert_equal "", `diff /tmp/problem.csv /tmp/problemx.csv`, "Unterschied in Sheet #{sh} #{s1.sheets.index(sh)}"
+        }
       end
     end
   end
 
   def SKIP_test_problemx_csv_imported  #no test file
-    after Date.new(2009,1,6) do
-      if EXCEL
-        local_only do
-          # wieder eingelesene CSV-Datei aus obigem Test
-          # muss identisch mit problem.xls sein
-          # Importieren aus csv-Datei muss manuell gemacht werden
-          ex = Excel.new(File.join(TESTDIR,"problem.xls"))
-          cs = Excel.new(File.join(TESTDIR,"problemx_csv_imported.xls"))
-          # nur das erste sheet betrachten
-          ex.default_sheet = ex.sheets.first
-          cs.default_sheet = cs.sheets.first
-          ex.first_row.upto(ex.last_row) do |row|
-            ex.first_column.upto(ex.last_column) do |col|
-              assert_equal ex.cell(row,col), cs.cell(row,col), "cell #{row}/#{col} does not match '#{ex.cell(row,col)}' '#{cs.cell(row,col)}'"
-              assert_equal ex.celltype(row,col), cs.celltype(row,col), "celltype #{row}/#{col} does not match"
-              assert_equal ex.empty?(row,col), cs.empty?(row,col), "empty? #{row}/#{col} does not match"
-              if defined? excel_supports_formulas
-                assert_equal ex.formula?(row,col), cs.formula?(row,col), "formula? #{row}/#{col} does not match"
-                assert_equal ex.formula(row,col), cs.formula(row,col), "formula #{row}/#{col} does not match"
-              end
+    if EXCEL
+      local_only do
+        # wieder eingelesene CSV-Datei aus obigem Test
+        # muss identisch mit problem.xls sein
+        # Importieren aus csv-Datei muss manuell gemacht werden
+        ex = Excel.new(File.join(TESTDIR,"problem.xls"))
+        cs = Excel.new(File.join(TESTDIR,"problemx_csv_imported.xls"))
+        # nur das erste sheet betrachten
+        ex.default_sheet = ex.sheets.first
+        cs.default_sheet = cs.sheets.first
+        ex.first_row.upto(ex.last_row) do |row|
+          ex.first_column.upto(ex.last_column) do |col|
+            assert_equal ex.cell(row,col), cs.cell(row,col), "cell #{row}/#{col} does not match '#{ex.cell(row,col)}' '#{cs.cell(row,col)}'"
+            assert_equal ex.celltype(row,col), cs.celltype(row,col), "celltype #{row}/#{col} does not match"
+            assert_equal ex.empty?(row,col), cs.empty?(row,col), "empty? #{row}/#{col} does not match"
+            if defined? excel_supports_formulas
+              assert_equal ex.formula?(row,col), cs.formula?(row,col), "formula? #{row}/#{col} does not match"
+              assert_equal ex.formula(row,col), cs.formula(row,col), "formula #{row}/#{col} does not match"
             end
           end
-          cs.first_row.upto(cs.last_row) do |row|
-            cs.first_column.upto(cs.last_column) do |col|
-              assert_equal ex.cell(row,col), cs.cell(row,col), "cell #{row}/#{col} does not match '#{ex.cell(row,col)}' '#{cs.cell(row,col)}'"
-              assert_equal ex.celltype(row,col), cs.celltype(row,col), "celltype #{row}/#{col} does not match"
-              assert_equal ex.empty?(row,col), cs.empty?(row,col), "empty? #{row}/#{col} does not match"
-              if defined? excel_supports_formulas
-                assert_equal ex.formula?(row,col), cs.formula?(row,col), "formula? #{row}/#{col} does not match"
-                assert_equal ex.formula(row,col), cs.formula(row,col), "formula #{row}/#{col} does not match"
-              end
+        end
+        cs.first_row.upto(cs.last_row) do |row|
+          cs.first_column.upto(cs.last_column) do |col|
+            assert_equal ex.cell(row,col), cs.cell(row,col), "cell #{row}/#{col} does not match '#{ex.cell(row,col)}' '#{cs.cell(row,col)}'"
+            assert_equal ex.celltype(row,col), cs.celltype(row,col), "celltype #{row}/#{col} does not match"
+            assert_equal ex.empty?(row,col), cs.empty?(row,col), "empty? #{row}/#{col} does not match"
+            if defined? excel_supports_formulas
+              assert_equal ex.formula?(row,col), cs.formula?(row,col), "formula? #{row}/#{col} does not match"
+              assert_equal ex.formula(row,col), cs.formula(row,col), "formula #{row}/#{col} does not match"
             end
           end
         end
@@ -604,38 +586,36 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
     if ONLINE
       if OPENOFFICE
         assert_raises(RuntimeError) {
-          oo = Openoffice.new("http://gibbsnichtdomainxxxxx.com/file.ods")
+          Openoffice.new("http://gibbsnichtdomainxxxxx.com/file.ods")
         }
       end
       if EXCEL
         assert_raises(RuntimeError) {
-          oo = Excel.new("http://gibbsnichtdomainxxxxx.com/file.xls")
+          Excel.new("http://gibbsnichtdomainxxxxx.com/file.xls")
         }
       end
       if EXCELX
         assert_raises(RuntimeError) {
-          oo = Excelx.new("http://gibbsnichtdomainxxxxx.com/file.xlsx")
+          Excelx.new("http://gibbsnichtdomainxxxxx.com/file.xlsx")
         }
       end
     end
   end
 
   def SKIP_test_to_ascii_openoffice #file does not exist
-    after Date.new(9999,12,31) do
-      with_each_spreadsheet(:name=>'verysimple_spreadsheet', :format=>:openoffice) do |oo|    
-        oo.default_sheet = oo.sheets.first
-        expected="
-  A    |   B   |  C   |
+    with_each_spreadsheet(:name=>'verysimple_spreadsheet', :format=>:openoffice) do |oo|    
+      oo.default_sheet = oo.sheets.first
+      expected="
+A    |   B   |  C   |
 -------+-------+------|
-      7|      8|     9|
+    7|      8|     9|
 -------+-------+------|
-      4|      5|     6|
+    4|      5|     6|
 -------+-------+------|
-      1|      2|     3|
+    1|      2|     3|
 ----------------------/
-        "
-        assert_equal expected, oo.to_ascii
-      end
+      "
+      assert_equal expected, oo.to_ascii
     end
   end
   if false
@@ -747,25 +727,21 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   #  s.set 'c',1,44
   #  s.save
   #
-  #  #after Date.new(2007,7,3) do
-  #  #  t = Openoffice.new(File.join(TESTDIR,"createdspreadsheet.ods"))
-  #  #  assert_equal 42, t.cell(1,'a')
-  #  #  assert_equal 43, t.cell('b',1)
-  #  #  assert_equal 44, t.cell('c',3)
-  #  #end
+  #  t = Openoffice.new(File.join(TESTDIR,"createdspreadsheet.ods"))
+  #  assert_equal 42, t.cell(1,'a')
+  #  assert_equal 43, t.cell('b',1)
+  #  assert_equal 44, t.cell('c',3)
   #end
    
   #TODO: xlsx-Datei anpassen!
   def test_excelx_open_from_uri_and_zipped
     #TODO: gezippte xlsx Datei online zum Testen suchen
-    after Date.new(2999,6,30) do
-      if EXCELX
-        if ONLINE
-          url = 'http://stiny-leonhard.de/bode-v1.xlsx.zip'
-          excel = Excelx.new(url, :zip)
-          assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-          excel.remove_tmp # don't forget to remove the temporary files
-        end
+    if EXCELX
+      if ONLINE
+        url = 'http://stiny-leonhard.de/bode-v1.xlsx.zip'
+        excel = Excelx.new(url, :zip)
+        assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
+        excel.remove_tmp # don't forget to remove the temporary files
       end
     end
   end
@@ -773,17 +749,15 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   def test_excelx_zipped
     # TODO: bode...xls bei Gelegenheit nach .xlsx konverieren lassen und zippen!
     if EXCELX
-      after Date.new(2999,7,30) do
-        # diese Datei gibt es noch nicht gezippt
-        excel = Excelx.new(File.join(TESTDIR,"bode-v1.xlsx.zip"), :zip)
-        assert excel
-        assert_raises (ArgumentError) {
-          assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-        }
-        excel.default_sheet = excel.sheets.first
+      # diese Datei gibt es noch nicht gezippt
+      excel = Excelx.new(File.join(TESTDIR,"bode-v1.xlsx.zip"), :zip)
+      assert excel
+      assert_raises (ArgumentError) {
         assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-        excel.remove_tmp # don't forget to remove the temporary files
-      end
+      }
+      excel.default_sheet = excel.sheets.first
+      assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
+      excel.remove_tmp # don't forget to remove the temporary files
     end
   end
 

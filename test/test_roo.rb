@@ -772,19 +772,17 @@ class TestRoo < Test::Unit::TestCase
   end
 
   def test_excel_zipped
-    after Date.new(2011,12,7) do
-      to do
-        'hier wieder das Problem, dass ausgepacktes xls File
-         unter Windows nicht geloescht werden kann, weil 
-         das spreadsheet gem die Datei nicht schliesst.
-         Fehler von spreadsheet gem'
-      end
-      if EXCEL
-        begin
-          oo = Roo::Excel.new(File.join(TESTDIR,"bode-v1.xls.zip"), :zip)
-          assert oo
-          assert_equal 'ist "e" im Nenner von H(s)', oo.cell('b', 5)
-        end
+    to do
+      'hier wieder das Problem, dass ausgepacktes xls File
+       unter Windows nicht geloescht werden kann, weil 
+       das spreadsheet gem die Datei nicht schliesst.
+       Fehler von spreadsheet gem'
+    end
+    if EXCEL
+      begin
+        oo = Roo::Excel.new(File.join(TESTDIR,"bode-v1.xls.zip"), :zip)
+        assert oo
+        assert_equal 'ist "e" im Nenner von H(s)', oo.cell('b', 5)
       end
     end
   end
@@ -1369,19 +1367,17 @@ class TestRoo < Test::Unit::TestCase
 
   def test_bug_set_value_with_more_than_one_sheet_google
     # write.me: http://spreadsheets.google.com/ccc?key=ptu6bbahNZpY0N0RrxQbWdw&hl=en_GB
-    after Date.new(2011,6,19) do
-      with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|
-        content1 = 'AAA'
-        content2 = 'BBB'
-        oo.default_sheet = oo.sheets.first
-        oo.set_value(1,1,content1)
-        oo.default_sheet = oo.sheets[1]
-        oo.set_value(1,1,content2) # in the second sheet
-        oo.default_sheet = oo.sheets.first
-        assert_equal content1, oo.cell(1,1)
-        oo.default_sheet = oo.sheets[1]
-        assert_equal content2, oo.cell(1,1)
-      end
+    with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|
+      content1 = 'AAA'
+      content2 = 'BBB'
+      oo.default_sheet = oo.sheets.first
+      oo.set_value(1,1,content1)
+      oo.default_sheet = oo.sheets[1]
+      oo.set_value(1,1,content2) # in the second sheet
+      oo.default_sheet = oo.sheets.first
+      assert_equal content1, oo.cell(1,1)
+      oo.default_sheet = oo.sheets[1]
+      assert_equal content2, oo.cell(1,1)
     end
   end
 
@@ -1465,56 +1461,50 @@ Sheet 3:
   end
 
   def test_no_remaining_tmp_files_openoffice
-    after Date.new(2011,12,7) do
-      # alles noch mal ueberarbeiten
-      # temp. Directories sollten in diesem Fall ueberhaupt nicht
-      # angelegt werden
-      if OPENOFFICE
-        assert_no_temp_files_left_over do
-          assert_raise(Zip::ZipError) { #TODO: besseres Fehlerkriterium bei
-            # oo = Roo::Openoffice.new(File.join(TESTDIR,"no_spreadsheet_file.txt"))
-            # es soll absichtlich ein Abbruch provoziert werden, deshalb :ignore
-            Roo::Openoffice.new(File.join(TESTDIR,"no_spreadsheet_file.txt"),
-              false,
-              :ignore)
-          }
-        end
+    # alles noch mal ueberarbeiten
+    # temp. Directories sollten in diesem Fall ueberhaupt nicht
+    # angelegt werden
+    if OPENOFFICE
+      assert_no_temp_files_left_over do
+        assert_raise(Zip::ZipError) { #TODO: besseres Fehlerkriterium bei
+          # oo = Roo::Openoffice.new(File.join(TESTDIR,"no_spreadsheet_file.txt"))
+          # es soll absichtlich ein Abbruch provoziert werden, deshalb :ignore
+          Roo::Openoffice.new(File.join(TESTDIR,"no_spreadsheet_file.txt"),
+            false,
+            :ignore)
+        }
       end
     end
   end
 
   def test_no_remaining_tmp_files_excel
-    after Date.new(2011,12,7) do
-      # alles noch mal ueberarbeiten
-      # temp. Directories sollten in diesem Fall ueberhaupt nicht
-      # angelegt werden
-      if EXCEL
-        assert_no_temp_files_left_over do
-          assert_raise(Ole::Storage::FormatError) {
-            oo = Roo::Excel.new(File.join(TESTDIR,"no_spreadsheet_file.txt"),
-              false,
-              :ignore)
-          }
-        end
+    # alles noch mal ueberarbeiten
+    # temp. Directories sollten in diesem Fall ueberhaupt nicht
+    # angelegt werden
+    if EXCEL
+      assert_no_temp_files_left_over do
+        assert_raise(Ole::Storage::FormatError) {
+          oo = Roo::Excel.new(File.join(TESTDIR,"no_spreadsheet_file.txt"),
+            false,
+            :ignore)
+        }
       end
     end
   end
 
   def test_no_remaining_tmp_files_excelx
-    after Date.new(2011,12,7) do
-      # alles noch mal ueberarbeiten
-      # temp. Directories sollten in diesem Fall ueberhaupt nicht
-      # angelegt werden
-      if EXCELX
-        assert_no_temp_files_left_over do
-          assert_raise(Zip::ZipError) { #TODO: besseres Fehlerkriterium bei
-            # oo = Roo::Excelx.new(File.join(TESTDIR,"no_spreadsheet_file.txt"))
-            # es soll absichtlich ein Abbruch provoziert werden, deshalb :ignore
-            oo = Roo::Excelx.new(File.join(TESTDIR,"no_spreadsheet_file.txt"),
-              false,
-              :ignore)
-          }
-        end
+    # alles noch mal ueberarbeiten
+    # temp. Directories sollten in diesem Fall ueberhaupt nicht
+    # angelegt werden
+    if EXCELX
+      assert_no_temp_files_left_over do
+        assert_raise(Zip::ZipError) { #TODO: besseres Fehlerkriterium bei
+          # oo = Roo::Excelx.new(File.join(TESTDIR,"no_spreadsheet_file.txt"))
+          # es soll absichtlich ein Abbruch provoziert werden, deshalb :ignore
+          oo = Roo::Excelx.new(File.join(TESTDIR,"no_spreadsheet_file.txt"),
+            false,
+            :ignore)
+        }
       end
     end
   end
@@ -1646,54 +1636,52 @@ Sheet 3:
   end
 
   def test_file_warning_warning
-    after Date.new(2011,12,7) do
-      if OPENOFFICE
-        assert_no_temp_files_left_over do
-          assert_nothing_raised(TypeError) {
-            assert_raises(Zip::ZipError) {
-              Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls"),false, :warning)
-            }
+    if OPENOFFICE
+      assert_no_temp_files_left_over do
+        assert_nothing_raised(TypeError) {
+          assert_raises(Zip::ZipError) {
+            Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls"),false, :warning)
           }
-        end
-	      assert_no_temp_files_left_over do
-          assert_nothing_raised(TypeError) {
-            assert_raises(Errno::ENOENT) {
-              Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xlsx"),false, :warning)
-            }
-          }
-	      end
+        }
       end
-      if EXCEL
-        assert_no_temp_files_left_over do
-          assert_nothing_raised(TypeError) {
-            assert_raises(Ole::Storage::FormatError) {
-              Roo::Excel.new(File.join(TESTDIR,"numbers1.ods"),false, :warning)
-            }
+      assert_no_temp_files_left_over do
+        assert_nothing_raised(TypeError) {
+          assert_raises(Errno::ENOENT) {
+            Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xlsx"),false, :warning)
           }
-        end
-        assert_no_temp_files_left_over do
-          assert_nothing_raised(TypeError) {
-            assert_raises(Ole::Storage::FormatError) {
-              Roo::Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false, :warning)
-            }
-          }
-        end
+        }
       end
-      if EXCELX
-        assert_no_temp_files_left_over do
-          assert_nothing_raised(TypeError) {
-            assert_raises(Errno::ENOENT) {
-              Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),false, :warning)
-            }
+    end
+    if EXCEL
+      assert_no_temp_files_left_over do
+        assert_nothing_raised(TypeError) {
+          assert_raises(Ole::Storage::FormatError) {
+            Roo::Excel.new(File.join(TESTDIR,"numbers1.ods"),false, :warning)
           }
-        end
-        assert_no_temp_files_left_over do
-          assert_nothing_raised(TypeError) {
-            assert_raises(Zip::ZipError) {
-              Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls"),false, :warning)
-            }
+        }
+      end
+      assert_no_temp_files_left_over do
+        assert_nothing_raised(TypeError) {
+          assert_raises(Ole::Storage::FormatError) {
+            Roo::Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false, :warning)
           }
-        end
+        }
+      end
+    end
+    if EXCELX
+      assert_no_temp_files_left_over do
+        assert_nothing_raised(TypeError) {
+          assert_raises(Errno::ENOENT) {
+            Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),false, :warning)
+          }
+        }
+      end
+      assert_no_temp_files_left_over do
+        assert_nothing_raised(TypeError) {
+          assert_raises(Zip::ZipError) {
+            Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls"),false, :warning)
+          }
+        }
       end
     end
   end
@@ -2276,12 +2264,10 @@ Sheet 3:
   # was verhindern koennte, das die Datei geloescht werden kann.
   def test_bug_cannot_delete_opened_excel_sheet
     #    with_each_spreadsheet(:name=>'simple_spreadsheet') do |oo|
-	  after Date.new(2011,7,17) do
-		  # to do
-      # 'kopiere  nach temporaere Datei
-      # und versuche diese zu oeffnen und zu loeschen'
-		  # end
-    end
+	  # to do
+    # 'kopiere  nach temporaere Datei
+    # und versuche diese zu oeffnen und zu loeschen'
+	  # end
     #end
   end
 
@@ -2314,12 +2300,10 @@ where the expected result is
   end
   
   def test_bug_guest_list_2011_05_05
-    after Date.new(2011,12,7) do
-      oo = Roo::Excel.new(File.join("..","confidential","guest_list_addresses.xls"))
-      oo.default_sheet = oo.sheets.first
-      assert_equal "lalala", oo.cell('a',1) # anderer Inhalt im Spreadsheet
-      assert_equal :string, oo.celltype('a',1)
-    end
+    oo = Roo::Excel.new(File.join("..","confidential","guest_list_addresses.xls"))
+    oo.default_sheet = oo.sheets.first
+    assert_equal "lalala", oo.cell('a',1) # anderer Inhalt im Spreadsheet
+    assert_equal :string, oo.celltype('a',1)
   end
 
   def test_bug_guest_list_2011_05_05_spreadsheet
@@ -2349,36 +2333,32 @@ where the expected result is
   end
 
   def test_bug_string_as_a_date_2011_05_21_spreadsheet_only
-    after Date.new(2011,12,28) do
-      if EXCEL
-        # to do
-        # 'wieder entfernen'
-        # end
-        require 'spreadsheet'
-        book = Spreadsheet.open File.join('..','confidential','2011-05-21_sample_type_problem.xls')
-        sheet1 = book.worksheet 0
-        sheet1.each_with_index do |row,rownum|
-          # p row[0]
-          if rownum == 2
-            assert_equal 68, row[6]
-          end
+    if EXCEL
+      # to do
+      # 'wieder entfernen'
+      # end
+      require 'spreadsheet'
+      book = Spreadsheet.open File.join('..','confidential','2011-05-21_sample_type_problem.xls')
+      sheet1 = book.worksheet 0
+      sheet1.each_with_index do |row,rownum|
+        # p row[0]
+        if rownum == 2
+          assert_equal 68, row[6]
         end
       end
     end
   end
 
   def test_bug_string_as_a_date_2011_05_21
-    after Date.new(2011,12,7) do
-      #oo = Roo::Excel.new(File.join(TESTDIR,'2011-05-21_sample_type_problem.xls'))
-      oo = Roo::Excel.new(File.join('..','confidential','2011-05-21_sample_type_problem.xls'))
-      oo.default_sheet = oo.sheets.first
-      assert_equal 68, oo.g2
-      assert_equal 72, oo.g3
-      assert_equal 75, oo.g4
-      assert_equal 76, oo.g5
-      assert_equal 77, oo.g6
-      assert_equal 78, oo.g7
-    end
+    #oo = Roo::Excel.new(File.join(TESTDIR,'2011-05-21_sample_type_problem.xls'))
+    oo = Roo::Excel.new(File.join('..','confidential','2011-05-21_sample_type_problem.xls'))
+    oo.default_sheet = oo.sheets.first
+    assert_equal 68, oo.g2
+    assert_equal 72, oo.g3
+    assert_equal 75, oo.g4
+    assert_equal 76, oo.g5
+    assert_equal 77, oo.g6
+    assert_equal 78, oo.g7
   end
 
   def test_bug_string_as_a_date_2011_05_21_saved_as_ods
