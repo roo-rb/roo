@@ -3095,50 +3095,49 @@ A    |   B   |  C   |
       assert_equal expected, oo.to_ascii
     end
   end
-  if false
-    def test_soap_server
-      #threads = []
-      #threads << Thread.new("serverthread") do
-      fork do
-        p "serverthread started"
-        puts "in child, pid = #$$"
-        puts `/usr/bin/ruby rooserver.rb`
-        p "serverthread finished"
-      end
-      #threads << Thread.new("clientthread") do
-      p "clientthread started"
-      sleep 10
-      proxy = SOAP::RPC::Driver.new("http://localhost:12321","spreadsheetserver")
-      proxy.add_method('cell','row','col')
-      proxy.add_method('officeversion')
-      proxy.add_method('last_row')
-      proxy.add_method('last_column')
-      proxy.add_method('first_row')
-      proxy.add_method('first_column')
-      proxy.add_method('sheets')
-      proxy.add_method('set_default_sheet','s')
-      proxy.add_method('ferien_fuer_region', 'region')
 
-      sheets = proxy.sheets
-      p sheets
-      proxy.set_default_sheet(sheets.first)
+  # def test_soap_server
+  #   #threads = []
+  #   #threads << Thread.new("serverthread") do
+  #   fork do
+  #     p "serverthread started"
+  #     puts "in child, pid = #$$"
+  #     puts `/usr/bin/ruby rooserver.rb`
+  #     p "serverthread finished"
+  #   end
+  #   #threads << Thread.new("clientthread") do
+  #   p "clientthread started"
+  #   sleep 10
+  #   proxy = SOAP::RPC::Driver.new("http://localhost:12321","spreadsheetserver")
+  #   proxy.add_method('cell','row','col')
+  #   proxy.add_method('officeversion')
+  #   proxy.add_method('last_row')
+  #   proxy.add_method('last_column')
+  #   proxy.add_method('first_row')
+  #   proxy.add_method('first_column')
+  #   proxy.add_method('sheets')
+  #   proxy.add_method('set_default_sheet','s')
+  #   proxy.add_method('ferien_fuer_region', 'region')
 
-      assert_equal 1, proxy.first_row
-      assert_equal 1, proxy.first_column
-      assert_equal 187, proxy.last_row
-      assert_equal 7, proxy.last_column
-      assert_equal 42, proxy.cell('C',8)
-      assert_equal 43, proxy.cell('F',12)
-      assert_equal "1.0", proxy.officeversion
-      p "clientthread finished"
-      #end
-      #threads.each {|t| t.join }
-      puts "fertig"
-      Process.kill("INT",pid)
-      pid = Process.wait
-      puts "child terminated, pid= #{pid}, status= #{$?.exitstatus}"
-    end
-  end # false
+  #   sheets = proxy.sheets
+  #   p sheets
+  #   proxy.set_default_sheet(sheets.first)
+
+  #   assert_equal 1, proxy.first_row
+  #   assert_equal 1, proxy.first_column
+  #   assert_equal 187, proxy.last_row
+  #   assert_equal 7, proxy.last_column
+  #   assert_equal 42, proxy.cell('C',8)
+  #   assert_equal 43, proxy.cell('F',12)
+  #   assert_equal "1.0", proxy.officeversion
+  #   p "clientthread finished"
+  #   #end
+  #   #threads.each {|t| t.join }
+  #   puts "fertig"
+  #   Process.kill("INT",pid)
+  #   pid = Process.wait
+  #   puts "child terminated, pid= #{pid}, status= #{$?.exitstatus}"
+  # end
 
   def split_coord(s)
     letter = ""
