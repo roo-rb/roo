@@ -52,31 +52,25 @@ class Roo::Google < Roo::GenericSpreadsheet
   end
 
   def date?(string)
-    begin
-      Date.strptime(string, @date_format)
-      true
-    rescue
-      false
-    end
+    Date.strptime(string, @date_format)
+    true
+  rescue
+    false
   end
 
   # is String a time with format HH:MM:SS?
   def time?(string)
-    begin
-      DateTime.strptime(string, @time_format)
-      true
-    rescue
-      false
-    end
+    DateTime.strptime(string, @time_format)
+    true
+  rescue
+    false
   end
 
   def datetime?(string)
-    begin
-      DateTime.strptime(string, @datetime_format)
-      true
-    rescue
-      false
-    end
+    DateTime.strptime(string, @datetime_format)
+    true
+  rescue
+    false
   end
 
   def numeric?(string)
