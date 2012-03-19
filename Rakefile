@@ -12,7 +12,7 @@ task :default => 'test:run'
 
 Bones {
   name  'roo'
-  authors  'Thomas Preymesser'
+  authors  'Thomas Preymesser', 'Hugh McGowan', 'Ben Woosley'
   email  'thopre@gmail.com'
   url  'http://roo.rubyforge.org/'
   version  Roo::VERSION
