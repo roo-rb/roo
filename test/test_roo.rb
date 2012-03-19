@@ -51,13 +51,6 @@ end
 
 include FileUtils
 
-def running_windows?
-  # to do
-  # "besser loesen"
-  # end
-  File.exists? "C:\\"
-end
-
 if DB_LOG
   def activerecord_connect
     ActiveRecord::Base.establish_connection(:adapter => "mysql",
@@ -859,16 +852,8 @@ class TestRoo < Test::Unit::TestCase
         assert_equal "Tagebuch aus Chile  Juli 1977", oo.cell(55,'A')
         assert oo.to_csv(File.join(tempdir,"Bibelbund.csv"))
         assert File.exists?(File.join(tempdir,"Bibelbund.csv"))
-        #if running_windows?
-        #  to do
-        #    "diff is not available under windows"
-        #  end
-        #else
-        # assert_equal "", `diff test/Bibelbund.csv /tmp/Bibelbund.csv`, "error in class #{oo.class}"
-        #  assert_equal "", `diff test/Bibelbund.csv #{File.join(tempdir,"Bibelbund.csv")}`, "error in class #{oo.class}"
-        assert_equal "",
-        diff("test/Bibelbund.csv","#{File.join(tempdir,"Bibelbund.csv")}"),
-        "error in class #{oo.class}"
+        assert_equal "", diff("test/Bibelbund.csv", File.join(tempdir,"Bibelbund.csv")),
+          "error in class #{oo.class}"
         #end
       end
     end
@@ -896,14 +881,10 @@ class TestRoo < Test::Unit::TestCase
       File.delete_if_exist(File.join(tempdir,"numbers1.csv"))
       assert oo.to_csv(File.join(tempdir,"numbers1.csv"),oo.sheets.first)
       assert(File.exists?(File.join(tempdir,"numbers1.csv")), "Datei #{tempdir}/numbers1.csv existiert nicht")
-      if running_windows?
-        warn "no 'diff' in windows"
-      else
-        assert_equal "", `diff #{master} #{File.join(tempdir,"numbers1.csv")}`
-        assert oo.to_csv(File.join(tempdir,"numbers1.csv"))
-        assert File.exists?(File.join(tempdir,"numbers1.csv"))
-        assert_equal "", `diff #{master} #{File.join(tempdir,"numbers1.csv")}`
-      end
+      assert_equal "", diff(master, File.join(tempdir,"numbers1.csv"))
+      assert oo.to_csv(File.join(tempdir,"numbers1.csv"))
+      assert File.exists?(File.join(tempdir,"numbers1.csv"))
+      assert_equal "", diff(master, File.join(tempdir,"numbers1.csv"))
     end
   end
 
