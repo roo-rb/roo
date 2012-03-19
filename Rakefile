@@ -26,8 +26,8 @@ Bones {
   #depend_on 'febeling-rubyzip','>= 0.9.2' # meine aktuelle Version
   #TODO: warum brauchen wir das? es lief doch auch vorher ohne dieses spezielle gem
   depend_on 'rubyzip' # rubyzip wird benoetigt
-  depend_on 'google-spreadsheet-ruby'
-  depend_on 'choice'
+  # depend_on 'google-spreadsheet-ruby'
+  # depend_on 'choice'
 }
 
 # EOF
