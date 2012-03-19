@@ -31,8 +31,8 @@ end
 # with the wrong spreadsheet class
 #STDERR.reopen "/dev/null","w"
 
-TESTDIR =  File.dirname(__FILE__) 
-require TESTDIR + '/test_helper.rb'
+TESTDIR =  File.join(File.dirname(__FILE__), 'files')
+require File.dirname(__FILE__) + '/test_helper.rb'
 
 require 'fileutils'
 require 'timeout'
@@ -342,7 +342,7 @@ class TestRoo < Test::Unit::TestCase
 
   def test_libre_office
 	  if LIBREOFFICE
-      oo = Roo::Libreoffice.new("test/numbers1.ods")
+      oo = Roo::Libreoffice.new(File.join(TESTDIR, "numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 41, oo.cell('a',12)
 	  end
@@ -844,7 +844,7 @@ class TestRoo < Test::Unit::TestCase
         assert_equal "Tagebuch aus Chile  Juli 1977", oo.cell(55,'A')
         assert oo.to_csv(File.join(tempdir,"Bibelbund.csv"))
         assert File.exists?(File.join(tempdir,"Bibelbund.csv"))
-        assert_equal "", diff("test/Bibelbund.csv", File.join(tempdir,"Bibelbund.csv")),
+        assert_equal "", diff(File.join(TESTDIR, "Bibelbund.csv"), File.join(tempdir,"Bibelbund.csv")),
           "error in class #{oo.class}"
         #end
       end
@@ -1530,7 +1530,7 @@ Sheet 3:
   def test_file_warning_default
     if OPENOFFICE
       assert_no_temp_files_left_over do
-        assert_raises(TypeError, "test/numbers1.xls is not an openoffice spreadsheet") { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls")) }
+        assert_raises(TypeError, "test/files/numbers1.xls is not an openoffice spreadsheet") { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls")) }
         assert_raises(TypeError) { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xlsx")) }
       end
     end
@@ -2225,7 +2225,7 @@ where the expected result is
 "A: TestString"
 "B: TestString"
 =end
-      xlsx = Roo::Excelx.new(File.join('test', "formula_string_error.xlsx"))
+      xlsx = Roo::Excelx.new(File.join(TESTDIR, "formula_string_error.xlsx"))
       xlsx.default_sheet = xlsx.sheets.first
       assert_equal 'Teststring', xlsx.cell('a',1)
       assert_equal 'Teststring', xlsx.cell('a',2)
@@ -2358,7 +2358,7 @@ where the expected result is
     with_each_spreadsheet(:name=>'datetime') do |oo|
       assert oo.to_csv("datetime.csv")
       assert File.exists?("datetime.csv")
-      assert_equal "", `diff test/so_datetime.csv datetime.csv`
+      assert_equal "", `diff test/files/so_datetime.csv datetime.csv`
     end
   end
 
