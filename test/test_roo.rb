@@ -10,7 +10,6 @@
 # the tests under another OS
 #
 require 'rubygems'
-require 'todonotes'
 require 'tmpdir'
 require './lib/roo'
 #TODO
@@ -750,12 +749,6 @@ class TestRoo < Test::Unit::TestCase
   end
 
   def test_excel_zipped
-    to do
-      'hier wieder das Problem, dass ausgepacktes xls File
-       unter Windows nicht geloescht werden kann, weil 
-       das spreadsheet gem die Datei nicht schliesst.
-       Fehler von spreadsheet gem'
-    end
     if EXCEL
       oo = Roo::Excel.new(File.join(TESTDIR,"bode-v1.xls.zip"), :zip)
       assert oo
@@ -2076,57 +2069,54 @@ Sheet 3:
     end
   end
 
-  #  def test_labeled_cells
-  #	   to do
-  #     "more spreadsheet types"
-  #	   end
-  #    with_each_spreadsheet(:name=>'named_cells', :format=>[:openoffice,:excelx,:libreoffice]) do |oo|
-  #      oo.default_sheet = oo.sheets.first
-  #      begin
-  #        row,col = oo.label('anton')
-  #      rescue ArgumentError
-  #        puts "labels error at #{oo.class}"
-  #        raise
-  #      end
-  #      assert_equal 5, row
-  #      assert_equal 3, col
-  #
-  #      row,col = oo.label('anton')
-  #      assert_equal 'Anton', oo.cell(row,col)
-  #
-  #      row,col = oo.label('berta')
-  #      assert_equal 'Bertha', oo.cell(row,col)
-  #
-  #      row,col = oo.label('caesar')
-  #      assert_equal 'Cäsar', oo.cell(row,col)
-  #
-  #      row,col = oo.label('never')
-  #      assert_nil row
-  #      assert_nil col
-  #
-  #      row,col,sheet = oo.label('anton')
-  #      assert_equal 5, row
-  #      assert_equal 3, col
-  #      assert_equal "Sheet1", sheet
-  #
-  #      assert_equal "Anton", oo.anton
-  #      assert_raises(NoMethodError) {
-  #        row,col = oo.never
-  #      }
-  #
-  #      #assert_equal [
-  ##	      ['anton',['Sheet1',5,3]],
-  ##	      ['berta',['Sheet1',4,2]],
-  ##	      ['caesar',['Sheet1',7,2]],
-  ##      ], oo.labels, "error with labels array in class #{oo.class}"
-  ## Reihenfolge row,col,sheet analog zu #label
-  #      assert_equal [
-  #	      ['anton',[5,3,'Sheet1']],
-  #	      ['berta',[4,2,'Sheet1']],
-  #	      ['caesar',[7,2,'Sheet1']],
-  #      ], oo.labels, "error with labels array in class #{oo.class}"
-  #    end
-  #  end
+   def test_labeled_cells
+     with_each_spreadsheet(:name=>'named_cells', :format=>[:openoffice,:excelx,:libreoffice]) do |oo|
+       oo.default_sheet = oo.sheets.first
+       begin
+         row,col = oo.label('anton')
+       rescue ArgumentError
+         puts "labels error at #{oo.class}"
+         raise
+       end
+       assert_equal 5, row
+       assert_equal 3, col
+  
+       row,col = oo.label('anton')
+       assert_equal 'Anton', oo.cell(row,col)
+  
+       row,col = oo.label('berta')
+       assert_equal 'Bertha', oo.cell(row,col)
+  
+       row,col = oo.label('caesar')
+       assert_equal 'Cäsar', oo.cell(row,col)
+  
+       row,col = oo.label('never')
+       assert_nil row
+       assert_nil col
+  
+       row,col,sheet = oo.label('anton')
+       assert_equal 5, row
+       assert_equal 3, col
+       assert_equal "Sheet1", sheet
+  
+       assert_equal "Anton", oo.anton
+       assert_raises(NoMethodError) {
+         row,col = oo.never
+       }
+  
+       assert_equal [
+  	      ['anton',['Sheet1',5,3]],
+  	      ['berta',['Sheet1',4,2]],
+  	      ['caesar',['Sheet1',7,2]],
+       ], oo.labels, "error with labels array in class #{oo.class}"
+  # Reihenfolge row,col,sheet analog zu #label
+       assert_equal [
+  	      ['anton',[5,3,'Sheet1']],
+  	      ['berta',[4,2,'Sheet1']],
+  	      ['caesar',[7,2,'Sheet1']],
+       ], oo.labels, "error with labels array in class #{oo.class}"
+     end
+   end
 
 
   def test_bug_excel_last_row_255
@@ -2191,10 +2181,6 @@ Sheet 3:
 
   def test_bug_date_mileszs
     local_only do
-      # to do
-      # "An richtige Stelle kopieren. Ist das Dokument vertraulich?"
-      # 'ist auf dem Netbook nicht vorhanden'
-      # end
       oo = Roo::Excel.new "/home/tp/Documents/feb-sales-analysis.xls"
       oo.default_sheet = oo.sheets.first
       # 2/1/2010 A2-A6 mm/dd/yyyy
@@ -2213,14 +2199,11 @@ Sheet 3:
   # mit Excel.new geoeffnet wurde nach dem Processing anschliessend zu loeschen.
   # Anmerkung: Das Spreadsheet-Gem erlaubt kein explizites Close von Spreadsheet-Dateien,
   # was verhindern koennte, das die Datei geloescht werden kann.
-  def test_bug_cannot_delete_opened_excel_sheet
-    #    with_each_spreadsheet(:name=>'simple_spreadsheet') do |oo|
-	  # to do
-    # 'kopiere  nach temporaere Datei
-    # und versuche diese zu oeffnen und zu loeschen'
-	  # end
-    #end
-  end
+  # def test_bug_cannot_delete_opened_excel_sheet
+  #   with_each_spreadsheet(:name=>'simple_spreadsheet') do |oo|
+  #     'kopiere  nach temporaere Datei und versuche diese zu oeffnen und zu loeschen'
+  #   end
+  # end
 
   def test_bug_xlsx_reference_cell
 
@@ -2258,9 +2241,6 @@ where the expected result is
   end
 
   def test_bug_guest_list_2011_05_05_spreadsheet
-	  # to do
-    # 'wieder entfernen'
-	  # end
 	  require 'spreadsheet'
 	  book = Spreadsheet.open File.join('..','confidential','guest_list_addresses.xls')
 	  sheet1 = book.worksheet 0
@@ -2285,9 +2265,6 @@ where the expected result is
 
   def test_bug_string_as_a_date_2011_05_21_spreadsheet_only
     if EXCEL
-      # to do
-      # 'wieder entfernen'
-      # end
       require 'spreadsheet'
       book = Spreadsheet.open File.join('..','confidential','2011-05-21_sample_type_problem.xls')
       sheet1 = book.worksheet 0
@@ -2440,17 +2417,12 @@ where the expected result is
 =end
 
   def test_nil_rows_and_lines_csv
-	  to do
-		  'wieder aktivieren'
-	  end
-=begin
-	  x_123
+	  # x_123
 	  if CSV
 		  oo = Csv.new(File.join(TESTDIR,'Bibelbund.csv'))
 		  oo.default_sheet = oo.sheets.first
 		  assert_equal 3, oo.first_row
 	  end
-=end
   end
 
   def test_bug_pfand_from_windows_phone_xlsx
@@ -2471,9 +2443,6 @@ where the expected result is
   end
 
   def test_comment
-    to do
-      "more spreadsheet types"
-    end
     with_each_spreadsheet(:name=>'comments', :format=>[:openoffice,:libreoffice,
         :excelx]) do |oo|
       oo.default_sheet = oo.sheets.first

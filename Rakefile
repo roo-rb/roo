@@ -28,7 +28,6 @@ Bones {
   depend_on 'rubyzip' # rubyzip wird benoetigt
   depend_on 'google-spreadsheet-ruby'
   depend_on 'choice'
-  depend_on 'todonotes'
 }
 
 # EOF
