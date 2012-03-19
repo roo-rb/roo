@@ -2419,7 +2419,7 @@ where the expected result is
   def test_nil_rows_and_lines_csv
 	  # x_123
 	  if CSV
-		  oo = Csv.new(File.join(TESTDIR,'Bibelbund.csv'))
+		  oo = Roo::Csv.new(File.join(TESTDIR,'Bibelbund.csv'))
 		  oo.default_sheet = oo.sheets.first
 		  assert_equal 3, oo.first_row
 	  end
