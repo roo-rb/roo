@@ -598,9 +598,7 @@ class Roo::GenericSpreadsheet
       file.close
       return File.join(@tmpdir, path)
     else
-      unless path.empty?
-        path += '/'
-      end
+      path += '/' unless path.empty?
       zip.dir.foreach(path) do |filename|
         ret = process_zipfile_packed(zip, path + filename)
       end
@@ -611,7 +609,7 @@ class Roo::GenericSpreadsheet
   # Write all cells to the csv file. File can be a filename or nil. If the this
   # parameter is nil the output goes to STDOUT
   def write_csv_content(file=nil,sheet=nil)
-    file = STDOUT unless file
+    file ||= STDOUT
     if first_row(sheet) # sheet is not empty
       1.upto(last_row(sheet)) do |row|
         1.upto(last_column(sheet)) do |col|
