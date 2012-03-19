@@ -1,5 +1,3 @@
-# require 'todo_gem'
-
 module Roo
 
   # :stopdoc:

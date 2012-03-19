@@ -33,7 +33,6 @@ end
 #STDERR.reopen "/dev/null","w"
 
 TESTDIR =  File.dirname(__FILE__) 
-# require './' + TESTDIR + '/test_helper.rb'
 require TESTDIR + '/test_helper.rb'
 
 require 'fileutils'
