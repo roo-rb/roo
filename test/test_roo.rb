@@ -163,7 +163,7 @@ class TestRoo < Test::Unit::TestCase
   CSV          = true  	# do CSV tests? (.csv files)
 
   ONLINE = false
-  LONG_RUN = true
+  LONG_RUN = false
 
   def test_internal_minutes
     assert_equal 42*60, 42.minutes
@@ -2234,71 +2234,82 @@ where the expected result is
   end
   
   def test_bug_guest_list_2011_05_05
-    oo = Roo::Excel.new(File.join("..","confidential","guest_list_addresses.xls"))
-    oo.default_sheet = oo.sheets.first
-    assert_equal "lalala", oo.cell('a',1) # anderer Inhalt im Spreadsheet
-    assert_equal :string, oo.celltype('a',1)
+    local_only do
+      oo = Roo::Excel.new(File.join("..","confidential","guest_list_addresses.xls"))
+      oo.default_sheet = oo.sheets.first
+      assert_equal "lalala", oo.cell('a',1) # anderer Inhalt im Spreadsheet
+      assert_equal :string, oo.celltype('a',1)
+    end
   end
 
   def test_bug_guest_list_2011_05_05_spreadsheet
-	  require 'spreadsheet'
-	  book = Spreadsheet.open File.join('..','confidential','guest_list_addresses.xls')
-	  sheet1 = book.worksheet 0
-	  sheet1.each do |row|
-		  p row[0]
-		  
-	  end
+    local_only do
+      require 'spreadsheet'
+      book = Spreadsheet.open File.join('..','confidential','guest_list_addresses.xls')
+      sheet1 = book.worksheet 0
+      sheet1.each do |row|
+        p row[0]
+      end
+    end
   end
 
   # don't test it with other spreadsheet types! this was only a problem
   # with .xlsx files
   def test_bug_date_not_recognized_2011_05_21
     if EXCELX
-      oo = Roo::Excelx.new(File.join('..','confidential','2011-05-21_sample_date_problem.xlsx'))
-      oo.default_sheet = oo.sheets.first
-      assert_equal Date.new(2011,3,24), oo.b4
-      assert_equal Date.new(2011,3,25), oo.b5
-      assert_equal Date.new(2011,5,5), oo.b6
-      assert_equal Date.new(2012,3,23), oo.b7
+      local_only do
+        oo = Roo::Excelx.new(File.join('..','confidential','2011-05-21_sample_date_problem.xlsx'))
+        oo.default_sheet = oo.sheets.first
+        assert_equal Date.new(2011,3,24), oo.b4
+        assert_equal Date.new(2011,3,25), oo.b5
+        assert_equal Date.new(2011,5,5), oo.b6
+        assert_equal Date.new(2012,3,23), oo.b7
+      end
     end
   end
 
   def test_bug_string_as_a_date_2011_05_21_spreadsheet_only
     if EXCEL
-      require 'spreadsheet'
-      book = Spreadsheet.open File.join('..','confidential','2011-05-21_sample_type_problem.xls')
-      sheet1 = book.worksheet 0
-      sheet1.each_with_index do |row,rownum|
-        # p row[0]
-        if rownum == 2
-          assert_equal 68, row[6]
+      local_only do
+        require 'spreadsheet'
+        book = Spreadsheet.open File.join('..','confidential','2011-05-21_sample_type_problem.xls')
+        sheet1 = book.worksheet 0
+        sheet1.each_with_index do |row,rownum|
+          # p row[0]
+          if rownum == 2
+            assert_equal 68, row[6]
+          end
         end
       end
     end
   end
 
   def test_bug_string_as_a_date_2011_05_21
-    #oo = Roo::Excel.new(File.join(TESTDIR,'2011-05-21_sample_type_problem.xls'))
-    oo = Roo::Excel.new(File.join('..','confidential','2011-05-21_sample_type_problem.xls'))
-    oo.default_sheet = oo.sheets.first
-    assert_equal 68, oo.g2
-    assert_equal 72, oo.g3
-    assert_equal 75, oo.g4
-    assert_equal 76, oo.g5
-    assert_equal 77, oo.g6
-    assert_equal 78, oo.g7
+    if EXCEL
+      local_only do
+        oo = Roo::Excel.new(File.join('..','confidential','2011-05-21_sample_type_problem.xls'))
+        oo.default_sheet = oo.sheets.first
+        assert_equal 68, oo.g2
+        assert_equal 72, oo.g3
+        assert_equal 75, oo.g4
+        assert_equal 76, oo.g5
+        assert_equal 77, oo.g6
+        assert_equal 78, oo.g7
+      end
+    end
   end
 
   def test_bug_string_as_a_date_2011_05_21_saved_as_ods
-	  #oo = Roo::Openoffice.new(File.join(TESTDIR,'2011-05-21_sample_type_problem.ods'))
-	  oo = Roo::Openoffice.new(File.join('..','confidential','2011-05-21_sample_type_problem.ods'))
-	  oo.default_sheet = oo.sheets.first
-	  assert_equal 68, oo.g2
-	  assert_equal 72, oo.g3
-	  assert_equal 75, oo.g4
-	  assert_equal 76, oo.g5
-	  assert_equal 77, oo.g6
-	  assert_equal 78, oo.g7
+    local_only do
+      oo = Roo::Openoffice.new(File.join('..','confidential','2011-05-21_sample_type_problem.ods'))
+      oo.default_sheet = oo.sheets.first
+      assert_equal 68, oo.g2
+      assert_equal 72, oo.g3
+      assert_equal 75, oo.g4
+      assert_equal 76, oo.g5
+      assert_equal 77, oo.g6
+      assert_equal 78, oo.g7
+    end
   end
 
   # #formulas of an empty sheet should return an empty array and not result in
@@ -2866,18 +2877,22 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   
   def test_bug_encoding_exported_from_google
     if EXCEL
-      xl = Roo::Excel.new(File.join(TESTDIR,"numbers1_from_google.xls"))
-      xl.default_sheet = xl.sheets.first
-      assert_equal 'test', xl.cell(2,'F')
+      local_only do
+        xl = Roo::Excel.new(File.join(TESTDIR,"numbers1_from_google.xls"))
+        xl.default_sheet = xl.sheets.first
+        assert_equal 'test', xl.cell(2,'F')
+      end
     end
   end
   
   def test_invalid_iconv_from_ms
-    #TODO: does only run within a darwin-environment
-    if RUBY_PLATFORM.downcase =~ /darwin/
-      assert_nothing_raised() {
-        oo = Roo::Excel.new(File.join(TESTDIR,"ms.xls"))
-      }
+    local_only do
+      #TODO: does only run within a darwin-environment
+      if RUBY_PLATFORM.downcase =~ /darwin/
+        assert_nothing_raised() {
+          oo = Roo::Excel.new(File.join(TESTDIR,"ms.xls"))
+        }
+      end
     end
   end
 
@@ -2905,8 +2920,8 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
     end
   end
   def test_bug_c2  # no test file
-    with_each_spreadsheet(:name=>'problem', :foramt=>:excel) do |oo|
-      local_only do
+    local_only do
+      with_each_spreadsheet(:name=>'problem', :foramt=>:excel) do |oo|
         expected = ['Supermodel X','T6','Shaun White','Jeremy','Custom',
           'Warhol','Twin','Malolo','Supermodel','Air','Elite',
           'King','Dominant','Dominant Slick','Blunt','Clash',
@@ -3080,19 +3095,21 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   end
 
   def test_to_ascii_openoffice #file does not exist
-    with_each_spreadsheet(:name=>'verysimple_spreadsheet', :format=>:openoffice) do |oo|    
-      oo.default_sheet = oo.sheets.first
-      expected="
-A    |   B   |  C   |
--------+-------+------|
-    7|      8|     9|
--------+-------+------|
-    4|      5|     6|
--------+-------+------|
-    1|      2|     3|
-----------------------/
-      "
-      assert_equal expected, oo.to_ascii
+    local_only do
+      with_each_spreadsheet(:name=>'verysimple_spreadsheet', :format=>:openoffice) do |oo|
+        oo.default_sheet = oo.sheets.first
+        expected="
+  A    |   B   |  C   |
+  -------+-------+------|
+      7|      8|     9|
+  -------+-------+------|
+      4|      5|     6|
+  -------+-------+------|
+      1|      2|     3|
+  ----------------------/
+        "
+        assert_equal expected, oo.to_ascii
+      end
     end
   end
 
