@@ -74,41 +74,38 @@ end
 
 class Test::Unit::TestCase
   def key_of(spreadsheetname)
-    begin
-      
-      return {
-        #'formula' => 'rt4Pw1WmjxFtyfrqqy94wPw',
-        'formula' => 'o10837434939102457526.3022866619437760118',
-        #"write.me" => 'r6m7HFlUOwst0RTUTuhQ0Ow',
-        "write.me" => '0AkCuGANLc3jFcHR1NmJiYWhOWnBZME4wUnJ4UWJXZHc',
-        #'numbers1' => "rYraCzjxTtkxw1NxHJgDU8Q",
-        'numbers1' => 'o10837434939102457526.4784396906364855777',
-        #'borders' => "r_nLYMft6uWg_PT9Rc2urXw",
-        'borders' => "o10837434939102457526.664868920231926255",
-        #'simple_spreadsheet' => "r3aMMCBCA153TmU_wyIaxfw",
-        'simple_spreadsheet' => "ptu6bbahNZpYe-L1vEBmgGA",
-        'testnichtvorhandenBibelbund.ods' => "invalidkeyforanyspreadsheet", # !!! intentionally false key
-        #"only_one_sheet" => "rqRtkcPJ97nhQ0m9ksDw2rA",
-        "only_one_sheet" => "o10837434939102457526.762705759906130135",
-        #'time-test' => 'r2XfDBJMrLPjmuLrPQQrEYw',
-        'time-test' => 'ptu6bbahNZpYBMhk01UfXSg',
-        #'datetime' => "r2kQpXWr6xOSUpw9MyXavYg",
-        'datetime' => "ptu6bbahNZpYQEtZwzL_dZQ",
-        'whitespace' => "rZyQaoFebVGeHKzjG6e9gRQ",
-        'matrix' => '0AkCuGANLc3jFdHY3cWtYUkM4bVdadjZ5VGpfTzFEUEE',
-      }[spreadsheetname]
-      # 'numbers1' => "o10837434939102457526.4784396906364855777",
-      # 'borders' => "o10837434939102457526.664868920231926255",
-      # 'simple_spreadsheet' => "ptu6bbahNZpYe-L1vEBmgGA",
-      # 'testnichtvorhandenBibelbund.ods' => "invalidkeyforanyspreadsheet", # !!! intentionally false key
-      # "only_one_sheet" => "o10837434939102457526.762705759906130135",
-      # "write.me" => 'ptu6bbahNZpY0N0RrxQbWdw&hl',
-      # 'formula' => 'o10837434939102457526.3022866619437760118',
-      # 'time-test' => 'ptu6bbahNZpYBMhk01UfXSg',
-      # 'datetime' => "ptu6bbahNZpYQEtZwzL_dZQ",
-    rescue
-      raise "unknown spreadsheetname: #{spreadsheetname}"
-    end
+    return {
+      #'formula' => 'rt4Pw1WmjxFtyfrqqy94wPw',
+      'formula' => 'o10837434939102457526.3022866619437760118',
+      #"write.me" => 'r6m7HFlUOwst0RTUTuhQ0Ow',
+      "write.me" => '0AkCuGANLc3jFcHR1NmJiYWhOWnBZME4wUnJ4UWJXZHc',
+      #'numbers1' => "rYraCzjxTtkxw1NxHJgDU8Q",
+      'numbers1' => 'o10837434939102457526.4784396906364855777',
+      #'borders' => "r_nLYMft6uWg_PT9Rc2urXw",
+      'borders' => "o10837434939102457526.664868920231926255",
+      #'simple_spreadsheet' => "r3aMMCBCA153TmU_wyIaxfw",
+      'simple_spreadsheet' => "ptu6bbahNZpYe-L1vEBmgGA",
+      'testnichtvorhandenBibelbund.ods' => "invalidkeyforanyspreadsheet", # !!! intentionally false key
+      #"only_one_sheet" => "rqRtkcPJ97nhQ0m9ksDw2rA",
+      "only_one_sheet" => "o10837434939102457526.762705759906130135",
+      #'time-test' => 'r2XfDBJMrLPjmuLrPQQrEYw',
+      'time-test' => 'ptu6bbahNZpYBMhk01UfXSg',
+      #'datetime' => "r2kQpXWr6xOSUpw9MyXavYg",
+      'datetime' => "ptu6bbahNZpYQEtZwzL_dZQ",
+      'whitespace' => "rZyQaoFebVGeHKzjG6e9gRQ",
+      'matrix' => '0AkCuGANLc3jFdHY3cWtYUkM4bVdadjZ5VGpfTzFEUEE',
+    }[spreadsheetname]
+    # 'numbers1' => "o10837434939102457526.4784396906364855777",
+    # 'borders' => "o10837434939102457526.664868920231926255",
+    # 'simple_spreadsheet' => "ptu6bbahNZpYe-L1vEBmgGA",
+    # 'testnichtvorhandenBibelbund.ods' => "invalidkeyforanyspreadsheet", # !!! intentionally false key
+    # "only_one_sheet" => "o10837434939102457526.762705759906130135",
+    # "write.me" => 'ptu6bbahNZpY0N0RrxQbWdw&hl',
+    # 'formula' => 'o10837434939102457526.3022866619437760118',
+    # 'time-test' => 'ptu6bbahNZpYBMhk01UfXSg',
+    # 'datetime' => "ptu6bbahNZpYQEtZwzL_dZQ",
+  rescue
+    raise "unknown spreadsheetname: #{spreadsheetname}"
   end
 
   if DB_LOG
@@ -741,12 +738,10 @@ class TestRoo < Test::Unit::TestCase
   def test_excel_open_from_uri_and_zipped
     if EXCEL
       if ONLINE
-        begin
-          url = 'http://stiny-leonhard.de/bode-v1.xls.zip'
-          excel = Roo::Excel.new(url, :zip)
-          excel.default_sheet = excel.sheets.first
-          assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-        end
+        url = 'http://stiny-leonhard.de/bode-v1.xls.zip'
+        excel = Roo::Excel.new(url, :zip)
+        excel.default_sheet = excel.sheets.first
+        assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
       end
     end
   end
@@ -754,12 +749,10 @@ class TestRoo < Test::Unit::TestCase
   def test_openoffice_open_from_uri_and_zipped
     if OPENOFFICE
       if ONLINE
-        begin
-          url = 'http://spazioinwind.libero.it/s2/rata.ods.zip'
-          sheet = Roo::Openoffice.new(url, :zip)
-          #has been changed: assert_equal 'ist "e" im Nenner von H(s)', sheet.cell('b', 5)
-          assert_in_delta 0.001, 505.14, sheet.cell('c', 33).to_f
-        end
+        url = 'http://spazioinwind.libero.it/s2/rata.ods.zip'
+        sheet = Roo::Openoffice.new(url, :zip)
+        #has been changed: assert_equal 'ist "e" im Nenner von H(s)', sheet.cell('b', 5)
+        assert_in_delta 0.001, 505.14, sheet.cell('c', 33).to_f
       end
     end
   end
@@ -772,11 +765,9 @@ class TestRoo < Test::Unit::TestCase
        Fehler von spreadsheet gem'
     end
     if EXCEL
-      begin
-        oo = Roo::Excel.new(File.join(TESTDIR,"bode-v1.xls.zip"), :zip)
-        assert oo
-        assert_equal 'ist "e" im Nenner von H(s)', oo.cell('b', 5)
-      end
+      oo = Roo::Excel.new(File.join(TESTDIR,"bode-v1.xls.zip"), :zip)
+      assert oo
+      assert_equal 'ist "e" im Nenner von H(s)', oo.cell('b', 5)
     end
   end
 
