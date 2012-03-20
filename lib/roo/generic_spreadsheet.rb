@@ -1,5 +1,4 @@
 # encoding: utf-8
-require 'matrix'
 
 # Base class for all other types of spreadsheets
 class Roo::GenericSpreadsheet
@@ -193,21 +192,16 @@ class Roo::GenericSpreadsheet
 
   # returns a matrix object from the whole sheet or a rectangular area of a sheet
   def to_matrix(from_row=nil, from_column=nil, to_row=nil, to_column=nil,sheet=nil)
+    require 'matrix'
+
     sheet = @default_sheet unless sheet
-    arr = []
-    pos = 0
-    return Matrix.rows([]) unless first_row
+    return Matrix.empty unless first_row
 
-    (from_row||first_row(sheet)).upto(to_row||last_row(sheet)) do |row|
-      line = []
-      (from_column||first_column(sheet)).upto(to_column||last_column(sheet)) do |col|
-
-        line << cell(row,col)
+    Matrix.rows((from_row||first_row(sheet)).upto(to_row||last_row(sheet)).map do |row|
+      (from_column||first_column(sheet)).upto(to_column||last_column(sheet)).map do |col|
+        cell(row,col)
       end
-      arr[pos] = line
-      pos += 1
-    end
-    Matrix.rows(arr)
+    end)
   end
 
   # find a row either by row number or a condition
