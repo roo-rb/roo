@@ -716,6 +716,8 @@ class Roo::GenericSpreadsheet
           else
             onecell.to_s
           end
+        elsif onecell.class == DateTime
+          str << onecell.to_s
         else
           raise "unhandled onecell-class #{onecell.class}"
         end
