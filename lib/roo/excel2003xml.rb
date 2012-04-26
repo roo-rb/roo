@@ -198,31 +198,31 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   end
 
   # helper function to set the internal representation of cells
-  def set_cell_values(sheet,x,y,i,v,vt,formula,table_cell,str_v,style_name)
+  def set_cell_values(sheet,x,y,i,v,value_type,formula,table_cell,str_v,style_name)
     key = [y,x+i]
     @cell_type[sheet] = {} unless @cell_type[sheet]
-    @cell_type[sheet][key] = vt
+    @cell_type[sheet][key] = value_type
     @formula[sheet] = {} unless @formula[sheet]
     @formula[sheet][key] = formula  if formula
     @cell[sheet]    = {} unless @cell[sheet]
     @style[sheet] = {} unless @style[sheet]
     @style[sheet][key] = style_name
-    case @cell_type[sheet][key]
-    when :float
-      @cell[sheet][key] = v.to_f
-    when :string
-      @cell[sheet][key] = str_v
-    when :datetime
-      @cell[sheet][key] = DateTime.parse(v)
-      @cell_type[sheet][key] = :datetime
-    when :percentage
-      @cell[sheet][key] = v.to_f
-    # when :time
-    #   hms = v.split(':')
-    #   @cell[sheet][key] = hms[0].to_i*3600 + hms[1].to_i*60 + hms[2].to_i
-    else
-      @cell[sheet][key] = v
-    end
+    @cell[sheet][key] =
+      case @cell_type[sheet][key]
+      when :float
+        v.to_f
+      when :string
+        str_v
+      when :datetime
+        DateTime.parse(v)
+      when :percentage
+        v.to_f
+      # when :time
+      #   hms = v.split(':')
+      #   hms[0].to_i*3600 + hms[1].to_i*60 + hms[2].to_i
+      else
+        v
+      end
   end
 
   # read all cells in the selected sheet
@@ -258,25 +258,25 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
           end
           c.xpath('./ss:Data').each do |cell|
             formula = cell['Formula']
-            vt = cell['Type'].downcase.to_sym
+            value_type = cell['Type'].downcase.to_sym
             v =  cell.content
             str_v = v
-            case vt
+            case value_type
             when :number
               v = v.to_f
-              vt = :float
+              value_type = :float
             when :datetime
               if v =~ /^1899-12-31T(\d{2}:\d{2}:\d{2})/
                 v = $1
-                vt = :time
+                value_type = :time
               elsif v =~ /([^T]+)T00:00:00.000/
                 v = $1
-                vt = :date
+                value_type = :date
               end
             when :boolean
               v = cell['boolean-value']
             end
-            set_cell_values(sheet,col,row,0,v,vt,formula,cell,str_v,style_name)
+            set_cell_values(sheet,col,row,0,v,value_type,formula,cell,str_v,style_name)
           end
           col += 1
         end

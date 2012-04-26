@@ -281,10 +281,10 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   end
 
   # helper function to set the internal representation of cells
-  def set_cell_values(sheet,x,y,i,v,vt,formula,table_cell,str_v,style_name)
+  def set_cell_values(sheet,x,y,i,v,value_type,formula,table_cell,str_v,style_name)
     key = [y,x+i]    
     @cell_type[sheet] = {} unless @cell_type[sheet]
-    @cell_type[sheet][key] = Roo::Openoffice.oo_type_2_roo_type(vt)
+    @cell_type[sheet][key] = Roo::Openoffice.oo_type_2_roo_type(value_type)
     @formula[sheet] = {} unless @formula[sheet]
     if formula
       ['of:', 'oooc:'].each do |prefix|
@@ -350,10 +350,11 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
             table_element.children.each do |cell|
               skip_col = cell['number-columns-repeated']
               formula = cell['formula']
-              vt = cell['value-type']
+              value_type = cell['value-type']
               v =  cell['value']
               style_name = cell['style-name']
-              if vt == 'string'
+              case value_type
+              when 'string'
                 str_v  = ''
                 # insert \n if there is more than one paragraph
                 para_count = 0
@@ -397,34 +398,34 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
                     str_v = CGI.unescapeHTML(str_v)
                   end # == 'p'
                 end
-              elsif vt == 'time'
+              when 'time'
                 cell.children.each do |str|
                   if str.name == 'p'
                     v = str.content
                   end
                 end
-              elsif vt == '' or vt == nil
+              when '', nil
                 #
-              elsif vt == 'date'
+              when 'date'
                 #
-              elsif vt == 'percentage'
+              when 'percentage'
                 #
-              elsif vt == 'float'
+              when 'float'
                 #
-              elsif vt == 'boolean'
+              when 'boolean'
                 v = cell.attributes['boolean-value'].to_s
               else
-                # raise "unknown type #{vt}"
+                # raise "unknown type #{value_type}"
               end
               if skip_col
                 if v != nil or cell.attributes['date-value']
                   0.upto(skip_col.to_i-1) do |i|
-                    set_cell_values(sheet,col,row,i,v,vt,formula,cell,str_v,style_name)
+                    set_cell_values(sheet,col,row,i,v,value_type,formula,cell,str_v,style_name)
                   end
                 end
                 col += (skip_col.to_i - 1)
               end # if skip
-              set_cell_values(sheet,col,row,0,v,vt,formula,cell,str_v,style_name)
+              set_cell_values(sheet,col,row,0,v,value_type,formula,cell,str_v,style_name)
               col += 1
             end
             row += 1

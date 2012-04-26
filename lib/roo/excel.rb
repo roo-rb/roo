@@ -308,33 +308,34 @@ class Roo::Excel < Roo::GenericSpreadsheet
   end
 
   # helper function to set the internal representation of cells
-  def set_cell_values(sheet,row,col,i,v,vt,formula,tr,font)
+  def set_cell_values(sheet,row,col,i,v,value_type,formula,tr,font)
     #key = "#{y},#{x+i}"
     key = [row,col+i]
     @cell_type[sheet] = {} unless @cell_type[sheet]
-    @cell_type[sheet][key] = vt 
+    @cell_type[sheet][key] = value_type
     @formula[sheet] = {} unless @formula[sheet]
     @formula[sheet][key] = formula  if formula
     @cell[sheet]    = {} unless @cell[sheet]
     @fonts[sheet] = {} unless @fonts[sheet]
     @fonts[sheet][key] = font
     
-    case vt
-    when :float
-      @cell[sheet][key] = v.to_f
-    when :string
-      @cell[sheet][key] = v
-    when :date
-      @cell[sheet][key] = v 
-    when :datetime
-      @cell[sheet][key] = DateTime.new(v.year,v.month,v.day,v.hour,v.min,v.sec)
-    when :percentage
-      @cell[sheet][key] = v.to_f
-    when :time
-      @cell[sheet][key] = v 
-    else
-      @cell[sheet][key] = v
-    end
+    @cell[sheet][key] =
+      case value_type
+      when :float
+        v.to_f
+      when :string
+        v
+      when :date
+        v
+      when :datetime
+        @cell[sheet][key] = DateTime.new(v.year,v.month,v.day,v.hour,v.min,v.sec)
+      when :percentage
+        v.to_f
+      when :time
+        v
+      else
+        v
+      end
   end
 
   # read all cells in the selected sheet
@@ -354,16 +355,17 @@ class Roo::Excel < Roo::GenericSpreadsheet
         cell = row.at(cell_index)
         next if cell.nil?  #skip empty cells
         next if cell.class == Spreadsheet::Formula && cell.value.nil? # skip empty formula cells
-        if date_or_time?(row, cell_index)
-          vt, v = read_cell_date_or_time(row, cell_index)
-        else
-          vt, v = read_cell(row, cell_index)
-        end
+        value_type, v =
+          if date_or_time?(row, cell_index)
+            read_cell_date_or_time(row, cell_index)
+          else
+            read_cell(row, cell_index)
+          end
         formula = tr = nil #TODO:???
         col_index = cell_index + 1
         font = row.format(cell_index).font
         font.extend(ExcelFontExtensions)
-        set_cell_values(sheet,row_index,col_index,0,v,vt,formula,tr,font)
+        set_cell_values(sheet,row_index,col_index,0,v,value_type,formula,tr,font)
       end #row
       row_index += 1
     end # worksheet

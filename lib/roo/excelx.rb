@@ -402,13 +402,13 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   private
 
   # helper function to set the internal representation of cells
-  def set_cell_values(sheet,x,y,i,v,vt,formula,tr,str_v,
+  def set_cell_values(sheet,x,y,i,v,value_type,formula,tr,str_v,
       excelx_type=nil,
       excelx_value=nil,
       s_attribute=nil)
     key = [y,x+i]
     @cell_type[sheet] = {} unless @cell_type[sheet]
-    @cell_type[sheet][key] = vt
+    @cell_type[sheet][key] = value_type
     @formula[sheet] = {} unless @formula[sheet]
     @formula[sheet][key] = formula  if formula
     @cell[sheet]    = {} unless @cell[sheet]
@@ -457,23 +457,24 @@ class Roo::Excelx < Roo::GenericSpreadsheet
       # c: <c r="A5" s="2">
       # <v>22606</v>
       # </c>, format: , tmp_type: float
-      if c['t'] == 's'
-        tmp_type = :shared
-      elsif c['t'] == 'b'
-        tmp_type = :boolean
-        # 2011-02-25 BEGIN
-      elsif c['t'] == 'str'
-        tmp_type = :string
-        # 2011-02-25 END
-        # 2011-09-15 BEGIN
-      elsif c['t'] == 'inlineStr'
-	      tmp_type = :inlinestr
-        # 2011-09-15 END
-      else
-        s_attribute = c['s'].to_i
-        format = attribute2format(s_attribute)
-        tmp_type = format2type(format)
-      end
+      value_type =
+        case c['t']
+        when 's'
+          :shared
+        when 'b'
+          :boolean
+          # 2011-02-25 BEGIN
+        when 'str'
+          :string
+          # 2011-02-25 END
+          # 2011-09-15 BEGIN
+        when 'inlineStr'
+  	      :inlinestr
+          # 2011-09-15 END
+        else
+          format = attribute2format(s_attribute)
+          format2type(format)
+        end
       formula = nil
       c.children.each do |cell|
 	      # 2011-09-15 BEGIN
@@ -481,14 +482,14 @@ class Roo::Excelx < Roo::GenericSpreadsheet
           cell.children.each do |is|
             if is.name == 't'
               inlinestr_content = is.content
-              vt = :string
+              value_type = :string
               str_v = inlinestr_content
               excelx_type = :string
               y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
               v = nil
               tr=nil #TODO: ???s
               excelx_value = inlinestr_content #cell.content
-              set_cell_values(sheet,x,y,0,v,vt,formula,tr,str_v,excelx_type,excelx_value,s_attribute)
+              set_cell_values(sheet,x,y,0,v,value_type,formula,tr,str_v,excelx_type,excelx_value,s_attribute)
             end
           end
         end
@@ -497,50 +498,46 @@ class Roo::Excelx < Roo::GenericSpreadsheet
           formula = cell.content
         end
         if cell.name == 'v'
-          if tmp_type == :time or tmp_type == :datetime
+          if value_type == :time or value_type == :datetime
             if cell.content.to_f >= 1.0 
               if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001 
-                tmp_type = :datetime 
+                value_type = :datetime 
               else
-                tmp_type = :date
+                value_type = :date
               end
             else
             end 
           end
           excelx_type = [:numeric_or_formula,format.to_s]
           excelx_value = cell.content
-          if tmp_type == :shared
-            vt = :string
+          case value_type
+          when :shared
+            value_type = :string
             str_v = @shared_table[cell.content.to_i]
             excelx_type = :string
-          elsif tmp_type == :boolean
-            vt = :boolean
+          when :boolean
             cell.content.to_i == 1 ? v = 'TRUE' : v = 'FALSE'
-          elsif tmp_type == :date
-            vt = :date
+          when :date
             v = cell.content
-          elsif tmp_type == :time
-            vt = :time
+          when :time
             v = cell.content
-          elsif tmp_type == :datetime
-            vt = :datetime
+          when :datetime
             v = cell.content
-          elsif tmp_type == :formula
-            vt = :formula
+          when :formula
+            value_type = :formula
             v = cell.content.to_f #TODO: !!!!
             # 2011-02-25 BEGIN
-          elsif tmp_type == :string
-            vt = :string
+          when :string
             str_v = cell.content
             excelx_type = :string
             # 2011-02-25 END
           else
-            vt = :float
+            value_type = :float
             v = cell.content
           end
           y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
           tr=nil #TODO: ???s
-          set_cell_values(sheet,x,y,0,v,vt,formula,tr,str_v,excelx_type,excelx_value,s_attribute)
+          set_cell_values(sheet,x,y,0,v,value_type,formula,tr,str_v,excelx_type,excelx_value,s_attribute)
         end
       end
     end
