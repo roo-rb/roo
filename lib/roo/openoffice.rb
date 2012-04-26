@@ -16,8 +16,8 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     super()
     file_type_check(filename,'.ods','an Roo::Openoffice', packed)
     @tmpdir = Roo::GenericSpreadsheet.next_tmpdir
-    @tmpdir = File.join(ENV['ROO_TMP'], @tmpdir) if ENV['ROO_TMP'] 
-    @tmpdir = File.join(tmpdir, @tmpdir) if tmpdir 
+    @tmpdir = File.join(ENV['ROO_TMP'], @tmpdir) if ENV['ROO_TMP']
+    @tmpdir = File.join(tmpdir, @tmpdir) if tmpdir
     unless File.exists?(@tmpdir)
       FileUtils::mkdir(@tmpdir)
     end
@@ -47,7 +47,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     @last_column = Hash.new
     @style = Hash.new
     @style_defaults = Hash.new { |h,k| h[k] = [] }
-    @style_definitions = Hash.new 
+    @style_definitions = Hash.new
     @header_line = 1
     @comment = Hash.new
     @comments_read = Hash.new
@@ -60,7 +60,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
       row,col = label(m.to_s)
 		  cell(row,col)
 	  else
-		  # call super for methods like #a1 
+		  # call super for methods like #a1
 		  super
 	  end
   end
@@ -126,29 +126,29 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
 
   class Font
     attr_accessor :bold, :italic, :underline
-    
-    def bold? 
+
+    def bold?
       @bold == 'bold'
     end
 
-    def italic? 
+    def italic?
       @italic == 'italic'
     end
-    
-    def underline? 
+
+    def underline?
       @underline != nil
     end
   end
 
-  # Given a cell, return the cell's style 
+  # Given a cell, return the cell's style
   def font(row, col, sheet=nil)
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     style_name = @style[sheet][[row,col]] || @style_defaults[sheet][col - 1] || 'Default'
     @style_definitions[style_name]
-  end 
-  
+  end
+
   # set a cell to a certain value
   # (this will not be saved back to the spreadsheet file!)
   def set(row,col,value,sheet=nil) #:nodoc:
@@ -193,7 +193,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     end
     return_sheets
   end
-    
+
   # version of the Roo::Openoffice document
   # at 2007 this is always "1.0"
   def officeversion
@@ -282,7 +282,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
 
   # helper function to set the internal representation of cells
   def set_cell_values(sheet,x,y,i,v,value_type,formula,table_cell,str_v,style_name)
-    key = [y,x+i]    
+    key = [y,x+i]
     @cell_type[sheet] = {} unless @cell_type[sheet]
     @cell_type[sheet][key] = Roo::Openoffice.oo_type_2_roo_type(value_type)
     @formula[sheet] = {} unless @formula[sheet]
@@ -341,7 +341,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
         ws.children.each do |table_element|
           case table_element.name
           when 'table-column'
-            @style_defaults[sheet] << table_element.attributes['default-cell-style-name'] 
+            @style_defaults[sheet] << table_element.attributes['default-cell-style-name']
           when 'table-row'
             if table_element.attributes['number-rows-repeated']
               skip_row = table_element.attributes['number-rows-repeated'].to_s.to_i
@@ -449,7 +449,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   def read_comments(sheet=nil)
     read_cells(sheet)
   end
-  
+
   def read_labels
     @label ||= Hash[@doc.xpath("//table:named-range").map do |ne|
       #-
@@ -462,7 +462,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
       [name, [sheetname,row,col]]
     end]
   end
-  
+
   def read_styles(style_elements)
     @style_definitions['Default'] = Roo::Openoffice::Font.new
     style_elements.each do |style|
@@ -477,7 +477,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
       end
     end
   end
-  
+
   # Checks if the default_sheet exists. If not an RangeError exception is
   # raised
   def check_default_sheet
@@ -533,7 +533,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   def self.oo_type_2_roo_type(ootype)
     return A_ROO_TYPE[ootype]
   end
- 
+
   # helper method to convert compressed spaces and other elements within
   # an text into a string
   def children_to_string(children)

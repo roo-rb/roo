@@ -14,9 +14,9 @@ def spreadsheet(spreadsheet, sheets, options={})
 
   sheets.each { |sheet|
     @rspreadsheet.default_sheet = sheet
-    linenumber = @rspreadsheet.first_row(sheet) 
+    linenumber = @rspreadsheet.first_row(sheet)
     if options[:first_row]
-      linenumber += (options[:first_row]-1) 
+      linenumber += (options[:first_row]-1)
     end
     o << '<table border="0" cellspacing="1" cellpadding="1">'
     if options[:first_row]
@@ -38,14 +38,14 @@ def spreadsheet(spreadsheet, sheets, options={})
     if coordinates
       o << "  <tr>"
       o << "  <td>&nbsp;</td>"
-      @rspreadsheet.first_column(sheet).upto(@rspreadsheet.last_column(sheet)) {|c| 
+      @rspreadsheet.first_column(sheet).upto(@rspreadsheet.last_column(sheet)) {|c|
         if c < first_column or c > last_column
           next
         end
         o << "    <td>"
         o << "      <b>#{Roo::GenericSpreadsheet.number_to_letter(c)}</b>"
         o << "    </td>"
-      } 
+      }
       o << "</tr>"
     end
     @rspreadsheet.first_row.upto(@rspreadsheet.last_row) do |y|

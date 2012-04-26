@@ -51,7 +51,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     'yyyy-mm-dd' => :date, # 2011-09-16
     # was used in a spreadsheet file from a windows phone
   }
-  STANDARD_FORMATS = { 
+  STANDARD_FORMATS = {
     0 => 'General',
     1 => '0',
     2 => '0.00',
@@ -90,7 +90,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @file_warning = file_warning
     file_type_check(filename,'.xlsx','an Excel-xlsx',packed)
     @tmpdir = Roo::GenericSpreadsheet.next_tmpdir
-    @tmpdir = File.join(ENV['ROO_TMP'], @tmpdir) if ENV['ROO_TMP'] 
+    @tmpdir = File.join(ENV['ROO_TMP'], @tmpdir) if ENV['ROO_TMP']
     unless File.exists?(@tmpdir)
       FileUtils::mkdir(@tmpdir)
     end
@@ -225,20 +225,20 @@ class Roo::Excelx < Roo::GenericSpreadsheet
 
   class Font
     attr_accessor :bold, :italic, :underline
-    
+
     def bold?
       @bold == true
     end
-        
-    def italic? 
+
+    def italic?
       @italic == true
     end
-    
+
     def underline?
       @underline == true
-    end    
+    end
   end
-  
+
   # Given a cell, return the cell's style
   def font(row, col, sheet=nil)
     sheet = @default_sheet unless sheet
@@ -248,7 +248,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     s_attribute ||= 0
     s_attribute = s_attribute.to_i
     @style_definitions[s_attribute]
-  end 
+  end
 
   # set a cell to a certain value
   # (this will not be saved back to the spreadsheet file!)
@@ -289,24 +289,24 @@ class Roo::Excelx < Roo::GenericSpreadsheet
 
   # returns the internal type of an excel cell
   # * :numeric_or_formula
-  # * :string  
-  # Note: this is only available within the Excelx class 
+  # * :string
+  # Note: this is only available within the Excelx class
   def excelx_type(row,col,sheet=nil)
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     return @excelx_type[sheet][[row,col]]
   end
-  
+
   # returns the internal value of an excelx cell
-  # Note: this is only available within the Excelx class 
+  # Note: this is only available within the Excelx class
   def excelx_value(row,col,sheet=nil)
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     return @excelx_value[sheet][[row,col]]
   end
-  
+
   # returns the internal format of an excel cell
   def excelx_format(row,col,sheet=nil)
     sheet = @default_sheet unless sheet
@@ -316,7 +316,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     result = attribute2format(s).to_s
     result
   end
-  
+
   # returns an array of sheet names in the spreadsheet
   def sheets
     return_sheets = []
@@ -418,7 +418,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     when :string
       @cell[sheet][key] = str_v
     when :date
-      @cell[sheet][key] = (Date.new(1899,12,30)+v.to_i).strftime("%Y-%m-%d") 
+      @cell[sheet][key] = (Date.new(1899,12,30)+v.to_i).strftime("%Y-%m-%d")
     when :datetime
       @cell[sheet][key] = (DateTime.new(1899,12,30)+v.to_f).strftime("%Y-%m-%d %H:%M:%S")
     when :percentage
@@ -499,14 +499,14 @@ class Roo::Excelx < Roo::GenericSpreadsheet
         end
         if cell.name == 'v'
           if value_type == :time or value_type == :datetime
-            if cell.content.to_f >= 1.0 
-              if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001 
-                value_type = :datetime 
+            if cell.content.to_f >= 1.0
+              if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001
+                value_type = :datetime
               else
                 value_type = :date
               end
             else
-            end 
+            end
           end
           excelx_type = [:numeric_or_formula,format.to_s]
           excelx_value = cell.content
@@ -736,7 +736,7 @@ Datei xl/comments1.xml
     @numFmts = []
     @cellXfs = []
     fonts = []
-    
+
     doc.xpath("//*[local-name()='numFmt']").each do |numFmt|
       numFmtId = numFmt.attributes['numFmtId']
       formatCode = numFmt.attributes['formatCode']
@@ -760,7 +760,7 @@ Datei xl/comments1.xml
         end
       end
     end
-    
+
     doc.xpath("//*[local-name()='cellXfs']").each do |xfs|
       xfs.children.each do |xf|
         numFmtId = xf['numFmtId']

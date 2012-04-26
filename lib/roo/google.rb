@@ -6,7 +6,7 @@ class GoogleWriteError < RuntimeError; end
 
 class Roo::Google < Roo::GenericSpreadsheet
   attr_accessor :date_format, :datetime_format
-  
+
   # Creates a new Google spreadsheet object.
   def initialize(spreadsheetkey,user=nil,password=nil)
     @filename = spreadsheetkey
@@ -35,7 +35,7 @@ class Roo::Google < Roo::GenericSpreadsheet
     @cells_read = Hash.new
     @header_line = 1
     @date_format = '%d/%m/%Y'
-    @datetime_format = '%d/%m/%Y %H:%M:%S' 
+    @datetime_format = '%d/%m/%Y %H:%M:%S'
     @time_format = '%H:%M:%S'
     session = GoogleSpreadsheet.login(user, password)
     @sheetlist = []
@@ -104,7 +104,7 @@ class Roo::Google < Roo::GenericSpreadsheet
       rescue ArgumentError
         raise "Invalid DateTime #{sheet}[#{row},#{col}] #{value} using format '{@datetime_format}'"
       end
-    end 
+    end
     return value
   end
 
@@ -137,7 +137,7 @@ class Roo::Google < Roo::GenericSpreadsheet
     if @formula[sheet]["#{row},#{col}"] == nil
       return nil
     else
-      return @formula[sheet]["#{row},#{col}"] 
+      return @formula[sheet]["#{row},#{col}"]
     end
   end
 
@@ -176,11 +176,11 @@ class Roo::Google < Roo::GenericSpreadsheet
     if @cells_read[sheet]
       key = "#{row},#{col}"
       (value, value_type) = determine_datatype(value.to_s)
-      @cell[sheet][key] = value 
-      @cell_type[sheet][key] = value_type 
+      @cell[sheet][key] = value
+      @cell_type[sheet][key] = value_type
     end
   end
-  
+
   # returns the first non-empty row in a sheet
   def first_row(sheet=nil)
     sheet = @default_sheet unless sheet
@@ -188,7 +188,7 @@ class Roo::Google < Roo::GenericSpreadsheet
       sheet_no = sheets.index(sheet) + 1
       @first_row[sheet], @last_row[sheet], @first_column[sheet], @last_column[sheet] =
         oben_unten_links_rechts(sheet_no)
-    end   
+    end
     return @first_row[sheet]
   end
 
@@ -227,7 +227,7 @@ class Roo::Google < Roo::GenericSpreadsheet
 
   private
 
-  # read all cells in a sheet. 
+  # read all cells in a sheet.
   def read_cells(sheet=nil)
     sheet = @default_sheet unless sheet
     raise RangeError, "illegal sheet <#{sheet}>" unless sheets.index(sheet)
@@ -247,7 +247,7 @@ class Roo::Google < Roo::GenericSpreadsheet
     end
     @cells_read[sheet] = true
   end
-  
+
   def determine_datatype(val, numval=nil)
     if val.nil? || val[0,1] == '='
       ty = :formula
@@ -261,7 +261,7 @@ class Roo::Google < Roo::GenericSpreadsheet
         ty = :datetime
       elsif date?(val)
         ty = :date
-      elsif numeric?(val) 
+      elsif numeric?(val)
         ty = :float
         val = val.to_f
       elsif time?(val)
@@ -271,7 +271,7 @@ class Roo::Google < Roo::GenericSpreadsheet
         ty = :string
       end
     end
-    return val, ty 
+    return val, ty
   end
 
   def add_to_cell_roo(row,col,value, sheet_no=1)

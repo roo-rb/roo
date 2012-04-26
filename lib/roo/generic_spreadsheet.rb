@@ -604,7 +604,7 @@ class Roo::GenericSpreadsheet
   end
 
   private
-  
+
   def clean_sheet
     read_cells(@default_sheet) unless @cells_read[@default_sheet]
     @cell = Hash[
@@ -613,18 +613,18 @@ class Roo::GenericSpreadsheet
               end]
     @cleaned[@default_sheet] = true
   end
-  
+
   def sanitize_value(v)
     String === v ? v.strip.unpack('U*').select {|b| b < 127}.pack('U*') : v
   end
-  
+
   def set_headers(hash={})
     # try to find header row with all values or give an error
     # then create new hash by indexing strings and keeping integers for header array
     @headers = row_with(hash.values,true)
     @headers = Hash[hash.keys.zip(@headers.map {|x| header_index(x)})]
   end
-  
+
   def header_index(query)
     row(@header_line).index(query) + first_column
   end
@@ -662,7 +662,7 @@ class Roo::GenericSpreadsheet
     end
     File.join(@tmpdir, File.basename(uri))
   end
-  
+
   def open_from_stream(stream)
     tempfilename = File.join(@tmpdir, "spreadsheet")
     f = File.open(tempfilename,"wb")
@@ -750,7 +750,7 @@ class Roo::GenericSpreadsheet
     end
   end
 
-  # The content of a cell in the csv output  
+  # The content of a cell in the csv output
   def one_cell_output(onecelltype, onecell, empty)
     str = ""
     if empty

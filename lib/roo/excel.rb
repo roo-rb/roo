@@ -11,8 +11,8 @@ CHARGUESS =
     false
   end
 
-# The Spreadsheet library has a bug in handling Excel 
-# base dates so if the file is a 1904 base date then 
+# The Spreadsheet library has a bug in handling Excel
+# base dates so if the file is a 1904 base date then
 # dates are off by a day. 1900 base dates work fine
 module Spreadsheet
   module Excel
@@ -68,18 +68,18 @@ module Spreadsheet
 end
 #=====================================================================
 
-# ruby-spreadsheet has a font object so we're extending it 
+# ruby-spreadsheet has a font object so we're extending it
 # with our own functionality but still providing full access
 # to the user for other font information
 module ExcelFontExtensions
   def bold?(*args)
     #From ruby-spreadsheet doc: 100 <= weight <= 1000, bold => 700, normal => 400
     case weight
-    when 700    
+    when 700
       true
     else
       false
-    end   
+    end
   end
 
   def italic?
@@ -104,7 +104,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
     @file_warning = file_warning
     file_type_check(filename,'.xls','an Excel',packed)
     @tmpdir = Roo::GenericSpreadsheet.next_tmpdir
-    @tmpdir = File.join(ENV['ROO_TMP'], @tmpdir) if ENV['ROO_TMP'] 
+    @tmpdir = File.join(ENV['ROO_TMP'], @tmpdir) if ENV['ROO_TMP']
     unless File.exists?(@tmpdir)
       FileUtils::mkdir(@tmpdir)
     end
@@ -137,7 +137,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
   end
 
   def encoding= (codepage)
-    @workbook.encoding = codepage    
+    @workbook.encoding = codepage
   end
 
   # returns an array of sheet names in the spreadsheet
@@ -216,8 +216,8 @@ class Roo::Excel < Roo::GenericSpreadsheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     @fonts[sheet][[row,col]]
-  end 
-  
+  end
+
   # shows the internal representation of all cells
   # mainly for debugging purposes
   def to_s(sheet=nil)
@@ -258,7 +258,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
     }
     ! content
   end
-  
+
   def normalize_string(value)
     value = every_second_null?(value) ? remove_every_second_null(value) : value
     if CHARGUESS && encoding = CharGuess::guess(value)
@@ -267,7 +267,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
       platform_specific_iconv(value)
     end
   end
-  
+
   def platform_specific_iconv(value)
     result =
       case RUBY_PLATFORM.downcase
@@ -291,7 +291,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
       c = str[i*2,1]
       n = str[i*2+1,1]
       if n != "\000"
-        result = false 
+        result = false
         break
       end
     end
@@ -318,7 +318,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
     @cell[sheet]    = {} unless @cell[sheet]
     @fonts[sheet] = {} unless @fonts[sheet]
     @fonts[sheet][key] = font
-    
+
     @cell[sheet][key] =
       case value_type
       when :float
@@ -343,14 +343,14 @@ class Roo::Excel < Roo::GenericSpreadsheet
     sheet = @default_sheet unless sheet
     raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
     raise RangeError unless self.sheets.include? sheet
-    
+
     if @cells_read[sheet]
       raise "sheet #{sheet} already read"
     end
-    
+
     worksheet = @workbook.worksheet(sheet_no(sheet))
     row_index=1
-    worksheet.each(0) do |row| 
+    worksheet.each(0) do |row|
       (0..row.size).each do |cell_index|
         cell = row.at(cell_index)
         next if cell.nil?  #skip empty cells
@@ -379,8 +379,8 @@ class Roo::Excel < Roo::GenericSpreadsheet
     cell = cell.value if cell.class == Spreadsheet::Formula
     cell
   end
-    
-  # Test the cell to see if it's a valid date/time. 
+
+  # Test the cell to see if it's a valid date/time.
   def date_or_time?(row, idx)
     format = row.format(idx)
     if format.date_or_time?
@@ -388,11 +388,11 @@ class Roo::Excel < Roo::GenericSpreadsheet
       true if Float(cell) > 0 rescue false
     else
       false
-    end  
+    end
   end
   private :date_or_time?
-  
-  # Read the date-time cell and convert to, 
+
+  # Read the date-time cell and convert to,
   # the date-time values for Roo
   def read_cell_date_or_time(row, idx)
     cell = read_cell_content(row, idx)
@@ -412,7 +412,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
         datetime = row._datetime(cell)
       else
         datetime = row.datetime(idx)
-      end    
+      end
       if datetime.hour != 0 or
           datetime.min != 0 or
           datetime.sec != 0
@@ -424,20 +424,20 @@ class Roo::Excel < Roo::GenericSpreadsheet
           value = row._date(cell)
         else
           value = row.date(idx)
-        end    
+        end
         value = sprintf("%04d-%02d-%02d",value.year,value.month,value.day)
       end
-    end  
+    end
     return value_type, value
   end
   private :read_cell_date_or_time
-  
-  # Read the cell and based on the class, 
+
+  # Read the cell and based on the class,
   # return the values for Roo
   def read_cell(row, idx)
     cell = read_cell_content(row, idx)
     case cell
-    when Float, Integer, Fixnum, Bignum 
+    when Float, Integer, Fixnum, Bignum
       value_type = :float
       value = cell.to_f
     when String, TrueClass, FalseClass

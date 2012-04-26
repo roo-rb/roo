@@ -1,8 +1,8 @@
 # patch for skipping blank rows in the case of
-# having a spreadsheet with 30,000 nil rows appended 
+# having a spreadsheet with 30,000 nil rows appended
 # to the actual data.  (it happens and your RAM will love me)
 class Spreadsheet::Worksheet
-  
+
   def each skip=dimensions[0]
     blanks = 0
     skip.upto(dimensions[1] - 1) do |i|
@@ -14,5 +14,5 @@ class Spreadsheet::Worksheet
       end
     end
   end
-  
+
 end
