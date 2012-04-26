@@ -7,7 +7,30 @@ require 'cgi'
 require 'pp' #TODO
 class Roo::Openoffice < Roo::GenericSpreadsheet
 
-  @@nr = 0
+  class << self
+    def extract_content(tmpdir, filename)
+      Zip::ZipFile.open(filename) do |zip|
+        process_zipfile(tmpdir, zip)
+      end
+    end
+
+    def process_zipfile(tmpdir, zip, path='')
+      if zip.file.file? path
+        if path == "content.xml"
+          open(File.join(tmpdir, 'roo_content.xml'),'wb') {|f|
+            f << zip.read(path)
+          }
+        end
+      else
+        unless path.empty?
+          path += '/'
+        end
+        zip.dir.foreach(path) do |filename|
+          process_zipfile(tmpdir, zip, path+filename)
+        end
+      end
+    end
+  end
 
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
@@ -30,10 +53,8 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
       FileUtils::rm_r(@tmpdir)
       raise IOError, "file #{@filename} does not exist"
     end
-    @@nr += 1
-    @file_nr = @@nr
-    extract_content
-    @doc = File.open(File.join(@tmpdir, @file_nr.to_s+"_roo_content.xml")) do |file|
+    self.class.extract_content(@tmpdir, @filename)
+    @doc = File.open(File.join(@tmpdir, "roo_content.xml")) do |file|
       Nokogiri::XML(file)
     end
     FileUtils::rm_r(@tmpdir)
@@ -486,29 +507,6 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     sheet_found = true if sheets.include?(@default_sheet)
     if ! sheet_found
       raise RangeError, "sheet '#{@default_sheet}' not found"
-    end
-  end
-
-  def process_zipfile(zip, path='')
-    if zip.file.file? path
-      if path == "content.xml"
-        open(File.join(@tmpdir, @file_nr.to_s+'_roo_content.xml'),'wb') {|f|
-          f << zip.read(path)
-        }
-      end
-    else
-      unless path.empty?
-        path += '/'
-      end
-      zip.dir.foreach(path) do |filename|
-        process_zipfile(zip, path+filename)
-      end
-    end
-  end
-
-  def extract_content
-    Zip::ZipFile.open(@filename) do |zip|
-      process_zipfile(zip)
     end
   end
 

@@ -81,7 +81,6 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     48 => '##0.0E+0',
     49 => '@',
   }
-  @@nr = 0
 
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
@@ -102,24 +101,22 @@ class Roo::Excelx < Roo::GenericSpreadsheet
       FileUtils::rm_r(@tmpdir)
       raise IOError, "file #{@filename} does not exist"
     end
-    @@nr += 1
-    @file_nr = @@nr
     @comments_files = Array.new
     extract_content(@filename)
-    @workbook_doc = File.open(File.join(@tmpdir, @file_nr.to_s+"_roo_workbook.xml")) do |file|
+    @workbook_doc = File.open(File.join(@tmpdir, "roo_workbook.xml")) do |file|
       Nokogiri::XML(file)
     end
     @shared_table = []
-    if File.exist?(File.join(@tmpdir, @file_nr.to_s+'_roo_sharedStrings.xml'))
-      @sharedstring_doc = File.open(File.join(@tmpdir, @file_nr.to_s+'_roo_sharedStrings.xml')) do |file|
+    if File.exist?(File.join(@tmpdir, 'roo_sharedStrings.xml'))
+      @sharedstring_doc = File.open(File.join(@tmpdir, 'roo_sharedStrings.xml')) do |file|
         Nokogiri::XML(file)
       end
       read_shared_strings(@sharedstring_doc)
     end
     @styles_table = []
     @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
-    if File.exist?(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml'))
-      @styles_doc = File.open(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml')) do |file|
+    if File.exist?(File.join(@tmpdir, 'roo_styles.xml'))
+      @styles_doc = File.open(File.join(@tmpdir, 'roo_styles.xml')) do |file|
         Nokogiri::XML(file)
       end
       read_styles(@styles_doc)
@@ -652,7 +649,7 @@ Datei xl/comments1.xml
     Zip::ZipFile.open(zipfilename) {|zf|
       zf.entries.each {|entry|
         if entry.to_s.end_with?('workbook.xml')
-          open(@tmpdir+'/'+@file_nr.to_s+'_roo_workbook.xml','wb') {|f|
+          open(@tmpdir+'/'+'roo_workbook.xml','wb') {|f|
             f << zip.read(entry)
           }
         end
@@ -662,28 +659,28 @@ Datei xl/comments1.xml
 	# won't be both names in the archive.
 	# Changed the casing of all the following filenames.
         if entry.to_s.downcase.end_with?('sharedstrings.xml')
-          open(@tmpdir+'/'+@file_nr.to_s+'_roo_sharedStrings.xml','wb') {|f|
+          open(@tmpdir+'/'+'roo_sharedStrings.xml','wb') {|f|
             f << zip.read(entry)
           }
         end
         if entry.to_s.downcase.end_with?('styles.xml')
-          open(@tmpdir+'/'+@file_nr.to_s+'_roo_styles.xml','wb') {|f|
+          open(@tmpdir+'/'+'roo_styles.xml','wb') {|f|
             f << zip.read(entry)
           }
         end
         if entry.to_s.downcase =~ /sheet([0-9]+).xml$/
           nr = $1
-          open(@tmpdir+'/'+@file_nr.to_s+"_roo_sheet#{nr}",'wb') {|f|
+          open(@tmpdir+'/'+"roo_sheet#{nr}",'wb') {|f|
             f << zip.read(entry)
           }
-          @sheet_files[nr.to_i-1] = @tmpdir+'/'+@file_nr.to_s+"_roo_sheet#{nr}"
+          @sheet_files[nr.to_i-1] = @tmpdir+'/'+"roo_sheet#{nr}"
         end
         if entry.to_s.downcase =~ /comments([0-9]+).xml$/
           nr = $1
-          open(@tmpdir+'/'+@file_nr.to_s+"_roo_comments#{nr}",'wb') {|f|
+          open(@tmpdir+'/'+"roo_comments#{nr}",'wb') {|f|
             f << zip.read(entry)
           }
-          @comments_files[nr.to_i-1] = @tmpdir+'/'+@file_nr.to_s+"_roo_comments#{nr}"
+          @comments_files[nr.to_i-1] = @tmpdir+'/'+"roo_comments#{nr}"
         end
       }
     }

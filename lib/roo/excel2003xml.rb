@@ -6,8 +6,6 @@ require 'cgi'
 
 class Roo::Excel2003XML < Roo::GenericSpreadsheet
 
-  @@nr = 0
-
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
   def initialize(filename, packed=nil, file_warning=:error)
@@ -316,7 +314,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   def process_zipfile(zip, path='')
     if zip.file.file? path
       if path == "content.xml"
-        open(File.join(@tmpdir, @file_nr.to_s+'_roo_content.xml'),'wb') {|f|
+        open(File.join(@tmpdir, 'roo_content.xml'),'wb') {|f|
           f << zip.read(path)
         }
       end
