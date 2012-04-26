@@ -2848,26 +2848,7 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
         end
       end
     end
-  end
-
-  # Eine Spreadsheetdatei wird nicht als Dateiname sondern direkt als Dokument
-  # geoeffnettest_problemx_csv_imported
-  def test_from_stream_openoffice
-    if OPENOFFICE
-      filecontent = nil
-      File.open(File.join(TESTDIR,"numbers1.ods")) do |f|
-        filecontent = f.read
-        p filecontent.class
-        p filecontent.size
-        #p filecontent
-        assert filecontent.size > 0
-        # #stream macht das gleiche wie #new liest abe aus Stream anstatt Datei
-        oo = Roo::Openoffice.stream(filecontent)
-      end
-      #oo = Openoffice.open()
-    end
-  end
-  
+  end  
   
   def test_bug_encoding_exported_from_google
     if EXCEL
