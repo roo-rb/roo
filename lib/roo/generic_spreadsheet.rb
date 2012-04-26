@@ -178,9 +178,9 @@ class Roo::GenericSpreadsheet
   def to_csv(filename=nil,sheet=nil)
     sheet = @default_sheet unless sheet
     if filename
-      file = File.open(filename,"w") # do |file|
-      write_csv_content(file,sheet)
-      file.close
+      File.open(filename,"w") do |file|
+        write_csv_content(file,sheet)
+      end
       return true
     else
       sio = StringIO.new
@@ -653,9 +653,9 @@ class Roo::GenericSpreadsheet
       open(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}") { |net|
         response = net.read
         tempfilename = File.join(@tmpdir, File.basename(uri))
-        f = File.open(tempfilename,"wb")
-        f.write(response)
-        f.close
+        File.open(tempfilename,"wb") do |file|
+          file.write(response)
+        end
       }
     rescue OpenURI::HTTPError
       raise "could not open #{uri}"
@@ -665,9 +665,9 @@ class Roo::GenericSpreadsheet
 
   def open_from_stream(stream)
     tempfilename = File.join(@tmpdir, "spreadsheet")
-    f = File.open(tempfilename,"wb")
-    f.write(stream[7..-1])
-    f.close
+    File.open(tempfilename,"wb") do |file|
+      file.write(stream[7..-1])
+    end
     File.join(@tmpdir, "spreadsheet")
   end
 
@@ -720,9 +720,9 @@ class Roo::GenericSpreadsheet
     ret=nil
     if zip.file.file? path
       # extract and return filename
-      file = File.open(File.join(@tmpdir, path),"wb")
-      file.write(zip.read(path))
-      file.close
+      File.open(File.join(@tmpdir, path),"wb") do |file|
+        file.write(zip.read(path))
+      end
       return File.join(@tmpdir, path)
     else
       path += '/' unless path.empty?

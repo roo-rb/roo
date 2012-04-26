@@ -33,9 +33,9 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     @@nr += 1
     @file_nr = @@nr
     extract_content
-    file = File.new(File.join(@tmpdir, @file_nr.to_s+"_roo_content.xml"))
-    @doc = Nokogiri::XML(file)
-    file.close
+    @doc = File.open(File.join(@tmpdir, @file_nr.to_s+"_roo_content.xml")) do |file|
+      Nokogiri::XML(file)
+    end
     FileUtils::rm_r(@tmpdir)
     @default_sheet = self.sheets.first
     @cell = Hash.new

@@ -106,35 +106,33 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @file_nr = @@nr
     @comments_files = Array.new
     extract_content(@filename)
-    file = File.new(File.join(@tmpdir, @file_nr.to_s+"_roo_workbook.xml"))
-    @workbook_doc = Nokogiri::XML(file)
-    file.close
+    @workbook_doc = File.open(File.join(@tmpdir, @file_nr.to_s+"_roo_workbook.xml")) do |file|
+      Nokogiri::XML(file)
+    end
     @shared_table = []
     if File.exist?(File.join(@tmpdir, @file_nr.to_s+'_roo_sharedStrings.xml'))
-      file = File.new(File.join(@tmpdir, @file_nr.to_s+'_roo_sharedStrings.xml'))
-      @sharedstring_doc = Nokogiri::XML(file)
-      file.close
+      @sharedstring_doc = File.open(File.join(@tmpdir, @file_nr.to_s+'_roo_sharedStrings.xml')) do |file|
+        Nokogiri::XML(file)
+      end
       read_shared_strings(@sharedstring_doc)
     end
     @styles_table = []
     @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
     if File.exist?(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml'))
-      file = File.new(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml'))
-      @styles_doc = Nokogiri::XML(file)
-      file.close
+      @styles_doc = File.open(File.join(@tmpdir, @file_nr.to_s+'_roo_styles.xml')) do |file|
+        Nokogiri::XML(file)
+      end
       read_styles(@styles_doc)
     end
-    @sheet_doc = []
-    @sheet_files.each_with_index do |item, i|
-      file = File.new(item)
-      @sheet_doc[i] = Nokogiri::XML(file)
-      file.close
+    @sheet_doc = @sheet_files.map do |item|
+      File.open(item) do |file|
+        Nokogiri::XML(file)
+      end
     end
-    @comments_doc = []
-    @comments_files.each_with_index do |item, i|
-      file = File.new(item)
-      @comments_doc[i] = Nokogiri::XML(file)
-      file.close
+    @comments_doc = @comments_files.map do |item|
+      File.open(item) do |file|
+        Nokogiri::XML(file)
+      end
     end
     FileUtils::rm_r(@tmpdir)
     @default_sheet = self.sheets.first
