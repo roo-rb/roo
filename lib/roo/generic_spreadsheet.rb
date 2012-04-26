@@ -300,11 +300,9 @@ class Roo::GenericSpreadsheet
   def row(rownumber,sheet=nil)
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
-    result = []
-    first_column(sheet).upto(last_column(sheet)) do |col|
-      result << cell(rownumber,col,sheet)
+    first_column(sheet).upto(last_column(sheet)).map do |col|
+      cell(rownumber,col,sheet)
     end
-    result
   end
 
   # returns all values in this column as an array
@@ -315,11 +313,9 @@ class Roo::GenericSpreadsheet
     end
     sheet = @default_sheet unless sheet
     read_cells(sheet) unless @cells_read[sheet]
-    result = []
-    first_row(sheet).upto(last_row(sheet)) do |row|
-      result << cell(row,columnnumber,sheet)
+    first_row(sheet).upto(last_row(sheet)).map do |row|
+      cell(row,columnnumber,sheet)
     end
-    result
   end
 
   # reopens and read a spreadsheet document

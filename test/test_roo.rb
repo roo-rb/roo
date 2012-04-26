@@ -2927,14 +2927,12 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
           'Bullet','Tadashi Fuse','Jussi','Royale','S-Series',
           'Fish','Love','Feelgood ES','Feelgood','GTwin','Troop',
           'Lux','Stigma','Feather','Stria','Alpha','Feelgood ICS']
-        result = []
-        oo.sheets[2..oo.sheets.length].each do |s|
+        result = oo.sheets[2..oo.sheets.length].map do |s|
           #(13..13).each do |s|
-          oo.default_sheet = s
-          name = oo.cell(2,'C')
-          result << name
           #puts "#{name} (sheet: #{s})"
           #assert_equal "whatever (sheet: 13)",          "#{name} (sheet: #{s})"
+          oo.default_sheet = s
+          oo.cell(2,'C')
         end
         assert_equal expected, result
       end
@@ -2990,17 +2988,15 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
         'Bullet','Tadashi Fuse','Jussi','Royale','S-Series',
         'Fish','Love','Feelgood ES','Feelgood','GTwin','Troop',
         'Lux','Stigma','Feather','Stria','Alpha','Feelgood ICS']
-      result = []
       @e = Roo::Excelx.new(File.join(TESTDIR,"problem.xlsx"))
-      @e.sheets[2..@e.sheets.length].each do |s|
+      result = @e.sheets[2..@e.sheets.length].map do |s|
         @e.default_sheet = s
         #  assert_equal "A.",@e.cell('a',13)
-        name = @e.cell(2,'C')
-        result << name
         #puts "#{name} (sheet: #{s})"
         #assert_equal :string, @e.celltype('c',2)
         #assert_equal "Vapor (sheet: Vapor)", "#{name} (sheet: #{@e.sheets.first})"
         assert @e.cell(2,'c')
+        @e.cell(2,'C')
       end
       assert_equal expected, result
 

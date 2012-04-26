@@ -229,15 +229,13 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # [labelname, [sheetname,row,col]]
   def labels(sheet=nil)
     read_labels
-    result = []
-    @label.each do |label|
-      result << [ label[0], # name
+    @label.map do |label|
+      [ label[0], # name
         [ label[1][1].to_i, # row
           Roo::GenericSpreadsheet.letter_to_number(label[1][2]), # column
           label[1][0], # sheet
         ] ]
     end
-    result
   end
 
   # returns the comment at (row/col)

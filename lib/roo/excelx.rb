@@ -356,15 +356,13 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     # sheet = @default_sheet unless sheet
     # read_cells(sheet) unless @cells_read[sheet]
     read_labels
-    result = []
-    @label.each do |label|
-      result << [ label[0], # name
+    @label.map do |label|
+      [ label[0], # name
         [ label[1][1].to_i, # row
           Roo::GenericSpreadsheet.letter_to_number(label[1][2]), # column
           label[1][0], # sheet
         ] ]
     end
-    result
   end
 
   # returns the comment at (row/col)
