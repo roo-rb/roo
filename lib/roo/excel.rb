@@ -226,22 +226,6 @@ class Roo::Excel < Roo::GenericSpreadsheet
     @cell[sheet].inspect
   end
 
-  # returns the row,col values of the labelled cell
-  # (nil,nil) if label is not defined
-  # sheet parameter is not really needed because label names are global
-  # to the whole spreadsheet
-  def label(labelname,sheet=nil)
-    sheet = @default_sheet unless sheet
-    read_cells(sheet) unless @cells_read[sheet]
-    if @labels.has_key? labelname
-      return @labels[labelname][1].to_i,
-        Roo::GenericSpreadsheet.letter_to_number(@labels[labelname][2]),
-        @labels[labelname][0]
-    else
-      return nil,nil,nil
-    end
-  end
-
   private
 
   # converts name of a sheet to index (0,1,2,..)
