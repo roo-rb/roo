@@ -149,15 +149,13 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @excelx_type = Hash.new
     @excelx_value = Hash.new
     @s_attribute = Hash.new # TODO: ggf. wieder entfernen nur lokal benoetigt
-    @label = Hash.new
-    @labels_read = false
     @comment = Hash.new
     @comments_read = Hash.new
   end
 
   def method_missing(m,*args)
     # is method name a label name
-    read_labels unless @labels_read
+    read_labels
     if @label.has_key?(m.to_s)
       sheet = @default_sheet unless sheet
       read_cells(sheet) unless @cells_read[sheet]
@@ -339,7 +337,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   # returns the row,col values of the labelled cell
   # (nil,nil) if label is not defined
   def label(labelname)
-    read_labels unless @labels_read
+    read_labels
     unless @label.size > 0
       return nil,nil,nil
     end
@@ -357,7 +355,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   def labels
     # sheet = @default_sheet unless sheet
     # read_cells(sheet) unless @cells_read[sheet]
-    read_labels unless @labels_read
+    read_labels
     result = []
     @label.each do |label|
       result << [ label[0], # name
@@ -636,13 +634,12 @@ Datei xl/comments1.xml
   end
 
   def read_labels
-    @label = Hash[@workbook_doc.xpath("//*[local-name()='definedName']").map do |defined_name|
+    @label ||= Hash[@workbook_doc.xpath("//*[local-name()='definedName']").map do |defined_name|
 	    # "Sheet1!$C$5"
       sheet, coordinates = defined_name.text.split('!$', 2)
       col,row = coordinates.split('$')
       [defined_name['name'], [sheet,row,col]]
     end]
-    @labels_read = true
   end
 
   # Checks if the default_sheet exists. If not an RangeError exception is

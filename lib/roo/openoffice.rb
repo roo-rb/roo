@@ -49,14 +49,12 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     @style_defaults = Hash.new { |h,k| h[k] = [] }
     @style_definitions = Hash.new 
     @header_line = 1
-    @label = Hash.new
-    @labels_read = false
     @comment = Hash.new
     @comments_read = Hash.new
   end
 
   def method_missing(m,*args)
-    read_labels unless @labels_read
+    read_labels
     # is method name a label name
 	  if @label.has_key?(m.to_s)
       row,col = label(m.to_s)
@@ -214,7 +212,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # returns the row,col values of the labelled cell
   # (nil,nil) if label is not defined
   def label(labelname)
-    read_labels unless @labels_read
+    read_labels
     unless @label.size > 0
       return nil,nil,nil
     end
@@ -230,7 +228,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # Returns an array which all labels. Each element is an array with
   # [labelname, [sheetname,row,col]]
   def labels(sheet=nil)
-    read_labels unless @labels_read
+    read_labels
     result = []
     @label.each do |label|
       result << [ label[0], # name
@@ -454,7 +452,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   end
   
   def read_labels
-    @label = Hash[@doc.xpath("//table:named-range").map do |ne|
+    @label ||= Hash[@doc.xpath("//table:named-range").map do |ne|
       #-
       # $Sheet1.$C$5
       #+
@@ -464,7 +462,6 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
       sheetname = sheetname[1..-1] if sheetname[0,1] == '$'
       [name, [sheetname,row,col]]
     end]
-    @labels_read = true
   end
   
   def read_styles(style_elements)
