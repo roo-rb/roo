@@ -3,12 +3,13 @@ require 'spreadsheet'
 require 'iconv'
 #require 'lib/roo/generic_spreadsheet'
 #require 'parseexcel'
-CHARGUESS = begin
-  require 'charguess'
-  true
-rescue LoadError => e
-  false
-end
+CHARGUESS =
+  begin
+    require 'charguess'
+    true
+  rescue LoadError
+    false
+  end
 
 # The Spreadsheet library has a bug in handling Excel 
 # base dates so if the file is a 1904 base date then 
