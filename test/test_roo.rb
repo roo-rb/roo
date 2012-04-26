@@ -2103,11 +2103,6 @@ Sheet 3:
          row,col = oo.never
        }
   
-       assert_equal [
-  	      ['anton',['Sheet1',5,3]],
-  	      ['berta',['Sheet1',4,2]],
-  	      ['caesar',['Sheet1',7,2]],
-       ], oo.labels, "error with labels array in class #{oo.class}"
   # Reihenfolge row,col,sheet analog zu #label
        assert_equal [
   	      ['anton',[5,3,'Sheet1']],

@@ -351,7 +351,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   end
 
   # Returns an array which all labels. Each element is an array with
-  # [labelname, [sheetname,row,col]]
+  # [labelname, [row,col,sheetname]]
   def labels
     # sheet = @default_sheet unless sheet
     # read_cells(sheet) unless @cells_read[sheet]

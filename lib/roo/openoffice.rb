@@ -226,7 +226,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   end
 
   # Returns an array which all labels. Each element is an array with
-  # [labelname, [sheetname,row,col]]
+  # [labelname, [row,col,sheetname]]
   def labels(sheet=nil)
     read_labels
     @label.map do |label|
