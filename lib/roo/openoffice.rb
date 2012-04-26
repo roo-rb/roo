@@ -454,17 +454,16 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   end
   
   def read_labels
-    @doc.xpath("//table:named-range").each do |ne|
+    @label = Hash[@doc.xpath("//table:named-range").map do |ne|
       #-
       # $Sheet1.$C$5
       #+
       name = ne.attribute('name').to_s
-      sheetname,coords = ne.attribute('cell-range-address').to_s.split('.')
-      col = coords.split('$')[1]
-      row = coords.split('$')[2]
+      sheetname,coords = ne.attribute('cell-range-address').to_s.split('.$')
+      col, row = coords.split('$')
       sheetname = sheetname[1..-1] if sheetname[0,1] == '$'
-      @label[name] = [sheetname,row,col]
-    end
+      [name, [sheetname,row,col]]
+    end]
     @labels_read = true
   end
   

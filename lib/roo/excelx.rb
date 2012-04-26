@@ -636,13 +636,12 @@ Datei xl/comments1.xml
   end
 
   def read_labels
-    @workbook_doc.xpath("//*[local-name()='definedName']").each do |defined_name|
+    @label = Hash[@workbook_doc.xpath("//*[local-name()='definedName']").map do |defined_name|
 	    # "Sheet1!$C$5"
-      sheet = defined_name.text.split('!').first
-      coordinates = defined_name.text.split('!')[1]
-      dummy,col,row = coordinates.split('$')
-      @label[defined_name['name']] = [sheet,row,col]
-    end
+      sheet, coordinates = defined_name.text.split('!$', 2)
+      col,row = coordinates.split('$')
+      [defined_name['name'], [sheet,row,col]]
+    end]
     @labels_read = true
   end
 
