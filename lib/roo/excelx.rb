@@ -722,7 +722,7 @@ Datei xl/comments1.xml
     doc.xpath("//*[local-name()='cellXfs']").each do |xfs|
       xfs.children.each do |xf|
         numFmtId = xf['numFmtId']
-        @cellXfs << [numFmtId]
+        @cellXfs << numFmtId
         fontId = xf['fontId'].to_i
         @style_definitions << fonts[fontId]
       end
@@ -731,14 +731,8 @@ Datei xl/comments1.xml
 
   # convert internal excelx attribute to a format
   def attribute2format(s)
-    result = @numFmts[@cellXfs[s.to_i].first]
-    unless result
-      id = @cellXfs[s.to_i].first.to_i
-      if STANDARD_FORMATS.has_key? id
-        result = STANDARD_FORMATS[id]
-      end
-    end
-    result
+    id = @cellXfs[s.to_i]
+    @numFmts[id] || STANDARD_FORMATS[id.to_i]
   end
 
 end # class
