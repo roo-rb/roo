@@ -391,32 +391,33 @@ class Roo::Excelx < Roo::GenericSpreadsheet
       excelx_value=nil,
       s_attribute=nil)
     key = [y,x+i]
-    @cell_type[sheet] = {} unless @cell_type[sheet]
+    @cell_type[sheet] ||= {}
     @cell_type[sheet][key] = value_type
-    @formula[sheet] = {} unless @formula[sheet]
+    @formula[sheet] ||= {}
     @formula[sheet][key] = formula  if formula
-    @cell[sheet]    = {} unless @cell[sheet]
-    case @cell_type[sheet][key]
-    when :float
-      @cell[sheet][key] = v.to_f
-    when :string
-      @cell[sheet][key] = str_v
-    when :date
-      @cell[sheet][key] = (Date.new(1899,12,30)+v.to_i).strftime("%Y-%m-%d")
-    when :datetime
-      @cell[sheet][key] = (DateTime.new(1899,12,30)+v.to_f).strftime("%Y-%m-%d %H:%M:%S")
-    when :percentage
-      @cell[sheet][key] = v.to_f
-    when :time
-      @cell[sheet][key] = v.to_f*(24*60*60)
-    else
-      @cell[sheet][key] = v
-    end
-    @excelx_type[sheet] = {} unless @excelx_type[sheet]
+    @cell[sheet] ||= {}
+    @cell[sheet][key] =
+      case @cell_type[sheet][key]
+      when :float
+        v.to_f
+      when :string
+        str_v
+      when :date
+        (Date.new(1899,12,30)+v.to_i).strftime("%Y-%m-%d")
+      when :datetime
+        (DateTime.new(1899,12,30)+v.to_f).strftime("%Y-%m-%d %H:%M:%S")
+      when :percentage
+        v.to_f
+      when :time
+        v.to_f*(24*60*60)
+      else
+        v
+      end
+    @excelx_type[sheet] ||= {}
     @excelx_type[sheet][key] = excelx_type
-    @excelx_value[sheet] = {} unless @excelx_value[sheet]
+    @excelx_value[sheet] ||= {}
     @excelx_value[sheet][key] = excelx_value
-    @s_attribute[sheet] = {} unless @s_attribute[sheet]
+    @s_attribute[sheet] ||= {}
     @s_attribute[sheet][key] = s_attribute
   end
 
