@@ -17,8 +17,8 @@ def file_diff(fn1,fn2)
   File.open(fn1) do |f1|
     File.open(fn2) do |f2|
       while f1.eof? == false and f2.eof? == false
-        line1 = f1.gets
-        line2 = f2.gets
+        line1 = f1.gets.chomp
+        line2 = f2.gets.chomp
         result << "<#{line1}\n>#{line2}\n" if line1 != line2
       end
       if f1.eof? == false
