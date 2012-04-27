@@ -438,7 +438,6 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   # read all cells in the selected sheet
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
-    sheet_found = false
     raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
     raise RangeError unless self.sheets.include? sheet
     n = self.sheets.index(sheet)
@@ -530,10 +529,6 @@ class Roo::Excelx < Roo::GenericSpreadsheet
           set_cell_values(sheet,x,y,0,v,value_type,formula,tr,str_v,excelx_type,excelx_value,s_attribute)
         end
       end
-    end
-    sheet_found = true #TODO:
-    if !sheet_found
-      raise RangeError
     end
     @cells_read[sheet] = true
     # begin comments
