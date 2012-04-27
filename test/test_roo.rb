@@ -48,8 +48,6 @@ if DB_LOG
   require 'activerecord'
 end
 
-include FileUtils
-
 if DB_LOG
   def activerecord_connect
     ActiveRecord::Base.establish_connection(:adapter => "mysql",
