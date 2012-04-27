@@ -2195,7 +2195,7 @@ where the expected result is
     with_each_spreadsheet(:name=>'datetime') do |oo|
       assert oo.to_csv("datetime.csv")
       assert File.exists?("datetime.csv")
-      assert_equal "", `diff test/files/so_datetime.csv datetime.csv`
+      assert_equal "", file_diff('test/files/so_datetime.csv', 'datetime.csv')
     end
   end
 
