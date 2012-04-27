@@ -386,7 +386,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   private
 
   # helper function to set the internal representation of cells
-  def set_cell_values(sheet,x,y,i,v,value_type,formula,tr,str_v,
+  def set_cell_values(sheet,x,y,i,v,value_type,formula,tr,
       excelx_type=nil,
       excelx_value=nil,
       s_attribute=nil)
@@ -401,7 +401,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
       when :float
         v.to_f
       when :string
-        str_v
+        v
       when :date
         (Date.new(1899,12,30)+v.to_i).strftime("%Y-%m-%d")
       when :datetime
@@ -466,13 +466,12 @@ class Roo::Excelx < Roo::GenericSpreadsheet
             if is.name == 't'
               inlinestr_content = is.content
               value_type = :string
-              str_v = inlinestr_content
+              v = inlinestr_content
               excelx_type = :string
               y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
-              v = nil
               tr=nil #TODO: ???s
               excelx_value = inlinestr_content #cell.content
-              set_cell_values(sheet,x,y,0,v,value_type,formula,tr,str_v,excelx_type,excelx_value,s_attribute)
+              set_cell_values(sheet,x,y,0,v,value_type,formula,tr,excelx_type,excelx_value,s_attribute)
             end
           end
         when 'f'
@@ -488,33 +487,32 @@ class Roo::Excelx < Roo::GenericSpreadsheet
           end
           excelx_type = [:numeric_or_formula,format.to_s]
           excelx_value = cell.content
-          case value_type
-          when :shared
-            value_type = :string
-            str_v = @shared_table[cell.content.to_i]
-            excelx_type = :string
-          when :boolean
-            v = (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
-          when :date
-            v = cell.content
-          when :time
-            v = cell.content
-          when :datetime
-            v = cell.content
-          when :formula
-            v = cell.content.to_f #TODO: !!!!
-            # 2011-02-25 BEGIN
-          when :string
-            str_v = cell.content
-            excelx_type = :string
-            # 2011-02-25 END
-          else
-            value_type = :float
-            v = cell.content
-          end
+          v =
+            case value_type
+            when :shared
+              value_type = :string
+              excelx_type = :string
+              @shared_table[cell.content.to_i]
+            when :boolean
+              (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
+            when :date
+              cell.content
+            when :time
+              cell.content
+            when :datetime
+              cell.content
+            when :formula
+              cell.content.to_f #TODO: !!!!
+            when :string
+              excelx_type = :string
+              cell.content
+            else
+              value_type = :float
+              cell.content
+            end
           y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
           tr=nil #TODO: ???s
-          set_cell_values(sheet,x,y,0,v,value_type,formula,tr,str_v,excelx_type,excelx_value,s_attribute)
+          set_cell_values(sheet,x,y,0,v,value_type,formula,tr,excelx_type,excelx_value,s_attribute)
         end
       end
     end
