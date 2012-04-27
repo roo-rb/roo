@@ -103,27 +103,18 @@ class Roo::Excel < Roo::GenericSpreadsheet
     super()
     @file_warning = file_warning
     file_type_check(filename,'.xls','an Excel',packed)
-    @tmpdir = Roo::GenericSpreadsheet.next_tmpdir
-    @tmpdir = File.join(ENV['ROO_TMP'], @tmpdir) if ENV['ROO_TMP']
-    unless File.exists?(@tmpdir)
-      FileUtils::mkdir(@tmpdir)
-    end
-    filename = open_from_uri(filename) if filename[0,7] == "http://"
-    filename = open_from_stream(filename[7..-1]) if filename[0,7] == "stream:"
-    filename = unzip(filename) if packed and packed == :zip
-    @filename = filename
-    unless File.file?(@filename)
-      FileUtils::rm_r(@tmpdir)
-      raise IOError, "file #{@filename} does not exist"
-    end
-    begin
+    make_tmpdir do |tmpdir|
+      filename = open_from_uri(filename, tmpdir) if filename[0,7] == "http://"
+      filename = open_from_stream(filename[7..-1], tmpdir) if filename[0,7] == "stream:"
+      filename = unzip(filename, tmpdir) if packed and packed == :zip
+
+      @filename = filename
+      unless File.file?(@filename)
+        raise IOError, "file #{@filename} does not exist"
+      end
       @workbook = Spreadsheet.open(filename)
-    rescue Ole::Storage::FormatError
-      FileUtils::rm_r(@tmpdir)
-      raise # nach aussen weiterhin sichtbar
     end
     @default_sheet = self.sheets.first
-    FileUtils::rm_r(@tmpdir)
     @cell = Hash.new
     @cell_type = Hash.new
     @formula = Hash.new

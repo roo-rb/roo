@@ -88,50 +88,45 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     super()
     @file_warning = file_warning
     file_type_check(filename,'.xlsx','an Excel-xlsx',packed)
-    @tmpdir = Roo::GenericSpreadsheet.next_tmpdir
-    @tmpdir = File.join(ENV['ROO_TMP'], @tmpdir) if ENV['ROO_TMP']
-    unless File.exists?(@tmpdir)
-      FileUtils::mkdir(@tmpdir)
-    end
-    filename = open_from_uri(filename) if filename[0,7] == "http://"
-    filename = unzip(filename) if packed and packed == :zip
-    @cells_read = Hash.new
-    @filename = filename
-    unless File.file?(@filename)
-      FileUtils::rm_r(@tmpdir)
-      raise IOError, "file #{@filename} does not exist"
-    end
-    @comments_files = Array.new
-    extract_content(@filename)
-    @workbook_doc = File.open(File.join(@tmpdir, "roo_workbook.xml")) do |file|
-      Nokogiri::XML(file)
-    end
-    @shared_table = []
-    if File.exist?(File.join(@tmpdir, 'roo_sharedStrings.xml'))
-      @sharedstring_doc = File.open(File.join(@tmpdir, 'roo_sharedStrings.xml')) do |file|
+    make_tmpdir do |tmpdir|
+      filename = open_from_uri(filename, tmpdir) if filename[0,7] == "http://"
+      filename = unzip(filename, tmpdir) if packed and packed == :zip
+      @cells_read = Hash.new
+      @filename = filename
+      unless File.file?(@filename)
+        raise IOError, "file #{@filename} does not exist"
+      end
+      @comments_files = Array.new
+      extract_content(tmpdir, @filename)
+      @workbook_doc = File.open(File.join(tmpdir, "roo_workbook.xml")) do |file|
         Nokogiri::XML(file)
       end
-      read_shared_strings(@sharedstring_doc)
-    end
-    @styles_table = []
-    @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
-    if File.exist?(File.join(@tmpdir, 'roo_styles.xml'))
-      @styles_doc = File.open(File.join(@tmpdir, 'roo_styles.xml')) do |file|
-        Nokogiri::XML(file)
+      @shared_table = []
+      if File.exist?(File.join(tmpdir, 'roo_sharedStrings.xml'))
+        @sharedstring_doc = File.open(File.join(tmpdir, 'roo_sharedStrings.xml')) do |file|
+          Nokogiri::XML(file)
+        end
+        read_shared_strings(@sharedstring_doc)
       end
-      read_styles(@styles_doc)
-    end
-    @sheet_doc = @sheet_files.map do |item|
-      File.open(item) do |file|
-        Nokogiri::XML(file)
+      @styles_table = []
+      @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
+      if File.exist?(File.join(tmpdir, 'roo_styles.xml'))
+        @styles_doc = File.open(File.join(tmpdir, 'roo_styles.xml')) do |file|
+          Nokogiri::XML(file)
+        end
+        read_styles(@styles_doc)
+      end
+      @sheet_doc = @sheet_files.map do |item|
+        File.open(item) do |file|
+          Nokogiri::XML(file)
+        end
+      end
+      @comments_doc = @comments_files.map do |item|
+        File.open(item) do |file|
+          Nokogiri::XML(file)
+        end
       end
     end
-    @comments_doc = @comments_files.map do |item|
-      File.open(item) do |file|
-        Nokogiri::XML(file)
-      end
-    end
-    FileUtils::rm_r(@tmpdir)
     @default_sheet = self.sheets.first
     @cell = Hash.new
     @cell_type = Hash.new
@@ -644,12 +639,12 @@ Datei xl/comments1.xml
   end
 
   # Extracts all needed files from the zip file
-  def process_zipfile(zipfilename, zip, path='')
+  def process_zipfile(tmpdir, zipfilename, zip, path='')
     @sheet_files = []
     Zip::ZipFile.open(zipfilename) {|zf|
       zf.entries.each {|entry|
         if entry.to_s.end_with?('workbook.xml')
-          open(@tmpdir+'/'+'roo_workbook.xml','wb') {|f|
+          open(tmpdir+'/'+'roo_workbook.xml','wb') {|f|
             f << zip.read(entry)
           }
         end
@@ -659,28 +654,28 @@ Datei xl/comments1.xml
 	# won't be both names in the archive.
 	# Changed the casing of all the following filenames.
         if entry.to_s.downcase.end_with?('sharedstrings.xml')
-          open(@tmpdir+'/'+'roo_sharedStrings.xml','wb') {|f|
+          open(tmpdir+'/'+'roo_sharedStrings.xml','wb') {|f|
             f << zip.read(entry)
           }
         end
         if entry.to_s.downcase.end_with?('styles.xml')
-          open(@tmpdir+'/'+'roo_styles.xml','wb') {|f|
+          open(tmpdir+'/'+'roo_styles.xml','wb') {|f|
             f << zip.read(entry)
           }
         end
         if entry.to_s.downcase =~ /sheet([0-9]+).xml$/
           nr = $1
-          open(@tmpdir+'/'+"roo_sheet#{nr}",'wb') {|f|
+          open(tmpdir+'/'+"roo_sheet#{nr}",'wb') {|f|
             f << zip.read(entry)
           }
-          @sheet_files[nr.to_i-1] = @tmpdir+'/'+"roo_sheet#{nr}"
+          @sheet_files[nr.to_i-1] = tmpdir+'/'+"roo_sheet#{nr}"
         end
         if entry.to_s.downcase =~ /comments([0-9]+).xml$/
           nr = $1
-          open(@tmpdir+'/'+"roo_comments#{nr}",'wb') {|f|
+          open(tmpdir+'/'+"roo_comments#{nr}",'wb') {|f|
             f << zip.read(entry)
           }
-          @comments_files[nr.to_i-1] = @tmpdir+'/'+"roo_comments#{nr}"
+          @comments_files[nr.to_i-1] = tmpdir+'/'+"roo_comments#{nr}"
         end
       }
     }
@@ -688,9 +683,9 @@ Datei xl/comments1.xml
   end
 
   # extract files from the zip file
-  def extract_content(zipfilename)
+  def extract_content(tmpdir, zipfilename)
     Zip::ZipFile.open(@filename) do |zip|
-      process_zipfile(zipfilename,zip)
+      process_zipfile(tmpdir, zipfilename,zip)
     end
   end
 

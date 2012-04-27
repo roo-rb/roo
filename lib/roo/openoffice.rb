@@ -34,30 +34,24 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
 
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
-  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil)
+  def initialize(filename, packed=nil, file_warning=:error, tmpdir_root=nil)
     @file_warning = file_warning
     super()
     file_type_check(filename,'.ods','an Roo::Openoffice', packed)
-    @tmpdir = Roo::GenericSpreadsheet.next_tmpdir
-    @tmpdir = File.join(ENV['ROO_TMP'], @tmpdir) if ENV['ROO_TMP']
-    @tmpdir = File.join(tmpdir, @tmpdir) if tmpdir
-    unless File.exists?(@tmpdir)
-      FileUtils::mkdir(@tmpdir)
+    make_tmpdir(tmpdir_root) do |tmpdir|
+      filename = open_from_uri(filename, tmpdir) if filename[0,7] == "http://"
+      filename = unzip(filename, tmpdir) if packed and packed == :zip
+      @cells_read = Hash.new
+      #TODO: @cells_read[:default] = false
+      @filename = filename
+      unless File.file?(@filename)
+        raise IOError, "file #{@filename} does not exist"
+      end
+      self.class.extract_content(tmpdir, @filename)
+      @doc = File.open(File.join(tmpdir, "roo_content.xml")) do |file|
+        Nokogiri::XML(file)
+      end
     end
-    filename = open_from_uri(filename) if filename[0,7] == "http://"
-    filename = unzip(filename) if packed and packed == :zip
-    @cells_read = Hash.new
-    #TODO: @cells_read[:default] = false
-    @filename = filename
-    unless File.file?(@filename)
-      FileUtils::rm_r(@tmpdir)
-      raise IOError, "file #{@filename} does not exist"
-    end
-    self.class.extract_content(@tmpdir, @filename)
-    @doc = File.open(File.join(@tmpdir, "roo_content.xml")) do |file|
-      Nokogiri::XML(file)
-    end
-    FileUtils::rm_r(@tmpdir)
     @default_sheet = self.sheets.first
     @cell = Hash.new
     @cell_type = Hash.new

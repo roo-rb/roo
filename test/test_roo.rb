@@ -10,7 +10,6 @@
 # the tests under another OS
 #
 require 'rubygems'
-require 'tmpdir'
 require './lib/roo'
 #TODO
 # Look at formulas in excel - does not work with date/time
@@ -3205,7 +3204,6 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
         url = 'http://stiny-leonhard.de/bode-v1.xlsx.zip'
         excel = Roo::Excelx.new(url, :zip)
         assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-        excel.remove_tmp # don't forget to remove the temporary files
       end
     end
   end
@@ -3221,7 +3219,6 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
       }
       excel.default_sheet = excel.sheets.first
       assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-      excel.remove_tmp # don't forget to remove the temporary files
     end
   end
 

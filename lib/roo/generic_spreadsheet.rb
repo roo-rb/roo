@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+require 'tmpdir'
+
 # Base class for all other types of spreadsheets
 class Roo::GenericSpreadsheet
   TEMP_PREFIX = "oo_"
@@ -10,10 +12,6 @@ class Roo::GenericSpreadsheet
   attr_accessor :header_line
 
   protected
-
-  def self.next_tmpdir
-    TEMP_PREFIX + $$.to_s + "_" + sprintf("%010d",rand(10_000_000_000))
-  end
 
   def self.split_coordinate(str)
     letter,number = Roo::GenericSpreadsheet.split_coord(str)
@@ -342,14 +340,6 @@ class Roo::GenericSpreadsheet
     false
   end
 
-  # recursively removes the current temporary directory
-  # this is only needed if you work with zipped files or files via the web
-  def remove_tmp
-    if File.exists?(@tmpdir)
-      FileUtils::rm_r(@tmpdir)
-    end
-  end
-
   # returns information of the spreadsheet document and all sheets within
   # this document.
   def info
@@ -605,6 +595,12 @@ class Roo::GenericSpreadsheet
 
   private
 
+  def make_tmpdir(tmp_root = nil)
+    Dir.mktmpdir(TEMP_PREFIX, tmp_root || ENV['ROO_TMP']) do |tmpdir|
+      yield tmpdir
+    end
+  end
+
   def clean_sheet
     read_cells(@default_sheet) unless @cells_read[@default_sheet]
     @cell = Hash[
@@ -646,13 +642,13 @@ class Roo::GenericSpreadsheet
     return row,col
   end
 
-  def open_from_uri(uri)
+  def open_from_uri(uri, tmpdir)
     require 'open-uri'
     response = ''
     begin
       open(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}") { |net|
         response = net.read
-        tempfilename = File.join(@tmpdir, File.basename(uri))
+        tempfilename = File.join(tmpdir, File.basename(uri))
         File.open(tempfilename,"wb") do |file|
           file.write(response)
         end
@@ -660,15 +656,15 @@ class Roo::GenericSpreadsheet
     rescue OpenURI::HTTPError
       raise "could not open #{uri}"
     end
-    File.join(@tmpdir, File.basename(uri))
+    File.join(tmpdir, File.basename(uri))
   end
 
-  def open_from_stream(stream)
-    tempfilename = File.join(@tmpdir, "spreadsheet")
+  def open_from_stream(stream, tmpdir)
+    tempfilename = File.join(tmpdir, "spreadsheet")
     File.open(tempfilename,"wb") do |file|
       file.write(stream[7..-1])
     end
-    File.join(@tmpdir, "spreadsheet")
+    File.join(tmpdir, "spreadsheet")
   end
 
   # convert a number to something like 'AB' (1 => 'A', 2 => 'B', ...)
@@ -696,10 +692,10 @@ class Roo::GenericSpreadsheet
     result
   end
 
-  def unzip(filename)
+  def unzip(filename, tmpdir)
     ret = nil
     Zip::ZipFile.open(filename) do |zip|
-      ret = process_zipfile_packed zip
+      ret = process_zipfile_packed(zip, tmpdir)
     end
     ret
   end
@@ -716,18 +712,18 @@ class Roo::GenericSpreadsheet
     end
   end
 
-  def process_zipfile_packed(zip, path='')
+  def process_zipfile_packed(zip, tmpdir, path='')
     ret=nil
     if zip.file.file? path
       # extract and return filename
-      File.open(File.join(@tmpdir, path),"wb") do |file|
+      File.open(File.join(tmpdir, path),"wb") do |file|
         file.write(zip.read(path))
       end
-      return File.join(@tmpdir, path)
+      return File.join(tmpdir, path)
     else
       path += '/' unless path.empty?
       zip.dir.foreach(path) do |filename|
-        ret = process_zipfile_packed(zip, path + filename)
+        ret = process_zipfile_packed(zip, tmpdir, path + filename)
       end
     end
     ret

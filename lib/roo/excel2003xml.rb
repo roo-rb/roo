@@ -11,14 +11,10 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   def initialize(filename, packed=nil, file_warning=:error)
     @file_warning = file_warning
     super()
-    @tmpdir = "oo_"+$$.to_s
-    @tmpdir = File.join(ENV['ROO_TMP'], @tmpdir) if ENV['ROO_TMP']
-    unless File.exists?(@tmpdir)
-      FileUtils::mkdir(@tmpdir)
-    end
-    filename = open_from_uri(filename) if filename[0,7] == "http://"
-    filename = unzip(filename) if packed and packed == :zip
-    begin
+    make_tmpdir do |tmpdir|
+      filename = open_from_uri(filename, tmpdir) if filename[0,7] == "http://"
+      filename = unzip(filename, tmpdir) if packed and packed == :zip
+
       file_type_check(filename,'.xml','an Excel 2003 XML')
       @cells_read = Hash.new
       @filename = filename
@@ -26,8 +22,6 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
         raise IOError, "file #{@filename} does not exist"
       end
       @doc = Nokogiri::XML(open(@filename))
-    ensure
-      FileUtils::rm_r(@tmpdir)
     end
     @default_sheet = self.sheets.first
     @cell = Hash.new
@@ -308,29 +302,6 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
     sheet_found = true if sheets.include?(@default_sheet)
     if ! sheet_found
       raise RangeError, "sheet '#{@default_sheet}' not found"
-    end
-  end
-
-  def process_zipfile(zip, path='')
-    if zip.file.file? path
-      if path == "content.xml"
-        open(File.join(@tmpdir, 'roo_content.xml'),'wb') {|f|
-          f << zip.read(path)
-        }
-      end
-    else
-      unless path.empty?
-        path += '/'
-      end
-      zip.dir.foreach(path) do |filename|
-        process_zipfile(zip, path+filename)
-      end
-    end
-  end
-
-  def extract_content
-    Zip::ZipFile.open(@filename) do |zip|
-      process_zipfile(zip)
     end
   end
 
