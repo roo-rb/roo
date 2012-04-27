@@ -569,31 +569,12 @@ Datei xl/comments1.xml
     validate_sheet!(sheet)
     n = self.sheets.index(sheet)
     return unless @comments_doc[n] #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    @comments_doc[n].xpath("//*[local-name()='comments']").each do |comment|
-      comment.children.each do |cc|
-        if cc.name == 'commentList'
-          cc.children.each do |commentlist|
-            if commentlist.name == 'comment'
-              ref = commentlist.attributes['ref'].to_s
-              row,col = Roo::GenericSpreadsheet.split_coordinate(ref)
-              commentlist.children.each do |clc|
-                if clc.name == 'text'
-                  clc.children.each do |text|
-                    if text.name == 'r'
-                      text.children.each do |r|
-                        if r.name == 't'
-                          comment = r.text
-                          @comment[sheet] = Hash.new unless @comment[sheet]
-                          @comment[sheet][[row,col]] = comment
-                        end
-                      end
-                    end
-                  end
-                end
-              end
-            end
-          end
-        end
+    @comments_doc[n].xpath("//xmlns:comments/xmlns:commentList/xmlns:comment").each do |comment|
+      ref = comment.attributes['ref'].to_s
+      row,col = Roo::GenericSpreadsheet.split_coordinate(ref)
+      comment.xpath('./xmlns:text/xmlns:r/xmlns:t').each do |text|
+        @comment[sheet] ||= {}
+        @comment[sheet][[row,col]] = text.text
       end
     end
     @comments_read[sheet] = true
