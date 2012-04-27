@@ -698,15 +698,12 @@ Datei xl/comments1.xml
 
   # read the styles elements of an excelx document
   def read_styles(doc)
-    @numFmts = []
     @cellXfs = []
     fonts = []
 
-    doc.xpath("//*[local-name()='numFmt']").each do |numFmt|
-      numFmtId = numFmt.attributes['numFmtId']
-      formatCode = numFmt.attributes['formatCode']
-      @numFmts << [numFmtId, formatCode]
-    end
+    @numFmts = Hash[doc.xpath("//*[local-name()='numFmt']").map do |numFmt|
+      [numFmt['numFmtId'], numFmt['formatCode']]
+    end]
     doc.xpath("//*[local-name()='fonts']").each do |fonts_el|
       fonts_el.children.each do |font_el|
         if font_el == 'font'
@@ -738,15 +735,7 @@ Datei xl/comments1.xml
 
   # convert internal excelx attribute to a format
   def attribute2format(s)
-    result = nil
-    @numFmts.each {|nf|
-      # to_s weil das eine Nokogiri::XML::Attr und das
-      # andere ein String ist
-      if nf.first.to_s == @cellXfs[s.to_i].first
-        result = nf[1]
-        break
-      end
-    }
+    result = @numFmts[@cellXfs[s.to_i].first]
     unless result
       id = @cellXfs[s.to_i].first.to_i
       if STANDARD_FORMATS.has_key? id
