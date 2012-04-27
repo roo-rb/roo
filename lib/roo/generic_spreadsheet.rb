@@ -271,10 +271,9 @@ class Roo::GenericSpreadsheet
     sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet] or self.class == Roo::Excel
     row,col = normalize(row,col)
-    return true unless cell(row, col, sheet)
-    return true if celltype(row, col, sheet) == :string && cell(row, col, sheet).empty?
-    return true if row < first_row(sheet) || row > last_row(sheet) || col < first_column(sheet) || col > last_column(sheet)
-    false
+    contents = cell(row, col, sheet)
+    !contents || (celltype(row, col, sheet) == :string && contents.empty?) \
+      || (row < first_row(sheet) || row > last_row(sheet) || col < first_column(sheet) || col > last_column(sheet))
   end
 
   # returns information of the spreadsheet document and all sheets within
@@ -465,15 +464,18 @@ class Roo::GenericSpreadsheet
 
         if headers.length == query.length
           @header_line = line_no
-          return_headers ? (return headers) : (return line_no)
+          return return_headers ? headers : line_no
+        elsif line_no > 100
+          raise "Couldn't find header row."
         end
-        raise "Couldn't find header row." if line_no > 100
       end
     end
 
     # this method lets you find the worksheet with the most data
     def longest_sheet
-      sheet(@workbook.worksheets.inject {|m,o| o.row_count > m.row_count ? o : m}.name)
+      sheet(@workbook.worksheets.inject {|m,o|
+        o.row_count > m.row_count ? o : m
+      }.name)
     end
 
   protected
@@ -519,9 +521,7 @@ class Roo::GenericSpreadsheet
   # Zugriff mit numerischen Keys schneller ist.
   def key_to_num(str)
     r,c = str.split(',')
-    r = r.to_i
-    c = c.to_i
-    [r,c]
+    [r.to_i,c.to_i]
   end
 
   # see: key_to_num
@@ -603,12 +603,14 @@ class Roo::GenericSpreadsheet
     File.join(tmpdir, "spreadsheet")
   end
 
+  LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
   # convert a number to something like 'AB' (1 => 'A', 2 => 'B', ...)
   def self.number_to_letter(n)
     letters=""
     while n > 0
       num = n%26
-      letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[num-1,1] + letters
+      letters = LETTERS[num-1] + letters
       n = n.div(26)
     end
     letters
@@ -619,7 +621,7 @@ class Roo::GenericSpreadsheet
     result = 0
     while letters && letters.length > 0
       character = letters[0,1].upcase
-      num = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".index(character)
+      num = LETTERS.index(character)
       raise ArgumentError, "invalid column character '#{letters[0,1]}'" if num == nil
       num += 1
       result = result * 26 + num
@@ -655,20 +657,20 @@ class Roo::GenericSpreadsheet
   end
 
   def process_zipfile_packed(zip, tmpdir, path='')
-    ret=nil
     if zip.file.file? path
       # extract and return filename
       File.open(File.join(tmpdir, path),"wb") do |file|
         file.write(zip.read(path))
       end
-      return File.join(tmpdir, path)
+      File.join(tmpdir, path)
     else
+      ret=nil
       path += '/' unless path.empty?
       zip.dir.foreach(path) do |filename|
         ret = process_zipfile_packed(zip, tmpdir, path + filename)
       end
+      ret
     end
-    ret
   end
 
   # Write all cells to the csv file. File can be a filename or nil. If the this
