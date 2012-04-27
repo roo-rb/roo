@@ -95,8 +95,6 @@ end
 # Class for handling Excel-Spreadsheets
 class Roo::Excel < Roo::GenericSpreadsheet
 
-  EXCEL_NO_FORMULAS = 'Formulas are not supported for excel spreadsheets.'
-
   # Creates a new Excel spreadsheet object.
   # Parameter packed: :zip - File is a zip-file
   def initialize(filename, packed = nil, file_warning = :error)
@@ -438,7 +436,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
 
   def wait_for_version_080
     if Spreadsheet::VERSION<='0.8.0'
-      raise EXCEL_NO_FORMULAS+
+      raise 'Formulas are not supported for excel spreadsheets.' +
         " We have to wait for the 0.8.0 version of the Spreadsheet gem (currently used version is #{Spreadsheet::VERSION})"
     else
       raise 'Thomas should implement formulas from Spreadsheet gem'
