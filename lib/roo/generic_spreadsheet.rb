@@ -679,9 +679,7 @@ class Roo::GenericSpreadsheet
       1.upto(last_row(sheet)) do |row|
         1.upto(last_column(sheet)) do |col|
           file.print(",") if col > 1
-          onecell = cell(row,col,sheet)
-          onecelltype = celltype(row,col,sheet)
-          file.print one_cell_output(onecelltype,onecell,empty?(row,col,sheet))
+          file.print cell_to_csv(row,col,sheet)
         end
         file.print("\n")
       end # sheet not empty
@@ -689,49 +687,45 @@ class Roo::GenericSpreadsheet
   end
 
   # The content of a cell in the csv output
-  def one_cell_output(onecelltype, onecell, empty)
-    str = ""
-    if empty
-      str += ''
+  def cell_to_csv(row, col, sheet)
+    if empty?(row,col,sheet)
+      ''
     else
-      case onecelltype
+      onecell = cell(row,col,sheet)
+
+      case celltype(row,col,sheet)
       when :string
         unless onecell.empty?
-          one = onecell.gsub(/"/,'""')
-          str << ('"'+one+'"')
+          %{"#{onecell.gsub(/"/,'""')}"}
         end
       when :float, :percentage
         if onecell == onecell.to_i
-          str << onecell.to_i.to_s
+          onecell.to_i.to_s
         else
-          str << onecell.to_s
+          onecell.to_s
         end
       when :formula
         if onecell.class == String
           unless onecell.empty?
-            one = onecell.gsub(/"/,'""')
-            str << '"'+one+'"'
+            %{"#{onecell.gsub(/"/,'""')}"}
           end
         elsif onecell.class == Float
           if onecell == onecell.to_i
-            str << onecell.to_i.to_s
+            onecell.to_i.to_s
           else
-            str << onecell.to_s
+            onecell.to_s
           end
         else
-          raise "unhandled onecell-class "+onecell.class.to_s
+          raise "unhandled onecell-class #{onecell.class}"
         end
-      when :date
-        str << onecell.to_s
+      when :date, :datetime
+        onecell.to_s
       when :time
-        str << Roo::GenericSpreadsheet.integer_to_timestring(onecell)
-      when :datetime
-        str << onecell.to_s
+        Roo::GenericSpreadsheet.integer_to_timestring(onecell)
       else
-        raise "unhandled celltype "+onecelltype.to_s
-      end
+        raise "unhandled celltype #{celltype(row,col,sheet)}"
+      end || ""
     end
-    str
   end
 
   # converts an integer value to a time string like '02:05:06'
