@@ -465,8 +465,8 @@ class Roo::Excelx < Roo::GenericSpreadsheet
         end
       formula = nil
       c.children.each do |cell|
-	      # 2011-09-15 BEGIN
-        if cell.name == 'is'
+        case cell.name
+        when 'is'
           cell.children.each do |is|
             if is.name == 't'
               inlinestr_content = is.content
@@ -480,21 +480,16 @@ class Roo::Excelx < Roo::GenericSpreadsheet
               set_cell_values(sheet,x,y,0,v,value_type,formula,tr,str_v,excelx_type,excelx_value,s_attribute)
             end
           end
-        end
-	      # 2011-09-15 END
-        if cell.name == 'f'
+        when 'f'
           formula = cell.content
-        end
-        if cell.name == 'v'
-          if value_type == :time or value_type == :datetime
-            if cell.content.to_f >= 1.0
+        when 'v'
+          if [:time, :datetime].include?(value_type) && cell.content.to_f >= 1.0
+            value_type =
               if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001
-                value_type = :datetime
+                :datetime
               else
-                value_type = :date
+                :date
               end
-            else
-            end
           end
           excelx_type = [:numeric_or_formula,format.to_s]
           excelx_value = cell.content
@@ -504,7 +499,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
             str_v = @shared_table[cell.content.to_i]
             excelx_type = :string
           when :boolean
-            cell.content.to_i == 1 ? v = 'TRUE' : v = 'FALSE'
+            v = (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
           when :date
             v = cell.content
           when :time
@@ -512,7 +507,6 @@ class Roo::Excelx < Roo::GenericSpreadsheet
           when :datetime
             v = cell.content
           when :formula
-            value_type = :formula
             v = cell.content.to_f #TODO: !!!!
             # 2011-02-25 BEGIN
           when :string
