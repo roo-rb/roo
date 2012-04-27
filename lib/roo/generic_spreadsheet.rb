@@ -417,7 +417,7 @@ class Roo::GenericSpreadsheet
         if options[:clean]
           options.delete(:clean)
           @cleaned ||= {}
-          @cleaned[@default_sheet] || clean_sheet
+          @cleaned[@default_sheet] || clean_sheet(@default_sheet)
         end
 
         if options[:header_search]
@@ -537,13 +537,13 @@ class Roo::GenericSpreadsheet
     end
   end
 
-  def clean_sheet
-    read_cells(@default_sheet) unless @cells_read[@default_sheet]
-    sheet_cells = @cell[@default_sheet]
+  def clean_sheet(sheet)
+    read_cells(sheet) unless @cells_read[sheet]
+    sheet_cells = @cell[sheet]
     sheet_cells.each do |coord,value|
       sheet_cells[coord] = sanitize_value(value)
     end
-    @cleaned[@default_sheet] = true
+    @cleaned[sheet] = true
   end
 
   def sanitize_value(v)
