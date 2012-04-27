@@ -823,7 +823,7 @@ class TestRoo < Test::Unit::TestCase
           assert_equal "Tagebuch aus Chile  Juli 1977", oo.cell(55,'A')
           assert oo.to_csv(File.join(tempdir,"Bibelbund.csv"))
           assert File.exists?(File.join(tempdir,"Bibelbund.csv"))
-          assert_equal "", diff(File.join(TESTDIR, "Bibelbund.csv"), File.join(tempdir,"Bibelbund.csv")),
+          assert_equal "", file_diff(File.join(TESTDIR, "Bibelbund.csv"), File.join(tempdir,"Bibelbund.csv")),
             "error in class #{oo.class}"
           #end
         end
@@ -853,10 +853,10 @@ class TestRoo < Test::Unit::TestCase
       Dir.mktmpdir do |tempdir|
         assert oo.to_csv(File.join(tempdir,"numbers1.csv"),oo.sheets.first)
         assert(File.exists?(File.join(tempdir,"numbers1.csv")), "Datei #{tempdir}/numbers1.csv existiert nicht")
-        assert_equal "", diff(master, File.join(tempdir,"numbers1.csv"))
+        assert_equal "", file_diff(master, File.join(tempdir,"numbers1.csv"))
         assert oo.to_csv(File.join(tempdir,"numbers1.csv"))
         assert File.exists?(File.join(tempdir,"numbers1.csv"))
-        assert_equal "", diff(master, File.join(tempdir,"numbers1.csv"))
+        assert_equal "", file_diff(master, File.join(tempdir,"numbers1.csv"))
       end
     end
   end

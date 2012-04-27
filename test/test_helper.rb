@@ -12,7 +12,7 @@ end
 # output is an empty string if the files are equal
 # otherwise differences a printen (not compatible to
 # the diff command)
-def diff(fn1,fn2)
+def file_diff(fn1,fn2)
   result = ''
   File.open(fn1) do |f1|
     File.open(fn2) do |f2|
