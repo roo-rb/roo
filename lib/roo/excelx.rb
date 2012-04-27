@@ -681,16 +681,9 @@ Datei xl/comments1.xml
     end]
     fonts = doc.xpath("//xmlns:fonts/xmlns:font").map do |font_el|
       Font.new.tap do |font|
-        font_el.children.each do |font_sub_el|
-          case font_sub_el.name
-          when 'b'
-            font.bold = true
-          when 'i'
-            font.italic = true
-          when 'u'
-            font.underline = true
-          end
-        end
+        font.bold = !font_el.xpath('./xmlns:b').empty?
+        font.italic = !font_el.xpath('./xmlns:i').empty?
+        font.underline = !font_el.xpath('./xmlns:u').empty?
       end
     end
 
