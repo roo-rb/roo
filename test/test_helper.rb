@@ -1,19 +1,11 @@
 require 'test/unit'
 require File.dirname(__FILE__) + '/../lib/roo'
-         
+
 # helper method
 def local_only
   if ENV["roo_local"] == "thomas-p"
     yield
   end
-end
-
-TMP_PREFIX = "#{Roo::GenericSpreadsheet::TEMP_PREFIX}*"
-def assert_no_temp_files_left_over
-  prev = Dir.glob(TMP_PREFIX)
-  yield
-  now = Dir.glob(TMP_PREFIX)
-  assert (now-prev).empty?, "temporary directory not removed"
 end
 
 # very simple diff implementation

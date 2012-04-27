@@ -1401,66 +1401,6 @@ Sheet 3:
     end
   end
 
-  def test_no_remaining_tmp_files_openoffice
-    # alles noch mal ueberarbeiten
-    # temp. Directories sollten in diesem Fall ueberhaupt nicht
-    # angelegt werden
-    if OPENOFFICE
-      assert_no_temp_files_left_over do
-        assert_raise(Zip::ZipError) { #TODO: besseres Fehlerkriterium bei
-          # oo = Roo::Openoffice.new(File.join(TESTDIR,"no_spreadsheet_file.txt"))
-          # es soll absichtlich ein Abbruch provoziert werden, deshalb :ignore
-          Roo::Openoffice.new(File.join(TESTDIR,"no_spreadsheet_file.txt"),
-            false,
-            :ignore)
-        }
-      end
-    end
-  end
-
-  def test_no_remaining_tmp_files_excel
-    # alles noch mal ueberarbeiten
-    # temp. Directories sollten in diesem Fall ueberhaupt nicht
-    # angelegt werden
-    if EXCEL
-      assert_no_temp_files_left_over do
-        assert_raise(Ole::Storage::FormatError) {
-          oo = Roo::Excel.new(File.join(TESTDIR,"no_spreadsheet_file.txt"),
-            false,
-            :ignore)
-        }
-      end
-    end
-  end
-
-  def test_no_remaining_tmp_files_excelx
-    # alles noch mal ueberarbeiten
-    # temp. Directories sollten in diesem Fall ueberhaupt nicht
-    # angelegt werden
-    if EXCELX
-      assert_no_temp_files_left_over do
-        assert_raise(Zip::ZipError) { #TODO: besseres Fehlerkriterium bei
-          # oo = Roo::Excelx.new(File.join(TESTDIR,"no_spreadsheet_file.txt"))
-          # es soll absichtlich ein Abbruch provoziert werden, deshalb :ignore
-          oo = Roo::Excelx.new(File.join(TESTDIR,"no_spreadsheet_file.txt"),
-            false,
-            :ignore)
-        }
-      end
-    end
-  end
-
-  def test_no_remaining_tmp_files_google
-    # Exception ist irgendwie anders, nochmal ansehen TODO:
-    if GOOGLE
-      assert_no_temp_files_left_over do
-        assert_nothing_raised {
-          Google.new(key_of("no_spreadsheet_file.txt"))
-        }
-      end
-    end
-  end
-
   # Erstellt eine Liste aller Zellen im Spreadsheet. Dies ist nötig, weil ein einfacher
   # Textvergleich des XML-Outputs nicht funktioniert, da xml-builder die Attribute
   # nicht immer in der gleichen Reihenfolge erzeugt.
@@ -1527,103 +1467,70 @@ Sheet 3:
 
   def test_file_warning_default
     if OPENOFFICE
-      assert_no_temp_files_left_over do
-        assert_raises(TypeError, "test/files/numbers1.xls is not an openoffice spreadsheet") { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls")) }
-        assert_raises(TypeError) { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xlsx")) }
-      end
+      assert_raises(TypeError, "test/files/numbers1.xls is not an openoffice spreadsheet") { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls")) }
+      assert_raises(TypeError) { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xlsx")) }
     end
     if EXCEL
-      assert_no_temp_files_left_over do
-        assert_raises(TypeError) { oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.ods")) }
-        assert_raises(TypeError) { oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.xlsx")) }
-      end
+      assert_raises(TypeError) { oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.ods")) }
+      assert_raises(TypeError) { oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.xlsx")) }
     end
     if EXCELX
-      assert_no_temp_files_left_over do
-        assert_raises(TypeError) { oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods")) }
-        assert_raises(TypeError) { oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls")) }
-      end
+      assert_raises(TypeError) { oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods")) }
+      assert_raises(TypeError) { oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls")) }
     end
   end
 
   def test_file_warning_error
     if OPENOFFICE
-      assert_no_temp_files_left_over do
-        assert_raises(TypeError) { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls"),false,:error) }
-      end
-
-      assert_no_temp_files_left_over do
-        assert_raises(TypeError) { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xlsx"),false,:error) }
-      end
+      assert_raises(TypeError) { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls"),false,:error) }
+      assert_raises(TypeError) { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xlsx"),false,:error) }
     end
     if EXCEL
-      assert_no_temp_files_left_over do
-        assert_raises(TypeError) { oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.ods"),false,:error) }
-      end
-
-      assert_no_temp_files_left_over do
-        assert_raises(TypeError) { oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false,:error) }
-      end
+      assert_raises(TypeError) { oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.ods"),false,:error) }
+      assert_raises(TypeError) { oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false,:error) }
     end
     if EXCELX
-      assert_no_temp_files_left_over do
-        assert_raises(TypeError) { oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),false,:error) }
-      end
-
-      assert_no_temp_files_left_over do
-        assert_raises(TypeError) { oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls"),false,:error) }
-      end
+      assert_raises(TypeError) { oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),false,:error) }
+      assert_raises(TypeError) { oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls"),false,:error) }
     end
   end
 
   def test_file_warning_warning
     if OPENOFFICE
-      assert_no_temp_files_left_over do
-        assert_nothing_raised(TypeError) {
-          assert_raises(Zip::ZipError) {
-            Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls"),false, :warning)
-          }
+      assert_nothing_raised(TypeError) {
+        assert_raises(Zip::ZipError) {
+          Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls"),false, :warning)
         }
-      end
-      assert_no_temp_files_left_over do
-        assert_nothing_raised(TypeError) {
-          assert_raises(Errno::ENOENT) {
-            Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xlsx"),false, :warning)
-          }
+      }
+      assert_nothing_raised(TypeError) {
+        assert_raises(Errno::ENOENT) {
+          Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xlsx"),false, :warning)
         }
-      end
+      }
     end
     if EXCEL
-      assert_no_temp_files_left_over do
-        assert_nothing_raised(TypeError) {
-          assert_raises(Ole::Storage::FormatError) {
-            Roo::Excel.new(File.join(TESTDIR,"numbers1.ods"),false, :warning)
-          }
+      assert_nothing_raised(TypeError) {
+        assert_raises(Ole::Storage::FormatError) {
+          Roo::Excel.new(File.join(TESTDIR,"numbers1.ods"),false, :warning)
         }
-      end
-      assert_no_temp_files_left_over do
-        assert_nothing_raised(TypeError) {
-          assert_raises(Ole::Storage::FormatError) {
-            Roo::Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false, :warning)
-          }
+      }
+      assert_nothing_raised(TypeError) {
+        assert_raises(Ole::Storage::FormatError) {
+          Roo::Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false, :warning)
         }
-      end
+      }
     end
     if EXCELX
-      assert_no_temp_files_left_over do
-        assert_nothing_raised(TypeError) {
-          assert_raises(Errno::ENOENT) {
-            Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),false, :warning)
-          }
+      assert_nothing_raised(TypeError) {
+        assert_raises(Errno::ENOENT) {
+          Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),false, :warning)
         }
-      end
-      assert_no_temp_files_left_over do
-        assert_nothing_raised(TypeError) {
-          assert_raises(Zip::ZipError) {
-            Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls"),false, :warning)
-          }
+      }
+      assert_nothing_raised(TypeError) {
+        assert_raises(Zip::ZipError) {
+          Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls"),false, :warning)
         }
-      end
+      }
     end
   end
 
@@ -1659,44 +1566,6 @@ Sheet 3:
         oo = Roo::Excelx.new(File.join(TESTDIR,"type_excelx.xls"),false, :ignore)
       }
     end
-=begin
-      if OPENOFFICE
-        assert_no_temp_files_left_over do
-          assert_nothing_raised() {
-            assert_raises(Zip::ZipError) {
-              oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls"),false, :ignore) }
-          }
-          assert_nothing_raised() {
-            assert_raises(Errno::ENOENT) {
-              oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xlsx"),false, :ignore) }
-          }
-        end
-      end
-      if EXCEL
-        assert_no_temp_files_left_over do
-          assert_nothing_raised(TypeError) {
-            assert_raises(Ole::Storage::FormatError) {
-              oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.ods"),false, :ignore) }
-          }
-          assert_nothing_raised(TypeError) {
-            assert_raises(Ole::Storage::FormatError) {oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false, :ignore) }}
-        end
-      end
-      if EXCELX
-        assert_no_temp_files_left_over do
-          assert_nothing_raised(TypeError) {
-            assert_raises(Errno::ENOENT) {
-              oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),false, :ignore)
-            }
-          }
-          assert_nothing_raised(TypeError) {
-            assert_raises(Zip::ZipError) {
-              oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls"),false, :ignore)
-            }
-          }
-        end
-      end
-=end
   end
 
   def test_bug_last_row_excel
