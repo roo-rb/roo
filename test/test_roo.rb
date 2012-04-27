@@ -137,21 +137,6 @@ class Test::Unit::TestCase
   end
 end
 
-class File
-  def File.delete_if_exist(filename)
-    if File.exist?(filename)
-      File.delete(filename)
-    end
-  end
-end
-
-# :nodoc
-class Fixnum
-  def minutes
-    self * 60
-  end
-end
-
 class TestRoo < Test::Unit::TestCase
 
   OPENOFFICE   = true  	# do Openoffice-Spreadsheet Tests? (.ods files)

@@ -37,3 +37,18 @@ def diff(fn1,fn2)
   end
   result
 end
+
+class File
+  def File.delete_if_exist(filename)
+    if File.exist?(filename)
+      File.delete(filename)
+    end
+  end
+end
+
+# :nodoc
+class Fixnum
+  def minutes
+    self * 60
+  end
+end
