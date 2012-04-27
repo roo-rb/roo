@@ -156,10 +156,7 @@ class TestRoo < Test::Unit::TestCase
   def with_each_spreadsheet(options)
     # test if the spreadsheet type is valid :nodoc
     if options[:format]
-      if options[:format].is_a? Symbol
-        options[:format] = [options[:format]]
-      end
-      options[:format].each do |formatname|
+      [*options[:format]].each do |formatname|
         unless [:openoffice,:excel,:excelx,:google,:libreoffice].include?(formatname)
           raise "invalid spreadsheet type #{formatname}"
         end
