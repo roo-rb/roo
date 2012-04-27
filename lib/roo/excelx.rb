@@ -699,26 +699,22 @@ Datei xl/comments1.xml
   # read the styles elements of an excelx document
   def read_styles(doc)
     @cellXfs = []
-    fonts = []
 
     @numFmts = Hash[doc.xpath("//*[local-name()='numFmt']").map do |numFmt|
       [numFmt['numFmtId'], numFmt['formatCode']]
     end]
-    doc.xpath("//*[local-name()='fonts']").each do |fonts_el|
-      fonts_el.children.each do |font_el|
-        if font_el == 'font'
-          font = Excelx::Font.new
-          font_el.each_element do |font_sub_el|
-            case font_sub_el.name
-            when 'b'
-              font.bold = true
-            when 'i'
-              font.italic = true
-            when 'u'
-              font.underline = true
-            end
+    fonts = doc.xpath("//*[local-name()='fonts']").flat_map do |fonts_el|
+      fonts_el.xpath('./font').map do |font_el|
+        font = Excelx::Font.new
+        font_el.each_element do |font_sub_el|
+          case font_sub_el.name
+          when 'b'
+            font.bold = true
+          when 'i'
+            font.italic = true
+          when 'u'
+            font.underline = true
           end
-          fonts << font
         end
       end
     end
