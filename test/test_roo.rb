@@ -3040,31 +3040,32 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   #  assert_equal 43, t.cell('b',1)
   #  assert_equal 44, t.cell('c',3)
   #end
-   
-  #TODO: xlsx-Datei anpassen!
-  def test_excelx_open_from_uri_and_zipped
-    #TODO: gezippte xlsx Datei online zum Testen suchen
-    if EXCELX
-      if ONLINE
-        url = 'http://stiny-leonhard.de/bode-v1.xlsx.zip'
-        excel = Roo::Excelx.new(url, :zip)
-        assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-      end
-    end
-  end
 
-  def test_excelx_zipped
-    # TODO: bode...xls bei Gelegenheit nach .xlsx konverieren lassen und zippen!
-    if EXCELX
-      # diese Datei gibt es noch nicht gezippt
-      excel = Roo::Excelx.new(File.join(TESTDIR,"bode-v1.xlsx.zip"), :zip)
-      assert excel
-      assert_raises(ArgumentError) {
-        assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-      }
-      excel.default_sheet = excel.sheets.first
-      assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-    end
-  end
+  # We don't have the bode-v1.xlsx test file
+  # #TODO: xlsx-Datei anpassen!
+  # def test_excelx_open_from_uri_and_zipped
+  #   #TODO: gezippte xlsx Datei online zum Testen suchen
+  #   if EXCELX
+  #     if ONLINE
+  #       url = 'http://stiny-leonhard.de/bode-v1.xlsx.zip'
+  #       excel = Roo::Excelx.new(url, :zip)
+  #       assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
+  #     end
+  #   end
+  # end
+
+  # def test_excelx_zipped
+  #   # TODO: bode...xls bei Gelegenheit nach .xlsx konverieren lassen und zippen!
+  #   if EXCELX
+  #     # diese Datei gibt es noch nicht gezippt
+  #     excel = Roo::Excelx.new(File.join(TESTDIR,"bode-v1.xlsx.zip"), :zip)
+  #     assert excel
+  #     assert_raises(ArgumentError) {
+  #       assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
+  #     }
+  #     excel.default_sheet = excel.sheets.first
+  #     assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
+  #   end
+  # end
 
 end # class
