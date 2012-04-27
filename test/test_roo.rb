@@ -2183,11 +2183,6 @@ Sheet 3:
     end
   end
 
-  #def test_no_generic_new
-  #oo = GenericSpreadsheet.new
-  #assert_equal GenericSpreadsheet, oo.class
-  #end
-
   # unter Windows soll es laut Bug-Reports nicht moeglich sein, eine Excel-Datei, die
   # mit Excel.new geoeffnet wurde nach dem Processing anschliessend zu loeschen.
   # Anmerkung: Das Spreadsheet-Gem erlaubt kein explizites Close von Spreadsheet-Dateien,
