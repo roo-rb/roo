@@ -4,6 +4,8 @@ require 'tmpdir'
 
 # Base class for all other types of spreadsheets
 class Roo::GenericSpreadsheet
+  include Enumerable
+
   TEMP_PREFIX = "oo_"
 
   attr_reader :default_sheet, :headers
