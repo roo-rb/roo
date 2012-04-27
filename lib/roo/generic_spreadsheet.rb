@@ -36,19 +36,8 @@ class Roo::GenericSpreadsheet
   # sets the working sheet in the document
   # 'sheet' can be a number (1 = first sheet) or the name of a sheet.
   def default_sheet=(sheet)
-    if sheet.kind_of? Fixnum
-      if sheet > 0 and sheet <= sheets.length
-        sheet = self.sheets[sheet-1]
-      else
-        raise RangeError
-      end
-    elsif sheet.kind_of?(String)
-      raise RangeError if ! self.sheets.include?(sheet)
-    else
-      raise TypeError, "what are you trying to set as default sheet?"
-    end
+    validate_sheet!(sheet)
     @default_sheet = sheet
-    check_default_sheet
     @first_row[sheet] = @last_row[sheet] = @first_column[sheet] = @last_column[sheet] = nil
     @cells_read[sheet] = false
   end
@@ -697,14 +686,20 @@ class Roo::GenericSpreadsheet
   end
 
   # check if default_sheet was set and exists in sheets-array
-  def check_default_sheet
-    sheet_found = false
-    raise ArgumentError, "Error: default_sheet not set" if @default_sheet == nil
-    if sheets.index(@default_sheet)
-      sheet_found = true
-    end
-    if ! sheet_found
-      raise RangeError, "sheet '#{@default_sheet}' not found"
+  def validate_sheet!(sheet)
+    case sheet
+    when nil
+      raise ArgumentError, "Error: sheet 'nil' not valid"
+    when Fixnum
+      self.sheets.fetch(sheet-1) do
+        raise RangeError, "sheet index #{sheet} not found"
+      end
+    when String
+      if !sheets.include? sheet
+        raise RangeError, "sheet '#{sheet}' not found"
+      end
+    else
+      raise TypeError, "not a valid sheet type: #{sheet.inspect}"
     end
   end
 

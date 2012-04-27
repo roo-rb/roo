@@ -88,7 +88,7 @@ class Roo::Google < Roo::GenericSpreadsheet
   # cell at the first line and first row.
   def cell(row, col, sheet=nil)
     sheet ||= @default_sheet
-    check_default_sheet #TODO: 2007-12-16
+    validate_sheet!(sheet) #TODO: 2007-12-16
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     value = @cell[sheet]["#{row},#{col}"]
@@ -163,13 +163,9 @@ class Roo::Google < Roo::GenericSpreadsheet
   # a formula can be set in the form of '=SUM(...)'
   def set_value(row,col,value,sheet=nil)
     sheet ||= @default_sheet
-    raise RangeError, "sheet not set" unless sheet
-    #@@ Set and pass sheet_no
-    begin
-      sheet_no = sheets.index(sheet)+1
-    rescue
-      raise RangeError, "invalid sheet '"+sheet.to_s+"'"
-    end
+    validate_sheet!(sheet)
+
+    sheet_no = sheets.index(sheet)+1
     row,col = normalize(row,col)
     add_to_cell_roo(row,col,value,sheet_no)
     # re-read the portion of the document that has changed
@@ -230,7 +226,7 @@ class Roo::Google < Roo::GenericSpreadsheet
   # read all cells in a sheet.
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
-    raise RangeError, "illegal sheet <#{sheet}>" unless sheets.index(sheet)
+    validate_sheet!(sheet)
     sheet_no = sheets.index(sheet)
     ws = @worksheets[sheet_no]
     for row in 1..ws.num_rows

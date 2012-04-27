@@ -344,9 +344,8 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   #++
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
+    validate_sheet!(sheet)
     sheet_found = false
-    raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
-    raise RangeError unless self.sheets.include? sheet
 
     @doc.xpath("//*[local-name()='table']").each do |ws|
       if sheet == ws['name']
@@ -490,17 +489,6 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
         font.underline = properties.attributes['text-underline-style']
         @style_definitions[style_name] = font
       end
-    end
-  end
-
-  # Checks if the default_sheet exists. If not an RangeError exception is
-  # raised
-  def check_default_sheet
-    sheet_found = false
-    raise ArgumentError, "Error: default_sheet not set" if @default_sheet == nil
-    sheet_found = true if sheets.include?(@default_sheet)
-    if ! sheet_found
-      raise RangeError, "sheet '#{@default_sheet}' not found"
     end
   end
 

@@ -294,17 +294,6 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
     end
   end
 
-  # Checks if the default_sheet exists. If not an RangeError exception is
-  # raised
-  def check_default_sheet
-    sheet_found = false
-    raise ArgumentError, "Error: default_sheet not set" if @default_sheet == nil
-    sheet_found = true if sheets.include?(@default_sheet)
-    if ! sheet_found
-      raise RangeError, "sheet '#{@default_sheet}' not found"
-    end
-  end
-
   def set_value(row,col,value,sheet=nil)
     sheet = @default_value unless sheet
     @cell[sheet][[row,col]] = value

@@ -139,7 +139,8 @@ class Roo::Excel < Roo::GenericSpreadsheet
   # returns the content of a cell. The upper left corner is (1,1) or ('A',1)
   def cell(row,col,sheet=nil)
     sheet ||= @default_sheet
-    raise ArgumentError unless sheet
+    validate_sheet!(sheet)
+
     read_cells(sheet) unless @cells_read[sheet]
     raise "should be read" unless @cells_read[sheet]
     row,col = normalize(row,col)
@@ -332,8 +333,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
   # read all cells in the selected sheet
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
-    raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
-    raise RangeError unless self.sheets.include? sheet
+    validate_sheet!(sheet)
 
     if @cells_read[sheet]
       raise "sheet #{sheet} already read"

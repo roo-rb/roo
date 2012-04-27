@@ -438,8 +438,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   # read all cells in the selected sheet
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
-    raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
-    raise RangeError unless self.sheets.include? sheet
+    validate_sheet!(sheet)
     n = self.sheets.index(sheet)
     @sheet_doc[n].xpath("//*[local-name()='c']").each do |c|
       s_attribute = c['s'].to_i   # should be here
@@ -578,9 +577,7 @@ Datei xl/comments1.xml
   # Reads all comments from a sheet
   def read_comments(sheet=nil)
     sheet ||= @default_sheet
-    #sheet_found = false
-    raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
-    raise RangeError unless self.sheets.include? sheet
+    validate_sheet!(sheet)
     n = self.sheets.index(sheet)
     return unless @comments_doc[n] #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @comments_doc[n].xpath("//*[local-name()='comments']").each do |comment|
@@ -620,17 +617,6 @@ Datei xl/comments1.xml
       col,row = coordinates.split('$')
       [defined_name['name'], [sheet,row,col]]
     end]
-  end
-
-  # Checks if the default_sheet exists. If not an RangeError exception is
-  # raised
-  def check_default_sheet
-    sheet_found = false
-    raise ArgumentError, "Error: default_sheet not set" if @default_sheet == nil
-    sheet_found = true if sheets.include?(@default_sheet)
-    if ! sheet_found
-      raise RangeError, "sheet '#{@default_sheet}' not found"
-    end
   end
 
   # Extracts all needed files from the zip file
