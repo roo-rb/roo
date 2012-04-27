@@ -198,24 +198,17 @@ class Roo::GenericSpreadsheet
     #-- id
     if args[0].class == Fixnum
       rownum = args[0]
-      if @header_line
-        tmp = {}
-      else
-        tmp = []
-      end
-      1.upto(self.row(rownum).size) {|j|
+      result =
         if @header_line
-          tmp[header_for.fetch(j)] = cell(rownum,j)
+          [Hash[1.upto(self.row(rownum).size).map {|j|
+            [header_for.fetch(j), cell(rownum,j)]
+          }]]
         else
-          tmp[j-1] = cell(rownum,j)
+          self.row(rownum).size.times.map {|j|
+            cell(rownum,j + 1)
+          }
         end
-      }
-      if @header_line
-        result = [ tmp ]
-      else
-        result = tmp
-      end
-      #-- :all
+    #-- :all
     elsif args[0] == :all
       conditions = options[:conditions]
       column_with = header_for.invert
