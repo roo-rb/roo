@@ -303,17 +303,14 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     s = @s_attribute[sheet][[row,col]]
-    result = attribute2format(s).to_s
-    result
+    attribute2format(s).to_s
   end
 
   # returns an array of sheet names in the spreadsheet
   def sheets
-    return_sheets = []
-    @workbook_doc.xpath("//*[local-name()='sheet']").each do |sheet|
-      return_sheets << sheet['name']
+    @workbook_doc.xpath("//*[local-name()='sheet']").map do |sheet|
+      sheet['name']
     end
-    return_sheets
   end
 
   # shows the internal representation of all cells
@@ -328,15 +325,12 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   # (nil,nil) if label is not defined
   def label(labelname)
     read_labels
-    unless @label.size > 0
+    if @label.empty? || !@label.has_key?(labelname)
       return nil,nil,nil
-    end
-    if @label.has_key? labelname
+    else
       return @label[labelname][1].to_i,
         Roo::GenericSpreadsheet.letter_to_number(@label[labelname][2]),
         @label[labelname][0]
-    else
-      return nil,nil,nil
     end
   end
 
@@ -722,10 +716,8 @@ Datei xl/comments1.xml
 
     doc.xpath("//*[local-name()='cellXfs']").each do |xfs|
       xfs.children.each do |xf|
-        numFmtId = xf['numFmtId']
-        @cellXfs << numFmtId
-        fontId = xf['fontId'].to_i
-        @style_definitions << fonts[fontId]
+        @cellXfs << xf['numFmtId']
+        @style_definitions << fonts[xf['fontId'].to_i]
       end
     end
   end
