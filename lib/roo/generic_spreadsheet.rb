@@ -470,15 +470,17 @@ class Roo::GenericSpreadsheet
     # odd unicode characters and white spaces around columns
 
     def each(options={})
-      if options[:clean]
-        options.delete(:clean)
-        @cleaned ||= {}
-        @cleaned[@default_sheet] || clean_sheet
-      end
-
       if options.empty?
-        @header_line = 1
+        1.upto(last_row) do |line|
+          yield row(line)
+        end
       else
+        if options[:clean]
+          options.delete(:clean)
+          @cleaned ||= {}
+          @cleaned[@default_sheet] || clean_sheet
+        end
+
         if options[:header_search]
           @headers = nil
           @header_line = row_with(options[:header_search])
@@ -488,16 +490,14 @@ class Roo::GenericSpreadsheet
         else
           set_headers(options)
         end
-      end
 
-      cols = (first_column..last_column)
-      @header_line.upto(last_row) do |line|
-        if options.empty?
-          yield row(line)
-        elsif @headers
-          yield(Hash[@headers.map {|k,v| [k,cell(line,v)]}])
-        else
-          yield(Hash[cols.map {|col| [cell(@header_line,col),cell(line,col)]}])
+        headers = @headers ||
+          Hash[(first_column..last_column).map do |col|
+            [cell(@header_line,col), col]
+          end]
+
+        @header_line.upto(last_row) do |line|
+          yield(Hash[headers.map {|k,v| [k,cell(line,v)]}])
         end
       end
     end
