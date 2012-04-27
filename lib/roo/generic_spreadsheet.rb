@@ -189,21 +189,12 @@ class Roo::GenericSpreadsheet
   # Caution: this works only within the default sheet -> set default_sheet before you call this method
   # (experimental. see examples in the test_roo.rb file)
   def find(*args) # :nodoc
-    result_array = false
-    args.each {|arg,val|
-      if arg.class == Hash
-        arg.each { |hkey,hval|
-          if hkey == :array and hval == true
-            result_array = true
-          end
-        }
-      end
-    }
-    column_with = {}
-    1.upto(last_column) do |col|
-      column_with[cell(@header_line,col)] = col
-    end
+    options = (args.last.is_a?(Hash) ? args.pop : {})
+    result_array = options[:array]
     result = Array.new
+    header_for = Hash[1.upto(last_column).map do |col|
+      [col, cell(@header_line,col)]
+    end]
     #-- id
     if args[0].class == Fixnum
       rownum = args[0]
@@ -213,18 +204,11 @@ class Roo::GenericSpreadsheet
         tmp = []
       end
       1.upto(self.row(rownum).size) {|j|
-        x = ''
-        column_with.each { |key,val|
-          if val == j
-            x = key
-          end
-        }
         if @header_line
-          tmp[x] = cell(rownum,j)
+          tmp[header_for.fetch(j)] = cell(rownum,j)
         else
           tmp[j-1] = cell(rownum,j)
         end
-
       }
       if @header_line
         result = [ tmp ]
@@ -233,44 +217,28 @@ class Roo::GenericSpreadsheet
       end
       #-- :all
     elsif args[0] == :all
-      if args[1].class == Hash
-        args[1].each {|key,val|
-          if key == :conditions
-            column_with = {}
-            1.upto(last_column) do |col|
-              column_with[cell(@header_line,col)] = col
-            end
-            conditions = val
-            first_row.upto(last_row) do |i|
-              # are all conditions met?
-              found = 1
-              conditions.each { |key,val|
-                if cell(i,column_with[key]) == val
-                  found *= 1
-                else
-                  found *= 0
-                end
-              }
-              if found > 0
-                tmp = {}
-                1.upto(self.row(i).size) {|j|
-                  x = ''
-                  column_with.each { |key,val|
-                    if val == j
-                      x = key
-                    end
-                  }
-                  tmp[x] = cell(i,j)
-                }
-                if result_array
-                  result << self.row(i)
-                else
-                  result << tmp
-                end
-              end
-            end
-          end # :conditions
+      conditions = options[:conditions]
+      column_with = header_for.invert
+
+      first_row.upto(last_row) do |i|
+        # are all conditions met?
+        found = 1
+        conditions.each { |key,val|
+          if cell(i,column_with[key]) == val
+            found *= 1
+          else
+            found *= 0
+          end
         }
+        if found > 0
+          if result_array
+            result << self.row(i)
+          else
+            result << Hash[1.upto(self.row(i).size).map do |j|
+              [header_for.fetch(j), cell(i,j)]
+            end]
+          end
+        end
       end
     end
     result
