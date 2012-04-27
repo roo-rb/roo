@@ -191,50 +191,39 @@ class Roo::GenericSpreadsheet
   def find(*args) # :nodoc
     options = (args.last.is_a?(Hash) ? args.pop : {})
     result_array = options[:array]
-    result = Array.new
     header_for = Hash[1.upto(last_column).map do |col|
       [col, cell(@header_line,col)]
     end]
     #-- id
     if args[0].class == Fixnum
       rownum = args[0]
-      result =
-        if @header_line
-          [Hash[1.upto(self.row(rownum).size).map {|j|
-            [header_for.fetch(j), cell(rownum,j)]
-          }]]
-        else
-          self.row(rownum).size.times.map {|j|
-            cell(rownum,j + 1)
-          }
-        end
+      if @header_line
+        [Hash[1.upto(self.row().size).map {|j|
+          [header_for.fetch(j), cell(rownum,j)]
+        }]]
+      else
+        self.row(rownum).size.times.map {|j|
+          cell(rownum,j + 1)
+        }
+      end
     #-- :all
     elsif args[0] == :all
       conditions = options[:conditions]
       column_with = header_for.invert
 
-      first_row.upto(last_row) do |i|
+      first_row.upto(last_row).select do |i|
         # are all conditions met?
-        found = 1
-        conditions.each { |key,val|
-          if cell(i,column_with[key]) == val
-            found *= 1
-          else
-            found *= 0
-          end
-        }
-        if found > 0
-          if result_array
-            result << self.row(i)
-          else
-            result << Hash[1.upto(self.row(i).size).map do |j|
-              [header_for.fetch(j), cell(i,j)]
-            end]
-          end
+        conditions.all? { |key,val| cell(i,column_with[key]) == val }
+      end.map do |i|
+        if result_array
+          self.row(i)
+        else
+          Hash[1.upto(self.row(i).size).map do |j|
+            [header_for.fetch(j), cell(i,j)]
+          end]
         end
       end
     end
-    result
   end
 
   # returns all values in this row as an array
