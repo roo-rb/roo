@@ -351,7 +351,7 @@ class Roo::GenericSpreadsheet
 
   # returns an XML representation of all sheets of a spreadsheet file
   def to_xml
-    builder = Nokogiri::XML::Builder.new do |xml|
+    Nokogiri::XML::Builder.new do |xml|
       xml.spreadsheet {
         self.sheets.each do |sheet|
           self.default_sheet = sheet
@@ -372,8 +372,7 @@ class Roo::GenericSpreadsheet
           }
         end
       }
-    end
-    return builder.to_xml
+    end.to_xml
   end
 
   # when a method like spreadsheet.a42 is called
@@ -384,10 +383,10 @@ class Roo::GenericSpreadsheet
     if m =~ /^([a-z]+)(\d)$/
       col = Roo::GenericSpreadsheet.letter_to_number($1)
       row = $2.to_i
-      if args.size > 0
-        return cell(row,col,args[0])
+      if args.empty?
+        cell(row,col)
       else
-        return cell(row,col)
+        cell(row,col,args.first)
       end
     else
       super

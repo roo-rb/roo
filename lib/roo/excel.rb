@@ -173,13 +173,9 @@ class Roo::Excel < Roo::GenericSpreadsheet
     row,col = normalize(row,col)
     begin
       if @formula[sheet] and @formula[sheet][[row,col]]
-        return :formula
-      else
-        if @cell_type[sheet] and @cell_type[sheet][[row,col]]
-          return @cell_type[sheet][[row,col]]
-        else
-          return nil
-        end
+        :formula
+      elsif @cell_type[sheet]
+        @cell_type[sheet][[row,col]]
       end
     rescue
       puts "Error in sheet #{sheet}, row #{row}, col #{col}"
