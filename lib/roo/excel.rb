@@ -276,9 +276,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
     result = true
     return false if str.length < 2
     0.upto(str.length/2-1) do |i|
-      c = str[i*2,1]
-      n = str[i*2+1,1]
-      if n != "\000"
+      if str[i*2+1,1] != "\000"
         result = false
         break
       end

@@ -46,13 +46,15 @@ class Roo::Csv < Roo::GenericSpreadsheet
 
   private
 
+  TYPE_MAP = {
+    String => :string,
+    Float => :float,
+    Date => :date,
+    DateTime => :datetime,
+  }
+
   def celltype_class(value)
-    return {String => :string,
-      Float => :float,
-      Date => :date,
-      DateTime => :datetime,
-    }[value.class]
-    raise "unknown type for #{value.inspect}"
+    TYPE_MAP[value.class]
   end
 
   def read_cells(sheet=nil)

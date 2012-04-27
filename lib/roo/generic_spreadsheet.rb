@@ -64,8 +64,7 @@ class Roo::GenericSpreadsheet
     impossible_value = 999_999 # more than a spreadsheet can hold
     result = impossible_value
     @cell[sheet].each_pair {|key,value|
-      y,x = key # _to_string(key).split(',')
-      y = y.to_i
+      y = key.first.to_i # _to_string(key).split(',')
       result = [result, y].min if value
     } if @cell[sheet]
     result = nil if result == impossible_value
@@ -83,8 +82,7 @@ class Roo::GenericSpreadsheet
     impossible_value = 0
     result = impossible_value
     @cell[sheet].each_pair {|key,value|
-      y,x = key # _to_string(key).split(',')
-      y = y.to_i
+      y = key.first.to_i # _to_string(key).split(',')
       result = [result, y].max if value
     } if @cell[sheet]
     result = nil if result == impossible_value
@@ -102,8 +100,7 @@ class Roo::GenericSpreadsheet
     impossible_value = 999_999 # more than a spreadsheet can hold
     result = impossible_value
     @cell[sheet].each_pair {|key,value|
-      y,x = key # _to_string(key).split(',')
-      x = x # .to_i
+      x = key.last.to_i # _to_string(key).split(',')
       result = [result, x].min if value
     } if @cell[sheet]
     result = nil if result == impossible_value
@@ -121,8 +118,7 @@ class Roo::GenericSpreadsheet
     impossible_value = 0
     result = impossible_value
     @cell[sheet].each_pair {|key,value|
-      y,x = key # _to_string(key).split(',')
-      x = x.to_i
+      x = key.last.to_i # _to_string(key).split(',')
       result = [result, x].max if value
     } if @cell[sheet]
     result = nil if result == impossible_value

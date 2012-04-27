@@ -125,7 +125,7 @@ class Test::Unit::TestCase
       puts "\t#{t2-t1} seconds"
     end
     if DB_LOG
-      domain = Testrun.create(
+      Testrun.create(
         :class_name => self.class.to_s,
         :test_name => @method_name,
         :start => t1,
@@ -395,23 +395,23 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 'I am sheet 2', oo.cell('C',5)
       assert_raise(RangeError) { oo.default_sheet = "non existing sheet name" }
       assert_raise(RangeError) { oo.default_sheet = "non existing sheet name" }
-      assert_raise(RangeError) { dummy = oo.cell('C',5,"non existing sheet name")}
-      assert_raise(RangeError) { dummy = oo.celltype('C',5,"non existing sheet name")}
-      assert_raise(RangeError) { dummy = oo.empty?('C',5,"non existing sheet name")}
+      assert_raise(RangeError) { oo.cell('C',5,"non existing sheet name")}
+      assert_raise(RangeError) { oo.celltype('C',5,"non existing sheet name")}
+      assert_raise(RangeError) { oo.empty?('C',5,"non existing sheet name")}
       if oo.class == Roo::Excel
-        assert_raise(RuntimeError) { dummy = oo.formula?('C',5,"non existing sheet name")}
-        assert_raise(RuntimeError) { dummy = oo.formula('C',5,"non existing sheet name")}
+        assert_raise(RuntimeError) { oo.formula?('C',5,"non existing sheet name")}
+        assert_raise(RuntimeError) { oo.formula('C',5,"non existing sheet name")}
       else
-        assert_raise(RangeError) { dummy = oo.formula?('C',5,"non existing sheet name")}
-        assert_raise(RangeError) { dummy = oo.formula('C',5,"non existing sheet name")}
+        assert_raise(RangeError) { oo.formula?('C',5,"non existing sheet name")}
+        assert_raise(RangeError) { oo.formula('C',5,"non existing sheet name")}
         begin
-          assert_raise(RangeError) { dummy = oo.set('C',5,42,"non existing sheet name")} unless oo.class == Google
+          assert_raise(RangeError) { oo.set('C',5,42,"non existing sheet name")} unless oo.class == Google
         rescue NameError
           #
         end
-        assert_raise(RangeError) { dummy = oo.formulas("non existing sheet name")}
+        assert_raise(RangeError) { oo.formulas("non existing sheet name")}
       end
-      assert_raise(RangeError) { dummy = oo.to_yaml({},1,1,1,1,"non existing sheet name")}
+      assert_raise(RangeError) { oo.to_yaml({},1,1,1,1,"non existing sheet name")}
     end
   end
 
@@ -836,7 +836,7 @@ class TestRoo < Test::Unit::TestCase
         oo.default_sheet = oo.sheets.first
         assert_equal 'Einflüsse der neuen Theologie in "de gereformeerde Kerken van Nederland"',
           oo.cell('a',76)
-        dummy = oo.to_csv("csv#{$$}")
+        oo.to_csv("csv#{$$}")
         assert_equal 'Einflüsse der neuen Theologie in "de gereformeerde Kerken van Nederland"',
           oo.cell('a',78)
         File.delete_if_exist("csv#{$$}")
@@ -1160,9 +1160,9 @@ class TestRoo < Test::Unit::TestCase
 
   def test_excel_does_not_support_formulas
     with_each_spreadsheet(:name=>'false_encoding', :format=>:excel) do |oo|
-      assert_raise(RuntimeError) { void = oo.formula('a',1) }
-      assert_raise(RuntimeError) { void = oo.formula?('a',1) }
-      assert_raise(RuntimeError) { void = oo.formulas(oo.sheets.first) }
+      assert_raise(RuntimeError) { oo.formula('a',1) }
+      assert_raise(RuntimeError) { oo.formula?('a',1) }
+      assert_raise(RuntimeError) { oo.formulas(oo.sheets.first) }
     end
   end
 
@@ -1256,27 +1256,27 @@ class TestRoo < Test::Unit::TestCase
   def test_should_raise_file_not_found_error
     if OPENOFFICE
       assert_raise(IOError) {
-        oo = Roo::Openoffice.new(File.join('testnichtvorhanden','Bibelbund.ods'))
+        Roo::Openoffice.new(File.join('testnichtvorhanden','Bibelbund.ods'))
       }
     end
     if EXCEL
       assert_raise(IOError) {
-        oo = Roo::Excel.new(File.join('testnichtvorhanden','Bibelbund.xls'))
+        Roo::Excel.new(File.join('testnichtvorhanden','Bibelbund.xls'))
       }
     end
     if EXCELX
       assert_raise(IOError) {
-        oo = Roo::Excelx.new(File.join('testnichtvorhanden','Bibelbund.xlsx'))
+        Roo::Excelx.new(File.join('testnichtvorhanden','Bibelbund.xlsx'))
       }
     end
     if GOOGLE
-      #     assert_raise(Net::HTTPServerException) {
-      # oo = Google.new(key_of('testnichtvorhanden'+'Bibelbund.ods'))
-      #        oo = Google.new('testnichtvorhanden')
-      #      }
+      # assert_raise(Net::HTTPServerException) {
+      #   Google.new(key_of('testnichtvorhanden'+'Bibelbund.ods'))
+      #   Google.new('testnichtvorhanden')
+      # }
     end
   end
-  
+
   def test_write_google
     # write.me: http://spreadsheets.google.com/ccc?key=ptu6bbahNZpY0N0RrxQbWdw&hl=en_GB
     with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|
@@ -1434,7 +1434,7 @@ Sheet 3:
         sheetname = oo.sheets[oo.sheets.index(sheetname)+1]
       }
     end
-	end
+  end
 
   def test_bug_row_column_fixnum_float
     with_each_spreadsheet(:name=>'bug-row-column-fixnum-float', :format=>:excel) do |oo|
@@ -1447,31 +1447,33 @@ Sheet 3:
 
   def test_file_warning_default
     if OPENOFFICE
-      assert_raises(TypeError, "test/files/numbers1.xls is not an openoffice spreadsheet") { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls")) }
-      assert_raises(TypeError) { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xlsx")) }
+      assert_raises(TypeError, "test/files/numbers1.xls is not an openoffice spreadsheet") {
+        Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls"))
+      }
+      assert_raises(TypeError) { Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xlsx")) }
     end
     if EXCEL
-      assert_raises(TypeError) { oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.ods")) }
-      assert_raises(TypeError) { oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.xlsx")) }
+      assert_raises(TypeError) { Roo::Excel.new(File.join(TESTDIR,"numbers1.ods")) }
+      assert_raises(TypeError) { Roo::Excel.new(File.join(TESTDIR,"numbers1.xlsx")) }
     end
     if EXCELX
-      assert_raises(TypeError) { oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods")) }
-      assert_raises(TypeError) { oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls")) }
+      assert_raises(TypeError) { Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods")) }
+      assert_raises(TypeError) { Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls")) }
     end
   end
 
   def test_file_warning_error
     if OPENOFFICE
-      assert_raises(TypeError) { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls"),false,:error) }
-      assert_raises(TypeError) { oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xlsx"),false,:error) }
+      assert_raises(TypeError) { Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xls"),false,:error) }
+      assert_raises(TypeError) { Roo::Openoffice.new(File.join(TESTDIR,"numbers1.xlsx"),false,:error) }
     end
     if EXCEL
-      assert_raises(TypeError) { oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.ods"),false,:error) }
-      assert_raises(TypeError) { oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false,:error) }
+      assert_raises(TypeError) { Roo::Excel.new(File.join(TESTDIR,"numbers1.ods"),false,:error) }
+      assert_raises(TypeError) { Roo::Excel.new(File.join(TESTDIR,"numbers1.xlsx"),false,:error) }
     end
     if EXCELX
-      assert_raises(TypeError) { oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),false,:error) }
-      assert_raises(TypeError) { oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls"),false,:error) }
+      assert_raises(TypeError) { Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),false,:error) }
+      assert_raises(TypeError) { Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls"),false,:error) }
     end
   end
 
@@ -1523,27 +1525,27 @@ Sheet 3:
 
       # xls
       assert_nothing_raised() {
-        oo = Roo::Openoffice.new(File.join(TESTDIR,"type_openoffice.xls"),false, :ignore)
+        Roo::Openoffice.new(File.join(TESTDIR,"type_openoffice.xls"),false, :ignore)
       }
       # xlsx
       assert_nothing_raised() {
-        oo = Roo::Openoffice.new(File.join(TESTDIR,"type_openoffice.xlsx"),false, :ignore)
+        Roo::Openoffice.new(File.join(TESTDIR,"type_openoffice.xlsx"),false, :ignore)
       }
     end
     if EXCEL
       assert_nothing_raised() {
-        oo = Roo::Excel.new(File.join(TESTDIR,"type_excel.ods"),false, :ignore)
+        Roo::Excel.new(File.join(TESTDIR,"type_excel.ods"),false, :ignore)
       }
       assert_nothing_raised() {
-        oo = Roo::Excel.new(File.join(TESTDIR,"type_excel.xlsx"),false, :ignore)
+        Roo::Excel.new(File.join(TESTDIR,"type_excel.xlsx"),false, :ignore)
       }
     end
     if EXCELX
       assert_nothing_raised() {
-        oo = Roo::Excelx.new(File.join(TESTDIR,"type_excelx.ods"),false, :ignore)
+        Roo::Excelx.new(File.join(TESTDIR,"type_excelx.ods"),false, :ignore)
       }
       assert_nothing_raised() {
-        oo = Roo::Excelx.new(File.join(TESTDIR,"type_excelx.xls"),false, :ignore)
+        Roo::Excelx.new(File.join(TESTDIR,"type_excelx.xls"),false, :ignore)
       }
     end
   end
@@ -1566,7 +1568,7 @@ Sheet 3:
         assert_equal nil, oo.first_column(sheet), "first_column not nil in sheet #{sheet}"
         assert_equal nil, oo.last_column(sheet), "last_column not nil in sheet #{sheet}"
       }
-      assert_nothing_raised() { result = oo.to_xml }
+      assert_nothing_raised() { oo.to_xml }
     end
   end
 
@@ -1899,7 +1901,7 @@ Sheet 3:
       # oo.default_sheet = oo.sheets.first
       assert_equal "Anton", oo.anton
       assert_raises(NoMethodError) {
-        row,col = oo.never
+        oo.never
       }
     end
   end
@@ -2156,7 +2158,7 @@ where the expected result is
       :format=>[:openoffice,:excelx,:google]) do |oo|
       assert_nothing_raised(NoMethodError) {
         oo.default_sheet = oo.sheets.first
-        result = oo.formulas
+        oo.formulas
       }
       assert_equal([], oo.formulas)
     end
@@ -2170,7 +2172,7 @@ where the expected result is
       :format=>[:openoffice,:excelx,:google]) do |oo|
       assert_nothing_raised(NoMethodError) {
         oo.default_sheet = oo.sheets.first
-        result = oo.to_yaml
+        oo.to_yaml
       }
       assert_equal('', oo.to_yaml)
     end
@@ -2184,7 +2186,7 @@ where the expected result is
       :format=>[:openoffice,:excelx,:google]) do |oo|
       assert_nothing_raised(NoMethodError) {
         oo.default_sheet = oo.sheets.first
-        result = oo.to_matrix
+        oo.to_matrix
       }
       assert_equal(Matrix.empty(0,0), oo.to_matrix)
     end
@@ -2707,7 +2709,7 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
       #TODO: does only run within a darwin-environment
       if RUBY_PLATFORM.downcase =~ /darwin/
         assert_nothing_raised() {
-          oo = Roo::Excel.new(File.join(TESTDIR,"ms.xls"))
+          Roo::Excel.new(File.join(TESTDIR,"ms.xls"))
         }
       end
     end
@@ -3057,7 +3059,7 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
       # diese Datei gibt es noch nicht gezippt
       excel = Roo::Excelx.new(File.join(TESTDIR,"bode-v1.xlsx.zip"), :zip)
       assert excel
-      assert_raises (ArgumentError) {
+      assert_raises(ArgumentError) {
         assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
       }
       excel.default_sheet = excel.sheets.first
