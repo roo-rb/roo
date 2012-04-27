@@ -539,10 +539,10 @@ class Roo::GenericSpreadsheet
 
   def clean_sheet
     read_cells(@default_sheet) unless @cells_read[@default_sheet]
-    @cell = Hash[
-              @cell.map do |k,v|
-                [k,Hash[v.map {|k,v| [k,sanitize_value(v)]}]]
-              end]
+    sheet_cells = @cell[@default_sheet]
+    sheet_cells.each do |coord,value|
+      sheet_cells[coord] = sanitize_value(value)
+    end
     @cleaned[@default_sheet] = true
   end
 
