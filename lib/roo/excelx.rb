@@ -386,7 +386,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   private
 
   # helper function to set the internal representation of cells
-  def set_cell_values(sheet,x,y,i,v,value_type,formula,tr,
+  def set_cell_values(sheet,x,y,i,v,value_type,formula,
       excelx_type=nil,
       excelx_value=nil,
       s_attribute=nil)
@@ -469,9 +469,8 @@ class Roo::Excelx < Roo::GenericSpreadsheet
               v = inlinestr_content
               excelx_type = :string
               y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
-              tr=nil #TODO: ???s
               excelx_value = inlinestr_content #cell.content
-              set_cell_values(sheet,x,y,0,v,value_type,formula,tr,excelx_type,excelx_value,s_attribute)
+              set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
             end
           end
         when 'f'
@@ -511,8 +510,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
               cell.content
             end
           y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
-          tr=nil #TODO: ???s
-          set_cell_values(sheet,x,y,0,v,value_type,formula,tr,excelx_type,excelx_value,s_attribute)
+          set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
         end
       end
     end
