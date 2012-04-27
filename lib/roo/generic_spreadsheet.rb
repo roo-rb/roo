@@ -631,11 +631,9 @@ class Roo::GenericSpreadsheet
   end
 
   def unzip(filename, tmpdir)
-    ret = nil
     Zip::ZipFile.open(filename) do |zip|
-      ret = process_zipfile_packed(zip, tmpdir)
+      process_zipfile_packed(zip, tmpdir)
     end
-    ret
   end
 
   # check if default_sheet was set and exists in sheets-array
