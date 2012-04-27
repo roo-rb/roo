@@ -308,7 +308,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
 
   # returns an array of sheet names in the spreadsheet
   def sheets
-    @workbook_doc.xpath("//*[local-name()='sheet']").map do |sheet|
+    @workbook_doc.xpath("//xmlns:sheet").map do |sheet|
       sheet['name']
     end
   end
@@ -435,7 +435,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     sheet ||= @default_sheet
     validate_sheet!(sheet)
     n = self.sheets.index(sheet)
-    @sheet_doc[n].xpath("//*[local-name()='c']").each do |c|
+    @sheet_doc[n].xpath("//xmlns:c").each do |c|
       s_attribute = c['s'].to_i   # should be here
       # c: <c r="A5" s="2">
       # <v>22606</v>
@@ -581,7 +581,7 @@ Datei xl/comments1.xml
   end
 
   def read_labels
-    @label ||= Hash[@workbook_doc.xpath("//*[local-name()='definedName']").map do |defined_name|
+    @label ||= Hash[@workbook_doc.xpath("//xmlns:definedName").map do |defined_name|
 	    # "Sheet1!$C$5"
       sheet, coordinates = defined_name.text.split('!$', 2)
       col,row = coordinates.split('$')
@@ -654,7 +654,7 @@ Datei xl/comments1.xml
 
   # read the shared strings xml document
   def read_shared_strings(doc)
-    doc.xpath("//*[local-name()='si']").each do |si|
+    doc.xpath("//xmlns:si").each do |si|
       shared_table_entry = ''
       si.children.each do |elem|
         if elem.name == 'r' and elem.children
@@ -676,7 +676,7 @@ Datei xl/comments1.xml
   def read_styles(doc)
     @cellXfs = []
 
-    @numFmts = Hash[doc.xpath("//*[local-name()='numFmt']").map do |numFmt|
+    @numFmts = Hash[doc.xpath("//xmlns:numFmt").map do |numFmt|
       [numFmt['numFmtId'], numFmt['formatCode']]
     end]
     fonts = doc.xpath("//xmlns:fonts/xmlns:font").map do |font_el|
@@ -687,7 +687,7 @@ Datei xl/comments1.xml
       end
     end
 
-    doc.xpath("//*[local-name()='cellXfs']").each do |xfs|
+    doc.xpath("//xmlns:cellXfs").each do |xfs|
       xfs.children.each do |xf|
         @cellXfs << xf['numFmtId']
         @style_definitions << fonts[xf['fontId'].to_i]
