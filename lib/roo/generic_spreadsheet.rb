@@ -208,13 +208,17 @@ class Roo::GenericSpreadsheet
       end
     #-- :all
     elsif args[0] == :all
-      conditions = options[:conditions]
-      column_with = header_for.invert
+      rows = first_row.upto(last_row)
 
-      first_row.upto(last_row).select do |i|
-        # are all conditions met?
-        conditions.all? { |key,val| cell(i,column_with[key]) == val }
-      end.map do |i|
+      # are all conditions met?
+      if (conditions = options[:conditions]) && !conditions.empty?
+        column_with = header_for.invert
+        rows = rows.select do |i|
+          conditions.all? { |key,val| cell(i,column_with[key]) == val }
+        end
+      end
+
+      rows.map do |i|
         if result_array
           self.row(i)
         else
