@@ -705,15 +705,16 @@ Datei xl/comments1.xml
     end]
     fonts = doc.xpath("//*[local-name()='fonts']").flat_map do |fonts_el|
       fonts_el.xpath('./font').map do |font_el|
-        font = Excelx::Font.new
-        font_el.each_element do |font_sub_el|
-          case font_sub_el.name
-          when 'b'
-            font.bold = true
-          when 'i'
-            font.italic = true
-          when 'u'
-            font.underline = true
+        Excelx::Font.new.tap do |font|
+          font_el.each_element do |font_sub_el|
+            case font_sub_el.name
+            when 'b'
+              font.bold = true
+            when 'i'
+              font.italic = true
+            when 'u'
+              font.underline = true
+            end
           end
         end
       end
