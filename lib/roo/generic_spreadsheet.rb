@@ -65,9 +65,7 @@ class Roo::GenericSpreadsheet
 
   # returns the number of the first non-empty row
   def first_row(sheet=nil)
-    if sheet == nil
-      sheet = @default_sheet
-    end
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     if @first_row[sheet]
       return @first_row[sheet]
@@ -86,7 +84,7 @@ class Roo::GenericSpreadsheet
 
   # returns the number of the last non-empty row
   def last_row(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     if @last_row[sheet]
       return @last_row[sheet]
@@ -105,9 +103,7 @@ class Roo::GenericSpreadsheet
 
   # returns the number of the first non-empty column
   def first_column(sheet=nil)
-    if sheet == nil
-      sheet = @default_sheet
-    end
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     if @first_column[sheet]
       return @first_column[sheet]
@@ -126,7 +122,7 @@ class Roo::GenericSpreadsheet
 
   # returns the number of the last non-empty column
   def last_column(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     if @last_column[sheet]
       return @last_column[sheet]
@@ -147,7 +143,7 @@ class Roo::GenericSpreadsheet
   # you can add additional attributes with the prefix parameter like:
   # oo.to_yaml({"file"=>"flightdata_2007-06-26", "sheet" => "1"})
   def to_yaml(prefix={}, from_row=nil, from_column=nil, to_row=nil, to_column=nil,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     result = "--- \n"
     return '' unless first_row # empty result if there is no first_row in a sheet
 
@@ -174,7 +170,7 @@ class Roo::GenericSpreadsheet
 
   # write the current spreadsheet to stdout or into a file
   def to_csv(filename=nil,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     if filename
       File.open(filename,"w") do |file|
         write_csv_content(file,sheet)
@@ -192,7 +188,7 @@ class Roo::GenericSpreadsheet
   def to_matrix(from_row=nil, from_column=nil, to_row=nil, to_column=nil,sheet=nil)
     require 'matrix'
 
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     return Matrix.empty unless first_row
 
     Matrix.rows((from_row||first_row(sheet)).upto(to_row||last_row(sheet)).map do |row|
@@ -296,7 +292,7 @@ class Roo::GenericSpreadsheet
   # returns all values in this row as an array
   # row numbers are 1,2,3,... like in the spreadsheet
   def row(rownumber,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     first_column(sheet).upto(last_column(sheet)).map do |col|
       cell(rownumber,col,sheet)
@@ -309,7 +305,7 @@ class Roo::GenericSpreadsheet
     if columnnumber.class == String
       columnnumber = Roo::Excel.letter_to_number(columnnumber)
     end
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     first_row(sheet).upto(last_row(sheet)).map do |row|
       cell(row,columnnumber,sheet)
@@ -331,7 +327,7 @@ class Roo::GenericSpreadsheet
 
   # true if cell is empty
   def empty?(row, col, sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet] or self.class == Roo::Excel
     row,col = normalize(row,col)
     return true unless cell(row, col, sheet)
@@ -415,7 +411,7 @@ class Roo::GenericSpreadsheet
   # [row, col, formula]
   def formulas(sheet=nil)
     theformulas = Array.new
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     return theformulas unless first_row(sheet) # if there is no first row then
     # there can't be formulas

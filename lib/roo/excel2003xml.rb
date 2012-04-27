@@ -43,7 +43,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   # (1,1), (1,'A'), ('A',1), ('a',1) all refers to the
   # cell at the first line and first row.
   def cell(row, col, sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     if celltype(row,col,sheet) == :date
@@ -57,7 +57,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   # Returns nil if there is no formula.
   # The method #formula? checks if there is a formula.
   def formula(row,col,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     if @formula[sheet][[row,col]] == nil
@@ -69,7 +69,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
 
   # true, if there is a formula
   def formula?(row,col,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     formula(row,col) != nil
@@ -93,7 +93,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
 
   # Given a cell, return the cell's style
   def font(row, col, sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     style_name = @style[sheet][[row,col]] || @style_defaults[sheet][col - 1] || 'Default'
@@ -103,7 +103,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   # set a cell to a certain value
   # (this will not be saved back to the spreadsheet file!)
   def set(row,col,value,sheet=nil) #:nodoc:
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     set_value(row,col,value,sheet)
@@ -127,7 +127,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   # * :time
   # * :datetime
   def celltype(row,col,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     if @formula[sheet][[row,col]]
@@ -153,7 +153,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   # shows the internal representation of all cells
   # mainly for debugging purposes
   def to_s(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     @cell[sheet].inspect
   end
@@ -167,7 +167,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   # [row, col, formula]
   def formulas(sheet=nil)
     theformulas = Array.new
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     first_row(sheet).upto(last_row(sheet)) {|row|
       first_column(sheet).upto(last_column(sheet)) {|col|
@@ -223,7 +223,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   # some content <text:s text:c="3"/>
   #++
   def read_cells(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     sheet_found = false
     raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
     raise RangeError unless self.sheets.include? sheet

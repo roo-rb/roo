@@ -27,14 +27,14 @@ class Roo::Csv < Roo::GenericSpreadsheet
   end
 
   def cell(row, col, sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     @cell[[row,col]]
   end
 
   def celltype(row, col, sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     @cell_type[[row,col]]
@@ -56,7 +56,7 @@ class Roo::Csv < Roo::GenericSpreadsheet
   end
 
   def read_cells(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     @cell_type = {} unless @cell_type
     @cell = {} unless @cell
     @first_row[sheet] = 1

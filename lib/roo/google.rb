@@ -87,7 +87,7 @@ class Roo::Google < Roo::GenericSpreadsheet
   # (1,1), (1,'A'), ('A',1), ('a',1) all refers to the
   # cell at the first line and first row.
   def cell(row, col, sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     check_default_sheet #TODO: 2007-12-16
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
@@ -117,7 +117,7 @@ class Roo::Google < Roo::GenericSpreadsheet
   # * :time
   # * :datetime
   def celltype(row, col, sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     if @formula.size > 0 && @formula[sheet]["#{row},#{col}"]
@@ -131,7 +131,7 @@ class Roo::Google < Roo::GenericSpreadsheet
   # Returns nil if there is no formula.
   # The method #formula? checks if there is a formula.
   def formula(row,col,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     if @formula[sheet]["#{row},#{col}"] == nil
@@ -143,7 +143,7 @@ class Roo::Google < Roo::GenericSpreadsheet
 
   # true, if there is a formula
   def formula?(row,col,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     formula(row,col) != nil
@@ -162,7 +162,7 @@ class Roo::Google < Roo::GenericSpreadsheet
   # sets the cell to the content of 'value'
   # a formula can be set in the form of '=SUM(...)'
   def set_value(row,col,value,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     raise RangeError, "sheet not set" unless sheet
     #@@ Set and pass sheet_no
     begin
@@ -183,7 +183,7 @@ class Roo::Google < Roo::GenericSpreadsheet
 
   # returns the first non-empty row in a sheet
   def first_row(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     unless @first_row[sheet]
       sheet_no = sheets.index(sheet) + 1
       @first_row[sheet], @last_row[sheet], @first_column[sheet], @last_column[sheet] =
@@ -194,7 +194,7 @@ class Roo::Google < Roo::GenericSpreadsheet
 
   # returns the last non-empty row in a sheet
   def last_row(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     unless @last_row[sheet]
       sheet_no = sheets.index(sheet) + 1
       @first_row[sheet], @last_row[sheet], @first_column[sheet], @last_column[sheet] =
@@ -205,7 +205,7 @@ class Roo::Google < Roo::GenericSpreadsheet
 
   # returns the first non-empty column in a sheet
   def first_column(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     unless @first_column[sheet]
       sheet_no = sheets.index(sheet) + 1
       @first_row[sheet], @last_row[sheet], @first_column[sheet], @last_column[sheet] =
@@ -216,7 +216,7 @@ class Roo::Google < Roo::GenericSpreadsheet
 
   # returns the last non-empty column in a sheet
   def last_column(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     unless @last_column[sheet]
       sheet_no = sheets.index(sheet) + 1
       @first_row[sheet], @last_row[sheet], @first_column[sheet], @last_column[sheet] =
@@ -229,7 +229,7 @@ class Roo::Google < Roo::GenericSpreadsheet
 
   # read all cells in a sheet.
   def read_cells(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     raise RangeError, "illegal sheet <#{sheet}>" unless sheets.index(sheet)
     sheet_no = sheets.index(sheet)
     ws = @worksheets[sheet_no]

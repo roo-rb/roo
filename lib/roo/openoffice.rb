@@ -85,7 +85,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # (1,1), (1,'A'), ('A',1), ('a',1) all refers to the
   # cell at the first line and first row.
   def cell(row, col, sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     if celltype(row,col,sheet) == :date
@@ -99,7 +99,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # Returns nil if there is no formula.
   # The method #formula? checks if there is a formula.
   def formula(row,col,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     if @formula[sheet][[row,col]] == nil
@@ -119,7 +119,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
 
   # true, if there is a formula
   def formula?(row,col,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     formula(row,col) != nil
@@ -128,7 +128,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # returns each formula in the selected sheet as an array of elements
   # [row, col, formula]
   def formulas(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     if @formula[sheet]
       @formula[sheet].each.collect do |elem|
@@ -157,7 +157,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
 
   # Given a cell, return the cell's style
   def font(row, col, sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     style_name = @style[sheet][[row,col]] || @style_defaults[sheet][col - 1] || 'Default'
@@ -167,7 +167,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # set a cell to a certain value
   # (this will not be saved back to the spreadsheet file!)
   def set(row,col,value,sheet=nil) #:nodoc:
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     set_value(row,col,value,sheet)
@@ -191,7 +191,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # * :time
   # * :datetime
   def celltype(row,col,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     if @formula[sheet][[row,col]]
@@ -219,7 +219,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # shows the internal representation of all cells
   # mainly for debugging purposes
   def to_s(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     @cell[sheet].inspect
   end
@@ -256,7 +256,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # returns the comment at (row/col)
   # nil if there is no comment
   def comment(row,col,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     return nil unless @comment[sheet]
@@ -265,7 +265,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
 
   # true, if there is a comment
   def comment?(row,col,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     comment(row,col) != nil
@@ -275,7 +275,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # returns each comment in the selected sheet as an array of elements
   # [row, col, comment]
   def comments(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_comments(sheet) unless @comments_read[sheet]
     if @comment[sheet]
       @comment[sheet].each.collect do |elem|
@@ -343,7 +343,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # some content <text:s text:c="3"/>
   #++
   def read_cells(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     sheet_found = false
     raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
     raise RangeError unless self.sheets.include? sheet

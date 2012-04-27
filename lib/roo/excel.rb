@@ -138,7 +138,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
 
   # returns the content of a cell. The upper left corner is (1,1) or ('A',1)
   def cell(row,col,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     raise ArgumentError unless sheet
     read_cells(sheet) unless @cells_read[sheet]
     raise "should be read" unless @cells_read[sheet]
@@ -167,7 +167,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
   # * :time
   # * :datetime
   def celltype(row,col,sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     begin
@@ -203,7 +203,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
 
   # Given a cell, return the cell's font
   def font(row, col, sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row,col = normalize(row,col)
     @fonts[sheet][[row,col]]
@@ -212,7 +212,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
   # shows the internal representation of all cells
   # mainly for debugging purposes
   def to_s(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     @cell[sheet].inspect
   end
@@ -331,7 +331,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
 
   # read all cells in the selected sheet
   def read_cells(sheet=nil)
-    sheet = @default_sheet unless sheet
+    sheet ||= @default_sheet
     raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
     raise RangeError unless self.sheets.include? sheet
 
