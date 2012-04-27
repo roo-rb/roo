@@ -9,6 +9,7 @@
 # (like 'diff') must be changed (or commented out ;-)) if you want to run
 # the tests under another OS
 #
+require 'tmpdir'
 require 'rubygems'
 require './lib/roo'
 #TODO
@@ -820,10 +821,6 @@ class TestRoo < Test::Unit::TestCase
     #    assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
     #end
   end
-  
-  def tempdir
-    Dir::tmpdir
-  end
 
   # "/tmp/xxxx" darf man unter Windows nicht verwenden, weil das nicht erkannt
   # wird.
@@ -837,19 +834,20 @@ class TestRoo < Test::Unit::TestCase
         # Google hier nicht, weil Google-Spreadsheets nicht so gross werden
         # duerfen
       ]) do |oo|
-        File.delete_if_exist(File.join(tempdir,"Bibelbund.csv"))
-        assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
-        assert_equal "Tagebuch des Sekret\303\244rs.  Nachrichten aus Chile", oo.cell(46,'A')
-        assert_equal "Tagebuch aus Chile  Juli 1977", oo.cell(55,'A')
-        assert oo.to_csv(File.join(tempdir,"Bibelbund.csv"))
-        assert File.exists?(File.join(tempdir,"Bibelbund.csv"))
-        assert_equal "", diff(File.join(TESTDIR, "Bibelbund.csv"), File.join(tempdir,"Bibelbund.csv")),
-          "error in class #{oo.class}"
-        #end
+        Dir.mktmpdir do |tempdir|
+          assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
+          assert_equal "Tagebuch des Sekret\303\244rs.  Nachrichten aus Chile", oo.cell(46,'A')
+          assert_equal "Tagebuch aus Chile  Juli 1977", oo.cell(55,'A')
+          assert oo.to_csv(File.join(tempdir,"Bibelbund.csv"))
+          assert File.exists?(File.join(tempdir,"Bibelbund.csv"))
+          assert_equal "", diff(File.join(TESTDIR, "Bibelbund.csv"), File.join(tempdir,"Bibelbund.csv")),
+            "error in class #{oo.class}"
+          #end
+        end
       end
     end
   end
-  
+
   def test_bug_quotes_excelx
 	  if LONG_RUN
       with_each_spreadsheet(:name=>'Bibelbund', :format=>[:openoffice,
@@ -869,13 +867,14 @@ class TestRoo < Test::Unit::TestCase
   def test_to_csv
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       master = "#{TESTDIR}/numbers1.csv"
-      File.delete_if_exist(File.join(tempdir,"numbers1.csv"))
-      assert oo.to_csv(File.join(tempdir,"numbers1.csv"),oo.sheets.first)
-      assert(File.exists?(File.join(tempdir,"numbers1.csv")), "Datei #{tempdir}/numbers1.csv existiert nicht")
-      assert_equal "", diff(master, File.join(tempdir,"numbers1.csv"))
-      assert oo.to_csv(File.join(tempdir,"numbers1.csv"))
-      assert File.exists?(File.join(tempdir,"numbers1.csv"))
-      assert_equal "", diff(master, File.join(tempdir,"numbers1.csv"))
+      Dir.mktmpdir do |tempdir|
+        assert oo.to_csv(File.join(tempdir,"numbers1.csv"),oo.sheets.first)
+        assert(File.exists?(File.join(tempdir,"numbers1.csv")), "Datei #{tempdir}/numbers1.csv existiert nicht")
+        assert_equal "", diff(master, File.join(tempdir,"numbers1.csv"))
+        assert oo.to_csv(File.join(tempdir,"numbers1.csv"))
+        assert File.exists?(File.join(tempdir,"numbers1.csv"))
+        assert_equal "", diff(master, File.join(tempdir,"numbers1.csv"))
+      end
     end
   end
 
@@ -962,8 +961,10 @@ class TestRoo < Test::Unit::TestCase
   def test_bug_empty_sheet
     with_each_spreadsheet(:name=>'formula', :format=>[:openoffice, :excelx]) do |oo|
       oo.default_sheet = 'Sheet3' # is an empty sheet
-      assert_nothing_raised() {  oo.to_csv(File.join(tempdir,"emptysheet.csv"))  }
-      assert_equal "", `cat #{File.join(tempdir,"emptysheet.csv")}`
+      Dir.mktmpdir do |tempdir|
+        assert_nothing_raised() {  oo.to_csv(File.join(tempdir,"emptysheet.csv"))  }
+        assert_equal "", `cat #{File.join(tempdir,"emptysheet.csv")}`
+      end
     end
   end
 
@@ -1381,15 +1382,13 @@ Sheet 3:
 
   def test_date_time_to_csv
     with_each_spreadsheet(:name=>'time-test') do |oo|
-      begin
+      Dir.mktmpdir do |tempdir|
         csv_output = File.join(tempdir,'time_test.csv')
         assert oo.to_csv(csv_output)
         assert File.exists?(csv_output)
         assert_equal "", `diff --strip-trailing-cr #{TESTDIR}/time-test.csv #{csv_output}`
         # --strip-trailing-cr is needed because the test-file use 0A and
         # the test on an windows box generates 0D 0A as line endings
-      ensure
-        File.delete_if_exist(csv_output)
       end
     end
   end
