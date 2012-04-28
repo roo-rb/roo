@@ -11,63 +11,6 @@ CHARGUESS =
     false
   end
 
-# The Spreadsheet library has a bug in handling Excel
-# base dates so if the file is a 1904 base date then
-# dates are off by a day. 1900 base dates work fine
-module Spreadsheet
-  module Excel
-    class Row < Spreadsheet::Row
-      def _date data # :nodoc:
-        return data if data.is_a?(Date)
-        date = @worksheet.date_base + data.to_i
-        if LEAP_ERROR > @worksheet.date_base
-          date -= 1
-        end
-        date
-      end
-      public :_datetime
-    end
-  end
-end
-
-#=====================================================================
-# TODO:
-# redefinition of this method, the method in the spreadsheet gem has a bug
-# redefinition can be removed, if spreadsheet does it in the correct way
-module Spreadsheet
-  module Excel
-    class Row < Spreadsheet::Row
-      def _datetime data # :nodoc:
-        return data if data.is_a?(DateTime)
-        base = @worksheet.date_base
-        date = base + data.to_f
-        hour = (data % 1) * 24
-        min  = (hour % 1) * 60
-        sec  = ((min % 1) * 60).round
-        min = min.floor
-        hour = hour.floor
-        if sec > 59
-          sec = 0
-          min += 1
-        end
-        if min > 59
-          min = 0
-          hour += 1
-        end
-        if hour > 23
-          hour = 0
-          date += 1
-        end
-        if LEAP_ERROR > base
-          date -= 1
-        end
-        DateTime.new(date.year, date.month, date.day, hour, min, sec)
-      end
-    end
-  end
-end
-#=====================================================================
-
 # ruby-spreadsheet has a font object so we're extending it
 # with our own functionality but still providing full access
 # to the user for other font information
@@ -392,7 +335,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
       value = h*3600+m*60+s
     else
       if row.at(idx).class == Spreadsheet::Formula
-        datetime = row._datetime(cell)
+        datetime = row.send(:_datetime, cell)
       else
         datetime = row.datetime(idx)
       end
@@ -404,7 +347,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
       else
         value_type = :date
         if row.at(idx).class == Spreadsheet::Formula
-          value = row._date(cell)
+          value = row.send(:_date, cell)
         else
           value = row.date(idx)
         end
