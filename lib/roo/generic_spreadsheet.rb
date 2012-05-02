@@ -480,7 +480,7 @@ class Roo::GenericSpreadsheet
 
   protected
 
-  def file_type_check(filename, ext, name, packed=nil)
+  def file_type_check(filename, ext, name, warning_level, packed=nil)
     new_expression = {
       '.ods' => 'Roo::Openoffice.new',
       '.xls' => 'Roo::Excel.new',
@@ -500,7 +500,7 @@ class Roo::GenericSpreadsheet
       raise "unknown file type: #{ext}"
     end
     if File.extname(filename).downcase != ext
-      case @file_warning
+      case warning_level
       when :error
         warn correct_class
         raise TypeError, "#{filename} is not #{name} file"
@@ -510,7 +510,7 @@ class Roo::GenericSpreadsheet
       when :ignore
         # ignore
       else
-        raise "#{@file_warning} illegal state of file_warning"
+        raise "#{warning_level} illegal state of file_warning"
       end
     end
   end

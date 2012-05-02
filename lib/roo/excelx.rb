@@ -86,8 +86,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   # values for packed: :zip
   def initialize(filename, packed=nil, file_warning = :error) #, create = false)
     super()
-    @file_warning = file_warning
-    file_type_check(filename,'.xlsx','an Excel-xlsx',packed)
+    file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
     make_tmpdir do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if filename[0,7] == "http://"
       filename = unzip(filename, tmpdir) if packed and packed == :zip
@@ -434,8 +433,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
     validate_sheet!(sheet)
-    n = self.sheets.index(sheet)
-    @sheet_doc[n].xpath("//xmlns:c").each do |c|
+    @sheet_doc[sheets.index(sheet)].xpath("//xmlns:c").each do |c|
       s_attribute = c['s'].to_i   # should be here
       # c: <c r="A5" s="2">
       # <v>22606</v>

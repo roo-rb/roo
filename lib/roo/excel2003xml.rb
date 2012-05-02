@@ -9,13 +9,12 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
   def initialize(filename, packed=nil, file_warning=:error)
-    @file_warning = file_warning
     super()
     make_tmpdir do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if filename[0,7] == "http://"
       filename = unzip(filename, tmpdir) if packed and packed == :zip
 
-      file_type_check(filename,'.xml','an Excel 2003 XML')
+      file_type_check(filename,'.xml','an Excel 2003 XML', file_warning)
       @cells_read = Hash.new
       @filename = filename
       unless File.file?(@filename)

@@ -42,8 +42,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
   # Parameter packed: :zip - File is a zip-file
   def initialize(filename, packed = nil, file_warning = :error)
     super()
-    @file_warning = file_warning
-    file_type_check(filename,'.xls','an Excel',packed)
+    file_type_check(filename,'.xls','an Excel', file_warning, packed)
     make_tmpdir do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if filename[0,7] == "http://"
       filename = open_from_stream(filename[7..-1], tmpdir) if filename[0,7] == "stream:"
