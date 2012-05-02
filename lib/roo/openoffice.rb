@@ -35,7 +35,6 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
   def initialize(filename, packed=nil, file_warning=:error, tmpdir_root=nil)
-    super()
     file_type_check(filename,'.ods','an Roo::Openoffice', file_warning, packed)
     make_tmpdir(tmpdir_root) do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if filename[0,7] == "http://"

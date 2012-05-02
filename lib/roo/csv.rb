@@ -10,7 +10,6 @@ require 'csv'
 class Roo::Csv < Roo::GenericSpreadsheet
   def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil)
     @filename = filename
-    super()
     @cell = Hash.new
     @cell_type = Hash.new
     @cells_read = Hash.new

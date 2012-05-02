@@ -9,7 +9,6 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
   def initialize(filename, packed=nil, file_warning=:error)
-    super()
     make_tmpdir do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if filename[0,7] == "http://"
       filename = unzip(filename, tmpdir) if packed == :zip

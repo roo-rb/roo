@@ -41,7 +41,6 @@ class Roo::Excel < Roo::GenericSpreadsheet
   # Creates a new Excel spreadsheet object.
   # Parameter packed: :zip - File is a zip-file
   def initialize(filename, packed = nil, file_warning = :error)
-    super()
     file_type_check(filename,'.xls','an Excel', file_warning, packed)
     make_tmpdir do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if filename[0,7] == "http://"
