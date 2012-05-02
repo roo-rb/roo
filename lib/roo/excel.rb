@@ -142,26 +142,6 @@ class Roo::Excel < Roo::GenericSpreadsheet
     raise StandardError, "sheet '#{name}' not found"
   end
 
-  def empty_row?(row)
-    content = false
-    row.compact.each {|elem|
-      if elem != ''
-        content = true
-      end
-    }
-    ! content
-  end
-
-  def empty_column?(col)
-    content = false
-    col.compact.each {|elem|
-      if elem != ''
-        content = true
-      end
-    }
-    ! content
-  end
-
   def normalize_string(value)
     value = every_second_null?(value) ? remove_every_second_null(value) : value
     if CHARGUESS && encoding = CharGuess::guess(value)
