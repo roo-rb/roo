@@ -540,13 +540,15 @@ class Roo::GenericSpreadsheet
   def clean_sheet(sheet)
     read_cells(sheet) unless @cells_read[sheet]
     @cell[sheet].each_pair do |coord,value|
-      @cell[sheet][coord] = sanitize_value(value)
+      if String === value
+        @cell[sheet][coord] = sanitize_value(value)
+      end
     end
     @cleaned[sheet] = true
   end
 
   def sanitize_value(v)
-    String === v ? v.strip.unpack('U*').select {|b| b < 127}.pack('U*') : v
+    v.strip.unpack('U*').select {|b| b < 127}.pack('U*')
   end
 
   def set_headers(hash={})
