@@ -39,7 +39,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     file_type_check(filename,'.ods','an Roo::Openoffice', file_warning, packed)
     make_tmpdir(tmpdir_root) do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if filename[0,7] == "http://"
-      filename = unzip(filename, tmpdir) if packed and packed == :zip
+      filename = unzip(filename, tmpdir) if packed == :zip
       @cells_read = Hash.new
       #TODO: @cells_read[:default] = false
       @filename = filename

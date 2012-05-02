@@ -46,7 +46,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
     make_tmpdir do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if filename[0,7] == "http://"
       filename = open_from_stream(filename[7..-1], tmpdir) if filename[0,7] == "stream:"
-      filename = unzip(filename, tmpdir) if packed and packed == :zip
+      filename = unzip(filename, tmpdir) if packed == :zip
 
       @filename = filename
       unless File.file?(@filename)
