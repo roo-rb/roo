@@ -17,12 +17,7 @@ CHARGUESS =
 module ExcelFontExtensions
   def bold?(*args)
     #From ruby-spreadsheet doc: 100 <= weight <= 1000, bold => 700, normal => 400
-    case weight
-    when 700
-      true
-    else
-      false
-    end
+    weight == 700
   end
 
   def italic?
@@ -32,7 +27,6 @@ module ExcelFontExtensions
   def underline?
     underline != :none
   end
-
 end
 
 # Class for handling Excel-Spreadsheets
