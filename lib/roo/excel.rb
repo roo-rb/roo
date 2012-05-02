@@ -11,24 +11,6 @@ CHARGUESS =
     false
   end
 
-# ruby-spreadsheet has a font object so we're extending it
-# with our own functionality but still providing full access
-# to the user for other font information
-module ExcelFontExtensions
-  def bold?(*args)
-    #From ruby-spreadsheet doc: 100 <= weight <= 1000, bold => 700, normal => 400
-    weight == 700
-  end
-
-  def italic?
-    italic
-  end
-
-  def underline?
-    underline != :none
-  end
-end
-
 # Class for handling Excel-Spreadsheets
 class Roo::Excel < Roo::GenericSpreadsheet
 
@@ -255,6 +237,24 @@ class Roo::Excel < Roo::GenericSpreadsheet
       else
         v
       end
+  end
+
+  # ruby-spreadsheet has a font object so we're extending it
+  # with our own functionality but still providing full access
+  # to the user for other font information
+  module ExcelFontExtensions
+    def bold?(*args)
+      #From ruby-spreadsheet doc: 100 <= weight <= 1000, bold => 700, normal => 400
+      weight == 700
+    end
+
+    def italic?
+      italic
+    end
+
+    def underline?
+      underline != :none
+    end
   end
 
   # read all cells in the selected sheet
