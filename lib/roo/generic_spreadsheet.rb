@@ -539,9 +539,8 @@ class Roo::GenericSpreadsheet
 
   def clean_sheet(sheet)
     read_cells(sheet) unless @cells_read[sheet]
-    sheet_cells = @cell[sheet]
-    sheet_cells.each do |coord,value|
-      sheet_cells[coord] = sanitize_value(value)
+    @cell[sheet].each_pair do |coord,value|
+      @cell[sheet][coord] = sanitize_value(value)
     end
     @cleaned[sheet] = true
   end
