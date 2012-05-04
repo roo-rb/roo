@@ -161,6 +161,12 @@ class Roo::Google < Roo::GenericSpreadsheet
 
   # sets the cell to the content of 'value'
   # a formula can be set in the form of '=SUM(...)'
+  def set(row,col,value,sheet=nil)
+    set_value(row,col,value,sheet=nil)
+  end
+
+  # sets the cell to the content of 'value'
+  # a formula can be set in the form of '=SUM(...)'
   def set_value(row,col,value,sheet=nil)
     sheet ||= @default_sheet
     validate_sheet!(sheet)
@@ -222,6 +228,12 @@ class Roo::Google < Roo::GenericSpreadsheet
   end
 
   private
+
+  def set_type(row,col,type,sheet=nil)
+    sheet = @default_value unless sheet
+    key = "#{row},#{col}"
+    @cell_type[sheet][[key]] = type
+  end
 
   # read all cells in a sheet.
   def read_cells(sheet=nil)

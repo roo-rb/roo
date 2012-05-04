@@ -253,6 +253,24 @@ class Roo::GenericSpreadsheet
     end
   end
 
+  # set a cell to a certain value
+  # (this will not be saved back to the spreadsheet file!)
+  def set(row,col,value,sheet=nil) #:nodoc:
+    sheet ||= @default_sheet
+    read_cells(sheet) unless @cells_read[sheet]
+    row,col = normalize(row,col)
+    set_value(row,col,value,sheet)
+    if value.class == Fixnum
+      set_type(row,col,:float,sheet)
+    elsif value.class == String
+      set_type(row,col,:string,sheet)
+    elsif value.class == Float
+      set_type(row,col,:string,sheet)
+    else
+      raise ArgumentError, "Type for "+value.to_s+" not set"
+    end
+  end
+
   # reopens and read a spreadsheet document
   def reload
     # von Abfrage der Klasse direkt auf .to_s == '..' umgestellt
@@ -560,6 +578,16 @@ class Roo::GenericSpreadsheet
 
   def header_index(query)
     row(@header_line).index(query) + first_column
+  end
+
+  def set_value(row,col,value,sheet=nil)
+    sheet = @default_value unless sheet
+    @cell[sheet][[row,col]] = value
+  end
+
+  def set_type(row,col,type,sheet=nil)
+    sheet = @default_value unless sheet
+    @cell_type[sheet][[row,col]] = type
   end
 
   # converts cell coordinate to numeric values of row,col
