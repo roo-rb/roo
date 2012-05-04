@@ -255,20 +255,18 @@ class Roo::GenericSpreadsheet
 
   # set a cell to a certain value
   # (this will not be saved back to the spreadsheet file!)
-  def set(row,col,value,sheet=nil) #:nodoc:
-    sheet ||= @default_sheet
+  def set(row,col,value,sheet=@default_sheet) #:nodoc:
     read_cells(sheet) unless @cells_read[sheet]
-    row,col = normalize(row,col)
+    row, col = normalize(row,col)
+    cell_type = case value
+                when Fixnum then :float
+                when String, Float then :string
+                else
+                  raise ArgumentError, "Type for #{value} not set"
+                end
+
     set_value(row,col,value,sheet)
-    if value.class == Fixnum
-      set_type(row,col,:float,sheet)
-    elsif value.class == String
-      set_type(row,col,:string,sheet)
-    elsif value.class == Float
-      set_type(row,col,:string,sheet)
-    else
-      raise ArgumentError, "Type for "+value.to_s+" not set"
-    end
+    set_type(row,col,cell_type,sheet)
   end
 
   # reopens and read a spreadsheet document
@@ -580,13 +578,11 @@ class Roo::GenericSpreadsheet
     row(@header_line).index(query) + first_column
   end
 
-  def set_value(row,col,value,sheet=nil)
-    sheet = @default_value unless sheet
+  def set_value(row,col,value,sheet=@default_value)
     @cell[sheet][[row,col]] = value
   end
 
-  def set_type(row,col,type,sheet=nil)
-    sheet = @default_value unless sheet
+  def set_type(row,col,type,sheet=@default_value)
     @cell_type[sheet][[row,col]] = type
   end
 
