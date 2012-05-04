@@ -1793,7 +1793,14 @@ Sheet 3:
       assert_equal [ "Start time", 9.25, 10.75], oo.column(5)
     end
   end
-  
+
+  def test_ruby_spreadsheet_formula_bug
+     with_each_spreadsheet(:name=>'formula_parse_error', :format=>:excel) do |oo|
+       assert_equal '5026', oo.cell(2,3)
+       assert_equal '5026', oo.cell(3,3)
+     end
+   end
+
   # Excel has two base date formats one from 1900 and the other from 1904.
   # There's a MS bug that 1900 base dates include an extra day due to erroneously
   # including 1900 as a leap yar.
@@ -1819,7 +1826,15 @@ Sheet 3:
       assert_nothing_raised(ArgumentError) {
         assert_equal DateTime.new(2006,2,2,10,0,0), oo.cell('a',1)
       }
-    end # each
+    end
+  end
+
+  def test_bad_excel_date
+    with_each_spreadsheet(:name=>'bad_excel_date', :format=>:excel) do |oo|
+      assert_nothing_raised(ArgumentError) {
+        assert_equal DateTime.new(2006,2,2,10,0,0), oo.cell('a',1)
+      }
+    end
   end
 
   def test_cell_methods
@@ -2020,7 +2035,8 @@ Sheet 3:
         [1.0, nil, 3.0],
         [4.0, 5.0, 6.0],
         [7.0, 8.0, nil] ], oo.to_matrix(1,1,3,3)
-    end end
+    end
+  end
 
   def test_bug_date_mileszs
     local_only do
