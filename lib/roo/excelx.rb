@@ -432,9 +432,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
     validate_sheet!(sheet)
-    n = self.sheets.index(sheet)
-    @sheet_doc[n].remove_namespaces!  #TODO Check why namespaces aren't working
-    @sheet_doc[n].xpath("/worksheet/sheetData/row/c").each do |c|
+    @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row/xmlns:c").each do |c|
       s_attribute = c['s'].to_i   # should be here
       # c: <c r="A5" s="2">
       # <v>22606</v>
@@ -649,8 +647,7 @@ Datei xl/comments1.xml
 
   # read the shared strings xml document
   def read_shared_strings(doc)
-    doc.remove_namespaces! #TODO Check why namespaces aren't working
-    doc.xpath("/sst/si").each do |si|
+    doc.xpath("/xmlns:sst/xmlns:si").each do |si|
       shared_table_entry = ''
       si.children.each do |elem|
         if elem.name == 'r' and elem.children
