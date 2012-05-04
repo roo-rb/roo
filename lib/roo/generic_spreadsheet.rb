@@ -706,18 +706,19 @@ class Roo::GenericSpreadsheet
           onecell.to_s
         end
       when :formula
-        if onecell.class == String
+        case onecell
+        when String
           unless onecell.empty?
             %{"#{onecell.gsub(/"/,'""')}"}
           end
-        elsif onecell.class == Float
+        when Float
           if onecell == onecell.to_i
             onecell.to_i.to_s
           else
             onecell.to_s
           end
-        elsif onecell.class == DateTime
-          str << onecell.to_s
+        when DateTime
+          onecell.to_s
         else
           raise "unhandled onecell-class #{onecell.class}"
         end
