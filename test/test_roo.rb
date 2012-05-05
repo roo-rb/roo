@@ -405,7 +405,7 @@ class TestRoo < Test::Unit::TestCase
         assert_raise(RangeError) { oo.formula?('C',5,"non existing sheet name")}
         assert_raise(RangeError) { oo.formula('C',5,"non existing sheet name")}
         begin
-          assert_raise(RangeError) { oo.set('C',5,42,"non existing sheet name")} unless oo.class == Google
+          assert_raise(RangeError) { oo.set('C',5,42,"non existing sheet name")}
         rescue NameError
           #
         end
