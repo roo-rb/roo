@@ -1281,22 +1281,22 @@ class TestRoo < Test::Unit::TestCase
     # write.me: http://spreadsheets.google.com/ccc?key=ptu6bbahNZpY0N0RrxQbWdw&hl=en_GB
     with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|
       oo.default_sheet = oo.sheets.first
-      oo.set_value(1,1,"hello from the tests")
+      oo.set(1,1,"hello from the tests")
       assert_equal "hello from the tests", oo.cell(1,1)
-      oo.set_value(1,1, 1.0)
+      oo.set(1,1, 1.0)
       assert_equal 1.0, oo.cell(1,1)
     end
   end
 
-  def test_bug_set_value_with_more_than_one_sheet_google
+  def test_bug_set_with_more_than_one_sheet_google
     # write.me: http://spreadsheets.google.com/ccc?key=ptu6bbahNZpY0N0RrxQbWdw&hl=en_GB
     with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|
       content1 = 'AAA'
       content2 = 'BBB'
       oo.default_sheet = oo.sheets.first
-      oo.set_value(1,1,content1)
+      oo.set(1,1,content1)
       oo.default_sheet = oo.sheets[1]
-      oo.set_value(1,1,content2) # in the second sheet
+      oo.set(1,1,content2) # in the second sheet
       oo.default_sheet = oo.sheets.first
       assert_equal content1, oo.cell(1,1)
       oo.default_sheet = oo.sheets[1]
@@ -1304,22 +1304,22 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  def test_set_value_with_sheet_argument_google
+  def test_set_with_sheet_argument_google
     with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|
       random_row = rand(10)+1
       random_column = rand(10)+1
       content1 = 'ABC'
       content2 = 'DEF'
-      oo.set_value(random_row,random_column,content1,oo.sheets.first)
-      oo.set_value(random_row,random_column,content2,oo.sheets[1])
+      oo.set(random_row,random_column,content1,oo.sheets.first)
+      oo.set(random_row,random_column,content2,oo.sheets[1])
       assert_equal content1, oo.cell(random_row,random_column,oo.sheets.first)
       assert_equal content2, oo.cell(random_row,random_column,oo.sheets[1])
     end
   end
 
-  def test_set_value_for_non_existing_sheet_google
+  def test_set_for_non_existing_sheet_google
     with_each_spreadsheet(:name=>'ptu6bbahNZpY0N0RrxQbWdw', :format=>:google) do |oo|
-      assert_raise(RangeError) { oo.set_value(1,1,"dummy","no_sheet")   }
+      assert_raise(RangeError) { oo.set(1,1,"dummy","no_sheet")   }
     end
   end
 
