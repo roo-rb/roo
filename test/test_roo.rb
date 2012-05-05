@@ -482,6 +482,14 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
+  def test_setting_invalid_type_does_not_update_cell
+    with_each_spreadsheet(:name=>'numbers1') do |oo|
+      assert_raise(ArgumentError) { oo.set(1,1, :invalid_type) }
+      assert_equal 1, oo.cell(1,1)
+      assert_equal :float, oo.celltype(1,1)
+    end
+  end
+
   def test_italo_table
     with_each_spreadsheet(:name=>'simple_spreadsheet_from_italo', :format=>[:openoffice, :excel]) do |oo|
       assert_equal  '1', oo.cell('A',1)
