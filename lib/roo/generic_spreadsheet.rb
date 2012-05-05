@@ -255,7 +255,8 @@ class Roo::GenericSpreadsheet
 
   # set a cell to a certain value
   # (this will not be saved back to the spreadsheet file!)
-  def set(row,col,value,sheet=@default_sheet) #:nodoc:
+  def set(row,col,value,sheet=nil) #:nodoc:
+    sheet ||= @default_sheet
     read_cells(sheet) unless @cells_read[sheet]
     row, col = normalize(row,col)
     cell_type = case value
@@ -578,11 +579,13 @@ class Roo::GenericSpreadsheet
     row(@header_line).index(query) + first_column
   end
 
-  def set_value(row,col,value,sheet=@default_value)
+  def set_value(row,col,value,sheet=nil)
+    sheet ||= @default_sheet
     @cell[sheet][[row,col]] = value
   end
 
-  def set_type(row,col,type,sheet=@default_value)
+  def set_type(row,col,type,sheet=nil)
+    sheet ||= @default_sheet
     @cell_type[sheet][[row,col]] = type
   end
 
