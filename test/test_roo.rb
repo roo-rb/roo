@@ -108,7 +108,7 @@ class Test::Unit::TestCase
   def run(result, &block)
     t1 = Time.now
     if DISPLAY_LOG
-	    v1,v2,v3 = RUBY_VERSION.split('.')
+	    v1,v2,_ = RUBY_VERSION.split('.')
 	    if v1.to_i > 1 or
           (v1.to_i == 1 and v2.to_i > 8)
 		    # Ruby 1.9.x
