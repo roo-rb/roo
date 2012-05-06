@@ -405,7 +405,7 @@ class TestRoo < Test::Unit::TestCase
         assert_raise(RangeError) { oo.formula?('C',5,"non existing sheet name")}
         assert_raise(RangeError) { oo.formula('C',5,"non existing sheet name")}
         begin
-          assert_raise(RangeError) { oo.set('C',5,42,"non existing sheet name")} unless oo.class == Google
+          assert_raise(RangeError) { oo.set('C',5,42,"non existing sheet name")}
         rescue NameError
           #
         end
@@ -479,6 +479,14 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 5, oo.cell('c',1)
       assert_equal 2, oo.cell('a',2)
       assert_equal 3, oo.cell('a',3)
+    end
+  end
+
+  def test_setting_invalid_type_does_not_update_cell
+    with_each_spreadsheet(:name=>'numbers1') do |oo|
+      assert_raise(ArgumentError) { oo.set(1,1, :invalid_type) }
+      assert_equal 1, oo.cell(1,1)
+      assert_equal :float, oo.celltype(1,1)
     end
   end
 
@@ -1281,22 +1289,22 @@ class TestRoo < Test::Unit::TestCase
     # write.me: http://spreadsheets.google.com/ccc?key=ptu6bbahNZpY0N0RrxQbWdw&hl=en_GB
     with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|
       oo.default_sheet = oo.sheets.first
-      oo.set_value(1,1,"hello from the tests")
+      oo.set(1,1,"hello from the tests")
       assert_equal "hello from the tests", oo.cell(1,1)
-      oo.set_value(1,1, 1.0)
+      oo.set(1,1, 1.0)
       assert_equal 1.0, oo.cell(1,1)
     end
   end
 
-  def test_bug_set_value_with_more_than_one_sheet_google
+  def test_bug_set_with_more_than_one_sheet_google
     # write.me: http://spreadsheets.google.com/ccc?key=ptu6bbahNZpY0N0RrxQbWdw&hl=en_GB
     with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|
       content1 = 'AAA'
       content2 = 'BBB'
       oo.default_sheet = oo.sheets.first
-      oo.set_value(1,1,content1)
+      oo.set(1,1,content1)
       oo.default_sheet = oo.sheets[1]
-      oo.set_value(1,1,content2) # in the second sheet
+      oo.set(1,1,content2) # in the second sheet
       oo.default_sheet = oo.sheets.first
       assert_equal content1, oo.cell(1,1)
       oo.default_sheet = oo.sheets[1]
@@ -1304,22 +1312,22 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  def test_set_value_with_sheet_argument_google
+  def test_set_with_sheet_argument_google
     with_each_spreadsheet(:name=>'write.me', :format=>:google) do |oo|
       random_row = rand(10)+1
       random_column = rand(10)+1
       content1 = 'ABC'
       content2 = 'DEF'
-      oo.set_value(random_row,random_column,content1,oo.sheets.first)
-      oo.set_value(random_row,random_column,content2,oo.sheets[1])
+      oo.set(random_row,random_column,content1,oo.sheets.first)
+      oo.set(random_row,random_column,content2,oo.sheets[1])
       assert_equal content1, oo.cell(random_row,random_column,oo.sheets.first)
       assert_equal content2, oo.cell(random_row,random_column,oo.sheets[1])
     end
   end
 
-  def test_set_value_for_non_existing_sheet_google
+  def test_set_for_non_existing_sheet_google
     with_each_spreadsheet(:name=>'ptu6bbahNZpY0N0RrxQbWdw', :format=>:google) do |oo|
-      assert_raise(RangeError) { oo.set_value(1,1,"dummy","no_sheet")   }
+      assert_raise(RangeError) { oo.set(1,1,"dummy","no_sheet")   }
     end
   end
 
