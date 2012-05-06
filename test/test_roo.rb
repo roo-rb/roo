@@ -2211,9 +2211,13 @@ where the expected result is
   # 2011-08-03
   def test_bug_datetime_to_csv
     with_each_spreadsheet(:name=>'datetime') do |oo|
-      assert oo.to_csv("datetime.csv")
-      assert File.exists?("datetime.csv")
-      assert_equal "", file_diff('test/files/so_datetime.csv', 'datetime.csv')
+      Dir.mktmpdir do |tempdir|
+        datetime_csv_file = File.join(tempdir,"datetime.csv")
+
+        assert oo.to_csv(datetime_csv_file)
+        assert File.exists?(datetime_csv_file)
+        assert_equal "", file_diff('test/files/so_datetime.csv', datetime_csv_file)
+      end
     end
   end
 
