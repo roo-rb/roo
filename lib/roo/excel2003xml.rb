@@ -98,24 +98,6 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
     @style_definitions[style_name]
   end
 
-  # set a cell to a certain value
-  # (this will not be saved back to the spreadsheet file!)
-  def set(row,col,value,sheet=nil) #:nodoc:
-    sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
-    row,col = normalize(row,col)
-    set_value(row,col,value,sheet)
-    if value.class == Fixnum
-      set_type(row,col,:float,sheet)
-    elsif value.class == String
-      set_type(row,col,:string,sheet)
-    elsif value.class == Float
-      set_type(row,col,:string,sheet)
-    else
-      raise ArgumentError, "Type for "+value.to_s+" not set"
-    end
-  end
-
   # returns the type of a cell:
   # * :float
   # * :string
@@ -290,16 +272,6 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
         @style_definitions[style_id].underline = font['Underline']
       end
     end
-  end
-
-  def set_value(row,col,value,sheet=nil)
-    sheet = @default_value unless sheet
-    @cell[sheet][[row,col]] = value
-  end
-
-  def set_type(row,col,type,sheet=nil)
-    sheet = @default_value unless sheet
-    @cell_type[sheet][[row,col]] = type
   end
 
   A_ROO_TYPE = {

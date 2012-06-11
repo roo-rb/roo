@@ -161,7 +161,7 @@ class Roo::Google < Roo::GenericSpreadsheet
 
   # sets the cell to the content of 'value'
   # a formula can be set in the form of '=SUM(...)'
-  def set_value(row,col,value,sheet=nil)
+  def set(row,col,value,sheet=nil)
     sheet ||= @default_sheet
     validate_sheet!(sheet)
 
@@ -170,11 +170,17 @@ class Roo::Google < Roo::GenericSpreadsheet
     add_to_cell_roo(row,col,value,sheet_no)
     # re-read the portion of the document that has changed
     if @cells_read[sheet]
-      key = "#{row},#{col}"
-      (value, value_type) = determine_datatype(value.to_s)
-      @cell[sheet][key] = value
-      @cell_type[sheet][key] = value_type
+      value, value_type = determine_datatype(value.to_s)
+
+      _set_value(col,row,value,sheet)
+      set_type(col,row,value_type,sheet)
     end
+  end
+
+  # *DEPRECATED*: Use Roo::Google#set instead
+  def set_value(row,col,value,sheet=nil)
+    warn "[DEPRECATION] `set_value` is deprecated.  Please use `set` instead."
+    set_value(row,col,value,sheet)
   end
 
   # returns the first non-empty row in a sheet
@@ -222,6 +228,16 @@ class Roo::Google < Roo::GenericSpreadsheet
   end
 
   private
+
+  def _set_value(row,col,value,sheet=nil)
+    sheet ||= @default_sheet
+    @cell[sheet][ "#{row},#{col}"] = value
+  end
+
+  def set_type(row,col,type,sheet=nil)
+    sheet ||= @default_sheet
+    @cell_type[sheet]["#{row},#{col}"] = type
+  end
 
   # read all cells in a sheet.
   def read_cells(sheet=nil)
