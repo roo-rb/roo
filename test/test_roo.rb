@@ -16,6 +16,7 @@ require './lib/roo'
 # Look at formulas in excel - does not work with date/time
 
 class Roo::Csv
+  remove_method :cell_postprocessing
   def cell_postprocessing(row,col,value)
     if row==1 and col==1
       return value.to_f
