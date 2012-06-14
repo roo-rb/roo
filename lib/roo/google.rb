@@ -180,7 +180,7 @@ class Roo::Google < Roo::GenericSpreadsheet
   # *DEPRECATED*: Use Roo::Google#set instead
   def set_value(row,col,value,sheet=nil)
     warn "[DEPRECATION] `set_value` is deprecated.  Please use `set` instead."
-    set_value(row,col,value,sheet)
+    _set_value(row,col,value,sheet)
   end
 
   # returns the first non-empty row in a sheet
