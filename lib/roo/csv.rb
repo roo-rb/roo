@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'csv'
+require 'time'
 
 # The Csv class can read csv files (must be separated with commas) which then
 # can be handled like spreadsheets. This means you can access cells like A5

@@ -5,6 +5,7 @@ require 'test/unit'
 require 'fileutils'
 require 'timeout'
 require 'logger'
+require 'date'
 
 # require gem files
 require File.dirname(__FILE__) + '/../lib/roo'

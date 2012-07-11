@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 require 'tmpdir'
+require 'stringio'
 
 # Base class for all other types of spreadsheets
 class Roo::GenericSpreadsheet
