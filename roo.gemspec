@@ -28,16 +28,19 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<nokogiri>, [">= 1.5.2"])
       s.add_runtime_dependency(%q<rubyzip>, [">= 0.9.6.1"])
       s.add_development_dependency(%q<bones>, [">= 3.8.0"])
+      s.add_development_dependency(%q<shoulda>, ["~> 3.0"])
     else
       s.add_dependency(%q<spreadsheet>, ["> 0.6.4"])
       s.add_dependency(%q<nokogiri>, [">= 1.5.2"])
       s.add_dependency(%q<rubyzip>, [">= 0.9.6.1"])
       s.add_dependency(%q<bones>, [">= 3.8.0"])
+      s.add_dependency(%q<shoulda>, ["~> 3.0"])
     end
   else
     s.add_dependency(%q<spreadsheet>, ["> 0.6.4"])
     s.add_dependency(%q<nokogiri>, [">= 1.5.2"])
     s.add_dependency(%q<rubyzip>, [">= 0.9.6.1"])
     s.add_dependency(%q<bones>, [">= 3.8.0"])
+    s.add_dependency(%q<shoulda>, ["~> 3.0"])
   end
 end

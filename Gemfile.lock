@@ -20,6 +20,11 @@ GEM
     rake (0.9.2.2)
     ruby-ole (1.2.11.4)
     rubyzip (0.9.9)
+    shoulda (3.0.1)
+      shoulda-context (~> 1.0.0)
+      shoulda-matchers (~> 1.0.0)
+    shoulda-context (1.0.0)
+    shoulda-matchers (1.0.0)
     spreadsheet (0.7.3)
       ruby-ole (>= 1.0)
 
@@ -30,3 +35,4 @@ PLATFORMS
 DEPENDENCIES
   bones (>= 3.8.0)
   roo!
+  shoulda (~> 3.0)
