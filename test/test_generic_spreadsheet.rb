@@ -50,6 +50,24 @@ class TestGenericSpreadsheet < Test::Unit::TestCase
     end
   end
 
+  context "Roo::GenericSpreadsheet.number_to_letter" do
+    should "return 'A' when passed 1" do
+      assert_equal 'A',Roo::GenericSpreadsheet.number_to_letter(1)
+    end
+
+    should "return 'Z' when passed 26" do
+      assert_equal 'Z',Roo::GenericSpreadsheet.number_to_letter(26)
+    end
+
+    should "return 'AA' when passed 27" do
+      assert_equal 'AA',Roo::GenericSpreadsheet.number_to_letter(27)
+    end
+
+    should "return the correct letter when passed a Float" do
+      assert_equal 'A',Roo::GenericSpreadsheet.number_to_letter(1.0)
+    end
+  end
+
   def test_setting_invalid_type_does_not_update_cell
     @oo.set(1,1,1)
     assert_raise(ArgumentError){@oo.set(1,1, :invalid_type)}
