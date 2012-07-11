@@ -48,19 +48,53 @@ class TestGenericSpreadsheet < Test::Unit::TestCase
       assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('Aa')
       assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('aa')
     end
+
+    should "give us the correct value for 'AB'" do
+      assert_equal 28, Roo::GenericSpreadsheet.letter_to_number('AB')
+    end
+
+    should "give us the correct value for 'AZ'" do
+      assert_equal 26*2, Roo::GenericSpreadsheet.letter_to_number('AZ')
+    end
+
+    should "give us the correct value for 'BZ'" do
+      assert_equal 26*3, Roo::GenericSpreadsheet.letter_to_number('BZ')
+    end
+
+    should "give us the correct value for 'ZZ'" do
+      assert_equal (26**2 + 26),Roo::GenericSpreadsheet.letter_to_number('ZZ')
+    end
   end
 
   context "Roo::GenericSpreadsheet.number_to_letter" do
-    should "return 'A' when passed 1" do
-      assert_equal 'A',Roo::GenericSpreadsheet.number_to_letter(1)
-    end
-
-    should "return 'Z' when passed 26" do
-      assert_equal 'Z',Roo::GenericSpreadsheet.number_to_letter(26)
+    Roo::GenericSpreadsheet::LETTERS.each_with_index do |l,i|
+      should "return '#{l}' when passed #{i+1}" do
+        assert_equal l,Roo::GenericSpreadsheet.number_to_letter(i+1)
+      end
     end
 
     should "return 'AA' when passed 27" do
       assert_equal 'AA',Roo::GenericSpreadsheet.number_to_letter(27)
+    end
+
+    should "return 'AZ' when passed #{26*2}" do
+      assert_equal 'AZ', Roo::GenericSpreadsheet.number_to_letter(26*2)
+    end
+
+    should "return 'BZ' when passed #{26*3}" do
+      assert_equal 'BZ', Roo::GenericSpreadsheet.number_to_letter(26*3)
+    end
+
+    should "return 'ZZ' when passed #{26**2 + 26}" do
+      assert_equal 'ZZ',Roo::GenericSpreadsheet.number_to_letter(26**2 + 26)
+    end
+
+    should "return 'AAA' when passed #{26**2 + 27}" do
+      assert_equal 'AAA',Roo::GenericSpreadsheet.number_to_letter(26**2 + 27)
+    end
+
+    should "return 'ZZZ' when passed #{26**3 + 26**2 + 26}" do
+      assert_equal 'ZZZ',Roo::GenericSpreadsheet.number_to_letter(26**3 + 26**2 + 26)
     end
 
     should "return the correct letter when passed a Float" do

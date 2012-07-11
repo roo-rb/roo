@@ -651,15 +651,23 @@ class Roo::GenericSpreadsheet
     File.join(tmpdir, "spreadsheet")
   end
 
-  LETTERS = %w{A B C D E F G H I J K L M N O  P Q R S T U V W X Y Z}
+  LETTERS = %w{A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
 
   # convert a number to something like 'AB' (1 => 'A', 2 => 'B', ...)
   def self.number_to_letter(n)
     letters=""
-    while n > 0
-      num = n%26
-      letters = LETTERS[num-1] + letters
-      n = n.div(26)
+    if n > 26
+      while n % 26 == 0 && n != 0
+        letters << 'Z'
+        n = (n - 26) / 26
+      end
+      while n > 0
+        num = n%26
+        letters = LETTERS[num-1] + letters
+        n = (n / 26)
+      end
+    else
+      letters = LETTERS[n-1]
     end
     letters
   end
