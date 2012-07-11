@@ -141,6 +141,10 @@ class Test::Unit::TestCase
     raise "unknown spreadsheetname: #{spreadsheetname}"
   end
 
+  def yaml_entry(row,col,type,value)
+    "cell_#{row}_#{col}: \n  row: #{row} \n  col: #{col} \n  celltype: #{type} \n  value: #{value} \n"
+  end
+
   if DB_LOG
     if ! (defined?(@connected) and @connected)
       activerecord_connect
