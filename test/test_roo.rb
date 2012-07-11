@@ -201,25 +201,6 @@ class TestRoo < Test::Unit::TestCase
 	  end
   end
 
-  #TODO: inkonsequente Lieferung Fixnum/Float
-  def test_rows
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 41, oo.cell('a',12)
-      assert_equal 42, oo.cell('b',12)
-      assert_equal 43, oo.cell('c',12)
-      assert_equal 44, oo.cell('d',12)
-      assert_equal 45, oo.cell('e',12)
-      assert_equal [41.0,42.0,43.0,44.0,45.0, nil, nil], oo.row(12)
-      assert_equal "einundvierzig", oo.cell('a',16)
-      assert_equal "zweiundvierzig", oo.cell('b',16)
-      assert_equal "dreiundvierzig", oo.cell('c',16)
-      assert_equal "vierundvierzig", oo.cell('d',16)
-      assert_equal "fuenfundvierzig", oo.cell('e',16)
-      assert_equal ["einundvierzig", "zweiundvierzig", "dreiundvierzig", "vierundvierzig", "fuenfundvierzig", nil, nil], oo.row(16)
-    end
-  end
-
   def test_sheetname
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       oo.default_sheet = "Name of Sheet 2"
@@ -249,23 +230,6 @@ class TestRoo < Test::Unit::TestCase
   def test_argument_error
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       assert_nothing_raised(ArgumentError) {  oo.default_sheet = "Tabelle1" }
-    end
-  end
-
-  def test_empty_eh
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      assert oo.empty?('a',14)
-      assert ! oo.empty?('a',15)
-      assert oo.empty?('a',20)
-    end
-  end
-
-  def test_reload
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 1, oo.cell(1,1)
-      oo.reload
-      assert_equal 1, oo.cell(1,1)
     end
   end
 

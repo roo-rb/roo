@@ -4,7 +4,7 @@ class TestGenericSpreadsheet < Test::Unit::TestCase
 
   def setup
     @klass = Class.new(Roo::GenericSpreadsheet) do
-      def initialize
+      def initialize(filename='some_file')
         @cells_read = {}
         @cell = Hash.new{|h,k| h[k] = {}}
         @cell_type = Hash.new{|h,k| h[k] = {}}
@@ -13,6 +13,7 @@ class TestGenericSpreadsheet < Test::Unit::TestCase
         @first_column = Hash.new
         @last_column = Hash.new
         @default_sheet = 'my_sheet'
+        @filename = filename
       end
 
       def read_cells(sheet=nil)
@@ -27,6 +28,10 @@ class TestGenericSpreadsheet < Test::Unit::TestCase
       def celltype(row, col, sheet=nil)
         sheet ||= @default_sheet
         @cell_type[sheet][[row,col]]
+      end
+
+      def sheets
+        ['my_sheet','blank sheet']
       end
     end
     @oo = @klass.new
@@ -68,11 +73,29 @@ class TestGenericSpreadsheet < Test::Unit::TestCase
   end
 
   def test_last_column
-    assert_equal 5, @oo.last_column
+    assert_equal 7, @oo.last_column
   end
 
   def test_last_column_as_letter
-    assert_equal 'E', @oo.last_column_as_letter
+    assert_equal 'G', @oo.last_column_as_letter
+  end
+
+  #TODO: inkonsequente Lieferung Fixnum/Float
+  def test_rows
+    assert_equal [41.0,42.0,43.0,44.0,45.0, nil, nil], @oo.row(12)
+    assert_equal [nil, nil, "dreiundvierzig", "vierundvierzig", "fuenfundvierzig", nil, nil], @oo.row(16)
+  end
+
+  def test_empty_eh
+    assert @oo.empty?(1,1)
+    assert !@oo.empty?(8,3)
+    assert @oo.empty?("A",11)
+    assert !@oo.empty?("A",12)
+  end
+
+  def test_reload
+    @oo.reload
+    assert @oo.instance_variable_get(:@cell).empty?
   end
 
   def test_to_yaml
@@ -106,8 +129,12 @@ protected
   def set_sheet_values(workbook)
     vals = workbook.instance_variable_get(:@cell)
     vals[workbook.default_sheet][[5,1]] = Date.civil(1961,11,21).to_s
-    vals[workbook.default_sheet][[8,3]] = "thisisc8"
 
+    vals[workbook.default_sheet][[8,3]] = "thisisc8"
+    vals[workbook.default_sheet][[8,7]] = "thisisg8"
+
+    vals[workbook.default_sheet][[12,1]] = 41.0
+    vals[workbook.default_sheet][[12,2]] = 42.0
     vals[workbook.default_sheet][[12,3]] = 43.0
     vals[workbook.default_sheet][[12,4]] = 44.0
     vals[workbook.default_sheet][[12,5]] = 45.0
@@ -124,8 +151,12 @@ protected
   def set_sheet_types(workbook)
     types = workbook.instance_variable_get(:@cell_type)
     types[workbook.default_sheet][[5,1]] = :date
-    types[workbook.default_sheet][[8,3]] = :string
 
+    types[workbook.default_sheet][[8,3]] = :string
+    types[workbook.default_sheet][[8,7]] = :string
+
+    types[workbook.default_sheet][[12,1]] = :float
+    types[workbook.default_sheet][[12,2]] = :float
     types[workbook.default_sheet][[12,3]] = :float
     types[workbook.default_sheet][[12,4]] = :float
     types[workbook.default_sheet][[12,5]] = :float
