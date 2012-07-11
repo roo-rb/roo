@@ -15,7 +15,10 @@ TESTDIR =  File.join(File.dirname(__FILE__), 'files')
 LOG_DIR = File.join(File.dirname(__FILE__),'log')
 LOG_FILE = File.join(LOG_DIR,'roo.log')
 
-Dir.mkdir(LOG_DIR) unless Dir.exist?(LOG_DIR)
+test_dirs = Dir.glob(File.dirname(__FILE__)+'/*')
+unless test_dirs.include?(LOG_DIR)
+  Dir.mkdir(LOG_DIR)
+end
 
 $log = Logger.new(LOG_FILE)
 
@@ -153,33 +156,33 @@ class Test::Unit::TestCase
       @connected = true
     end
   end
-  alias unlogged_run run
-  def run(result, &block)
-    t1 = Time.now
-    if DISPLAY_LOG
-	    v1,v2,_ = RUBY_VERSION.split('.')
-	    if v1.to_i > 1 or
-          (v1.to_i == 1 and v2.to_i > 8)
-		    # Ruby 1.9.x
-        print "RUNNING #{self.class} #{self.__name__} \t#{Time.now.to_s}"
-	    else
-		    # Ruby < 1.9.x
-        print "RUNNING #{self.class} #{@method_name} \t#{Time.now.to_s}"
-	    end
-      STDOUT.flush
-    end
-    unlogged_run result, &block
-    t2 = Time.now
-    if DISPLAY_LOG
-      puts "\t#{t2-t1} seconds"
-    end
-    if DB_LOG
-      Testrun.create(
-        :class_name => self.class.to_s,
-        :test_name => @method_name,
-        :start => t1,
-        :duration => t2-t1
-      )
-    end
-  end
+  # alias unlogged_run run
+  # def run(result, &block)
+  #   t1 = Time.now
+  #   if DISPLAY_LOG
+  #       v1,v2,_ = RUBY_VERSION.split('.')
+  #       if v1.to_i > 1 or
+  #         (v1.to_i == 1 and v2.to_i > 8)
+  #         # Ruby 1.9.x
+  #       print "RUNNING #{self.class} #{self.__name__} \t#{Time.now.to_s}"
+  #       else
+  #         # Ruby < 1.9.x
+  #       print "RUNNING #{self.class} #{@method_name} \t#{Time.now.to_s}"
+  #       end
+  #     STDOUT.flush
+  #   end
+  #   unlogged_run result, &block
+  #   t2 = Time.now
+  #   if DISPLAY_LOG
+  #     puts "\t#{t2-t1} seconds"
+  #   end
+  #   if DB_LOG
+  #     Testrun.create(
+  #       :class_name => self.class.to_s,
+  #       :test_name => @method_name,
+  #       :start => t1,
+  #       :duration => t2-t1
+  #     )
+  #   end
+  # end
 end
