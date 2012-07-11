@@ -246,28 +246,6 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  def test_boundaries
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = "Name of Sheet 2"
-      assert_equal 2, oo.first_column
-      assert_equal 'B', oo.first_column_as_letter
-      assert_equal 5, oo.first_row
-      assert_equal 'E', oo.last_column_as_letter
-      assert_equal 14, oo.last_row
-    end
-  end
-
-  def test_multiple_letters
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = "Sheet3"
-      assert_equal "i am AA", oo.cell('AA',1)
-      assert_equal "i am AB", oo.cell('AB',1)
-      assert_equal "i am BA", oo.cell('BA',1)
-      assert_equal 'BA', oo.last_column_as_letter
-      assert_equal "i am BA", oo.cell(1,'BA')
-    end
-  end
-
   def test_argument_error
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       assert_nothing_raised(ArgumentError) {  oo.default_sheet = "Tabelle1" }
