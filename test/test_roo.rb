@@ -99,17 +99,6 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  def test_letters
-    assert_equal 1, Roo::GenericSpreadsheet.letter_to_number('A')
-    assert_equal 1, Roo::GenericSpreadsheet.letter_to_number('a')
-    assert_equal 2, Roo::GenericSpreadsheet.letter_to_number('B')
-    assert_equal 26, Roo::GenericSpreadsheet.letter_to_number('Z')
-    assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('AA')
-    assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('aA')
-    assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('Aa')
-    assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('aa')
-  end
-
   def test_sheets_csv
     if CSV
       oo = Roo::Csv.new(File.join(TESTDIR,'numbers1.csv'))
@@ -231,48 +220,6 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  def test_last_row
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 18, oo.last_row
-    end
-  end
-
-  def test_last_column
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 7, oo.last_column
-    end
-  end
-
-  def test_last_column_as_letter
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 'G', oo.last_column_as_letter
-    end
-  end
-
-  def test_first_row
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 1, oo.first_row
-    end
-  end
-
-  def test_first_column
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 1, oo.first_column
-    end
-  end
-
-  def test_first_column_as_letter
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 'A', oo.first_column_as_letter
-    end
-  end
-
   def test_sheetname
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       oo.default_sheet = "Name of Sheet 2"
@@ -363,14 +310,6 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 5, oo.cell('c',1)
       assert_equal 2, oo.cell('a',2)
       assert_equal 3, oo.cell('a',3)
-    end
-  end
-
-  def test_setting_invalid_type_does_not_update_cell
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      assert_raise(ArgumentError) { oo.set(1,1, :invalid_type) }
-      assert_equal 1, oo.cell(1,1)
-      assert_equal :float, oo.celltype(1,1)
     end
   end
 
@@ -535,7 +474,6 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  
   def test_borders_sheets
     with_each_spreadsheet(:name=>'borders') do |oo|
       oo.default_sheet = oo.sheets[1]
@@ -555,33 +493,6 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 12, oo.last_row
       assert_equal 5, oo.first_column
       assert_equal 9, oo.last_column
-    end
-  end
-
-  def yaml_entry(row,col,type,value)
-    "cell_#{row}_#{col}: \n  row: #{row} \n  col: #{col} \n  celltype: #{type} \n  value: #{value} \n"
-  end
-
-  def test_to_yaml
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal "--- \n"+yaml_entry(5,1,"date","1961-11-21"), oo.to_yaml({}, 5,1,5,1)
-      assert_equal "--- \n"+yaml_entry(8,3,"string","thisisc8"), oo.to_yaml({}, 8,3,8,3)
-      assert_equal "--- \n"+yaml_entry(12,3,"float",43.0), oo.to_yaml({}, 12,3,12,3)
-      assert_equal \
-        "--- \n"+yaml_entry(12,3,"float",43.0) +
-        yaml_entry(12,4,"float",44.0) +
-        yaml_entry(12,5,"float",45.0), oo.to_yaml({}, 12,3,12)
-      assert_equal \
-        "--- \n"+yaml_entry(12,3,"float",43.0)+
-        yaml_entry(12,4,"float",44.0)+
-        yaml_entry(12,5,"float",45.0)+
-        yaml_entry(15,3,"float",43.0)+
-        yaml_entry(15,4,"float",44.0)+
-        yaml_entry(15,5,"float",45.0)+
-        yaml_entry(16,3,"string","dreiundvierzig")+
-        yaml_entry(16,4,"string","vierundvierzig")+
-        yaml_entry(16,5,"string","fuenfundvierzig"), oo.to_yaml({}, 12,3)
     end
   end
 
