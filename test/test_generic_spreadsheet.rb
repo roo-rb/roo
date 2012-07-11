@@ -6,14 +6,7 @@ class TestGenericSpreadsheet < Test::Unit::TestCase
   def setup
     @klass = Class.new(Roo::GenericSpreadsheet) do
       def initialize(filename='some_file')
-        @cells_read = {}
-        @cell = Hash.new{|h,k| h[k] = {}}
-        @cell_type = Hash.new{|h,k| h[k] = {}}
-        @first_row = Hash.new
-        @last_row = Hash.new
-        @first_column = Hash.new
-        @last_column = Hash.new
-        @default_sheet = 'my_sheet'
+        super
         @filename = filename
       end
 

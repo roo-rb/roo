@@ -36,6 +36,25 @@ class Roo::GenericSpreadsheet
 
   public
 
+  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil)
+    @cell = Hash.new{|h,k| h[k] = {}}
+    @cell_type = Hash.new{|h,k| h[k] = {}}
+    @cells_read = {}
+
+    @first_row = {}
+    @last_row = {}
+    @first_column = {}
+    @last_column = {}
+
+    @style = {}
+    @style_defaults = Hash.new { |h,k| h[k] = [] }
+    @style_definitions = {}
+
+    @default_sheet = self.sheets.first
+    @formula = {}
+    @header_line = 1
+  end
+
   # sets the working sheet in the document
   # 'sheet' can be a number (1 = first sheet) or the name of a sheet.
   def default_sheet=(sheet)
