@@ -32,15 +32,22 @@ class TestGenericSpreadsheet < Test::Unit::TestCase
     setup_test_sheet(@oo)
   end
 
-  def test_letters
-    assert_equal 1, Roo::GenericSpreadsheet.letter_to_number('A')
-    assert_equal 1, Roo::GenericSpreadsheet.letter_to_number('a')
-    assert_equal 2, Roo::GenericSpreadsheet.letter_to_number('B')
-    assert_equal 26, Roo::GenericSpreadsheet.letter_to_number('Z')
-    assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('AA')
-    assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('aA')
-    assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('Aa')
-    assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('aa')
+  context 'Roo::GenericSpreadsheet.letter_to_number(letter)' do
+    should "give us 1 for 'A' and 'a'" do
+      assert_equal 1, Roo::GenericSpreadsheet.letter_to_number('A')
+      assert_equal 1, Roo::GenericSpreadsheet.letter_to_number('a')
+    end
+
+    should "give us the correct value for 'Z'" do
+      assert_equal 26, Roo::GenericSpreadsheet.letter_to_number('Z')
+    end
+
+    should "give us the correct value for 'AA' regardless of case mixing" do
+      assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('AA')
+      assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('aA')
+      assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('Aa')
+      assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('aa')
+    end
   end
 
   def test_setting_invalid_type_does_not_update_cell
