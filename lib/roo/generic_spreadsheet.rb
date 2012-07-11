@@ -632,7 +632,7 @@ class Roo::GenericSpreadsheet
     File.join(tmpdir, "spreadsheet")
   end
 
-  LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  LETTERS = %w{A B C D E F G H I J K L M N O  P Q R S T U V W X Y Z}
 
   # convert a number to something like 'AB' (1 => 'A', 2 => 'B', ...)
   def self.number_to_letter(n)
