@@ -118,6 +118,9 @@ class TestGenericSpreadsheet < Test::Unit::TestCase
       yaml_entry(16,5,"string","fuenfundvierzig"), @oo.to_yaml({}, 12,3)
   end
 
+  def test_to_csv
+    assert_equal expected_csv,@oo.to_csv
+  end
 protected
   def setup_test_sheet(workbook=nil)
     workbook ||= @oo
@@ -193,5 +196,9 @@ protected
   def set_cells_read(workbook)
     read_hash = workbook.instance_variable_get(:@cells_read)
     read_hash[workbook.default_sheet] = true
+  end
+
+  def expected_csv
+    ",,,,,,\n,,,,,,\n,,,,,,\n,,,,,,\n1961-11-21,,,,,,\n,,,,,,\n,,,,,,\n,,\"thisisc8\",,,,\"thisisg8\"\n,,,,,,\n,,,,,,\n,,,,,,\n41,42,43,44,45,,\n,,,,,,\n,,,,,,\n,,43,44,45,,\n,,\"dreiundvierzig\",\"vierundvierzig\",\"fuenfundvierzig\",,\n"
   end
 end

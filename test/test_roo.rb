@@ -589,20 +589,6 @@ class TestRoo < Test::Unit::TestCase
 	  end
   end
 
-  def test_to_csv
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      master = "#{TESTDIR}/numbers1.csv"
-      Dir.mktmpdir do |tempdir|
-        assert oo.to_csv(File.join(tempdir,"numbers1.csv"),oo.sheets.first)
-        assert(File.exists?(File.join(tempdir,"numbers1.csv")), "Datei #{tempdir}/numbers1.csv existiert nicht")
-        assert_equal "", file_diff(master, File.join(tempdir,"numbers1.csv"))
-        assert oo.to_csv(File.join(tempdir,"numbers1.csv"))
-        assert File.exists?(File.join(tempdir,"numbers1.csv"))
-        assert_equal "", file_diff(master, File.join(tempdir,"numbers1.csv"))
-      end
-    end
-  end
-
   def test_bug_mehrere_datum
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       oo.default_sheet = 'Sheet5'
