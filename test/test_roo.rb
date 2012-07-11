@@ -2466,22 +2466,22 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
     end
   end
 
-  def test_false_encoding
-    ex = Roo::Excel.new(File.join(TESTDIR,'false_encoding.xls'))
-    ex.default_sheet = ex.sheets.first
-    assert_equal "Sheet1", ex.sheets.first
-    ex.first_row.upto(ex.last_row) do |row|
-      ex.first_column.upto(ex.last_column) do |col|
-        content = ex.cell(row,col)
-        puts "#{row}/#{col}"
-        #puts content if ! ex.empty?(row,col) or ex.formula?(row,col)
-        if ex.formula?(row,col)
-          #! ex.empty?(row,col)
-          puts content
-        end
-      end
-    end
-  end
+  # def test_false_encoding
+  #   ex = Roo::Excel.new(File.join(TESTDIR,'false_encoding.xls'))
+  #   ex.default_sheet = ex.sheets.first
+  #   assert_equal "Sheet1", ex.sheets.first
+  #   ex.first_row.upto(ex.last_row) do |row|
+  #     ex.first_column.upto(ex.last_column) do |col|
+  #       content = ex.cell(row,col)
+  #       puts "#{row}/#{col}"
+  #       #puts content if ! ex.empty?(row,col) or ex.formula?(row,col)
+  #       if ex.formula?(row,col)
+  #         #! ex.empty?(row,col)
+  #         puts content
+  #       end
+  #     end
+  #   end
+  # end
 
   def test_simple_google
     if GOOGLE
