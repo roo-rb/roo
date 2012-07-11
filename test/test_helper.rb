@@ -2,6 +2,7 @@
 require 'rubygems'
 require 'tmpdir'
 require 'test/unit'
+require 'shoulda'
 require 'fileutils'
 require 'timeout'
 require 'logger'
