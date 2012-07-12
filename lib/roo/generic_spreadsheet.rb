@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 require 'tmpdir'
+require 'stringio'
 
 # Base class for all other types of spreadsheets
 class Roo::GenericSpreadsheet
@@ -34,6 +35,25 @@ class Roo::GenericSpreadsheet
 
 
   public
+
+  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil)
+    @cell = Hash.new{|h,k| h[k] = {}}
+    @cell_type = Hash.new{|h,k| h[k] = {}}
+    @cells_read = {}
+
+    @first_row = {}
+    @last_row = {}
+    @first_column = {}
+    @last_column = {}
+
+    @style = {}
+    @style_defaults = Hash.new { |h,k| h[k] = [] }
+    @style_definitions = {}
+
+    @default_sheet = self.sheets.first
+    @formula = {}
+    @header_line = 1
+  end
 
   # sets the working sheet in the document
   # 'sheet' can be a number (1 = first sheet) or the name of a sheet.
@@ -631,15 +651,23 @@ class Roo::GenericSpreadsheet
     File.join(tmpdir, "spreadsheet")
   end
 
-  LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  LETTERS = %w{A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
 
   # convert a number to something like 'AB' (1 => 'A', 2 => 'B', ...)
   def self.number_to_letter(n)
     letters=""
-    while n > 0
-      num = n%26
-      letters = LETTERS[num-1] + letters
-      n = n.div(26)
+    if n > 26
+      while n % 26 == 0 && n != 0
+        letters << 'Z'
+        n = (n - 26) / 26
+      end
+      while n > 0
+        num = n%26
+        letters = LETTERS[num-1] + letters
+        n = (n / 26)
+      end
+    else
+      letters = LETTERS[n-1]
     end
     letters
   end

@@ -9,141 +9,24 @@
 # (like 'diff') must be changed (or commented out ;-)) if you want to run
 # the tests under another OS
 #
-require 'tmpdir'
-require 'rubygems'
-require './lib/roo'
+
 #TODO
 # Look at formulas in excel - does not work with date/time
-
-class Roo::Csv
-  remove_method :cell_postprocessing
-  def cell_postprocessing(row,col,value)
-    if row==1 and col==1
-      return value.to_f
-    end
-    if row==1 and col==2
-      return value.to_s
-    end
-    return value
-  end
-end
 
 # Dump warnings that come from the test to open files
 # with the wrong spreadsheet class
 #STDERR.reopen "/dev/null","w"
 
-TESTDIR =  File.join(File.dirname(__FILE__), 'files')
 require File.dirname(__FILE__) + '/test_helper.rb'
-
-require 'fileutils'
-require 'timeout'
-require 'logger'
-$log = Logger.new(File.join(ENV['HOME'],"roo.log"))
-#$log.level = Logger::WARN
-$log.level = Logger::DEBUG
-
-DISPLAY_LOG = false
-DB_LOG = false
-
-if DB_LOG
-  require 'activerecord'
-end
-
-if DB_LOG
-  def activerecord_connect
-    ActiveRecord::Base.establish_connection(:adapter => "mysql",
-      :database => "test_runs",
-      :host => "localhost",
-      :username => "root",
-      :socket => "/var/run/mysqld/mysqld.sock")
-  end
-
-  class Testrun < ActiveRecord::Base
-  end
-end
-
-class Test::Unit::TestCase
-  def key_of(spreadsheetname)
-    return {
-      #'formula' => 'rt4Pw1WmjxFtyfrqqy94wPw',
-      'formula' => 'o10837434939102457526.3022866619437760118',
-      #"write.me" => 'r6m7HFlUOwst0RTUTuhQ0Ow',
-      "write.me" => '0AkCuGANLc3jFcHR1NmJiYWhOWnBZME4wUnJ4UWJXZHc',
-      #'numbers1' => "rYraCzjxTtkxw1NxHJgDU8Q",
-      'numbers1' => 'o10837434939102457526.4784396906364855777',
-      #'borders' => "r_nLYMft6uWg_PT9Rc2urXw",
-      'borders' => "o10837434939102457526.664868920231926255",
-      #'simple_spreadsheet' => "r3aMMCBCA153TmU_wyIaxfw",
-      'simple_spreadsheet' => "ptu6bbahNZpYe-L1vEBmgGA",
-      'testnichtvorhandenBibelbund.ods' => "invalidkeyforanyspreadsheet", # !!! intentionally false key
-      #"only_one_sheet" => "rqRtkcPJ97nhQ0m9ksDw2rA",
-      "only_one_sheet" => "o10837434939102457526.762705759906130135",
-      #'time-test' => 'r2XfDBJMrLPjmuLrPQQrEYw',
-      'time-test' => 'ptu6bbahNZpYBMhk01UfXSg',
-      #'datetime' => "r2kQpXWr6xOSUpw9MyXavYg",
-      'datetime' => "ptu6bbahNZpYQEtZwzL_dZQ",
-      'whitespace' => "rZyQaoFebVGeHKzjG6e9gRQ",
-      'matrix' => '0AkCuGANLc3jFdHY3cWtYUkM4bVdadjZ5VGpfTzFEUEE',
-    }[spreadsheetname]
-    # 'numbers1' => "o10837434939102457526.4784396906364855777",
-    # 'borders' => "o10837434939102457526.664868920231926255",
-    # 'simple_spreadsheet' => "ptu6bbahNZpYe-L1vEBmgGA",
-    # 'testnichtvorhandenBibelbund.ods' => "invalidkeyforanyspreadsheet", # !!! intentionally false key
-    # "only_one_sheet" => "o10837434939102457526.762705759906130135",
-    # "write.me" => 'ptu6bbahNZpY0N0RrxQbWdw&hl',
-    # 'formula' => 'o10837434939102457526.3022866619437760118',
-    # 'time-test' => 'ptu6bbahNZpYBMhk01UfXSg',
-    # 'datetime' => "ptu6bbahNZpYQEtZwzL_dZQ",
-  rescue
-    raise "unknown spreadsheetname: #{spreadsheetname}"
-  end
-
-  if DB_LOG
-    if ! (defined?(@connected) and @connected)
-      activerecord_connect
-    else
-      @connected = true
-    end
-  end
-  alias unlogged_run run
-  def run(result, &block)
-    t1 = Time.now
-    if DISPLAY_LOG
-	    v1,v2,_ = RUBY_VERSION.split('.')
-	    if v1.to_i > 1 or
-          (v1.to_i == 1 and v2.to_i > 8)
-		    # Ruby 1.9.x
-        print "RUNNING #{self.class} #{self.__name__} \t#{Time.now.to_s}"
-	    else
-		    # Ruby < 1.9.x
-        print "RUNNING #{self.class} #{@method_name} \t#{Time.now.to_s}"
-	    end
-      STDOUT.flush
-    end
-    unlogged_run result, &block
-    t2 = Time.now
-    if DISPLAY_LOG
-      puts "\t#{t2-t1} seconds"
-    end
-    if DB_LOG
-      Testrun.create(
-        :class_name => self.class.to_s,
-        :test_name => @method_name,
-        :start => t1,
-        :duration => t2-t1
-      )
-    end
-  end
-end
 
 class TestRoo < Test::Unit::TestCase
 
-  OPENOFFICE   = true  	# do Openoffice-Spreadsheet Tests? (.ods files)
-  EXCEL        = true	# do Excel Tests? (.xls files)
+  OPENOFFICE   = false  	# do Openoffice-Spreadsheet Tests? (.ods files)
+  EXCEL        = false	# do Excel Tests? (.xls files)
   GOOGLE       = false 	# do Google-Spreadsheet Tests?
   EXCELX       = true  	# do Excelx Tests? (.xlsx files)
-  LIBREOFFICE  = true  	# do Libreoffice tests? (.ods files)
-  CSV          = true  	# do CSV tests? (.csv files)
+  LIBREOFFICE  = false  	# do Libreoffice tests? (.ods files)
+  CSV          = false  	# do CSV tests? (.csv files)
 
   ONLINE = false
   LONG_RUN = false
@@ -214,17 +97,6 @@ class TestRoo < Test::Unit::TestCase
       oo = Roo::Csv.new(File.join(TESTDIR,"numbers1.csv"))
       assert_kind_of Roo::Csv, oo
     end
-  end
-
-  def test_letters
-    assert_equal 1, Roo::GenericSpreadsheet.letter_to_number('A')
-    assert_equal 1, Roo::GenericSpreadsheet.letter_to_number('a')
-    assert_equal 2, Roo::GenericSpreadsheet.letter_to_number('B')
-    assert_equal 26, Roo::GenericSpreadsheet.letter_to_number('Z')
-    assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('AA')
-    assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('aA')
-    assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('Aa')
-    assert_equal 27, Roo::GenericSpreadsheet.letter_to_number('aa')
   end
 
   def test_sheets_csv
@@ -329,67 +201,6 @@ class TestRoo < Test::Unit::TestCase
 	  end
   end
 
-  #TODO: inkonsequente Lieferung Fixnum/Float
-  def test_rows
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 41, oo.cell('a',12)
-      assert_equal 42, oo.cell('b',12)
-      assert_equal 43, oo.cell('c',12)
-      assert_equal 44, oo.cell('d',12)
-      assert_equal 45, oo.cell('e',12)
-      assert_equal [41.0,42.0,43.0,44.0,45.0, nil, nil], oo.row(12)
-      assert_equal "einundvierzig", oo.cell('a',16)
-      assert_equal "zweiundvierzig", oo.cell('b',16)
-      assert_equal "dreiundvierzig", oo.cell('c',16)
-      assert_equal "vierundvierzig", oo.cell('d',16)
-      assert_equal "fuenfundvierzig", oo.cell('e',16)
-      assert_equal ["einundvierzig", "zweiundvierzig", "dreiundvierzig", "vierundvierzig", "fuenfundvierzig", nil, nil], oo.row(16)
-    end
-  end
-
-  def test_last_row
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 18, oo.last_row
-    end
-  end
-
-  def test_last_column
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 7, oo.last_column
-    end
-  end
-
-  def test_last_column_as_letter
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 'G', oo.last_column_as_letter
-    end
-  end
-
-  def test_first_row
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 1, oo.first_row
-    end
-  end
-
-  def test_first_column
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 1, oo.first_column
-    end
-  end
-
-  def test_first_column_as_letter
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 'A', oo.first_column_as_letter
-    end
-  end
-
   def test_sheetname
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       oo.default_sheet = "Name of Sheet 2"
@@ -416,48 +227,9 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  def test_boundaries
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = "Name of Sheet 2"
-      assert_equal 2, oo.first_column
-      assert_equal 'B', oo.first_column_as_letter
-      assert_equal 5, oo.first_row
-      assert_equal 'E', oo.last_column_as_letter
-      assert_equal 14, oo.last_row
-    end
-  end
-
-  def test_multiple_letters
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = "Sheet3"
-      assert_equal "i am AA", oo.cell('AA',1)
-      assert_equal "i am AB", oo.cell('AB',1)
-      assert_equal "i am BA", oo.cell('BA',1)
-      assert_equal 'BA', oo.last_column_as_letter
-      assert_equal "i am BA", oo.cell(1,'BA')
-    end
-  end
-
   def test_argument_error
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       assert_nothing_raised(ArgumentError) {  oo.default_sheet = "Tabelle1" }
-    end
-  end
-
-  def test_empty_eh
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      assert oo.empty?('a',14)
-      assert ! oo.empty?('a',15)
-      assert oo.empty?('a',20)
-    end
-  end
-
-  def test_reload
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal 1, oo.cell(1,1)
-      oo.reload
-      assert_equal 1, oo.cell(1,1)
     end
   end
 
@@ -480,14 +252,6 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 5, oo.cell('c',1)
       assert_equal 2, oo.cell('a',2)
       assert_equal 3, oo.cell('a',3)
-    end
-  end
-
-  def test_setting_invalid_type_does_not_update_cell
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      assert_raise(ArgumentError) { oo.set(1,1, :invalid_type) }
-      assert_equal 1, oo.cell(1,1)
-      assert_equal :float, oo.celltype(1,1)
     end
   end
 
@@ -652,7 +416,6 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  
   def test_borders_sheets
     with_each_spreadsheet(:name=>'borders') do |oo|
       oo.default_sheet = oo.sheets[1]
@@ -672,33 +435,6 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 12, oo.last_row
       assert_equal 5, oo.first_column
       assert_equal 9, oo.last_column
-    end
-  end
-
-  def yaml_entry(row,col,type,value)
-    "cell_#{row}_#{col}: \n  row: #{row} \n  col: #{col} \n  celltype: #{type} \n  value: #{value} \n"
-  end
-
-  def test_to_yaml
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal "--- \n"+yaml_entry(5,1,"date","1961-11-21"), oo.to_yaml({}, 5,1,5,1)
-      assert_equal "--- \n"+yaml_entry(8,3,"string","thisisc8"), oo.to_yaml({}, 8,3,8,3)
-      assert_equal "--- \n"+yaml_entry(12,3,"float",43.0), oo.to_yaml({}, 12,3,12,3)
-      assert_equal \
-        "--- \n"+yaml_entry(12,3,"float",43.0) +
-        yaml_entry(12,4,"float",44.0) +
-        yaml_entry(12,5,"float",45.0), oo.to_yaml({}, 12,3,12)
-      assert_equal \
-        "--- \n"+yaml_entry(12,3,"float",43.0)+
-        yaml_entry(12,4,"float",44.0)+
-        yaml_entry(12,5,"float",45.0)+
-        yaml_entry(15,3,"float",43.0)+
-        yaml_entry(15,4,"float",44.0)+
-        yaml_entry(15,5,"float",45.0)+
-        yaml_entry(16,3,"string","dreiundvierzig")+
-        yaml_entry(16,4,"string","vierundvierzig")+
-        yaml_entry(16,5,"string","fuenfundvierzig"), oo.to_yaml({}, 12,3)
     end
   end
 
@@ -851,20 +587,6 @@ class TestRoo < Test::Unit::TestCase
         File.delete_if_exist("csv#{$$}")
       end
 	  end
-  end
-
-  def test_to_csv
-    with_each_spreadsheet(:name=>'numbers1') do |oo|
-      master = "#{TESTDIR}/numbers1.csv"
-      Dir.mktmpdir do |tempdir|
-        assert oo.to_csv(File.join(tempdir,"numbers1.csv"),oo.sheets.first)
-        assert(File.exists?(File.join(tempdir,"numbers1.csv")), "Datei #{tempdir}/numbers1.csv existiert nicht")
-        assert_equal "", file_diff(master, File.join(tempdir,"numbers1.csv"))
-        assert oo.to_csv(File.join(tempdir,"numbers1.csv"))
-        assert File.exists?(File.join(tempdir,"numbers1.csv"))
-        assert_equal "", file_diff(master, File.join(tempdir,"numbers1.csv"))
-      end
-    end
   end
 
   def test_bug_mehrere_datum
@@ -2744,22 +2466,22 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
     end
   end
 
-  def test_false_encoding
-    ex = Roo::Excel.new(File.join(TESTDIR,'false_encoding.xls'))
-    ex.default_sheet = ex.sheets.first
-    assert_equal "Sheet1", ex.sheets.first
-    ex.first_row.upto(ex.last_row) do |row|
-      ex.first_column.upto(ex.last_column) do |col|
-        content = ex.cell(row,col)
-        puts "#{row}/#{col}"
-        #puts content if ! ex.empty?(row,col) or ex.formula?(row,col)
-        if ex.formula?(row,col)
-          #! ex.empty?(row,col)
-          puts content
-        end
-      end
-    end
-  end
+  # def test_false_encoding
+  #   ex = Roo::Excel.new(File.join(TESTDIR,'false_encoding.xls'))
+  #   ex.default_sheet = ex.sheets.first
+  #   assert_equal "Sheet1", ex.sheets.first
+  #   ex.first_row.upto(ex.last_row) do |row|
+  #     ex.first_column.upto(ex.last_column) do |col|
+  #       content = ex.cell(row,col)
+  #       puts "#{row}/#{col}"
+  #       #puts content if ! ex.empty?(row,col) or ex.formula?(row,col)
+  #       if ex.formula?(row,col)
+  #         #! ex.empty?(row,col)
+  #         puts content
+  #       end
+  #     end
+  #   end
+  # end
 
   def test_simple_google
     if GOOGLE
