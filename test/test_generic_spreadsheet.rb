@@ -62,7 +62,7 @@ class TestGenericSpreadsheet < Test::Unit::TestCase
     end
 
     should "give us the correct value for 'ZZ'" do
-      assert_equal (26**2 + 26),Roo::GenericSpreadsheet.letter_to_number('ZZ')
+      assert_equal 26**2 + 26,Roo::GenericSpreadsheet.letter_to_number('ZZ')
     end
   end
 
