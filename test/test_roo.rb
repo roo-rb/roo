@@ -34,8 +34,8 @@ class TestRoo < Test::Unit::TestCase
   def test_internal_minutes
     assert_equal 42*60, 42.minutes
   end
-  
-  # call a block of code for each spreadsheet type 
+
+  # call a block of code for each spreadsheet type
   # and yield a reference to the roo object
   def with_each_spreadsheet(options)
     # test if the spreadsheet type is valid :nodoc
@@ -161,7 +161,7 @@ class TestRoo < Test::Unit::TestCase
       end
     end
   end
- 
+
   def test_celltype
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       assert_equal :string, oo.celltype(2,6)
@@ -407,7 +407,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal 42.5, oo.cell('A',17)
     end
   end
-  
+
   # Excel can only read the cell's value
   def test_formula_excel
     with_each_spreadsheet(:name=>'formula', :format=>:excel) do |oo|
@@ -850,7 +850,7 @@ class TestRoo < Test::Unit::TestCase
       assert_equal "Task 1"    , erg[1]['Comment']
     end
   end
-  
+
   # Ruby-spreadsheet now allows us to at least give the current value
   # from a cell with a formula (no possible with parseexcel)
   def test_bug_false_borders_with_formulas
@@ -909,7 +909,7 @@ class TestRoo < Test::Unit::TestCase
       ""
     end
   end
-  
+
   def test_info
     expected_templ = "File: numbers1%s\n"+
       "Number of sheets: 5\n"+
@@ -1379,7 +1379,7 @@ Sheet 3:
       assert_equal Date.new(1961,11,21), oo.cell('c',7)
     end
   end
-  
+
   def test_cell_openoffice_html_escape
     with_each_spreadsheet(:name=>'html-escape', :format=>:openoffice) do |oo|
       assert_equal "'", oo.cell(1,1)
@@ -1390,7 +1390,7 @@ Sheet 3:
       # test_openoffice_zipped will catch issues with &quot;
     end
   end
-  
+
   def test_cell_boolean
     with_each_spreadsheet(:name=>'boolean', :format=>[:openoffice, :excel, :excelx]) do |oo|
       if oo.class == Roo::Excelx
@@ -1402,7 +1402,7 @@ Sheet 3:
       end
     end
   end
-  
+
   def test_cell_multiline
     with_each_spreadsheet(:name=>'paragraph', :format=>[:openoffice, :excel, :excelx]) do |oo|
       assert_equal "This is a test\nof a multiline\nCell", oo.cell(1,1)
@@ -1410,7 +1410,7 @@ Sheet 3:
       assert_equal "first p\n\nsecond p\n\nlast p", oo.cell(2,1)
     end
   end
-  
+
   def test_cell_styles
     # styles only valid in excel spreadsheets?
     # TODO: what todo with other spreadsheet types
@@ -1422,7 +1422,7 @@ Sheet 3:
       assert_equal true,  oo.font(1,1).bold?
       assert_equal false, oo.font(1,1).italic?
       assert_equal false, oo.font(1,1).underline?
-    
+
       # italic
       assert_equal false, oo.font(2,1).bold?
       assert_equal true,  oo.font(2,1).italic?
@@ -1474,7 +1474,7 @@ Sheet 3:
       assert_equal false,  oo.font(11,4).underline?
     end
   end
-  
+
   # If a cell has a date-like string but is preceeded by a '
   # to force that date to be treated like a string, we were getting an exception.
   # This test just checks for that exception to make sure it's not raised in this case
@@ -1504,7 +1504,7 @@ Sheet 3:
       assert_equal [Date.new(2007,5,7), nil,  10.75], oo.row(3)
     end
   end
-  
+
   def test_col_whitespace
     #TODO:
     # kein Zugriff auf Dokument whitespace
@@ -1551,7 +1551,7 @@ Sheet 3:
       assert_equal :date, oo.celltype(1,1)
     end
   end
-  
+
   def test_bad_date
     with_each_spreadsheet(:name=>'prova', :format=>:excel) do |oo|
       assert_nothing_raised(ArgumentError) {
@@ -1674,30 +1674,30 @@ Sheet 3:
        end
        assert_equal 5, row
        assert_equal 3, col
-  
+
        row,col = oo.label('anton')
        assert_equal 'Anton', oo.cell(row,col)
-  
+
        row,col = oo.label('berta')
        assert_equal 'Bertha', oo.cell(row,col)
-  
+
        row,col = oo.label('caesar')
        assert_equal 'Cäsar', oo.cell(row,col)
-  
+
        row,col = oo.label('never')
        assert_nil row
        assert_nil col
-  
+
        row,col,sheet = oo.label('anton')
        assert_equal 5, row
        assert_equal 3, col
        assert_equal "Sheet1", sheet
-  
+
        assert_equal "Anton", oo.anton
        assert_raises(NoMethodError) {
          row,col = oo.never
        }
-  
+
   # Reihenfolge row,col,sheet analog zu #label
        assert_equal [
   	      ['anton',[5,3,'Sheet1']],
@@ -1817,7 +1817,7 @@ where the expected result is
       assert_equal 'Teststring', xlsx.cell('a',2)
     end
   end
-  
+
   def test_bug_guest_list_2011_05_05
     local_only do
       oo = Roo::Excel.new(File.join("..","confidential","guest_list_addresses.xls"))
@@ -1967,7 +1967,7 @@ where the expected result is
       assert_equal '=SUM([.A1:.D1])', oo.formula('e',1)
       assert_equal '=SUM([.A2:.D2])', oo.formula('e',2)
       assert_equal '=SUM([.A3:.D3])', oo.formula('e',3)
-      assert_equal [ 
+      assert_equal [
        [1,5,'=SUM([.A1:.D1])'],
         [2,5,'=SUM([.A2:.D2])'],
         [3,5,'=SUM([.A3:.D3])'],
@@ -2080,7 +2080,7 @@ where the expected result is
 
   ## PREVIOUSLY SKIPPED
 
-  # don't have these test files so removing. We can easily add in 
+  # don't have these test files so removing. We can easily add in
   # by modifying with_each_spreadsheet
   GNUMERIC_ODS = false  # do gnumeric with ods files Tests?
   OPENOFFICEWRITE = false # experimental: write access with OO-Documents
@@ -2121,7 +2121,7 @@ where the expected result is
         File.join(TESTDIR,"numbers2.ods"))
     end
   end
-  
+
   def test_possible_bug_snowboard_borders #no test file
     local_only do
       if EXCEL
@@ -2443,8 +2443,8 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
         end
       end
     end
-  end  
-  
+  end
+
   def test_bug_encoding_exported_from_google
     if EXCEL
       local_only do
@@ -2454,7 +2454,7 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
       end
     end
   end
-  
+
   def test_invalid_iconv_from_ms
     local_only do
       #TODO: does only run within a darwin-environment
