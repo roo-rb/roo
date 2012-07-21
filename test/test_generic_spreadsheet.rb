@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-require 'test_helper.rb'
+require File.dirname(__FILE__) + '/test_helper'
 
 class TestGenericSpreadsheet < Test::Unit::TestCase
 
