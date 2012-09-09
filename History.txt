@@ -2,7 +2,7 @@
 
 * 2 bugfixes
   * forgot dependency 'rubyzip'
-  * at least one external application does create xlsx-files with different internal file names which differ from the original file names of Excel. Solution: ignore lower-/upper case in file names. 
+  * at least one external application does create xlsx-files with different internal file names which differ from the original file names of Excel. Solution: ignore lower-/upper case in file names.
 
 == 1.10.0 2011-10-10
 
@@ -11,7 +11,7 @@
   * Openoffice, Libreoffice: new method 'labels'
   * Excelx: implemented all methods concerning labels
   * Openoffice, Excelx: new methods concerning comments (comment, comment? and comments)
-  
+
 * 2 bugfixes
   * XLSX: some cells were not recognized correctly from a spreadsheet file from a windows mobile phone.
   * labels: Moved to a separate methode. There were problems if there was an access to a label before read_cells were called.
@@ -51,11 +51,11 @@
 * 1 enhancement
   * removed gem 'builder'. Functionality goes to gem 'nokogiri'.
 * 3 bugfixes
-  * Excel: remove temporary files if spreadsheed-file is not an excel file 
+  * Excel: remove temporary files if spreadsheed-file is not an excel file
     and an exception was raised
   * Excelx: a referenced cell with a string had the content 0.0 not the
     correct string
-  * Fixed a problem with a date cell which was not recognized as a Date 
+  * Fixed a problem with a date cell which was not recognized as a Date
     object (see 2011-05-21 in excelx.rb)
 
 == 1.9.3 2010-02-12
