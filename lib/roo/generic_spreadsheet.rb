@@ -626,6 +626,10 @@ class Roo::GenericSpreadsheet
     return row,col
   end
 
+  def uri?(filename)
+    filename.start_with?("http://", "https://")
+  end
+
   def open_from_uri(uri, tmpdir)
     require 'open-uri'
     response = ''

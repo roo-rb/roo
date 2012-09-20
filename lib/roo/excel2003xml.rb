@@ -10,7 +10,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
   # values for packed: :zip
   def initialize(filename, packed=nil, file_warning=:error)
     make_tmpdir do |tmpdir|
-      filename = open_from_uri(filename, tmpdir) if filename[0,7] == "http://"
+      filename = open_from_uri(filename, tmpdir) if uri?(filename)
       filename = unzip(filename, tmpdir) if packed == :zip
 
       file_type_check(filename,'.xml','an Excel 2003 XML', file_warning)
