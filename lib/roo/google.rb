@@ -1,4 +1,8 @@
-require "google_spreadsheet"
+begin
+  require "google_spreadsheet"
+rescue LoadError => e
+  raise e, "Using Roo::Google requires the google-spreadsheet-ruby gem"
+end
 
 class GoogleHTTPError < RuntimeError; end
 class GoogleReadError < RuntimeError; end
