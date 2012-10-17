@@ -21,12 +21,12 @@ require File.dirname(__FILE__) + '/test_helper'
 
 class TestRoo < Test::Unit::TestCase
 
-  OPENOFFICE   = false  	# do Openoffice-Spreadsheet Tests? (.ods files)
-  EXCEL        = false	# do Excel Tests? (.xls files)
+  OPENOFFICE   = true  	# do Openoffice-Spreadsheet Tests? (.ods files)
+  EXCEL        = true	# do Excel Tests? (.xls files)
   GOOGLE       = false 	# do Google-Spreadsheet Tests?
   EXCELX       = true  	# do Excelx Tests? (.xlsx files)
-  LIBREOFFICE  = false  	# do Libreoffice tests? (.ods files)
-  CSV          = false  	# do CSV tests? (.csv files)
+  LIBREOFFICE  = true  	# do Libreoffice tests? (.ods files)
+  CSV          = true  	# do CSV tests? (.csv files)
 
   ONLINE = false
   LONG_RUN = false
