@@ -14,6 +14,8 @@ Bones {
   name  'roo'
   authors  'Thomas Preymesser', 'Hugh McGowan', 'Ben Woosley'
   email  'thopre@gmail.com'
+  summary "Roo can access the contents of various spreadsheet files."
+  description "Roo can access the contents of various spreadsheet files. It can handle\n* Openoffice\n* Excel\n* Google spreadsheets\n* Excelx\n* Libreoffice\n* CSV"
   url  'http://roo.rubyforge.org/'
   version  Roo::VERSION
   depend_on 'spreadsheet', '> 0.6.4'
