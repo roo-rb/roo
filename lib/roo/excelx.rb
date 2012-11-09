@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'zip/zipfilesystem'
 require 'date'
 require 'rubygems'
 require 'nokogiri'

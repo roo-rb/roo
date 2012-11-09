@@ -2,6 +2,7 @@
 
 require 'tmpdir'
 require 'stringio'
+require 'zip/zipfilesystem'
 
 # Base class for all other types of spreadsheets
 class Roo::GenericSpreadsheet
