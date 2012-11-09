@@ -537,6 +537,10 @@ class Roo::GenericSpreadsheet
     else
       raise "unknown file type: #{ext}"
     end
+
+    if uri?(filename) && qs_begin = filename.rindex('?')
+      filename = filename[0..qs_begin-1]
+    end
     if File.extname(filename).downcase != ext
       case warning_level
       when :error

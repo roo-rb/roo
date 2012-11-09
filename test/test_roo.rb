@@ -2660,6 +2660,22 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
     end
   end
 
+  def test_open_from_uri_with_query_string
+    dir = File.expand_path("#{File.dirname __FILE__}/files")
+    { xls:  [EXCEL,       Roo::Excel],
+      xlsx: [EXCELX,      Roo::Excelx],
+      ods:  [OPENOFFICE,  Roo::Openoffice]}.each do |extension, (flag, type)|
+        if flag
+          file = "#{dir}/simple_spreadsheet.#{extension}"
+          url = "http://test.example.com/simple_spreadsheet.#{extension}?query-param=value"
+          stub_request(:any, url).to_return(body: File.read(file))
+          spreadsheet = type.new(url)
+          spreadsheet.default_sheet = spreadsheet.sheets.first
+          assert_equal 'Task 1', spreadsheet.cell('f', 4)
+        end
+      end
+  end
+
   def test_to_ascii_openoffice #file does not exist
     local_only do
       with_each_spreadsheet(:name=>'verysimple_spreadsheet', :format=>:openoffice) do |oo|
