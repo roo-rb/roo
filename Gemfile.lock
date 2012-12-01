@@ -40,5 +40,5 @@ PLATFORMS
 DEPENDENCIES
   bones (>= 3.8.0)
   roo!
-  shoulda (~> 3.0)
+  shoulda
   webmock

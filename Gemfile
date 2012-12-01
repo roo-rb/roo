@@ -5,3 +5,4 @@ gemspec
 
 # additional testing libs
 gem 'webmock'
+gem 'shoulda'
