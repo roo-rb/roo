@@ -36,7 +36,7 @@ class Roo::GenericSpreadsheet
 
   public
 
-  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil, options)
+  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil, options=Hash.new)
     @cell = Hash.new{|h,k| h[k] = {}}
     @cell_type = Hash.new{|h,k| h[k] = {}}
     @cells_read = {}
