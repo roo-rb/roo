@@ -9,7 +9,7 @@ require 'time'
 # types you have to do it yourself.
 
 class Roo::Csv < Roo::GenericSpreadsheet
-  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil, options)
+  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil, options=nil)
     @filename = filename
     @cell = Hash.new
     @cell_type = Hash.new
