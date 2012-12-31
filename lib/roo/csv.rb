@@ -12,7 +12,7 @@ IC = Iconv.new('UTF-8//IGNORE', 'UTF-8')   # set up the ic accessor to hold the 
 # types you have to do it yourself.
 
 class Roo::Csv < Roo::GenericSpreadsheet
-  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil)
+  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil, options=Hash.new)
     @filename = filename
     @cell = Hash.new
     @cell_type = Hash.new
@@ -21,6 +21,7 @@ class Roo::Csv < Roo::GenericSpreadsheet
     @last_row = Hash.new
     @first_column = Hash.new
     @last_column = Hash.new
+    @options = options
   end
 
   # Returns an array with the names of the sheets. In Csv class there is only
