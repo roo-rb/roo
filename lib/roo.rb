@@ -19,7 +19,7 @@ module Roo
         when ''
           Roo::Google.new(file)
         when '.csv'
-          Roo::Csv.new(file, packed=nil, file_warning=:error, tmpdir=nil, options=Hash.new)
+          Roo::Csv.new(file, packed=nil, file_warning=:error, tmpdir=nil, options)
         else
           raise ArgumentError, "Don't know how to open file #{file}"
         end

@@ -64,7 +64,7 @@ class Roo::Csv < Roo::GenericSpreadsheet
   # Use iconv force encoding before parsing the line using csv
   def parse_line(line)
     line = (IC.iconv(line + ' ')[0..-2]).gsub /"/, ''
-    line.parse_csv
+    CSV.parse_line(line, @options)
   end
 
   def read_cells(sheet=nil)
@@ -77,7 +77,6 @@ class Roo::Csv < Roo::GenericSpreadsheet
     @last_column[sheet] = 1
     rownum = 1
 
-    #CSV.foreach(@filename) do |row|
     f = File.open(@filename)
     f.each_line do |line|
       row = parse_line line
