@@ -18,7 +18,7 @@ module Roo
           Roo::Excel2003XML.new(file)
         when ''
           Roo::Google.new(file)
-        when '.csv'
+        when '.csv','.txt'
           Roo::Csv.new(file, packed=nil, file_warning=:error, tmpdir=nil, options)
         else
           raise ArgumentError, "Don't know how to open file #{file}"
