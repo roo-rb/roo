@@ -1,6 +1,9 @@
 require 'rubygems'
 require 'csv'
 require 'time'
+require 'iconv'
+
+IC = Iconv.new('UTF-8//IGNORE', 'UTF-8')   # set up the ic accessor to hold the Iconv force encoding object
 
 # The Csv class can read csv files (must be separated with commas) which then
 # can be handled like spreadsheets. This means you can access cells like A5
@@ -57,6 +60,12 @@ class Roo::Csv < Roo::GenericSpreadsheet
     TYPE_MAP[value.class]
   end
 
+  # Use iconv force encoding before parsing the line using csv
+  def parse_line(line)
+    line = (IC.iconv(line + ' ')[0..-2]).gsub /"/, ''
+    line.parse_csv
+  end
+
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
     @cell_type = {} unless @cell_type
@@ -66,7 +75,11 @@ class Roo::Csv < Roo::GenericSpreadsheet
     @first_column[sheet] = 1
     @last_column[sheet] = 1
     rownum = 1
-    CSV.foreach(@filename) do |row|
+
+    #CSV.foreach(@filename) do |row|
+    f = File.open(@filename)
+    f.each_line do |line|
+      row = parse_line line
       row.each_with_index do |elem,i|
         @cell[[rownum,i+1]] = cell_postprocessing rownum,i+1, elem
         @cell_type[[rownum,i+1]] = celltype_class @cell[[rownum,i+1]]
