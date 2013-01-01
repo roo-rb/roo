@@ -5,9 +5,8 @@ require 'iconv'
 
 IC = Iconv.new('UTF-8//IGNORE', 'UTF-8')   # set up the ic accessor to hold the Iconv force encoding object
 
-# The Csv class can read csv files (must be separated with commas) which then
-# can be handled like spreadsheets. This means you can access cells like A5
-# within these files.
+# The Csv class can read csv files which then can be handled like spreadsheets. 
+# This means you can access cells like A5 within these files.
 # The Csv class provides only string objects. If you want conversions to other
 # types you have to do it yourself.
 
@@ -48,6 +47,16 @@ class Roo::Csv < Roo::GenericSpreadsheet
     value
   end
 
+  # parse and return the first row without processing any of the rest of the sheet
+  def first_row_peek
+    read_row File.open(@filename, &:readline), 1, false
+  end
+
+  # iterator for looping through rows without loading them all into memory
+  def each_row
+    File.open(@filename).each_line { |line| yield read_row(line, $., false), $. }
+  end
+
   private
 
   TYPE_MAP = {
@@ -62,35 +71,41 @@ class Roo::Csv < Roo::GenericSpreadsheet
   end
 
   # Use iconv force encoding before parsing the line using csv
+  # Also globally substitutes for quotes to pre-empt malformed CSV errors
   def parse_line(line)
     line = (IC.iconv(line + ' ')[0..-2]).gsub /"/, ''
     CSV.parse_line(line, @options)
   end
 
-  def read_cells(sheet=nil)
-    sheet ||= @default_sheet
+  # read a single CSV row
+  def read_row(line, rownum, save_in_memory, sheet=@default_sheet)
+    row = parse_line(line)
+    return row unless save_in_memory
+    row.each_with_index do |elem,i|
+      @cell[[rownum,i+1]] = cell_postprocessing rownum,i+1, elem
+      @cell_type[[rownum,i+1]] = celltype_class @cell[[rownum,i+1]]
+      if i+1 > @last_column[sheet]
+        @last_column[sheet] += 1
+      end
+    end
+    @last_row[sheet] += 1
+  end
+
+  def read_cells(sheet=@default_sheet)
     @cell_type = {} unless @cell_type
     @cell = {} unless @cell
     @first_row[sheet] = 1
     @last_row[sheet] = 0
     @first_column[sheet] = 1
     @last_column[sheet] = 1
-    rownum = 1
 
     f = File.open(@filename)
-    f.each_line do |line|
-      row = parse_line line
-      row.each_with_index do |elem,i|
-        @cell[[rownum,i+1]] = cell_postprocessing rownum,i+1, elem
-        @cell_type[[rownum,i+1]] = celltype_class @cell[[rownum,i+1]]
-        if i+1 > @last_column[sheet]
-          @last_column[sheet] += 1
-        end
-      end
-      rownum += 1
-      @last_row[sheet] += 1
-    end
+    f.each_line { |line| read_row(line, $., true, sheet) }
     @cells_read[sheet] = true
+    adjust_rows_columns
+  end
+  
+  def adjust_rows_columns
     #-- adjust @first_row if neccessary
     loop do
       if !row(@first_row[sheet]).any? and @first_row[sheet] < @last_row[sheet]
@@ -129,4 +144,5 @@ class Roo::Csv < Roo::GenericSpreadsheet
       end
     end
   end
+  
 end # class Csv

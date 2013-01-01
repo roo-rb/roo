@@ -139,6 +139,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @s_attribute = Hash.new # TODO: ggf. wieder entfernen nur lokal benoetigt
     @comment = Hash.new
     @comments_read = Hash.new
+    @headers = first_row_peek(@default_sheet)
   end
 
   def method_missing(m,*args)
@@ -301,16 +302,6 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @cell[sheet].inspect
   end
 
-  def first_row_peek(sheet=@default_sheet)
-    validate_sheet!(sheet)
-    read_row(sheet, @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row").first, false)
-  end
-
-  def each_row(sheet=@default_sheet)
-    validate_sheet!(sheet)
-    @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row").each_with_index { |r, i| yield read_row(sheet, r, false), i }
-  end
-
   # returns the row,col values of the labelled cell
   # (nil,nil) if label is not defined
   def label(labelname)
@@ -373,7 +364,32 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     end
   end
 
+  # parse and return the first row without processing any of the rest of the sheet
+  def first_row_peek(sheet=@default_sheet)
+    validate_sheet!(sheet)
+    read_row(sheet, @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row").first, false)
+  end
+
+  # iterator for looping through rows without loading them all into memory
+  def each_row(sheet=@default_sheet)
+    validate_sheet!(sheet)
+    @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row").each_with_index { |r, i| yield read_row(sheet, r, false), i+1 }
+  end
+
   private
+
+  def formatted_value(value_type, v)
+    case value_type
+    when :float then v.to_f
+    when :string then v
+    when :date then (Date.new(1899,12,30)+v.to_i).strftime("%Y-%m-%d")
+    when :datetime then (DateTime.new(1899,12,30)+v.to_f).strftime("%Y-%m-%d %H:%M:%S")
+    when :percentage then v.to_f
+    when :time then v.to_f*(24*60*60)
+    else
+      v
+    end 
+  end
 
   # helper function to set the internal representation of cells
   def set_cell_values(sheet,x,y,i,v,value_type,formula,
@@ -386,23 +402,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @formula[sheet] ||= {}
     @formula[sheet][key] = formula  if formula
     @cell[sheet] ||= {}
-    @cell[sheet][key] =
-      case @cell_type[sheet][key]
-      when :float
-        v.to_f
-      when :string
-        v
-      when :date
-        (Date.new(1899,12,30)+v.to_i).strftime("%Y-%m-%d")
-      when :datetime
-        (DateTime.new(1899,12,30)+v.to_f).strftime("%Y-%m-%d %H:%M:%S")
-      when :percentage
-        v.to_f
-      when :time
-        v.to_f*(24*60*60)
-      else
-        v
-      end
+    @cell[sheet][key] = formatted_value(@cell_type[sheet][key])
     @excelx_type[sheet] ||= {}
     @excelx_type[sheet][key] = excelx_type
     @excelx_value[sheet] ||= {}
@@ -420,12 +420,15 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     end
   end
 
-  # read the given cell
+  # search through the XML for the given cell to find and format values
+  # if save_in_memory is true, these values will be saved using set_cell_values
+  # if save_in_memory is false, these values will be returned as soon as they are discovered (for each_row feature)
   def read_cell(sheet=@default_sheet, c, save_in_memory)
     s_attribute = c['s'].to_i   # should be here
     # c: <c r="A5" s="2">
     # <v>22606</v>
     # </c>, format: , tmp_type: float
+    y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
     value_type =
       case c['t']
       when 's' then :shared
@@ -446,9 +449,8 @@ class Roo::Excelx < Roo::GenericSpreadsheet
             value_type = :string
             v = inlinestr_content
             excelx_type = :string
-            y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
             excelx_value = inlinestr_content #cell.content
-            return v unless save_in_memory
+            return [formatted_value(value_type,v),x] unless save_in_memory
             set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
           end
         end
@@ -475,15 +477,20 @@ class Roo::Excelx < Roo::GenericSpreadsheet
             value_type = :float
             cell.content
           end
-        y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
-        return v unless save_in_memory
+        return [formatted_value(value_type,v),x] unless save_in_memory
         set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
       end
     end
   end
 
+  # read a single XML row from the selected sheet
   def read_row(sheet=@default_sheet, row_xml, save_in_memory)
-    row_xml.xpath("xmlns:c").collect { |cell_xml| read_cell(sheet, cell_xml, save_in_memory) }
+    @headers.nil? ? ary = Array.new() : ary = Array.new(@headers.length) unless save_in_memory    
+    row_xml.xpath("xmlns:c").each do |cell_xml|
+      val = read_cell(sheet, cell_xml, save_in_memory)
+      @headers.nil? ? ary << val[0] : ary[val[1]-1] = val[0] unless save_in_memory
+    end
+    return ary
   end
 
   # read all cells in the selected sheet
