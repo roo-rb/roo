@@ -301,6 +301,16 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @cell[sheet].inspect
   end
 
+  def first_row_peek(sheet=@default_sheet)
+    validate_sheet!(sheet)
+    read_row(sheet, @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row").first, false)
+  end
+
+  def each_row(sheet=@default_sheet)
+    validate_sheet!(sheet)
+    @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row").each_with_index { |r, i| yield read_row(sheet, r, false), i }
+  end
+
   # returns the row,col values of the labelled cell
   # (nil,nil) if label is not defined
   def label(labelname)
@@ -410,133 +420,79 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     end
   end
 
-  # read all cells in the selected sheet
-  def read_cells(sheet=nil)
-    sheet ||= @default_sheet
-    validate_sheet!(sheet)
-    @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row/xmlns:c").each do |c|
-      s_attribute = c['s'].to_i   # should be here
-      # c: <c r="A5" s="2">
-      # <v>22606</v>
-      # </c>, format: , tmp_type: float
-      value_type =
-        case c['t']
-        when 's'
-          :shared
-        when 'b'
-          :boolean
-          # 2011-02-25 BEGIN
-        when 'str'
-          :string
-          # 2011-02-25 END
-          # 2011-09-15 BEGIN
-        when 'inlineStr'
-  	      :inlinestr
-          # 2011-09-15 END
-        else
-          format = attribute2format(s_attribute)
-          format2type(format)
-        end
-      formula = nil
-      c.children.each do |cell|
-        case cell.name
-        when 'is'
-          cell.children.each do |is|
-            if is.name == 't'
-              inlinestr_content = is.content
-              value_type = :string
-              v = inlinestr_content
-              excelx_type = :string
-              y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
-              excelx_value = inlinestr_content #cell.content
-              set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
-            end
+  # read the given cell
+  def read_cell(sheet=@default_sheet, c, save_in_memory)
+    s_attribute = c['s'].to_i   # should be here
+    # c: <c r="A5" s="2">
+    # <v>22606</v>
+    # </c>, format: , tmp_type: float
+    value_type =
+      case c['t']
+      when 's' then :shared
+      when 'b' then :boolean
+      when 'str' then :string
+      when 'inlineStr' then :inlinestr
+      else
+        format = attribute2format(s_attribute)
+        format2type(format)
+      end
+    formula = nil
+    c.children.each do |cell|
+      case cell.name
+      when 'is'
+        cell.children.each do |is|
+          if is.name == 't'
+            inlinestr_content = is.content
+            value_type = :string
+            v = inlinestr_content
+            excelx_type = :string
+            y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
+            excelx_value = inlinestr_content #cell.content
+            return v unless save_in_memory
+            set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
           end
-        when 'f'
-          formula = cell.content
-        when 'v'
-          if [:time, :datetime].include?(value_type) && cell.content.to_f >= 1.0
-            value_type =
-              if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001
-                :datetime
-              else
-                :date
-              end
-          end
-          excelx_type = [:numeric_or_formula,format.to_s]
-          excelx_value = cell.content
-          v =
-            case value_type
-            when :shared
-              value_type = :string
-              excelx_type = :string
-              @shared_table[cell.content.to_i]
-            when :boolean
-              (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
-            when :date
-              cell.content
-            when :time
-              cell.content
-            when :datetime
-              cell.content
-            when :formula
-              cell.content.to_f #TODO: !!!!
-            when :string
-              excelx_type = :string
-              cell.content
-            else
-              value_type = :float
-              cell.content
-            end
-          y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
-          set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
         end
+      when 'f' then formula = cell.content
+      when 'v'
+        if [:time, :datetime].include?(value_type) && cell.content.to_f >= 1.0
+          value_type = ((cell.content.to_f - cell.content.to_f.floor).abs > 0.000001) ? :datetime : :date
+        end
+        excelx_type = [:numeric_or_formula,format.to_s]
+        excelx_value = cell.content
+        v =
+          case value_type
+          when :shared
+            value_type = :string
+            excelx_type = :string
+            @shared_table[cell.content.to_i]
+          when :boolean then (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
+          when :date, :time, :datetime then cell.content
+          when :formula then cell.content.to_f #TODO: !!!!
+          when :string
+            excelx_type = :string
+            cell.content
+          else
+            value_type = :float
+            cell.content
+          end
+        y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
+        return v unless save_in_memory
+        set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
       end
     end
-    @cells_read[sheet] = true
-    # begin comments
-=begin
-Datei xl/comments1.xml
-  <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-  <comments xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-    <authors>
-      <author />
-    </authors>
-    <commentList>
-      <comment ref="B4" authorId="0">
-        <text>
-          <r>
-            <rPr>
-              <sz val="10" />
-              <rFont val="Arial" />
-              <family val="2" />
-            </rPr>
-            <t>Kommentar fuer B4</t>
-          </r>
-        </text>
-      </comment>
-      <comment ref="B5" authorId="0">
-        <text>
-          <r>
-            <rPr>
-            <sz val="10" />
-            <rFont val="Arial" />
-            <family val="2" />
-          </rPr>
-          <t>Kommentar fuer B5</t>
-        </r>
-      </text>
-    </comment>
-  </commentList>
-  </comments>
-=end
-=begin
-    if @comments_doc[self.sheets.index(sheet)]
-      read_comments(sheet)
-    end
-=end
-    #end comments
   end
+
+  def read_row(sheet=@default_sheet, row_xml, save_in_memory)
+    row_xml.xpath("xmlns:c").collect { |cell_xml| read_cell(sheet, cell_xml, save_in_memory) }
+  end
+
+  # read all cells in the selected sheet
+  def read_cells(sheet=@default_sheet)
+    validate_sheet!(sheet)
+    @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row").each { |r| read_row(sheet, r, true) }
+    @cells_read[sheet] = true
+  end
+
 
   # Reads all comments from a sheet
   def read_comments(sheet=nil)
