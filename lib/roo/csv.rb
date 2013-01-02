@@ -54,7 +54,7 @@ class Roo::Csv < Roo::GenericSpreadsheet
 
   # iterator for looping through rows without loading them all into memory
   def each_row
-    File.open(@filename).each_line { |line| yield read_row(line, $., false), $. }
+    IO.foreach(@filename) { |line| yield read_row(line, $., false), $. }
   end
 
   private
@@ -74,6 +74,7 @@ class Roo::Csv < Roo::GenericSpreadsheet
   # Also globally substitutes for quotes to pre-empt malformed CSV errors
   def parse_line(line)
     line = (IC.iconv(line + ' ')[0..-2]).gsub /"/, ''
+    #line = (IC.iconv(line + ' ')[0..-2])
     CSV.parse_line(line, @options)
   end
 
