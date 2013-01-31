@@ -71,10 +71,8 @@ class Roo::Csv < Roo::GenericSpreadsheet
   end
 
   # Use iconv force encoding before parsing the line using csv
-  # Also globally substitutes for quotes to pre-empt malformed CSV errors
   def parse_line(line)
-    line = (IC.iconv(line + ' ')[0..-2]).gsub /"/, ''
-    #line = (IC.iconv(line + ' ')[0..-2])
+    line = (IC.iconv(line + ' ')[0..-2])
     CSV.parse_line(line, @options)
   end
 

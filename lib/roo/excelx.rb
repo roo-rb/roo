@@ -416,6 +416,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     if FORMATS.has_key? format
       FORMATS[format]
     else
+      #puts "FORMAT MISSING: #{format}"
       :float
     end
   end
