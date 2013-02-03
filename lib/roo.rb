@@ -4,7 +4,8 @@ module Roo
 
   class Spreadsheet
     class << self
-      def open(file)
+      def open(file, opts={})
+        options = opts
         file = File === file ? file.path : file
         case File.extname(file)
         when '.xls'
@@ -17,8 +18,8 @@ module Roo
           Roo::Excel2003XML.new(file)
         when ''
           Roo::Google.new(file)
-        when '.csv'
-          Roo::Csv.new(file)
+        when '.csv','.txt'
+          Roo::Csv.new(file, packed=nil, file_warning=:error, tmpdir=nil, options)
         else
           raise ArgumentError, "Don't know how to open file #{file}"
         end
