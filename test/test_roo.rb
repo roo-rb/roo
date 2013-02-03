@@ -28,6 +28,14 @@ class TestRoo < Test::Unit::TestCase
   LIBREOFFICE  = true  	# do Libreoffice tests? (.ods files)
   CSV          = true  	# do CSV tests? (.csv files)
 
+  FORMATS = {
+    excel: EXCEL,
+    excelx: EXCELX,
+    openoffice: OPENOFFICE,
+    google: GOOGLE,
+    libreoffice: LIBREOFFICE
+  }
+
   ONLINE = false
   LONG_RUN = false
 
@@ -35,25 +43,41 @@ class TestRoo < Test::Unit::TestCase
     assert_equal 42*60, 42.minutes
   end
 
+  def fixture_filename(name, format)
+    case format
+    when :excel
+      "#{name}.xls"
+    when :excelx
+      "#{name}.xlsx"
+    when :openoffice, :libreoffice
+      "#{name}.ods"
+    when :google
+      key_of(name) || name
+    end
+  end
+
   # call a block of code for each spreadsheet type
   # and yield a reference to the roo object
   def with_each_spreadsheet(options)
-    # test if the spreadsheet type is valid :nodoc
     if options[:format]
-      [*options[:format]].each do |formatname|
-        unless [:openoffice,:excel,:excelx,:google,:libreoffice].include?(formatname)
-          raise "invalid spreadsheet type #{formatname}"
+      options[:format] = Array(options[:format])
+      invalid_formats = options[:format] - FORMATS.keys
+      unless invalid_formats.empty?
+        raise "invalid spreadsheet types: #{invalid_formats.join(', ')}"
+      end
+    else
+      options[:format] = FORMATS.keys
+    end
+    options[:format].each do |format|
+      begin
+        if FORMATS[format]
+          yield Roo::Spreadsheet.open(File.join(TESTDIR,
+            fixture_filename(options[:name], format)))
         end
+      rescue => e
+        raise e, "#{e.message} for #{format}"
       end
     end
-    # end test spreadsheet type :nodoc
-    options[:format] ||= [:excel, :excelx, :openoffice, :google, :libreoffice]
-    options[:format] = [options[:format]] if options[:format].class == Symbol
-    yield Roo::Spreadsheet.open(File.join(TESTDIR, options[:name] + '.xls')) if EXCEL && options[:format].include?(:excel)
-    yield Roo::Spreadsheet.open(File.join(TESTDIR, options[:name] + '.xlsx')) if EXCELX && options[:format].include?(:excelx)
-    yield Roo::Spreadsheet.open(File.join(TESTDIR, options[:name] + '.ods')) if OPENOFFICE && options[:format].include?(:openoffice)
-    yield Roo::Spreadsheet.open(key_of(options[:name]) || options[:name]) if GOOGLE && options[:format].include?(:google)
-    yield Roo::Spreadsheet.open(File.join(TESTDIR, options[:name] + '.ods')) if LIBREOFFICE && options[:format].include?(:libreoffice)
   end
 
   # Using Date.strptime so check that it's using the method
