@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'zip/zipfilesystem'
 require 'date'
 require 'base64'
 require 'cgi'

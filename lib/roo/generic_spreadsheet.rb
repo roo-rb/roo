@@ -2,6 +2,7 @@
 
 require 'tmpdir'
 require 'stringio'
+require 'zip/zipfilesystem'
 
 # Base class for all other types of spreadsheets
 class Roo::GenericSpreadsheet
@@ -535,6 +536,10 @@ class Roo::GenericSpreadsheet
       correct_class = "use #{new_expression[ext]} to handle #{ext} spreadsheet files. This has #{File.extname(filename).downcase}"
     else
       raise "unknown file type: #{ext}"
+    end
+
+    if uri?(filename) && qs_begin = filename.rindex('?')
+      filename = filename[0..qs_begin-1]
     end
     if File.extname(filename).downcase != ext
       case warning_level
