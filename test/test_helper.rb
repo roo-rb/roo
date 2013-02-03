@@ -7,6 +7,7 @@ require 'fileutils'
 require 'timeout'
 require 'logger'
 require 'date'
+require 'webmock/test_unit'
 
 # require gem files
 require File.dirname(__FILE__) + '/../lib/roo'
