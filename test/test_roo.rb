@@ -75,7 +75,7 @@ class TestRoo < Test::Unit::TestCase
             fixture_filename(options[:name], format)))
         end
       rescue => e
-        raise e, "#{e.message} for #{format}"
+        raise e, "#{e.message} for #{format}", e.backtrace
       end
     end
   end
