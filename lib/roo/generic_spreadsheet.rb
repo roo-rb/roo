@@ -37,7 +37,7 @@ class Roo::GenericSpreadsheet
 
   public
 
-  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil)
+  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil, options=Hash.new)
     @cell = Hash.new{|h,k| h[k] = {}}
     @cell_type = Hash.new{|h,k| h[k] = {}}
     @cells_read = {}
@@ -54,6 +54,8 @@ class Roo::GenericSpreadsheet
     @default_sheet = self.sheets.first
     @formula = {}
     @header_line = 1
+    
+    @options = options
   end
 
   # sets the working sheet in the document

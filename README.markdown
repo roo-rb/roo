@@ -24,6 +24,7 @@ file but not the formula itself)
     s = Google.new("myspreadsheetkey_at_google") # creates an Google Spreadsheet instance
     s = Excelx.new("myspreadsheet.xlsx")         # creates an Excel Spreadsheet instance for Excel .xlsx files
 
+
     s.default_sheet = s.sheets.first  # first sheet in the spreadsheet file will be used
 
     # s.sheet is an array which holds the names of the sheets within
@@ -52,6 +53,37 @@ file but not the formula itself)
     s.font(1,1).bold?
     s.font(1,1).italic?
     s.font(1,1).underline?
+    
+    
+
+### Setting Options for .csv files
+
+	s = Csv.new("myspreadsheet.xlsx", options={})         # creates a csv Spreadsheet instance for .csv files
+	
+	# options should be a hash and can include any of the options used in the documentation at: 
+	# http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html#method-c-foreach
+	# this means you should be able to specify encoding and all other options.
+	
+	# these are some of the default options offered by CSV
+	
+	options = { :row_sep => :auto,
+				:quote_char => '"',
+				:field_size_limit => nil,
+				:converters => nil,
+				:unconverted_fields => nil,
+				:headers => false,
+				:return_headers => false,
+				:header_converters => nil,
+				:skip_blanks => false,
+				:force_quotes => false }
+	
+	
+	
+	
+	
+	
+
+
 
 
 see http://roo.rubyforge.org for a more complete tutorial

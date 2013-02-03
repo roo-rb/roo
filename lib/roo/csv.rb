@@ -9,7 +9,7 @@ require 'time'
 # types you have to do it yourself.
 
 class Roo::Csv < Roo::GenericSpreadsheet
-  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil)
+  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil, options=Hash.new)
     @filename = filename
     @cell = Hash.new
     @cell_type = Hash.new
@@ -18,6 +18,7 @@ class Roo::Csv < Roo::GenericSpreadsheet
     @last_row = Hash.new
     @first_column = Hash.new
     @last_column = Hash.new
+    @options = options
   end
 
   # Returns an array with the names of the sheets. In Csv class there is only
@@ -66,7 +67,7 @@ class Roo::Csv < Roo::GenericSpreadsheet
     @first_column[sheet] = 1
     @last_column[sheet] = 1
     rownum = 1
-    CSV.foreach(@filename) do |row|
+    CSV.foreach(@filename, @options) do |row|
       row.each_with_index do |elem,i|
         @cell[[rownum,i+1]] = cell_postprocessing rownum,i+1, elem
         @cell_type[[rownum,i+1]] = celltype_class @cell[[rownum,i+1]]
