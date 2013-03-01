@@ -183,7 +183,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   def sheets
     return_sheets = []
     @doc.xpath("//*[local-name()='table']").each do |sheet|
-      return_sheets << sheet['name']
+      return_sheets << sheet["table:name"]
     end
     return_sheets
   end
@@ -270,7 +270,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # read the version of the OO-Version
   def oo_version
     @doc.xpath("//*[local-name()='document-content']").each do |office|
-      @officeversion = office.attributes['version'].to_s
+      @officeversion = office['office:version']
     end
   end
 
@@ -298,10 +298,10 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
       @cell[sheet][key] = str_v
     when :date
       #TODO: if table_cell.attributes['date-value'].size != "XXXX-XX-XX".size
-      if table_cell.attributes['date-value'].to_s.size != "XXXX-XX-XX".size
+      if table_cell['office:date-value'].size != "XXXX-XX-XX".size
         #-- dann ist noch eine Uhrzeit vorhanden
         #-- "1961-11-21T12:17:18"
-        @cell[sheet][key] = DateTime.parse(table_cell.attributes['date-value'].to_s)
+        @cell[sheet][key] = DateTime.parse(table_cell['office:date-value'].to_s)
         @cell_type[sheet][key] = :datetime
       else
         @cell[sheet][key] = table_cell.attributes['date-value']
@@ -327,7 +327,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     sheet_found = false
 
     @doc.xpath("//*[local-name()='table']").each do |ws|
-      if sheet == ws['name']
+      if sheet == ws['table:name']
         sheet_found = true
         col = 1
         row = 1
@@ -337,14 +337,14 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
             @style_defaults[sheet] << table_element.attributes['default-cell-style-name']
           when 'table-row'
             if table_element.attributes['number-rows-repeated']
-              skip_row = table_element.attributes['number-rows-repeated'].to_s.to_i
+              skip_row = table_element['table:number-rows-repeated'].to_s.to_i
               row = row + skip_row - 1
             end
             table_element.children.each do |cell|
-              skip_col = cell['number-columns-repeated']
-              formula = cell['formula']
-              value_type = cell['value-type']
-              v =  cell['value']
+              skip_col = cell['table:number-columns-repeated']
+              formula = cell['office:formula']
+              value_type = cell['office:value-type']
+              v =  cell['office:value']
               style_name = cell['style-name']
               case value_type
               when 'string'
@@ -406,7 +406,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
               when 'float'
                 #
               when 'boolean'
-                v = cell.attributes['boolean-value'].to_s
+                v = cell['office:boolean-value'].to_s
               else
                 # raise "unknown type #{value_type}"
               end
