@@ -1,3 +1,9 @@
+== 1.10.2 2013-02-03
+
+* 2 bugfixes
+  * Support opening URIs with query strings https://github.com/Empact/roo/commit/abf94bdb59cabc16d4f7764025e88e3661983525
+  * Support both http: & https: urls https://github.com/Empact/roo/commit/fc5c5899d96dd5f9fbb68125d0efc8ce9be2c7e1
+
 == 1.10.1 2011-11-14
 
 * 2 bugfixes
