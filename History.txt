@@ -1,3 +1,12 @@
+== 1.10.3 2013-03-03
+
+* 1 bugfix
+  * Support both nokogiri 1.5.5 and 1.5.6 (Karsten Richter) https://github.com/Empact/roo/pull/18
+
+* 1 enhancement
+  * Relax our nokogiri dependency back to 1.4.0, as we have no particular reason
+    to require a newer version.
+
 == 1.10.2 2013-02-03
 
 * 2 bugfixes
