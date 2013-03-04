@@ -270,7 +270,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # read the version of the OO-Version
   def oo_version
     @doc.xpath("//*[local-name()='document-content']").each do |office|
-      @officeversion = safe_attr(office,'version')
+      @officeversion = attr(office,'version')
     end
   end
 
@@ -298,10 +298,10 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
       @cell[sheet][key] = str_v
     when :date
       #TODO: if table_cell.attributes['date-value'].size != "XXXX-XX-XX".size
-      if safe_attr(table_cell,'date-value').size != "XXXX-XX-XX".size
+      if attr(table_cell,'date-value').size != "XXXX-XX-XX".size
         #-- dann ist noch eine Uhrzeit vorhanden
         #-- "1961-11-21T12:17:18"
-        @cell[sheet][key] = DateTime.parse(safe_attr(table_cell,'date-value').to_s)
+        @cell[sheet][key] = DateTime.parse(attr(table_cell,'date-value').to_s)
         @cell_type[sheet][key] = :datetime
       else
         @cell[sheet][key] = table_cell.attributes['date-value']
@@ -327,7 +327,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     sheet_found = false
 
     @doc.xpath("//*[local-name()='table']").each do |ws|
-      if sheet == safe_attr(ws,'name')
+      if sheet == attr(ws,'name')
         sheet_found = true
         col = 1
         row = 1
@@ -337,15 +337,15 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
             @style_defaults[sheet] << table_element.attributes['default-cell-style-name']
           when 'table-row'
             if table_element.attributes['number-rows-repeated']
-              skip_row = safe_attr(table_element,'number-rows-repeated').to_s.to_i
+              skip_row = attr(table_element,'number-rows-repeated').to_s.to_i
               row = row + skip_row - 1
             end
             table_element.children.each do |cell|
-              skip_col = safe_attr(cell, 'number-columns-repeated')
-              formula = safe_attr(cell,'formula')
-              value_type = safe_attr(cell,'value-type')
-              v =  safe_attr(cell,'value')
-              style_name = safe_attr(cell,'style-name')
+              skip_col = attr(cell, 'number-columns-repeated')
+              formula = attr(cell,'formula')
+              value_type = attr(cell,'value-type')
+              v =  attr(cell,'value')
+              style_name = attr(cell,'style-name')
               case value_type
               when 'string'
                 str_v  = ''
@@ -406,7 +406,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
               when 'float'
                 #
               when 'boolean'
-                v = safe_attr(cell,'boolean-value').to_s
+                v = attr(cell,'boolean-value').to_s
               else
                 # raise "unknown type #{value_type}"
               end
@@ -448,8 +448,8 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
       #-
       # $Sheet1.$C$5
       #+
-      name = safe_attr(ne,'name').to_s
-      sheetname,coords = safe_attr(ne,'cell-range-address').to_s.split('.$')
+      name = attr(ne,'name').to_s
+      sheetname,coords = attr(ne,'cell-range-address').to_s.split('.$')
       col, row = coords.split('$')
       sheetname = sheetname[1..-1] if sheetname[0,1] == '$'
       [name, [sheetname,row,col]]
@@ -460,12 +460,12 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     @style_definitions['Default'] = Roo::Openoffice::Font.new
     style_elements.each do |style|
       next unless style.name == 'style'
-      style_name = safe_attr(style,'name')
+      style_name = attr(style,'name')
       style.each do |properties|
         font = Roo::Openoffice::Font.new
-        font.bold = safe_attr(properties,'font-weight')
-        font.italic = safe_attr(properties,'font-style')
-        font.underline = safe_attr(properties,'text-underline-style')
+        font.bold = attr(properties,'font-weight')
+        font.italic = attr(properties,'font-style')
+        font.underline = attr(properties,'text-underline-style')
         @style_definitions[style_name] = font
       end
     end
@@ -508,11 +508,9 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
 
 
   private
-  def safe_attr(node, attr_name)
-    if node.attributes[attr_name] then
+  def attr(node, attr_name)
+    if node.attributes[attr_name]
       node.attributes[attr_name].value
-    else
-      nil
     end
   end
 
