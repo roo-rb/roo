@@ -4,21 +4,25 @@ module Roo
 
   class Spreadsheet
     class << self
-      def open(file)
+      def open(file, opts = {})
         file = File === file ? file.path : file
-        case File.extname(file)
+        
+        extension = opts[:extension] ? ".#{opts[:extension]}" : File.extname(file)
+        file_warning = opts[:extension] ? :ignore : :error
+        
+        case extension
         when '.xls'
-          Roo::Excel.new(file)
+          Roo::Excel.new(file, nil, file_warning)
         when '.xlsx'
-          Roo::Excelx.new(file)
+          Roo::Excelx.new(file, nil, file_warning)
         when '.ods'
-          Roo::Openoffice.new(file)
+          Roo::Openoffice.new(file, nil, file_warning)
         when '.xml'
-          Roo::Excel2003XML.new(file)
+          Roo::Excel2003XML.new(file, nil, file_warning)
         when ''
           Roo::Google.new(file)
         when '.csv'
-          Roo::Csv.new(file)
+          Roo::Csv.new(file, nil, file_warning)
         else
           raise ArgumentError, "Don't know how to open file #{file}"
         end

@@ -62,6 +62,11 @@ see http://roo.rubyforge.org for a more complete tutorial
 
     xls = Roo::Spreadsheet.open('./new_prices.xls')
 
+		# If the File.path or provided path string does not have an extension, you can optionally 
+		# provide one as a string or symbol
+		
+		xls = Roo::Spreadsheet.open('./rails_temp_upload', extension: :xls)
+		
     # no more setting xls.default_sheet, just use this
 
     xls.sheet('Info').row_count
