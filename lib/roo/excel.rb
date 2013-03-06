@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'spreadsheet'
-require 'iconv'
 #require 'lib/roo/generic_spreadsheet'
 #require 'parseexcel'
 CHARGUESS =
@@ -64,7 +63,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
       return Date.new(yyyy.to_i,mm.to_i,dd.to_i)
     end
     if celltype(row,col,sheet) == :string
-      return platform_specific_iconv(@cell[sheet][[row,col]])
+      return platform_specific_encoding(@cell[sheet][[row,col]])
     else
       if @cell[sheet] and @cell[sheet][[row,col]]
         return @cell[sheet][[row,col]]
@@ -145,19 +144,19 @@ class Roo::Excel < Roo::GenericSpreadsheet
   def normalize_string(value)
     value = every_second_null?(value) ? remove_every_second_null(value) : value
     if CHARGUESS && encoding = CharGuess::guess(value)
-      Iconv.new('utf-8', encoding)
+      encoding.encode Encoding::UTF_8
     else
-      platform_specific_iconv(value)
+      platform_specific_encoding(value)
     end
   end
 
-  def platform_specific_iconv(value)
+  def platform_specific_encoding(value)
     result =
       case RUBY_PLATFORM.downcase
       when /darwin|solaris/
-        Iconv.new('utf-8','utf-8').iconv(value)
+        value.encode Encoding::UTF_8
       when /mswin32/
-        Iconv.new('utf-8','iso-8859-1').iconv(value)
+        value.encode Encoding::ISO_8859_1
       else
         value
       end
