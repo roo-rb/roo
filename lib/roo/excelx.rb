@@ -12,44 +12,6 @@ if RUBY_VERSION < '1.9.0'
 end
 
 class Roo::Excelx < Roo::GenericSpreadsheet
-  FORMATS = {
-    'General' => :float,
-    '0' => :float,
-    '0.00' => :float,
-    '#,##0' => :float,
-    '#,##0.00' => :float,
-    '0%' => :percentage,
-    '0.00%' => :percentage,
-    '0.00E+00' => :float,
-    '# ?/?' => :float, #??? TODO:
-    '# ??/??' => :float, #??? TODO:
-    'mm-dd-yy' => :date,
-    'd-mmm-yy' => :date,
-    'd-mmm' => :date,
-    'mmm-yy' => :date,
-    'h:mm AM/PM' => :date,
-    'h:mm:ss AM/PM' => :date,
-    'h:mm' => :time,
-    'h:mm:ss' => :time,
-    'm/d/yy h:mm' => :date,
-    '#,##0 ;(#,##0)' => :float,
-    '#,##0 ;[Red](#,##0)' => :float,
-    '#,##0.00;(#,##0.00)' => :float,
-    '#,##0.00;[Red](#,##0.00)' => :float,
-    'mm:ss' => :time,
-    '[h]:mm:ss' => :time,
-    'mmss.0' => :time,
-    '##0.0E+0' => :float,
-    '@' => :float,
-    #-- zusaetzliche Formate, die nicht standardmaessig definiert sind:
-    "yyyy\\-mm\\-dd" => :date,
-    'dd/mm/yy' => :date,
-    'hh:mm:ss' => :time,
-    "dd/mm/yy\\ hh:mm" => :datetime,
-    'dd/mmm/yy' => :date, # 2011-05-21
-    'yyyy-mm-dd' => :date, # 2011-09-16
-    # was used in a spreadsheet file from a windows phone
-  }
   STANDARD_FORMATS = {
     0 => 'General',
     1 => '0',
@@ -401,11 +363,16 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   end
 
   def format2type(format)
-    format = format.to_s # weil von Typ Nokogiri::XML::Attr
-    if FORMATS.has_key? format
-      FORMATS[format]
-    else
-      :float
+    format = format.to_s.downcase
+    case format
+    when /d|y/
+      case format
+      when /h|s/ then :datetime
+      else :date
+      end
+    when /h|s/ then :time
+    when /%/ then :percentage
+    else :float
     end
   end
 
