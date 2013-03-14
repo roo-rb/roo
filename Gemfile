@@ -1,9 +1,17 @@
 source 'http://rubygems.org'
 
-# pull reqs from gemspec
-gemspec
+gem 'spreadsheet', '> 0.6.4'
+gem 'nokogiri'
+gem 'rubyzip'
+# gem 'google-spreadsheet-ruby'
 
-# additional testing libs
-gem 'webmock'
-gem 'shoulda'
-gem 'rspec'
+group :development do
+  gem 'jeweler'
+end
+
+group :test do
+  # additional testing libs
+  gem 'webmock'
+  gem 'shoulda'
+  gem 'rspec'
+end
