@@ -1,3 +1,15 @@
+== 1.11.0 2013-03-14
+
+* 3 enhancements
+  * Support ruby 2.0.0 by replacing Iconv with String#encode
+    https://github.com/Empact/roo/pull/19
+  * Excelx: Loosen the format detection rules such that more are
+    successfully detected https://github.com/Empact/roo/pull/20
+  * Delete the roo binary, which was useless and not declared in the gemspec
+
+* 1 change
+  * Drop support for ruby 1.8.x or lower. Required in order to easily support 2.0.0.
+
 == 1.10.3 2013-03-03
 
 * 1 bugfix

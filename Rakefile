@@ -10,6 +10,7 @@ Jeweler::Tasks.new do |gem|
   gem.authors = ['Thomas Preymesser', 'Hugh McGowan', 'Ben Woosley']
 
   gem.rubyforge_project = 'roo'
+  gem.required_ruby_version = '>= 1.9.0'
 
   gem.test_files = FileList["{spec,test}/**/*.*"]
 end
