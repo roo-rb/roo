@@ -156,6 +156,7 @@ Gem::Specification.new do |s|
     "website/template.rhtml"
   ]
   s.homepage = "http://github.com/Empact/roo"
+  s.licenses = ["MIT"]
   s.require_paths = ["lib"]
   s.required_ruby_version = Gem::Requirement.new(">= 1.9.0")
   s.rubyforge_project = "roo"

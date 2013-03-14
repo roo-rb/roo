@@ -9,6 +9,7 @@ Jeweler::Tasks.new do |gem|
   gem.homepage = "http://github.com/Empact/roo"
   gem.authors = ['Thomas Preymesser', 'Hugh McGowan', 'Ben Woosley']
 
+  gem.license = 'MIT'
   gem.rubyforge_project = 'roo'
   gem.required_ruby_version = '>= 1.9.0'
 
