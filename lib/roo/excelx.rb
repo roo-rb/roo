@@ -1,6 +1,5 @@
 require 'fileutils'
 require 'date'
-require 'rubygems'
 require 'nokogiri'
 
 unless ''.respond_to?(:end_with?)
@@ -12,36 +11,67 @@ unless ''.respond_to?(:end_with?)
 end
 
 class Roo::Excelx < Roo::GenericSpreadsheet
-  STANDARD_FORMATS = {
-    0 => 'General',
-    1 => '0',
-    2 => '0.00',
-    3 => '#,##0',
-    4 => '#,##0.00',
-    9 => '0%',
-    10 => '0.00%',
-    11 => '0.00E+00',
-    12 => '# ?/?',
-    13 => '# ??/??',
-    14 => 'mm-dd-yy',
-    15 => 'd-mmm-yy',
-    16 => 'd-mmm',
-    17 => 'mmm-yy',
-    18 => 'h:mm AM/PM',
-    19 => 'h:mm:ss AM/PM',
-    20 => 'h:mm',
-    21 => 'h:mm:ss',
-    22 => 'm/d/yy h:mm',
-    37 => '#,##0 ;(#,##0)',
-    38 => '#,##0 ;[Red](#,##0)',
-    39 => '#,##0.00;(#,##0.00)',
-    40 => '#,##0.00;[Red](#,##0.00)',
-    45 => 'mm:ss',
-    46 => '[h]:mm:ss',
-    47 => 'mmss.0',
-    48 => '##0.0E+0',
-    49 => '@',
-  }
+  module Format
+    EXCEPTIONAL_FORMATS = {
+      'h:mm am/pm' => :date,
+      'h:mm:ss am/pm' => :date,
+      'm/d/yy h:mm' => :date,
+      '#,##0 ;[red](#,##0)' => :float,
+      '#,##0.00;[red](#,##0.00)' => :float
+    }
+
+    STANDARD_FORMATS = {
+      0 => 'General',
+      1 => '0',
+      2 => '0.00',
+      3 => '#,##0',
+      4 => '#,##0.00',
+      9 => '0%',
+      10 => '0.00%',
+      11 => '0.00E+00',
+      12 => '# ?/?',
+      13 => '# ??/??',
+      14 => 'mm-dd-yy',
+      15 => 'd-mmm-yy',
+      16 => 'd-mmm',
+      17 => 'mmm-yy',
+      18 => 'h:mm AM/PM',
+      19 => 'h:mm:ss AM/PM',
+      20 => 'h:mm',
+      21 => 'h:mm:ss',
+      22 => 'm/d/yy h:mm',
+      37 => '#,##0 ;(#,##0)',
+      38 => '#,##0 ;[Red](#,##0)',
+      39 => '#,##0.00;(#,##0.00)',
+      40 => '#,##0.00;[Red](#,##0.00)',
+      45 => 'mm:ss',
+      46 => '[h]:mm:ss',
+      47 => 'mmss.0',
+      48 => '##0.0E+0',
+      49 => '@',
+    }
+
+    def to_type(format)
+      format = format.to_s.downcase
+      if type = EXCEPTIONAL_FORMATS[format]
+        type
+      elsif format.include?('d') || format.include?('y')
+        if format.include?('h') || format.include?('s')
+          :datetime
+        else
+          :date
+        end
+      elsif format.include?('h') || format.include?('s')
+        :time
+      elsif format.include?('%')
+        :percentage
+      else
+        :float
+      end
+    end
+
+    module_function :to_type
+  end
 
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
@@ -362,20 +392,6 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @s_attribute[sheet][key] = s_attribute
   end
 
-  def format2type(format)
-    format = format.to_s.downcase
-    case format
-    when /d|y/
-      case format
-      when /h|s/ then :datetime
-      else :date
-      end
-    when /h|s/ then :time
-    when /%/ then :percentage
-    else :float
-    end
-  end
-
   # read all cells in the selected sheet
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
@@ -401,7 +417,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
           # 2011-09-15 END
         else
           format = attribute2format(s_attribute)
-          format2type(format)
+          Format.to_type(format)
         end
       formula = nil
       c.children.each do |cell|
@@ -627,7 +643,7 @@ Datei xl/comments1.xml
   # convert internal excelx attribute to a format
   def attribute2format(s)
     id = @cellXfs[s.to_i]
-    @numFmts[id] || STANDARD_FORMATS[id.to_i]
+    @numFmts[id] || Format::STANDARD_FORMATS[id.to_i]
   end
 
 end # class
