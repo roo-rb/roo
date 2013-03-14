@@ -1,5 +1,4 @@
 # Loeschen von Dateien, wenn mit Excel geoeffnet
-require 'rubygems'
 require 'roo'
 
 oo = Excel.new("tmp.xls")

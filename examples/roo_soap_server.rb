@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'roo'
 require 'soap/rpc/standaloneServer'
 

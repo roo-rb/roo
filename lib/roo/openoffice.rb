@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'fileutils'
 require 'date'
 require 'nokogiri'

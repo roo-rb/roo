@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'spreadsheet'
 #require 'lib/roo/generic_spreadsheet'
 #require 'parseexcel'

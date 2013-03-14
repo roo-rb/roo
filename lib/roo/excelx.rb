@@ -2,14 +2,6 @@ require 'fileutils'
 require 'date'
 require 'nokogiri'
 
-unless ''.respond_to?(:end_with?)
-  class  String
-    def end_with?(str)
-      self[-str.length,str.length] == str
-    end
-  end
-end
-
 class Roo::Excelx < Roo::GenericSpreadsheet
   module Format
     EXCEPTIONAL_FORMATS = {

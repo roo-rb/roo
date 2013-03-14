@@ -1,5 +1,4 @@
 # require deps
-require 'rubygems'
 require 'tmpdir'
 require 'test/unit'
 require 'shoulda'
