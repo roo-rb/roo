@@ -29,7 +29,6 @@ Bones {
   #TODO: warum brauchen wir das? es lief doch auch vorher ohne dieses spezielle gem
   depend_on 'rubyzip' # rubyzip wird benoetigt
   # depend_on 'google-spreadsheet-ruby'
-  # depend_on 'choice'
 }
 
 # EOF
