@@ -3,7 +3,7 @@ require 'date'
 require 'rubygems'
 require 'nokogiri'
 
-if RUBY_VERSION < '1.9.0'
+unless ''.respond_to?(:end_with?)
   class  String
     def end_with?(str)
       self[-str.length,str.length] == str
