@@ -1,5 +1,6 @@
 # require deps
 require 'tmpdir'
+require 'fileutils'
 require 'test/unit'
 require 'shoulda'
 require 'fileutils'
@@ -13,14 +14,10 @@ require File.dirname(__FILE__) + '/../lib/roo'
 
 TESTDIR =  File.join(File.dirname(__FILE__), 'files')
 
-LOG_DIR = File.join(File.dirname(__FILE__),'log')
-LOG_FILE = File.join(LOG_DIR,'roo.log')
+LOG_DIR = File.join(File.dirname(__FILE__),'../log')
+FileUtils.mkdir_p(LOG_DIR)
 
-test_dirs = Dir.glob(File.dirname(__FILE__)+'/*')
-unless test_dirs.include?(LOG_DIR)
-  Dir.mkdir(LOG_DIR)
-end
-
+LOG_FILE = File.join(LOG_DIR,'roo_test.log')
 $log = Logger.new(LOG_FILE)
 
 #$log.level = Logger::WARN
