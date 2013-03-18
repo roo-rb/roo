@@ -1,3 +1,9 @@
+== 1.11.1 2013-03-18
+
+* 1 bugfix
+  * Exclude test/log/roo.log test log file from the gemspec in order to avoid a
+    rubygems warning: https://github.com/Empact/roo/pull/26
+
 == 1.11.0 2013-03-14
 
 * 3 enhancements
