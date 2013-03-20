@@ -2,6 +2,7 @@ require 'fileutils'
 require 'date'
 require 'base64'
 require 'cgi'
+require 'nokogiri'
 
 class Roo::Excel2003XML < Roo::GenericSpreadsheet
 
@@ -118,7 +119,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
 
   def sheets
     @doc.xpath("/ss:Workbook/ss:Worksheet").map do |sheet|
-      sheet['Name']
+      sheet['ss:Name']
     end
   end
 
@@ -229,7 +230,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
           end
           c.xpath('./ss:Data').each do |cell|
             formula = cell['Formula']
-            value_type = cell['Type'].downcase.to_sym
+            value_type = cell['ss:Type'].downcase.to_sym
             v =  cell.content
             str_v = v
             case value_type
