@@ -7,7 +7,6 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     EXCEPTIONAL_FORMATS = {
       'h:mm am/pm' => :date,
       'h:mm:ss am/pm' => :date,
-      'm/d/yy h:mm' => :date,
       '#,##0 ;[red](#,##0)' => :float,
       '#,##0.00;[red](#,##0.00)' => :float
     }
@@ -405,7 +404,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
           # 2011-02-25 END
           # 2011-09-15 BEGIN
         when 'inlineStr'
-  	      :inlinestr
+          :inlinestr
           # 2011-09-15 END
         else
           format = attribute2format(s_attribute)
@@ -531,7 +530,7 @@ Datei xl/comments1.xml
 
   def read_labels
     @label ||= Hash[@workbook_doc.xpath("//xmlns:definedName").map do |defined_name|
-	    # "Sheet1!$C$5"
+      # "Sheet1!$C$5"
       sheet, coordinates = defined_name.text.split('!$', 2)
       col,row = coordinates.split('$')
       [defined_name['name'], [sheet,row,col]]
@@ -549,10 +548,10 @@ Datei xl/comments1.xml
           }
         end
         # if entry.to_s.end_with?('sharedStrings.xml')
-	# at least one application creates this file with another (incorrect?)
-	# casing. It doesn't hurt, if we ignore here the correct casing - there
-	# won't be both names in the archive.
-	# Changed the casing of all the following filenames.
+        # at least one application creates this file with another (incorrect?)
+        # casing. It doesn't hurt, if we ignore here the correct casing - there
+        # won't be both names in the archive.
+        # Changed the casing of all the following filenames.
         if entry.to_s.downcase.end_with?('sharedstrings.xml')
           open(tmpdir+'/'+'roo_sharedStrings.xml','wb') {|f|
             f << zip.read(entry)
