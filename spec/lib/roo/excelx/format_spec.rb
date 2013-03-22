@@ -21,7 +21,7 @@ describe Roo::Excelx::Format do
       'h:mm:ss AM/PM' => :date,
       'h:mm' => :time,
       'h:mm:ss' => :time,
-      'm/d/yy h:mm' => :date,
+      'm/d/yy h:mm' => :datetime,
       '#,##0 ;(#,##0)' => :float,
       '#,##0 ;[Red](#,##0)' => :float,
       '#,##0.00;(#,##0.00)' => :float,
