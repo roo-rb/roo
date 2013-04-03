@@ -19,10 +19,10 @@ file but not the formula itself)
 
     require 'roo'
 
-    s = Openoffice.new("myspreadsheet.ods")      # creates an Openoffice Spreadsheet instance
-    s = Excel.new("myspreadsheet.xls")           # creates an Excel Spreadsheet instance
-    s = Google.new("myspreadsheetkey_at_google") # creates an Google Spreadsheet instance
-    s = Excelx.new("myspreadsheet.xlsx")         # creates an Excel Spreadsheet instance for Excel .xlsx files
+    s = Roo::Openoffice.new("myspreadsheet.ods")      # creates an Openoffice Spreadsheet instance
+    s = Roo::Excel.new("myspreadsheet.xls")           # creates an Excel Spreadsheet instance
+    s = Roo::Google.new("myspreadsheetkey_at_google") # creates an Google Spreadsheet instance
+    s = Roo::Excelx.new("myspreadsheet.xlsx")         # creates an Excel Spreadsheet instance for Excel .xlsx files
 
     s.default_sheet = s.sheets.first  # first sheet in the spreadsheet file will be used
 
