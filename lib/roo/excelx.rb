@@ -7,9 +7,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     EXCEPTIONAL_FORMATS = {
       'h:mm am/pm' => :date,
       'h:mm:ss am/pm' => :date,
-      'm/d/yy h:mm' => :date,
-      '#,##0 ;[red](#,##0)' => :float,
-      '#,##0.00;[red](#,##0.00)' => :float
+      'm/d/yy h:mm' => :date
     }
 
     STANDARD_FORMATS = {
@@ -47,6 +45,8 @@ class Roo::Excelx < Roo::GenericSpreadsheet
       format = format.to_s.downcase
       if type = EXCEPTIONAL_FORMATS[format]
         type
+      elsif format.include?('#')
+        :float
       elsif format.include?('d') || format.include?('y')
         if format.include?('h') || format.include?('s')
           :datetime

@@ -26,6 +26,7 @@ describe Roo::Excelx::Format do
       '#,##0 ;[Red](#,##0)' => :float,
       '#,##0.00;(#,##0.00)' => :float,
       '#,##0.00;[Red](#,##0.00)' => :float,
+      '#,##0_);[Red](#,##0)' => :float,
       'mm:ss' => :time,
       '[h]:mm:ss' => :time,
       'mmss.0' => :time,
