@@ -1,9 +1,11 @@
 == 1.11.2 (unreleased)
 
-* 3 bugfixes
+* 4 bugfixes
   * Fix that Roo::Spreadsheet.open wasn't tolerant to case differences.
   * Fix that Roo::Excel2003XML loading was broken https://github.com/Empact/roo/pull/27
   * Enable loading Roo::Csv files from uris, just as other file types https://github.com/Empact/roo/pull/31
+  * Fix that Excelx "m/d/yy h:mm" was improperly being interpreted as date rather
+    than datetime https://github.com/Empact/roo/pull/29
 
 == 1.11.1 2013-03-18
 
