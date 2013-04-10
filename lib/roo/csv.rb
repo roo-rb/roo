@@ -17,16 +17,9 @@ class Roo::Csv < Roo::GenericSpreadsheet
     @last_row = Hash.new
     @first_column = Hash.new
     @last_column = Hash.new
-
-    make_tmpdir do |tmpdir|
-      @data =
-        File.open(
-          uri?(filename) ?
-            open_from_uri(filename, tmpdir) :
-            filename
-        ) { |f| f.read }
-    end
   end
+
+  attr_reader :filename
 
   # Returns an array with the names of the sheets. In Csv class there is only
   # one dummy sheet, because a csv file cannot have more than one sheet.
@@ -65,6 +58,17 @@ class Roo::Csv < Roo::GenericSpreadsheet
     TYPE_MAP[value.class]
   end
 
+  def data
+    @data ||=
+      make_tmpdir do |tmpdir|
+        File.open(
+          uri?(filename) ?
+            open_from_uri(filename, tmpdir) :
+            filename
+        ) { |f| f.read }
+      end
+  end
+
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
     @cell_type = {} unless @cell_type
@@ -74,7 +78,7 @@ class Roo::Csv < Roo::GenericSpreadsheet
     @first_column[sheet] = 1
     @last_column[sheet] = 1
     rownum = 1
-    CSV.parse @data do |row|
+    CSV.parse data do |row|
       row.each_with_index do |elem,i|
         @cell[[rownum,i+1]] = cell_postprocessing rownum,i+1, elem
         @cell_type[[rownum,i+1]] = celltype_class @cell[[rownum,i+1]]

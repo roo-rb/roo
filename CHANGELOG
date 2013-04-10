@@ -1,8 +1,9 @@
 == 1.11.2 (unreleased)
 
-* 1 bugfix
+* 3 bugfixes
   * Fix that Roo::Spreadsheet.open wasn't tolerant to case differences.
   * Fix that Roo::Excel2003XML loading was broken https://github.com/Empact/roo/pull/27
+  * Enable loading Roo::Csv files from uris, just as other file types https://github.com/Empact/roo/pull/31
 
 == 1.11.1 2013-03-18
 
