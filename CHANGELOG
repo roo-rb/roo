@@ -1,3 +1,8 @@
+== 1.11.3 (unreleased)
+
+* 1 enhancement
+  * Add Roo::Excelx#load_xml so that people can customize to their data, e.g. https://github.com/Empact/roo/pull/23
+
 == 1.11.2 2013-04-10
 
 * 4 bugfixes

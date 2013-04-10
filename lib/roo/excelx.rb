@@ -78,33 +78,23 @@ class Roo::Excelx < Roo::GenericSpreadsheet
       end
       @comments_files = Array.new
       extract_content(tmpdir, @filename)
-      @workbook_doc = File.open(File.join(tmpdir, "roo_workbook.xml")) do |file|
-        Nokogiri::XML(file)
-      end
+      @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml"))
       @shared_table = []
       if File.exist?(File.join(tmpdir, 'roo_sharedStrings.xml'))
-        @sharedstring_doc = File.open(File.join(tmpdir, 'roo_sharedStrings.xml')) do |file|
-          Nokogiri::XML(file)
-        end
+        @sharedstring_doc = load_xml(File.join(tmpdir, 'roo_sharedStrings.xml'))
         read_shared_strings(@sharedstring_doc)
       end
       @styles_table = []
       @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
       if File.exist?(File.join(tmpdir, 'roo_styles.xml'))
-        @styles_doc = File.open(File.join(tmpdir, 'roo_styles.xml')) do |file|
-          Nokogiri::XML(file)
-        end
+        @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
         read_styles(@styles_doc)
       end
       @sheet_doc = @sheet_files.map do |item|
-        File.open(item) do |file|
-          Nokogiri::XML(file)
-        end
+        load_xml(item)
       end
       @comments_doc = @comments_files.map do |item|
-        File.open(item) do |file|
-          Nokogiri::XML(file)
-        end
+        load_xml(item)
       end
     end
     @default_sheet = self.sheets.first
@@ -346,6 +336,12 @@ class Roo::Excelx < Roo::GenericSpreadsheet
   end
 
   private
+
+  def load_xml(path)
+    File.open(path) do |file|
+      Nokogiri::XML(file)
+    end
+  end
 
   # helper function to set the internal representation of cells
   def set_cell_values(sheet,x,y,i,v,value_type,formula,
