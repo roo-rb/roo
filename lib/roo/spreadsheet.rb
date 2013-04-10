@@ -1,7 +1,7 @@
 module Roo
   class Spreadsheet
     class << self
-      def open(file)
+      def open(file, options = {})
         file = File === file ? file.path : file
         case File.extname(file).downcase
         when '.xls'
@@ -15,7 +15,7 @@ module Roo
         when ''
           Roo::Google.new(file)
         when '.csv'
-          Roo::Csv.new(file)
+          Roo::Csv.new(file, options)
         else
           raise ArgumentError, "Don't know how to open file #{file}"
         end

@@ -10,5 +10,17 @@ describe Roo::Spreadsheet do
         Roo::Spreadsheet.open(filename)
       end
     end
+
+    context 'for a csv file' do
+      let(:filename) { 'file.csv' }
+      let(:options) { {csv_options: {col_sep: '"'}} }
+
+      context 'with options' do
+        it 'passes the options through' do
+          Roo::Csv.should_receive(:new).with(filename, options)
+          Roo::Spreadsheet.open(filename, options)
+        end
+      end
+    end
   end
 end

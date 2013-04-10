@@ -6,17 +6,22 @@ require 'time'
 # within these files.
 # The Csv class provides only string objects. If you want conversions to other
 # types you have to do it yourself.
+#
+# You can pass options to the underlying CSV parse operation, via the
+# :csv_options option.
+#
 
 class Roo::Csv < Roo::GenericSpreadsheet
-  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil)
+  def initialize(filename, options = {})
     @filename = filename
-    @cell = Hash.new
-    @cell_type = Hash.new
-    @cells_read = Hash.new
-    @first_row = Hash.new
-    @last_row = Hash.new
-    @first_column = Hash.new
-    @last_column = Hash.new
+    @options = options
+    @cell = {}
+    @cell_type = {}
+    @cells_read = {}
+    @first_row = {}
+    @last_row = {}
+    @first_column = {}
+    @last_column = {}
   end
 
   attr_reader :filename
@@ -43,6 +48,10 @@ class Roo::Csv < Roo::GenericSpreadsheet
 
   def cell_postprocessing(row,col,value)
     value
+  end
+
+  def csv_options
+    @options[:csv_options] || {}
   end
 
   private
@@ -78,7 +87,7 @@ class Roo::Csv < Roo::GenericSpreadsheet
     @first_column[sheet] = 1
     @last_column[sheet] = 1
     rownum = 1
-    CSV.parse data do |row|
+    CSV.parse data, csv_options do |row|
       row.each_with_index do |elem,i|
         @cell[[rownum,i+1]] = cell_postprocessing rownum,i+1, elem
         @cell_type[[rownum,i+1]] = celltype_class @cell[[rownum,i+1]]

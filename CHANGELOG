@@ -1,7 +1,9 @@
-== 1.11.3 (unreleased)
+== 2.0.0 (unreleased)
 
-* 1 enhancement
+* 3 enhancements
   * Add Roo::Excelx#load_xml so that people can customize to their data, e.g. https://github.com/Empact/roo/pull/23
+  * Enable passing csv_options to Roo::Csv, which are passed through to the underlying CSV call.
+  * Enable passing options through from Roo::Spreadsheet to Roo::Csv.
 
 == 1.11.2 2013-04-10
 
