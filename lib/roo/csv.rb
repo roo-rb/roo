@@ -91,41 +91,25 @@ class Roo::Csv < Roo::GenericSpreadsheet
     end
     @cells_read[sheet] = true
     #-- adjust @first_row if neccessary
-    loop do
-      if !row(@first_row[sheet]).any? and @first_row[sheet] < @last_row[sheet]
-        @first_row[sheet] += 1
-      else
-        break
-      end
+    while !row(@first_row[sheet]).any? and @first_row[sheet] < @last_row[sheet]
+      @first_row[sheet] += 1
     end
     #-- adjust @last_row if neccessary
-    loop do
-      if !row(@last_row[sheet]).any? and @last_row[sheet] and
-          @last_row[sheet] > @first_row[sheet]
-        @last_row[sheet] -= 1
-      else
-        break
-      end
+    while !row(@last_row[sheet]).any? and @last_row[sheet] and
+        @last_row[sheet] > @first_row[sheet]
+      @last_row[sheet] -= 1
     end
     #-- adjust @first_column if neccessary
-    loop do
-      if !column(@first_column[sheet]).any? and
+    while !column(@first_column[sheet]).any? and
           @first_column[sheet] and
           @first_column[sheet] < @last_column[sheet]
-        @first_column[sheet] += 1
-      else
-        break
-      end
+      @first_column[sheet] += 1
     end
     #-- adjust @last_column if neccessary
-    loop do
-      if !column(@last_column[sheet]).any? and
+    while !column(@last_column[sheet]).any? and
           @last_column[sheet] and
           @last_column[sheet] > @first_column[sheet]
-        @last_column[sheet] -= 1
-      else
-        break
-      end
+      @last_column[sheet] -= 1
     end
   end
 end # class Csv
