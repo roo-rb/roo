@@ -97,9 +97,9 @@ class Roo::Excelx < Roo::GenericSpreadsheet
         read_styles(@styles_doc)
       end
       @sheet_doc = @sheet_files.map do |item|
-        File.open(item) do |file|
-          Nokogiri::XML(file)
-        end
+        file = File.read item
+        file.gsub! /<row [^>]+>(?:<c [^>]+\/>)*<\/row>/, ''
+        Nokogiri::XML(file)
       end
       @comments_doc = @comments_files.map do |item|
         File.open(item) do |file|
