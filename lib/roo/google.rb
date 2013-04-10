@@ -33,20 +33,17 @@ class Roo::Google < Roo::GenericSpreadsheet
     @date_format = '%d/%m/%Y'
     @datetime_format = '%d/%m/%Y %H:%M:%S'
     @time_format = '%H:%M:%S'
-    @sheetlist = []
 
     session = GoogleSpreadsheet.login(@user, @password)
-    session.spreadsheet_by_key(@spreadsheetkey).worksheets.each { |sheet|
-      @sheetlist << sheet.title
-    }
-    @default_sheet = self.sheets.first
+    @sheets = session.spreadsheet_by_key(@spreadsheetkey).worksheets.map do |sheet|
+      sheet.title
+    end
+    @default_sheet = sheets.first
     @worksheets = session.spreadsheet_by_key(@spreadsheetkey).worksheets
   end
 
   # returns an array of sheet names in the spreadsheet
-  def sheets
-    @sheetlist
-  end
+  attr_reader :sheets
 
   def date?(string)
     Date.strptime(string, @date_format)
