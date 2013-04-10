@@ -13,7 +13,6 @@ class Roo::Google < Roo::GenericSpreadsheet
 
   # Creates a new Google spreadsheet object.
   def initialize(spreadsheetkey, options = {})
-    @filename = spreadsheetkey
     @spreadsheetkey = spreadsheetkey
     @user = options[:user] || ENV['GOOGLE_MAIL']
     @password = options[:password] || ENV['GOOGLE_PASSWORD']
