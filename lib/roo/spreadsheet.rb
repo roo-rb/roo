@@ -3,7 +3,7 @@ module Roo
     class << self
       def open(file)
         file = File === file ? file.path : file
-        case File.extname(file)
+        case File.extname(file).downcase
         when '.xls'
           Roo::Excel.new(file)
         when '.xlsx'

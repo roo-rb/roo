@@ -1,3 +1,8 @@
+== 1.11.2 (unreleased)
+
+* 1 bugfix
+  * Fix that Roo::Spreadsheet.open wasn't tolerant to case differences.
+
 == 1.11.1 2013-03-18
 
 * 1 bugfix
