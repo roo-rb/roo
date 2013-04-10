@@ -2,6 +2,7 @@
 
 * 1 bugfix
   * Fix that Roo::Spreadsheet.open wasn't tolerant to case differences.
+  * Fix that Roo::Excel2003XML loading was broken https://github.com/Empact/roo/pull/27
 
 == 1.11.1 2013-03-18
 
