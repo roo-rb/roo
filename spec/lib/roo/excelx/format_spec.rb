@@ -37,6 +37,7 @@ describe Roo::Excelx::Format do
       'dd/mm/yy' => :date,
       'hh:mm:ss' => :time,
       "dd/mm/yy\\ hh:mm" => :datetime,
+      'dd/mmm/yy\\ hh:mm' => :datetime,
       'dd/mmm/yy' => :date, # 2011-05-21
       'yyyy-mm-dd' => :date, # 2011-09-16
       'yyyy-mm-dd;@' => :date
