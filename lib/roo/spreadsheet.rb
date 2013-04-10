@@ -13,7 +13,7 @@ module Roo
         when '.xml'
           Roo::Excel2003XML.new(file)
         when ''
-          Roo::Google.new(file)
+          Roo::Google.new(file, options)
         when '.csv'
           Roo::Csv.new(file, options)
         else
