@@ -41,20 +41,6 @@ if DB_LOG
   end
 end
 
-
-class Roo::Csv
-  remove_method :cell_postprocessing
-  def cell_postprocessing(row,col,value)
-    if row==1 and col==1
-      return value.to_f
-    end
-    if row==1 and col==2
-      return value.to_s
-    end
-    return value
-  end
-end
-
 # helper method
 def local_only
   if ENV["roo_local"] == "thomas-p"

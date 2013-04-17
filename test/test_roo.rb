@@ -21,8 +21,8 @@ require File.dirname(__FILE__) + '/test_helper'
 
 class TestRoo < Test::Unit::TestCase
 
-  OPENOFFICE   = false  	# do Openoffice-Spreadsheet Tests? (.ods files)
-  EXCEL        = true	# do Excel Tests? (.xls files)
+  OPENOFFICE   = false 	# do Openoffice-Spreadsheet Tests? (.ods files)
+  EXCEL        = true  	# do Excel Tests? (.xls files)
   GOOGLE       = false 	# do Google-Spreadsheet Tests?
   EXCELX       = true  	# do Excelx Tests? (.xlsx files)
   LIBREOFFICE  = true  	# do Libreoffice tests? (.ods files)
@@ -2859,4 +2859,12 @@ This attached file is the newer format of Microsoft Excel (.xlsx).
   #   end
   # end
 
+  def test_csv_parsing_with_headers
+    return unless CSV
+    headers = ["TITEL", "VERFASSER", "OBJEKT", "NUMMER", "SEITE", "INTERNET", "PC", "KENNUNG"]
+
+    oo = Roo::Spreadsheet.open(File.join(TESTDIR, 'Bibelbund.csv'))
+    parsed = oo.parse(:headers => true)
+    assert_equal headers, parsed[1].keys
+  end
 end # class
