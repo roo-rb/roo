@@ -1576,6 +1576,19 @@ Sheet 3:
     end
   end
 
+  # Excel has two base date formats one from 1900 and the other from 1904.
+  # see #test_base_dates_in_excel
+  def test_base_dates_in_excelx
+    with_each_spreadsheet(:name=>'1900_base', :format=>:excelx) do |oo|
+      assert_equal Date.new(2009,06,15), oo.cell(1,1)
+      assert_equal :date, oo.celltype(1,1)
+    end
+    with_each_spreadsheet(:name=>'1904_base', :format=>:excelx) do |oo|
+      assert_equal Date.new(2009,06,15), oo.cell(1,1)
+      assert_equal :date, oo.celltype(1,1)
+    end
+  end
+
   def test_bad_date
     with_each_spreadsheet(:name=>'prova', :format=>:excel) do |oo|
       assert_nothing_raised(ArgumentError) {
