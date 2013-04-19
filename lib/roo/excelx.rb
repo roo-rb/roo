@@ -361,9 +361,9 @@ class Roo::Excelx < Roo::GenericSpreadsheet
       when :string
         v
       when :date
-        (Date.new(1899,12,30)+v.to_i).strftime("%Y-%m-%d")
+        (base_date+v.to_i).strftime("%Y-%m-%d")
       when :datetime
-        (DateTime.new(1899,12,30)+v.to_f).strftime("%Y-%m-%d %H:%M:%S")
+        (base_date+v.to_f).strftime("%Y-%m-%d %H:%M:%S")
       when :percentage
         v.to_f
       when :time
@@ -631,6 +631,21 @@ Datei xl/comments1.xml
   def attribute2format(s)
     id = @cellXfs[s.to_i]
     @numFmts[id] || Format::STANDARD_FORMATS[id.to_i]
+  end
+
+  def base_date
+    @base_date ||= read_base_date
+  end
+
+  # Default to 1900 (minus one day due to excel quirk) but use 1904 if
+  # it's set in the Workbook's workbookPr
+  # http://msdn.microsoft.com/en-us/library/ff530155(v=office.12).aspx
+  def read_base_date
+    base_date = Date.new(1899,12,30)
+    @workbook_doc.xpath("//xmlns:workbookPr").map do |workbookPr|
+      base_date = Date.new(1904,01,01) if workbookPr["date1904"]
+    end
+    base_date
   end
 
 end # class
