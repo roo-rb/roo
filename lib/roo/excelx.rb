@@ -643,7 +643,9 @@ Datei xl/comments1.xml
   def read_base_date
     base_date = Date.new(1899,12,30)
     @workbook_doc.xpath("//xmlns:workbookPr").map do |workbookPr|
-      base_date = Date.new(1904,01,01) if workbookPr["date1904"]
+      if workbookPr["date1904"] && workbookPr["date1904"] =~ /true|1/i
+        base_date = Date.new(1904,01,01)
+      end
     end
     base_date
   end
