@@ -3,7 +3,7 @@ module Roo
     class << self
       def open(file, options = {})
         file = File === file ? file.path : file
-        case File.extname(file).downcase
+        case File.extname(file).downcase.match(/(.*)\?.*/)[1]
         when '.xls'
           Roo::Excel.new(file)
         when '.xlsx'
