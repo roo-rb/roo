@@ -15,9 +15,9 @@ Unless the underlying 'spreadsheet' gem supports formulas there is no support
 for formulas in Roo for .xls files (you get the result of a formula in such a
 file but not the formula itself)
 
-## Spreadsheet's License
-Please note that the 'spreadsheet' gem is released under the GPLv3 license (see https://github.com/zdavatz/spreadsheet/blob/master/LICENSE.txt).
-Before using 'roo' please check whether you're in compliance with the underlying licenses.
+## License
+
+While Roo is licensed under the MIT / Expat license, please note that the 'spreadsheet' gem [is released under](https://github.com/zdavatz/spreadsheet/blob/master/LICENSE.txt) the GPLv3 license.
 
 ## Usage:
 
