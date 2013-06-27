@@ -1556,6 +1556,14 @@ Sheet 3:
      end
   end
 
+
+  def test_excel_links
+    with_each_spreadsheet(:name=>'link', :format=>:excel) do |oo|
+      assert_equal 'Google', oo.cell(1,1)
+      assert_equal 'http://www.google.com', oo.cell(1,1).url
+    end
+  end
+
   # Excel has two base date formats one from 1900 and the other from 1904.
   # There's a MS bug that 1900 base dates include an extra day due to erroneously
   # including 1900 as a leap yar.
