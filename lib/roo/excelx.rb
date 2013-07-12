@@ -1,6 +1,7 @@
 require 'fileutils'
 require 'date'
 require 'nokogiri'
+require 'spreadsheet'
 
 class Roo::Excelx < Roo::GenericSpreadsheet
   module Format
@@ -77,6 +78,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
         raise IOError, "file #{@filename} does not exist"
       end
       @comments_files = Array.new
+      @rels_files = Array.new
       extract_content(tmpdir, @filename)
       @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml"))
       @shared_table = []
@@ -96,6 +98,9 @@ class Roo::Excelx < Roo::GenericSpreadsheet
       @comments_doc = @comments_files.map do |item|
         load_xml(item)
       end
+      @rels_doc = @rels_files.map do |item|
+        load_xml(item)
+      end
     end
     @default_sheet = self.sheets.first
     @cell = Hash.new
@@ -111,6 +116,8 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @s_attribute = Hash.new # TODO: ggf. wieder entfernen nur lokal benoetigt
     @comment = Hash.new
     @comments_read = Hash.new
+    @hyperlink = Hash.new
+    @hyperlinks_read = Hash.new
   end
 
   def method_missing(m,*args)
@@ -301,6 +308,23 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     end
   end
 
+  def hyperlink?(row,col,sheet=nil)
+    sheet ||= @default_sheet
+    read_hyperlinks(sheet) unless @hyperlinks_read[sheet]
+    row,col = normalize(row,col)
+    hyperlink(row,col) != nil
+  end
+
+  # returns the hyperlink at (row/col)
+  # nil if there is no hyperlink
+  def hyperlink(row,col,sheet=nil)
+    sheet ||= @default_sheet
+    read_hyperlinks(sheet) unless @hyperlinks_read[sheet]
+    row,col = normalize(row,col)
+    return nil unless @hyperlink[sheet]
+    @hyperlink[sheet][[row,col]]
+  end
+
   # returns the comment at (row/col)
   # nil if there is no comment
   def comment(row,col,sheet=nil)
@@ -371,6 +395,8 @@ class Roo::Excelx < Roo::GenericSpreadsheet
       else
         v
       end
+
+    @cell[sheet][key] = Spreadsheet::Link.new(@hyperlink[sheet][key], @cell[sheet][key]) if hyperlink?(y,x+i)
     @excelx_type[sheet] ||= {}
     @excelx_type[sheet][key] = excelx_type
     @excelx_value[sheet] ||= {}
@@ -524,6 +550,24 @@ Datei xl/comments1.xml
     @comments_read[sheet] = true
   end
 
+  # Reads all hyperlinks from a sheet
+  def read_hyperlinks(sheet=nil)
+    sheet ||= @default_sheet
+    validate_sheet!(sheet)
+    n = self.sheets.index(sheet)
+    @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:hyperlinks/xmlns:hyperlink").each do |h|
+      relid = h.attribute('id')
+      ref = h.attributes['ref'].to_s
+      row,col = Roo::GenericSpreadsheet.split_coordinate(ref)
+      rel_element = @rels_doc[sheets.index(sheet)].xpath("/xmlns:Relationships/xmlns:Relationship[@Id='#{relid}']")
+      unless rel_element.nil?
+        @hyperlink[sheet] ||= {}
+        @hyperlink[sheet][[row,col]] = rel_element.attribute('Target').text
+      end
+    end
+    @hyperlinks_read[sheet] = true
+  end
+
   def read_labels
     @label ||= Hash[@workbook_doc.xpath("//xmlns:definedName").map do |defined_name|
       # "Sheet1!$C$5"
@@ -571,6 +615,13 @@ Datei xl/comments1.xml
             f << zip.read(entry)
           }
           @comments_files[nr.to_i-1] = tmpdir+'/'+"roo_comments#{nr}"
+        end
+        if entry.to_s.downcase =~ /sheet([0-9]+).xml.rels$/
+          nr = $1
+          open(tmpdir+'/'+"roo_rels#{nr}",'wb') {|f|
+            f << zip.read(entry)
+          }
+          @rels_files[nr.to_i-1] = tmpdir+'/'+"roo_rels#{nr}"
         end
       }
     }
