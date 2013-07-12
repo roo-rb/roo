@@ -555,11 +555,15 @@ Datei xl/comments1.xml
     sheet ||= @default_sheet
     validate_sheet!(sheet)
     n = self.sheets.index(sheet)
-    @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:hyperlinks/xmlns:hyperlink").each do |h|
-      relid = h.attribute('id')
+    rels = {}
+    @rels_doc[n].xpath("/xmlns:Relationships/xmlns:Relationship").each do |r|
+      rels[r.attribute('Id').text] = r
+    end
+    @sheet_doc[n].xpath("/xmlns:worksheet/xmlns:hyperlinks/xmlns:hyperlink").each do |h|
+      relid = h.attribute('id').text
       ref = h.attributes['ref'].to_s
       row,col = Roo::GenericSpreadsheet.split_coordinate(ref)
-      rel_element = @rels_doc[sheets.index(sheet)].xpath("/xmlns:Relationships/xmlns:Relationship[@Id='#{relid}']")
+      rel_element = rels[relid]
       unless rel_element.nil?
         @hyperlink[sheet] ||= {}
         @hyperlink[sheet][[row,col]] = rel_element.attribute('Target').text
