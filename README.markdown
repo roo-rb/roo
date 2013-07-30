@@ -30,7 +30,7 @@ While Roo is licensed under the MIT / Expat license, please note that the 'sprea
 
     s.default_sheet = s.sheets.first             # first sheet in the spreadsheet file will be used
 
-    # s.sheet is an array which holds the names of the sheets within
+    # s.sheets is an array which holds the names of the sheets within
     # a spreadsheet.
     # you can also write
     # s.default_sheet = s.sheets[3] or
