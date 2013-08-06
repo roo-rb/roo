@@ -1,16 +1,16 @@
 require 'spreadsheet'
 #require 'lib/roo/generic_spreadsheet'
 #require 'parseexcel'
-CHARGUESS =
-  begin
-    require 'charguess'
-    true
-  rescue LoadError
-    false
-  end
 
 # Class for handling Excel-Spreadsheets
 class Roo::Excel < Roo::GenericSpreadsheet
+  CHARGUESS =
+    begin
+      require 'charguess'
+      true
+    rescue LoadError
+      false
+    end
 
   # Creates a new Excel spreadsheet object.
   # Parameter packed: :zip - File is a zip-file
