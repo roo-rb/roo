@@ -2,11 +2,11 @@
 
 Roo implements read access for all spreadsheet types and read/write access for
 Google spreadsheets. It can handle
-* Openoffice
+* OpenOffice
 * Excel
 * Google spreadsheets
 * Excelx
-* Libreoffice
+* LibreOffice
 * CSV
 
 Using Roo to access Google spreadsheets requires you install the 'google-spreadsheet-ruby' gem separately.
@@ -15,18 +15,22 @@ Unless the underlying 'spreadsheet' gem supports formulas there is no support
 for formulas in Roo for .xls files (you get the result of a formula in such a
 file but not the formula itself)
 
+## License
+
+While Roo is licensed under the MIT / Expat license, please note that the 'spreadsheet' gem [is released under](https://github.com/zdavatz/spreadsheet/blob/master/LICENSE.txt) the GPLv3 license.
+
 ## Usage:
 
     require 'roo'
 
-    s = Openoffice.new("myspreadsheet.ods")      # creates an Openoffice Spreadsheet instance
-    s = Excel.new("myspreadsheet.xls")           # creates an Excel Spreadsheet instance
-    s = Google.new("myspreadsheetkey_at_google") # creates an Google Spreadsheet instance
-    s = Excelx.new("myspreadsheet.xlsx")         # creates an Excel Spreadsheet instance for Excel .xlsx files
+    s = Roo::OpenOffice.new("myspreadsheet.ods")      # creates an OpenOffice Spreadsheet instance
+    s = Roo::Excel.new("myspreadsheet.xls")           # creates an Excel Spreadsheet instance
+    s = Roo::Google.new("myspreadsheetkey_at_google") # creates an Google Spreadsheet instance
+    s = Roo::Excelx.new("myspreadsheet.xlsx")         # creates an Excel Spreadsheet instance for Excel .xlsx files
 
-    s.default_sheet = s.sheets.first  # first sheet in the spreadsheet file will be used
+    s.default_sheet = s.sheets.first             # first sheet in the spreadsheet file will be used
 
-    # s.sheet is an array which holds the names of the sheets within
+    # s.sheets is an array which holds the names of the sheets within
     # a spreadsheet.
     # you can also write
     # s.default_sheet = s.sheets[3] or

@@ -1,89 +1,81 @@
 require 'fileutils'
 require 'date'
-require 'rubygems'
 require 'nokogiri'
 
-if RUBY_VERSION < '1.9.0'
-  class  String
-    def end_with?(str)
-      self[-str.length,str.length] == str
-    end
-  end
-end
+class Roo::Excelx < Roo::Base
+  module Format
+    EXCEPTIONAL_FORMATS = {
+      'h:mm am/pm' => :date,
+      'h:mm:ss am/pm' => :date,
+    }
 
-class Roo::Excelx < Roo::GenericSpreadsheet
-  FORMATS = {
-    'General' => :float,
-    '0' => :float,
-    '0.00' => :float,
-    '#,##0' => :float,
-    '#,##0.00' => :float,
-    '0%' => :percentage,
-    '0.00%' => :percentage,
-    '0.00E+00' => :float,
-    '# ?/?' => :float, #??? TODO:
-    '# ??/??' => :float, #??? TODO:
-    'mm-dd-yy' => :date,
-    'd-mmm-yy' => :date,
-    'd-mmm' => :date,
-    'mmm-yy' => :date,
-    'h:mm AM/PM' => :date,
-    'h:mm:ss AM/PM' => :date,
-    'h:mm' => :time,
-    'h:mm:ss' => :time,
-    'm/d/yy h:mm' => :date,
-    '#,##0 ;(#,##0)' => :float,
-    '#,##0 ;[Red](#,##0)' => :float,
-    '#,##0.00;(#,##0.00)' => :float,
-    '#,##0.00;[Red](#,##0.00)' => :float,
-    'mm:ss' => :time,
-    '[h]:mm:ss' => :time,
-    'mmss.0' => :time,
-    '##0.0E+0' => :float,
-    '@' => :float,
-    #-- zusaetzliche Formate, die nicht standardmaessig definiert sind:
-    "yyyy\\-mm\\-dd" => :date,
-    'dd/mm/yy' => :date,
-    'hh:mm:ss' => :time,
-    "dd/mm/yy\\ hh:mm" => :datetime,
-    'dd/mmm/yy' => :date, # 2011-05-21
-    'yyyy-mm-dd' => :date, # 2011-09-16
-    # was used in a spreadsheet file from a windows phone
-  }
-  STANDARD_FORMATS = {
-    0 => 'General',
-    1 => '0',
-    2 => '0.00',
-    3 => '#,##0',
-    4 => '#,##0.00',
-    9 => '0%',
-    10 => '0.00%',
-    11 => '0.00E+00',
-    12 => '# ?/?',
-    13 => '# ??/??',
-    14 => 'mm-dd-yy',
-    15 => 'd-mmm-yy',
-    16 => 'd-mmm',
-    17 => 'mmm-yy',
-    18 => 'h:mm AM/PM',
-    19 => 'h:mm:ss AM/PM',
-    20 => 'h:mm',
-    21 => 'h:mm:ss',
-    22 => 'm/d/yy h:mm',
-    37 => '#,##0 ;(#,##0)',
-    38 => '#,##0 ;[Red](#,##0)',
-    39 => '#,##0.00;(#,##0.00)',
-    40 => '#,##0.00;[Red](#,##0.00)',
-    45 => 'mm:ss',
-    46 => '[h]:mm:ss',
-    47 => 'mmss.0',
-    48 => '##0.0E+0',
-    49 => '@',
-  }
+    STANDARD_FORMATS = {
+      0 => 'General',
+      1 => '0',
+      2 => '0.00',
+      3 => '#,##0',
+      4 => '#,##0.00',
+      9 => '0%',
+      10 => '0.00%',
+      11 => '0.00E+00',
+      12 => '# ?/?',
+      13 => '# ??/??',
+      14 => 'mm-dd-yy',
+      15 => 'd-mmm-yy',
+      16 => 'd-mmm',
+      17 => 'mmm-yy',
+      18 => 'h:mm AM/PM',
+      19 => 'h:mm:ss AM/PM',
+      20 => 'h:mm',
+      21 => 'h:mm:ss',
+      22 => 'm/d/yy h:mm',
+      37 => '#,##0 ;(#,##0)',
+      38 => '#,##0 ;[Red](#,##0)',
+      39 => '#,##0.00;(#,##0.00)',
+      40 => '#,##0.00;[Red](#,##0.00)',
+      45 => 'mm:ss',
+      46 => '[h]:mm:ss',
+      47 => 'mmss.0',
+      48 => '##0.0E+0',
+      49 => '@',
+    }
+
+    def to_type(format)
+      format = format.to_s.downcase
+      if type = EXCEPTIONAL_FORMATS[format]
+        type
+      elsif format.include?('#')
+        :float
+      elsif format.include?('d') || format.include?('y')
+        if format.include?('h') || format.include?('s')
+          :datetime
+        else
+          :date
+        end
+      elsif format.include?('h') || format.include?('s')
+        :time
+      elsif format.include?('%')
+        :percentage
+      else
+        :float
+      end
+    end
+
+    module_function :to_type
+  end
 
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
-  def initialize(filename, packed=nil, file_warning = :error) #, create = false)
+  def initialize(filename, options = {}, deprecated_file_warning = :error)
+    if Hash === options
+      packed = options[:packed]
+      file_warning = options[:file_warning] || :error
+    else
+      warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excelx.new` is deprected. Use an options hash instead.'
+      packed = options
+      file_warning = deprecated_file_warning
+    end
+
     file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
     make_tmpdir do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if uri?(filename)
@@ -95,33 +87,23 @@ class Roo::Excelx < Roo::GenericSpreadsheet
       end
       @comments_files = Array.new
       extract_content(tmpdir, @filename)
-      @workbook_doc = File.open(File.join(tmpdir, "roo_workbook.xml")) do |file|
-        Nokogiri::XML(file)
-      end
+      @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml"))
       @shared_table = []
       if File.exist?(File.join(tmpdir, 'roo_sharedStrings.xml'))
-        @sharedstring_doc = File.open(File.join(tmpdir, 'roo_sharedStrings.xml')) do |file|
-          Nokogiri::XML(file)
-        end
+        @sharedstring_doc = load_xml(File.join(tmpdir, 'roo_sharedStrings.xml'))
         read_shared_strings(@sharedstring_doc)
       end
       @styles_table = []
       @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
       if File.exist?(File.join(tmpdir, 'roo_styles.xml'))
-        @styles_doc = File.open(File.join(tmpdir, 'roo_styles.xml')) do |file|
-          Nokogiri::XML(file)
-        end
+        @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
         read_styles(@styles_doc)
       end
       @sheet_doc = @sheet_files.map do |item|
-        File.open(item) do |file|
-          Nokogiri::XML(file)
-        end
+        load_xml(item)
       end
       @comments_doc = @comments_files.map do |item|
-        File.open(item) do |file|
-          Nokogiri::XML(file)
-        end
+        load_xml(item)
       end
     end
     @default_sheet = self.sheets.first
@@ -308,7 +290,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
       return nil,nil,nil
     else
       return @label[labelname][1].to_i,
-        Roo::GenericSpreadsheet.letter_to_number(@label[labelname][2]),
+        Roo::Base.letter_to_number(@label[labelname][2]),
         @label[labelname][0]
     end
   end
@@ -322,7 +304,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @label.map do |label|
       [ label[0], # name
         [ label[1][1].to_i, # row
-          Roo::GenericSpreadsheet.letter_to_number(label[1][2]), # column
+          Roo::Base.letter_to_number(label[1][2]), # column
           label[1][0], # sheet
         ] ]
     end
@@ -364,6 +346,12 @@ class Roo::Excelx < Roo::GenericSpreadsheet
 
   private
 
+  def load_xml(path)
+    File.open(path) do |file|
+      Nokogiri::XML(file)
+    end
+  end
+
   # helper function to set the internal representation of cells
   def set_cell_values(sheet,x,y,i,v,value_type,formula,
       excelx_type=nil,
@@ -382,9 +370,9 @@ class Roo::Excelx < Roo::GenericSpreadsheet
       when :string
         v
       when :date
-        (Date.new(1899,12,30)+v.to_i).strftime("%Y-%m-%d")
+        (base_date+v.to_i).strftime("%Y-%m-%d")
       when :datetime
-        (DateTime.new(1899,12,30)+v.to_f).strftime("%Y-%m-%d %H:%M:%S")
+        (base_date+v.to_f).strftime("%Y-%m-%d %H:%M:%S")
       when :percentage
         v.to_f
       when :time
@@ -398,15 +386,6 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @excelx_value[sheet][key] = excelx_value
     @s_attribute[sheet] ||= {}
     @s_attribute[sheet][key] = s_attribute
-  end
-
-  def format2type(format)
-    format = format.to_s # weil von Typ Nokogiri::XML::Attr
-    if FORMATS.has_key? format
-      FORMATS[format]
-    else
-      :float
-    end
   end
 
   # read all cells in the selected sheet
@@ -430,11 +409,11 @@ class Roo::Excelx < Roo::GenericSpreadsheet
           # 2011-02-25 END
           # 2011-09-15 BEGIN
         when 'inlineStr'
-  	      :inlinestr
+          :inlinestr
           # 2011-09-15 END
         else
           format = attribute2format(s_attribute)
-          format2type(format)
+          Format.to_type(format)
         end
       formula = nil
       c.children.each do |cell|
@@ -446,7 +425,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
               value_type = :string
               v = inlinestr_content
               excelx_type = :string
-              y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
+              y, x = Roo::Base.split_coordinate(c['r'])
               excelx_value = inlinestr_content #cell.content
               set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
             end
@@ -487,7 +466,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
               value_type = :float
               cell.content
             end
-          y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
+          y, x = Roo::Base.split_coordinate(c['r'])
           set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
         end
       end
@@ -545,7 +524,7 @@ Datei xl/comments1.xml
     return unless @comments_doc[n] #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @comments_doc[n].xpath("//xmlns:comments/xmlns:commentList/xmlns:comment").each do |comment|
       ref = comment.attributes['ref'].to_s
-      row,col = Roo::GenericSpreadsheet.split_coordinate(ref)
+      row,col = Roo::Base.split_coordinate(ref)
       comment.xpath('./xmlns:text/xmlns:r/xmlns:t').each do |text|
         @comment[sheet] ||= {}
         @comment[sheet][[row,col]] = text.text
@@ -556,7 +535,7 @@ Datei xl/comments1.xml
 
   def read_labels
     @label ||= Hash[@workbook_doc.xpath("//xmlns:definedName").map do |defined_name|
-	    # "Sheet1!$C$5"
+      # "Sheet1!$C$5"
       sheet, coordinates = defined_name.text.split('!$', 2)
       col,row = coordinates.split('$')
       [defined_name['name'], [sheet,row,col]]
@@ -574,10 +553,10 @@ Datei xl/comments1.xml
           }
         end
         # if entry.to_s.end_with?('sharedStrings.xml')
-	# at least one application creates this file with another (incorrect?)
-	# casing. It doesn't hurt, if we ignore here the correct casing - there
-	# won't be both names in the archive.
-	# Changed the casing of all the following filenames.
+        # at least one application creates this file with another (incorrect?)
+        # casing. It doesn't hurt, if we ignore here the correct casing - there
+        # won't be both names in the archive.
+        # Changed the casing of all the following filenames.
         if entry.to_s.downcase.end_with?('sharedstrings.xml')
           open(tmpdir+'/'+'roo_sharedStrings.xml','wb') {|f|
             f << zip.read(entry)
@@ -660,7 +639,24 @@ Datei xl/comments1.xml
   # convert internal excelx attribute to a format
   def attribute2format(s)
     id = @cellXfs[s.to_i]
-    @numFmts[id] || STANDARD_FORMATS[id.to_i]
+    @numFmts[id] || Format::STANDARD_FORMATS[id.to_i]
+  end
+
+  def base_date
+    @base_date ||= read_base_date
+  end
+
+  # Default to 1900 (minus one day due to excel quirk) but use 1904 if
+  # it's set in the Workbook's workbookPr
+  # http://msdn.microsoft.com/en-us/library/ff530155(v=office.12).aspx
+  def read_base_date
+    base_date = Date.new(1899,12,30)
+    @workbook_doc.xpath("//xmlns:workbookPr").map do |workbookPr|
+      if workbookPr["date1904"] && workbookPr["date1904"] =~ /true|1/i
+        base_date = Date.new(1904,01,01)
+      end
+    end
+    base_date
   end
 
 end # class

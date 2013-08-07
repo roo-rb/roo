@@ -1,26 +1,33 @@
-require 'rubygems'
 require 'csv'
 require 'time'
 
-# The Csv class can read csv files (must be separated with commas) which then
+# The CSV class can read csv files (must be separated with commas) which then
 # can be handled like spreadsheets. This means you can access cells like A5
 # within these files.
-# The Csv class provides only string objects. If you want conversions to other
+# The CSV class provides only string objects. If you want conversions to other
 # types you have to do it yourself.
+#
+# You can pass options to the underlying CSV parse operation, via the
+# :csv_options option.
+#
 
-class Roo::Csv < Roo::GenericSpreadsheet
-  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil)
+class Roo::CSV < Roo::Base
+  def initialize(filename, options = {})
     @filename = filename
-    @cell = Hash.new
-    @cell_type = Hash.new
-    @cells_read = Hash.new
-    @first_row = Hash.new
-    @last_row = Hash.new
-    @first_column = Hash.new
-    @last_column = Hash.new
+    @options = options
+    @cell = {}
+    @cell_type = {}
+    @cells_read = {}
+    @first_row = {}
+    @last_row = {}
+    @first_column = {}
+    @last_column = {}
+    @header_line = 1
   end
 
-  # Returns an array with the names of the sheets. In Csv class there is only
+  attr_reader :filename
+
+  # Returns an array with the names of the sheets. In CSV class there is only
   # one dummy sheet, because a csv file cannot have more than one sheet.
   def sheets
     ['default']
@@ -44,6 +51,10 @@ class Roo::Csv < Roo::GenericSpreadsheet
     value
   end
 
+  def csv_options
+    @options[:csv_options] || {}
+  end
+
   private
 
   TYPE_MAP = {
@@ -57,6 +68,17 @@ class Roo::Csv < Roo::GenericSpreadsheet
     TYPE_MAP[value.class]
   end
 
+  def data
+    @data ||=
+      make_tmpdir do |tmpdir|
+        File.open(
+          uri?(filename) ?
+            open_from_uri(filename, tmpdir) :
+            filename
+        ) { |f| f.read }
+      end
+  end
+
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
     @cell_type = {} unless @cell_type
@@ -66,7 +88,7 @@ class Roo::Csv < Roo::GenericSpreadsheet
     @first_column[sheet] = 1
     @last_column[sheet] = 1
     rownum = 1
-    CSV.foreach(@filename) do |row|
+    CSV.parse data, csv_options do |row|
       row.each_with_index do |elem,i|
         @cell[[rownum,i+1]] = cell_postprocessing rownum,i+1, elem
         @cell_type[[rownum,i+1]] = celltype_class @cell[[rownum,i+1]]
@@ -79,41 +101,25 @@ class Roo::Csv < Roo::GenericSpreadsheet
     end
     @cells_read[sheet] = true
     #-- adjust @first_row if neccessary
-    loop do
-      if !row(@first_row[sheet]).any? and @first_row[sheet] < @last_row[sheet]
-        @first_row[sheet] += 1
-      else
-        break
-      end
+    while !row(@first_row[sheet]).any? and @first_row[sheet] < @last_row[sheet]
+      @first_row[sheet] += 1
     end
     #-- adjust @last_row if neccessary
-    loop do
-      if !row(@last_row[sheet]).any? and @last_row[sheet] and
-          @last_row[sheet] > @first_row[sheet]
-        @last_row[sheet] -= 1
-      else
-        break
-      end
+    while !row(@last_row[sheet]).any? and @last_row[sheet] and
+        @last_row[sheet] > @first_row[sheet]
+      @last_row[sheet] -= 1
     end
     #-- adjust @first_column if neccessary
-    loop do
-      if !column(@first_column[sheet]).any? and
+    while !column(@first_column[sheet]).any? and
           @first_column[sheet] and
           @first_column[sheet] < @last_column[sheet]
-        @first_column[sheet] += 1
-      else
-        break
-      end
+      @first_column[sheet] += 1
     end
     #-- adjust @last_column if neccessary
-    loop do
-      if !column(@last_column[sheet]).any? and
+    while !column(@last_column[sheet]).any? and
           @last_column[sheet] and
           @last_column[sheet] > @first_column[sheet]
-        @last_column[sheet] -= 1
-      else
-        break
-      end
+      @last_column[sheet] -= 1
     end
   end
-end # class Csv
+end

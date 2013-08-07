@@ -1,3 +1,61 @@
+== 1.12.0 (unreleased)
+
+* 2 deprecations
+  * Rename Openoffice -> OpenOffice, Libreoffice -> LibreOffice, Csv -> CSV,
+    and redirect the old names to the new constants
+  * Enable Roo::Excel, Excel2003XML, Excelx, OpenOffice to accept an options hash, and deprecate the old method argument-based approach to supplying them options
+
+* 3 enhancements
+  * Add Roo::Excelx#load_xml so that people can customize to their data, e.g. https://github.com/Empact/roo/pull/23
+  * Enable passing csv_options to Roo::Csv, which are passed through to the underlying CSV call.
+  * Enable passing options through from Roo::Spreadsheet to any Roo type.
+  * Switch from google-spreadsheet-ruby to google_drive for Roo::Google access https://github.com/Empact/roo/pull/40
+
+* 1 bugfix
+  * Fix that Roo::Csv#parse(headers: true) would blow up. https://github.com/Empact/roo/pull/37
+
+== 1.11.2 2013-04-10
+
+* 4 bugfixes
+  * Fix that Roo::Spreadsheet.open wasn't tolerant to case differences.
+  * Fix that Roo::Excel2003XML loading was broken https://github.com/Empact/roo/pull/27
+  * Enable loading Roo::Csv files from uris, just as other file types https://github.com/Empact/roo/pull/31
+  * Fix that Excelx "m/d/yy h:mm" was improperly being interpreted as date rather
+    than datetime https://github.com/Empact/roo/pull/29
+
+== 1.11.1 2013-03-18
+
+* 1 bugfix
+  * Exclude test/log/roo.log test log file from the gemspec in order to avoid a
+    rubygems warning: https://github.com/Empact/roo/pull/26
+
+== 1.11.0 2013-03-14
+
+* 3 enhancements
+  * Support ruby 2.0.0 by replacing Iconv with String#encode
+    https://github.com/Empact/roo/pull/19
+  * Excelx: Loosen the format detection rules such that more are
+    successfully detected https://github.com/Empact/roo/pull/20
+  * Delete the roo binary, which was useless and not declared in the gemspec
+
+* 1 change
+  * Drop support for ruby 1.8.x or lower. Required in order to easily support 2.0.0.
+
+== 1.10.3 2013-03-03
+
+* 1 bugfix
+  * Support both nokogiri 1.5.5 and 1.5.6 (Karsten Richter) https://github.com/Empact/roo/pull/18
+
+* 1 enhancement
+  * Relax our nokogiri dependency back to 1.4.0, as we have no particular reason
+    to require a newer version.
+
+== 1.10.2 2013-02-03
+
+* 2 bugfixes
+  * Support opening URIs with query strings https://github.com/Empact/roo/commit/abf94bdb59cabc16d4f7764025e88e3661983525
+  * Support both http: & https: urls https://github.com/Empact/roo/commit/fc5c5899d96dd5f9fbb68125d0efc8ce9be2c7e1
+
 == 1.10.1 2011-11-14
 
 * 2 bugfixes

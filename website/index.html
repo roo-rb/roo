@@ -95,10 +95,10 @@ Google spreadsheets can be read and written.</p>
 <code>
   1 require 'rubygems'
   2 require 'roo'
-  3 
+  3
   4 HOURLY_RATE = 123.45
-  5 
-  6 oo = Openoffice.new("simple_spreadsheet.ods")
+  5
+  6 oo = OpenOffice.new("simple_spreadsheet.ods")
   7 oo.default_sheet = oo.sheets.first
   8 4.upto(12) do |line|
   9   date       = oo.cell(line,'A')
@@ -178,7 +178,7 @@ oo.set_value(row, col, value)
 </pre>
 <p>There is an example in the examples folder which illustrates write access.</p>
 <h3>Formulas</h3>
-<p>Formulas in Openoffice- and Google-Spreadsheets can be handled.</p>
+<p>Formulas in OpenOffice- and Google-Spreadsheets can be handled.</p>
 <p>oo.<strong>celltype</strong>(row,col) returns :formula if there is a formula in this cell.</p>
 <p>oo.<strong>formula?</strong>(row,col) returns true if there is a formula</p>
 <p>oo.<strong>formula</strong>(row,col) returns the formula in this cell in a string variable (like &#8220;=<acronym title="[.A1:.M13]"><span class="caps">SUM</span></acronym>&#8221;).<br />
@@ -224,7 +224,7 @@ oo.to_csv("somefile.txt")
 <p>to write to a file.</p>
 <h3>Using MS-Excel spreadsheets</h3>
 <p>You can also access MS-Excel spreadsheat.</p>
-<p>Replace Openoffice with <br />
+<p>Replace OpenOffice with <br />
 <pre><br />
 <code>oo = Excel.new("simple_spreadsheet.xls").</p>
 <p></code><br />
@@ -282,15 +282,15 @@ export GOOGLE_PASSWORD=&#8220;mysecretpassword&#8221;
 changed.<br />
 Say you&#8217;re trying to open a spreadsheet file with the extension .xls, which is normally<br />
  an Excel file <br />
-with the Openoffice.new() call. This cannot work, if the file is really an excel file &#8211; instead <br />
+with the OpenOffice.new() call. This cannot work, if the file is really an excel file &#8211; instead <br />
 you have to open it with the Excel.new() call.</p>
 <p>Now you&#8217;re getting an exception raised. Before it was was only a warning and the<br />
 access to this file failed.</p>
-<p>Theorectically you can have a file with the extension .xls which is in fact an Openoffice spreadsheet file.</p>
-<p>It&#8217;s possible to open such a file with the Openoffice class, but you have have to<br />
+<p>Theorectically you can have a file with the extension .xls which is in fact an OpenOffice spreadsheet file.</p>
+<p>It&#8217;s possible to open such a file with the OpenOffice class, but you have have to<br />
 override the parameter &#8216;file_warning&#8217; in the new method: <br />
-&#8216;Openoffice.new(&#8217;myfile.xls&#8217;, false, :warning)&#8217; or<br />
-&#8216;Openoffice.new(&#8217;myfile.xls&#8217;, false, :ignore)&#8217;.</p>
+&#8216;OpenOffice.new(&#8217;myfile.xls&#8217;, false, :warning)&#8217; or<br />
+&#8216;OpenOffice.new(&#8217;myfile.xls&#8217;, false, :ignore)&#8217;.</p>
 <p>If you set it to :warning you get a warning if you try to use a spreadsheet file with <br />
 the &#8216;false&#8217; extension, but the <br />
 program will try to handle the file with this class (of course this will fail, if the file<br />
@@ -307,18 +307,18 @@ ROO_TMP was introduced in releases &gt;1.1.0.</p>
 <p>You can even read openoffice or excel-spreadsheets from a http-address:<br />
 <pre><br />
 <code>oo = Excel.new("http://www.somedomain.com/simple_spreadsheet.xls").
-oo = Openoffice.new("http://www.somedomain.com/simple_spreadsheet.ods").
+oo = OpenOffice.new("http://www.somedomain.com/simple_spreadsheet.ods").
 </code><br />
 </pre></p>
 <p>or a zipped file:<br />
 <pre><br />
 <code>oo = Excel.new("http://www.somedomain.com/simple_spreadsheet.xls.zip",:zip).
-oo = Openoffice.new("http://www.somedomain.com/simple_spreadsheet.ods.zip",:zip).
+oo = OpenOffice.new("http://www.somedomain.com/simple_spreadsheet.ods.zip",:zip).
 </code><br />
 </pre></p>
 <p>after working with a spreadsheet from the web you have to call <br />
 <pre><br />
-<code>oo.remove_tmp 
+<code>oo.remove_tmp
 </code><br />
 </pre></p>
 <p>to delete the temporary local copy of the spreadsheet file. If you don&#8217;t call<br />
@@ -328,11 +328,11 @@ provide a better solution in the next releases.</p>
 <h3>Remote Access</h3>
 <p>You can even access your spreadsheet data from a remote machine via <span class="caps">SOAP</span>. The examples directory shows a little example how to do this. If you like, you can extend these functions or restrict the access to certain cells. <br />
 Remote access with <span class="caps">SOAP</span> is nothing specific to roo, you can do this with every Rub object, but i thought it would nice to give an example what could be done with roo.</p>
-<h3>Excel spreadsheets / Openoffice spreadsheets / Google spreadsheets with Ruby on Rails</h3>
+<h3>Excel spreadsheets / OpenOffice spreadsheets / Google spreadsheets with Ruby on Rails</h3>
 <p>There is a simple helper method to display a spreadsheet at your application page:</p>
 <ul>
-	<li>in your controller, add &#8220;require &#8216;roo&#8217;&#8221; and &#8220;@rspreadsheet = Openoffice.new(&#8221;numbers1.ods&quot;)&quot; or<br />
-    &#8220;@rspreadsheet = Openoffice.new(&#8221;http://www.somehost.com/data/numbers1.od    s&quot;)&quot; to get access to your spreadsheet file</li>
+	<li>in your controller, add &#8220;require &#8216;roo&#8217;&#8221; and &#8220;@rspreadsheet = OpenOffice.new(&#8221;numbers1.ods&quot;)&quot; or<br />
+    &#8220;@rspreadsheet = OpenOffice.new(&#8221;http://www.somehost.com/data/numbers1.od    s&quot;)&quot; to get access to your spreadsheet file</li>
 	<li>use it in any view of your application with &#8220;&lt;%= spreadsheet @rspreadsheet, [&#8221;Tabelle&quot;]  %&gt;<br/>&quot; or one of the following formats</li>
 </ul>
 <p><img src="Roo_Spreadsheets_Rails.png"></p>

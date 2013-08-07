@@ -1,8 +1,7 @@
-require 'rubygems'
 require 'roo'
 
 #-- create a new spreadsheet within your google-spreadsheets and paste
-#-- the 'key' parameter in the spreadsheet URL 
+#-- the 'key' parameter in the spreadsheet URL
 MAXTRIES = 1000
 print "what's your name? "
 my_name = gets.chomp

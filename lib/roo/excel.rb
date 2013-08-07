@@ -1,22 +1,29 @@
-require 'rubygems'
 require 'spreadsheet'
-require 'iconv'
 #require 'lib/roo/generic_spreadsheet'
 #require 'parseexcel'
-CHARGUESS =
-  begin
-    require 'charguess'
-    true
-  rescue LoadError
-    false
-  end
 
 # Class for handling Excel-Spreadsheets
-class Roo::Excel < Roo::GenericSpreadsheet
+class Roo::Excel < Roo::Base
+  CHARGUESS =
+    begin
+      require 'charguess'
+      true
+    rescue LoadError
+      false
+    end
 
   # Creates a new Excel spreadsheet object.
   # Parameter packed: :zip - File is a zip-file
-  def initialize(filename, packed = nil, file_warning = :error)
+  def initialize(filename, options = {}, deprecated_file_warning = :error)
+    if Hash === options
+      packed = options[:packed]
+      file_warning = options[:file_warning] || :error
+    else
+      warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excel.new` is deprected. Use an options hash instead.'
+      packed = options
+      file_warning = deprecated_file_warning
+    end
+
     file_type_check(filename,'.xls','an Excel', file_warning, packed)
     make_tmpdir do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if uri?(filename)
@@ -64,7 +71,7 @@ class Roo::Excel < Roo::GenericSpreadsheet
       return Date.new(yyyy.to_i,mm.to_i,dd.to_i)
     end
     if celltype(row,col,sheet) == :string
-      return platform_specific_iconv(@cell[sheet][[row,col]])
+      return platform_specific_encoding(@cell[sheet][[row,col]])
     else
       if @cell[sheet] and @cell[sheet][[row,col]]
         return @cell[sheet][[row,col]]
@@ -145,19 +152,19 @@ class Roo::Excel < Roo::GenericSpreadsheet
   def normalize_string(value)
     value = every_second_null?(value) ? remove_every_second_null(value) : value
     if CHARGUESS && encoding = CharGuess::guess(value)
-      Iconv.new('utf-8', encoding)
+      encoding.encode Encoding::UTF_8
     else
-      platform_specific_iconv(value)
+      platform_specific_encoding(value)
     end
   end
 
-  def platform_specific_iconv(value)
+  def platform_specific_encoding(value)
     result =
       case RUBY_PLATFORM.downcase
       when /darwin|solaris/
-        Iconv.new('utf-8','utf-8').iconv(value)
+        value.encode Encoding::UTF_8
       when /mswin32/
-        Iconv.new('utf-8','iso-8859-1').iconv(value)
+        value.encode Encoding::ISO_8859_1
       else
         value
       end

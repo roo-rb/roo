@@ -1,34 +1,21 @@
 begin
-  require "google_spreadsheet"
+  require "google_drive"
 rescue LoadError => e
-  raise e, "Using Roo::Google requires the google-spreadsheet-ruby gem"
+  raise e, "Using Roo::Google requires the google_drive gem"
 end
 
-class GoogleHTTPError < RuntimeError; end
-class GoogleReadError < RuntimeError; end
-class GoogleWriteError < RuntimeError; end
-
-class Roo::Google < Roo::GenericSpreadsheet
+class Roo::Google < Roo::Base
   attr_accessor :date_format, :datetime_format
 
-  # Creates a new Google spreadsheet object.
-  def initialize(spreadsheetkey,user=nil,password=nil)
-    @filename = spreadsheetkey
+  # Creates a new Google Drive object.
+  def initialize(spreadsheetkey, options = {})
     @spreadsheetkey = spreadsheetkey
-    @user = user
-    @password = password
-    unless user
-      user = ENV['GOOGLE_MAIL']
-    end
-    unless password
-      password = ENV['GOOGLE_PASSWORD']
-    end
-    unless user and user.size > 0
-	    warn "user not set"
-    end
-    unless password and password.size > 0
-	    warn "password not set"
-    end
+    @user = options[:user] || ENV['GOOGLE_MAIL']
+    @password = options[:password] || ENV['GOOGLE_PASSWORD']
+
+    warn "user not set" if !@user || @user.empty?
+    warn "password not set" if !@password || @password.empty?
+
     @cell = Hash.new {|h,k| h[k]=Hash.new}
     @cell_type = Hash.new {|h,k| h[k]=Hash.new}
     @formula = Hash.new
@@ -41,19 +28,15 @@ class Roo::Google < Roo::GenericSpreadsheet
     @date_format = '%d/%m/%Y'
     @datetime_format = '%d/%m/%Y %H:%M:%S'
     @time_format = '%H:%M:%S'
-    session = GoogleSpreadsheet.login(user, password)
-    @sheetlist = []
-    session.spreadsheet_by_key(@spreadsheetkey).worksheets.each { |sheet|
-      @sheetlist << sheet.title
-    }
-    @default_sheet = self.sheets.first
+
+    session = GoogleDrive.login(@user, @password)
     @worksheets = session.spreadsheet_by_key(@spreadsheetkey).worksheets
+    @sheets = @worksheets.map {|sheet| sheet.title }
+    @default_sheet = sheets.first
   end
 
   # returns an array of sheet names in the spreadsheet
-  def sheets
-    @sheetlist
-  end
+  attr_reader :sheets
 
   def date?(string)
     Date.strptime(string, @date_format)
@@ -312,4 +295,9 @@ class Roo::Google < Roo::GenericSpreadsheet
     return rows.min, rows.max, cols.min, cols.max
   end
 
-end # class
+  private
+
+  def reinitialize
+    initialize(@spreadsheetkey, user: @user, password: @password)
+  end
+end

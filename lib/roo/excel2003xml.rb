@@ -2,12 +2,22 @@ require 'fileutils'
 require 'date'
 require 'base64'
 require 'cgi'
+require 'nokogiri'
 
-class Roo::Excel2003XML < Roo::GenericSpreadsheet
+class Roo::Excel2003XML < Roo::Base
 
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
-  def initialize(filename, packed=nil, file_warning=:error)
+  def initialize(filename, options={}, deprecated_file_warning=:error)
+    if Hash === options
+      packed = options[:packed]
+      file_warning = options[:file_warning] || :error
+    else
+      warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excel2003XML.new` is deprected. Use an options hash instead.'
+      packed = options
+      file_warning = deprecated_file_warning
+    end
+
     make_tmpdir do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if uri?(filename)
       filename = unzip(filename, tmpdir) if packed == :zip
@@ -118,7 +128,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
 
   def sheets
     @doc.xpath("/ss:Workbook/ss:Worksheet").map do |sheet|
-      sheet['Name']
+      sheet['ss:Name']
     end
   end
 
@@ -229,7 +239,7 @@ class Roo::Excel2003XML < Roo::GenericSpreadsheet
           end
           c.xpath('./ss:Data').each do |cell|
             formula = cell['Formula']
-            value_type = cell['Type'].downcase.to_sym
+            value_type = cell['ss:Type'].downcase.to_sym
             v =  cell.content
             str_v = v
             case value_type

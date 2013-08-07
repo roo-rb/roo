@@ -1,35 +1,24 @@
-begin
-  require 'bones'
-rescue LoadError
-  puts '### Please install the "bones" gem ###'
+require 'jeweler'
+
+Jeweler::Tasks.new do |gem|
+  # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
+  gem.name = "roo"
+  gem.summary = "Roo can access the contents of various spreadsheet files."
+  gem.description = "Roo can access the contents of various spreadsheet files. It can handle\n* OpenOffice\n* Excel\n* Google spreadsheets\n* Excelx\n* LibreOffice\n* CSV"
+  gem.email = "ruby.ruby.ruby.roo@gmail.com"
+  gem.homepage = "http://github.com/Empact/roo"
+  gem.authors = ['Thomas Preymesser', 'Hugh McGowan', 'Ben Woosley']
+
+  gem.license = 'MIT'
+  gem.rubyforge_project = 'roo'
+  gem.required_ruby_version = '>= 1.9.0'
+
+  gem.test_files = FileList["{spec,test}/**/*.*"]
 end
 
-ensure_in_path 'lib'
-require 'roo'
-
-task :default => 'test:run'
-# task 'gem:release' => 'test:run'
-
-Bones {
-  name  'roo'
-  authors  'Thomas Preymesser', 'Hugh McGowan', 'Ben Woosley'
-  email  'thopre@gmail.com'
-  summary "Roo can access the contents of various spreadsheet files."
-  description "Roo can access the contents of various spreadsheet files. It can handle\n* Openoffice\n* Excel\n* Google spreadsheets\n* Excelx\n* Libreoffice\n* CSV"
-  url  'http://roo.rubyforge.org/'
-  version  Roo::VERSION
-  depend_on 'spreadsheet', '> 0.6.4'
-  #--
-  # rel. 0.6.4 causes an invalid Date error if we
-  # have a datetime value of 2006-02-02 10:00:00
-  #++
-  depend_on 'nokogiri' #, '>= 0.0.1'
-  #TODO: brauchen wir das noch? depend_on 'gimite-google-spreadsheet-ruby','>= 0.0.5'
-  #depend_on 'febeling-rubyzip','>= 0.9.2' # meine aktuelle Version
-  #TODO: warum brauchen wir das? es lief doch auch vorher ohne dieses spezielle gem
-  depend_on 'rubyzip' # rubyzip wird benoetigt
-  # depend_on 'google-spreadsheet-ruby'
-  # depend_on 'choice'
-}
-
-# EOF
+require 'rake/testtask'
+Rake::TestTask.new do |t|
+  t.libs << "test"
+  t.test_files = FileList['test/test*.rb']
+  t.verbose = true
+end

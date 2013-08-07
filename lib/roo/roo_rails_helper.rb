@@ -43,7 +43,7 @@ def spreadsheet(spreadsheet, sheets, options={})
           next
         end
         o << "    <td>"
-        o << "      <b>#{Roo::GenericSpreadsheet.number_to_letter(c)}</b>"
+        o << "      <b>#{Roo::Base.number_to_letter(c)}</b>"
         o << "    </td>"
       }
       o << "</tr>"

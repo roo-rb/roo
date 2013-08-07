@@ -2,26 +2,26 @@ h1. roo
 
 h2. What
 
-This gem allows you to access the content of 
+This gem allows you to access the content of
 
 * Open-office spreadsheets (.ods)
-* Excel spreadsheets (.xls) 
+* Excel spreadsheets (.xls)
 * Google (online) spreadsheets
 * Excel's new file format .xlsx
 
 h2. Supporting this project
 
-Die Programme dieses Projekts sind kostenlos erhältlich und verwendbar. 
-Du kannst jedoch die weitere Entwicklung dieses Projekts mit einer finanziellen 
+Die Programme dieses Projekts sind kostenlos erhältlich und verwendbar.
+Du kannst jedoch die weitere Entwicklung dieses Projekts mit einer finanziellen
 Zuwendung unterstützen (ansonsten müßte ich mich verstärkt anderen Projekten
 widmen, die mehr finanziellen Ertrag einbringen, damit ich auch morgen noch
 für meine Katzen das Futter kaufen kann :-)).
 
-Am bequemsten kannst du per Paypal an die Email-Adresse thopre@gmail.com 
-bezahlen. 
+Am bequemsten kannst du per Paypal an die Email-Adresse thopre@gmail.com
+bezahlen.
 Falls du per Überweisung zahlen willst, frage bitte nach meiner Kontoverbindung!
 
-Ich werde, aufteilt pro Quartal, eine Liste der Spender mit Namen und Betrag, 
+Ich werde, aufteilt pro Quartal, eine Liste der Spender mit Namen und Betrag,
 sortiert nach Spendenhöhe hier veröffenlichen. Wenn von dir nichts anderes
 mitgeteilt, werde ich dich nach deinem Namen, soweit aus der Email-Adresse
 ersichtlich, in der Liste veröffenlichen. Falls etwas anderes gewünscht wird,
@@ -60,7 +60,7 @@ Supposed you have created this spreadsheet:
 
 <img src="Screenshot-spreadsheet3.png">
 
-which includes the amount of work you have done for a customer. 
+which includes the amount of work you have done for a customer.
 
 You can now process this spreadsheet with the following sample code.
 
@@ -68,10 +68,10 @@ You can now process this spreadsheet with the following sample code.
 <code>
   1 require 'rubygems'
   2 require 'roo'
-  3 
+  3
   4 HOURLY_RATE = 123.45
-  5 
-  6 oo = Openoffice.new("simple_spreadsheet.ods")
+  5
+  6 oo = OpenOffice.new("simple_spreadsheet.ods")
   7 oo.default_sheet = oo.sheets.first
   8 4.upto(12) do |line|
   9   date       = oo.cell(line,'A')
@@ -104,7 +104,7 @@ which produces this output
 </code>
 </pre>
 
-With the methods 
+With the methods
 
 <code>first_column</code>,
 <code>last_column</code>,
@@ -148,7 +148,7 @@ Date values are returned as type :date and as a Ruby Date object.
 
 Datetime values are returned as type :datetime and as a Ruby DateTime object.
 
-Percentage are return as type :percentage and as Ruby Float object with the 
+Percentage are return as type :percentage and as Ruby Float object with the
 range from 0.0 to 1.0.
 
 Formulas are returned as type :formula - the value of the cell is the computed
@@ -170,11 +170,11 @@ oo.set_value(row, col, value)
 </code>
 </pre>
 
-There is an example in the examples folder which illustrates write access. 
+There is an example in the examples folder which illustrates write access.
 
 h3. Formulas
 
-Formulas in Openoffice- and Google-Spreadsheets can be handled. 
+Formulas in OpenOffice- and Google-Spreadsheets can be handled.
 
 oo.*celltype*(row,col) returns :formula if there is a formula in this cell.
 
@@ -184,7 +184,7 @@ oo.*formula*(row,col) returns the formula in this cell in a string variable (lik
  You can do whatever you want with this expression. Please note that the syntax of
 formulas might vary between different sort of spreadsheets. There is no conversion
 of the formula syntax.
- 
+
 If there is no formula in this cell nil is returned.
 
 oo.*cell*(row,col) returns the computed result of the formula (as it was saved in the file, no recalculation is done in this Gem).
@@ -201,7 +201,7 @@ oo.*formulas* returns all formulas in the selected spreadsheet in an array like 
 
 Each entry consists of the elements row, col, formula.
 
-Note: oo.*cell*(row,col) is the same for ordinary cells and formulas. So you can use the computated value of a formula. If you have to distinguish if a cell is a formula use #*formula*? 
+Note: oo.*cell*(row,col) is the same for ordinary cells and formulas. So you can use the computated value of a formula. If you have to distinguish if a cell is a formula use #*formula*?
 
 Please note: formulas in Excel-Spreadsheets cannot be handled (this is another gem, see: "Thanks")
 
@@ -244,7 +244,7 @@ h3. Using MS-Excel spreadsheets
 
 You can also access MS-Excel spreadsheat.
 
-Replace Openoffice with 
+Replace OpenOffice with
 <pre>
 <code>oo = Excel.new("simple_spreadsheet.xls").
 
@@ -283,28 +283,28 @@ Setting these variables can be done if you add these lines to your
 
   export GOOGLE_MAIL="yourname@gmail.com"
   export GOOGLE_PASSWORD="mysecretpassword"
- 
+
 This gem does not check if you are allowed to access a specific google spreadsheet. If it's not your own spreadsheet or you are not allowed to read or write to a spreadsheet the behaviour is not defined (but it will not work ;-) ).
 
-The default behavior at opening a spreadsheet with a certain extension has been 
+The default behavior at opening a spreadsheet with a certain extension has been
 changed.
 Say you're trying to open a spreadsheet file with the extension .xls, which is normally
- an Excel file 
-with the Openoffice.new() call. This cannot work, if the file is really an excel file - instead 
+ an Excel file
+with the OpenOffice.new() call. This cannot work, if the file is really an excel file - instead
 you have to open it with the Excel.new() call.
 
 Now you're getting an exception raised. Before it was was only a warning and the
 access to this file failed.
 
-Theorectically you can have a file with the extension .xls which is in fact an Openoffice spreadsheet file.
+Theorectically you can have a file with the extension .xls which is in fact an OpenOffice spreadsheet file.
 
-It's possible to open such a file with the Openoffice class, but you have have to
-override the parameter 'file_warning' in the new method: 
-'Openoffice.new('myfile.xls', false, :warning)' or
-'Openoffice.new('myfile.xls', false, :ignore)'.
+It's possible to open such a file with the OpenOffice class, but you have have to
+override the parameter 'file_warning' in the new method:
+'OpenOffice.new('myfile.xls', false, :warning)' or
+'OpenOffice.new('myfile.xls', false, :ignore)'.
 
-If you set it to :warning you get a warning if you try to use a spreadsheet file with 
-the 'false' extension, but the 
+If you set it to :warning you get a warning if you try to use a spreadsheet file with
+the 'false' extension, but the
 program will try to handle the file with this class (of course this will fail, if the file
 is really of the false type).
 
@@ -315,7 +315,7 @@ Temporary files of this gem are stored in directories which are named with 'oo_'
 a number (the PID of the current process).
 These directories are created within the current working directory. If you want to
 use a different directory for temporary files set the environment variable ROO_TMP! (for
-example "export ROO_TMP=/tmp" in your .bashrc file). 
+example "export ROO_TMP=/tmp" in your .bashrc file).
 ROO_TMP was introduced in releases >1.1.0.
 
 h3. Accessing Spreadsheet over the Web
@@ -323,40 +323,40 @@ h3. Accessing Spreadsheet over the Web
 You can even read openoffice or excel-spreadsheets from a http-address:
 <pre>
 <code>oo = Excel.new("http://www.somedomain.com/simple_spreadsheet.xls").
-oo = Openoffice.new("http://www.somedomain.com/simple_spreadsheet.ods").
+oo = OpenOffice.new("http://www.somedomain.com/simple_spreadsheet.ods").
 </code>
 </pre>
 
 or a zipped file:
 <pre>
 <code>oo = Excel.new("http://www.somedomain.com/simple_spreadsheet.xls.zip",:zip).
-oo = Openoffice.new("http://www.somedomain.com/simple_spreadsheet.ods.zip",:zip).
+oo = OpenOffice.new("http://www.somedomain.com/simple_spreadsheet.ods.zip",:zip).
 </code>
 </pre>
 
-after working with a spreadsheet from the web you have to call 
+after working with a spreadsheet from the web you have to call
 <pre>
-<code>oo.remove_tmp 
+<code>oo.remove_tmp
 </code>
 </pre>
 
 to delete the temporary local copy of the spreadsheet file. If you don't call
 this method you will have subdirectories names 'oo_xxxxx' which you can remove manually.
-Calling remove_tmp is not the best solution to clean temporary files - i will 
+Calling remove_tmp is not the best solution to clean temporary files - i will
 provide a better solution in the next releases.
 
 
 h3. Remote Access
 
-You can even access your spreadsheet data from a remote machine via SOAP. The examples directory shows a little example how to do this. If you like, you can extend these functions or restrict the access to certain cells. 
+You can even access your spreadsheet data from a remote machine via SOAP. The examples directory shows a little example how to do this. If you like, you can extend these functions or restrict the access to certain cells.
 Remote access with SOAP is nothing specific to roo, you can do this with every Rub object, but i thought it would nice to give an example what could be done with roo.
 
-h3. Excel spreadsheets / Openoffice spreadsheets / Google spreadsheets with Ruby on Rails
+h3. Excel spreadsheets / OpenOffice spreadsheets / Google spreadsheets with Ruby on Rails
 
 There is a simple helper method to display a spreadsheet at your application page:
 
-* in your controller, add "require 'roo'" and "@rspreadsheet = Openoffice.new("numbers1.ods")" or
-    "@rspreadsheet = Openoffice.new("http://www.somehost.com/data/numbers1.od    s")" to get access to your spreadsheet file
+* in your controller, add "require 'roo'" and "@rspreadsheet = OpenOffice.new("numbers1.ods")" or
+    "@rspreadsheet = OpenOffice.new("http://www.somehost.com/data/numbers1.od    s")" to get access to your spreadsheet file
 * use it in any view of your application with "&lt;%= spreadsheet @rspreadsheet, ["Tabelle"]  %&gt;<br/>" or one of the following formats
 
 <img src="Roo_Spreadsheets_Rails.png">
@@ -368,10 +368,10 @@ How do you use roo? What are you doing with roo?
 * The author of this gem uses roo for the generation of weekly reports which are (automatically) sent to his customers (Thomas Preymesser, Homepage: www.thopre.com, Blog: thopre.wordpress.com, email me: thopre@gmail.com)
 
 
-If you have an interesting application where you use roo then write me a short description of your project and i will publish it here (write, if your email-address should be published or not). 
+If you have an interesting application where you use roo then write me a short description of your project and i will publish it here (write, if your email-address should be published or not).
 
 Or you can write directly in the project wiki at "http://roo.rubyforge.org/wiki/wiki.pl?Who's_Using_Roo":http://roo.rubyforge.org/wiki/wiki.pl?Who's_Using_Roo
- 
+
 
 If you don't want to publish the details you can also write me an email and state, that it should not be published - i am just curious to hear, where it is used.
 
@@ -382,7 +382,7 @@ h2. Documentation
 h2. Tests and test data
 
 There are many test files within the test directory. If you don't want to run unit tests and don't want the test data you can completely delete the 'test' directory within the hierarchy of this gem.
- 
+
 h2. Feature Requests / Bugs
 
 Submit Feature Requests and bugs here: "http://rubyforge.org/tracker/?group_id=3729":http://rubyforge.org/tracker/?group_id=3729

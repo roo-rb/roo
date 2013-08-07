@@ -1,10 +1,9 @@
-require 'rubygems'
 require 'fileutils'
 require 'date'
 require 'nokogiri'
 require 'cgi'
 require 'pp' #TODO
-class Roo::Openoffice < Roo::GenericSpreadsheet
+class Roo::OpenOffice < Roo::Base
 
   class << self
     def extract_content(tmpdir, filename)
@@ -33,8 +32,19 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
 
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
-  def initialize(filename, packed=nil, file_warning=:error, tmpdir_root=nil)
-    file_type_check(filename,'.ods','an Roo::Openoffice', file_warning, packed)
+  def initialize(filename, options={}, deprecated_file_warning=:error, deprecated_tmpdir_root=nil)
+    if Hash === options
+      packed = options[:packed]
+      file_warning = options[:file_warning] || :error
+      tmpdir_root = options[:tmpdir_root]
+    else
+      warn 'Supplying `packed`, `file_warning`, or `tmpdir_root` as separate arguments to `Roo::OpenOffice.new` is deprected. Use an options hash instead.'
+      packed = options
+      file_warning = deprecated_file_warning
+      tmpdir_root = deprecated_tmpdir_root
+    end
+
+    file_type_check(filename,'.ods','an Roo::OpenOffice', file_warning, packed)
     make_tmpdir(tmpdir_root) do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if uri?(filename)
       filename = unzip(filename, tmpdir) if packed == :zip
@@ -183,12 +193,12 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   def sheets
     return_sheets = []
     @doc.xpath("//*[local-name()='table']").each do |sheet|
-      return_sheets << sheet['name']
+      return_sheets << sheet.attributes["name"].value
     end
     return_sheets
   end
 
-  # version of the Roo::Openoffice document
+  # version of the Roo::OpenOffice document
   # at 2007 this is always "1.0"
   def officeversion
     oo_version
@@ -212,7 +222,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     end
     if @label.has_key? labelname
       return @label[labelname][1].to_i,
-        Roo::GenericSpreadsheet.letter_to_number(@label[labelname][2]),
+        Roo::Base.letter_to_number(@label[labelname][2]),
         @label[labelname][0]
     else
       return nil,nil,nil
@@ -226,7 +236,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     @label.map do |label|
       [ label[0], # name
         [ label[1][1].to_i, # row
-          Roo::GenericSpreadsheet.letter_to_number(label[1][2]), # column
+          Roo::Base.letter_to_number(label[1][2]), # column
           label[1][0], # sheet
         ] ]
     end
@@ -270,7 +280,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # read the version of the OO-Version
   def oo_version
     @doc.xpath("//*[local-name()='document-content']").each do |office|
-      @officeversion = office.attributes['version'].to_s
+      @officeversion = attr(office,'version')
     end
   end
 
@@ -278,7 +288,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   def set_cell_values(sheet,x,y,i,v,value_type,formula,table_cell,str_v,style_name)
     key = [y,x+i]
     @cell_type[sheet] = {} unless @cell_type[sheet]
-    @cell_type[sheet][key] = Roo::Openoffice.oo_type_2_roo_type(value_type)
+    @cell_type[sheet][key] = Roo::OpenOffice.oo_type_2_roo_type(value_type)
     @formula[sheet] = {} unless @formula[sheet]
     if formula
       ['of:', 'oooc:'].each do |prefix|
@@ -298,10 +308,10 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
       @cell[sheet][key] = str_v
     when :date
       #TODO: if table_cell.attributes['date-value'].size != "XXXX-XX-XX".size
-      if table_cell.attributes['date-value'].to_s.size != "XXXX-XX-XX".size
+      if attr(table_cell,'date-value').size != "XXXX-XX-XX".size
         #-- dann ist noch eine Uhrzeit vorhanden
         #-- "1961-11-21T12:17:18"
-        @cell[sheet][key] = DateTime.parse(table_cell.attributes['date-value'].to_s)
+        @cell[sheet][key] = DateTime.parse(attr(table_cell,'date-value').to_s)
         @cell_type[sheet][key] = :datetime
       else
         @cell[sheet][key] = table_cell.attributes['date-value']
@@ -327,7 +337,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     sheet_found = false
 
     @doc.xpath("//*[local-name()='table']").each do |ws|
-      if sheet == ws['name']
+      if sheet == attr(ws,'name')
         sheet_found = true
         col = 1
         row = 1
@@ -337,15 +347,15 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
             @style_defaults[sheet] << table_element.attributes['default-cell-style-name']
           when 'table-row'
             if table_element.attributes['number-rows-repeated']
-              skip_row = table_element.attributes['number-rows-repeated'].to_s.to_i
+              skip_row = attr(table_element,'number-rows-repeated').to_s.to_i
               row = row + skip_row - 1
             end
             table_element.children.each do |cell|
-              skip_col = cell['number-columns-repeated']
-              formula = cell['formula']
-              value_type = cell['value-type']
-              v =  cell['value']
-              style_name = cell['style-name']
+              skip_col = attr(cell, 'number-columns-repeated')
+              formula = attr(cell,'formula')
+              value_type = attr(cell,'value-type')
+              v =  attr(cell,'value')
+              style_name = attr(cell,'style-name')
               case value_type
               when 'string'
                 str_v  = ''
@@ -406,7 +416,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
               when 'float'
                 #
               when 'boolean'
-                v = cell.attributes['boolean-value'].to_s
+                v = attr(cell,'boolean-value').to_s
               else
                 # raise "unknown type #{value_type}"
               end
@@ -437,8 +447,8 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     @comments_read[sheet] = true
   end
 
-  # Only calls read_cells because Roo::GenericSpreadsheet calls read_comments
-  # whereas the reading of comments is done in read_cells for Roo::Openoffice-objects
+  # Only calls read_cells because Roo::Base calls read_comments
+  # whereas the reading of comments is done in read_cells for Roo::OpenOffice-objects
   def read_comments(sheet=nil)
     read_cells(sheet)
   end
@@ -448,8 +458,8 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
       #-
       # $Sheet1.$C$5
       #+
-      name = ne.attribute('name').to_s
-      sheetname,coords = ne.attribute('cell-range-address').to_s.split('.$')
+      name = attr(ne,'name').to_s
+      sheetname,coords = attr(ne,'cell-range-address').to_s.split('.$')
       col, row = coords.split('$')
       sheetname = sheetname[1..-1] if sheetname[0,1] == '$'
       [name, [sheetname,row,col]]
@@ -457,15 +467,15 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   end
 
   def read_styles(style_elements)
-    @style_definitions['Default'] = Roo::Openoffice::Font.new
+    @style_definitions['Default'] = Roo::OpenOffice::Font.new
     style_elements.each do |style|
       next unless style.name == 'style'
-      style_name = style.attributes['name']
+      style_name = attr(style,'name')
       style.each do |properties|
-        font = Roo::Openoffice::Font.new
-        font.bold = properties.attributes['font-weight']
-        font.italic = properties.attributes['font-style']
-        font.underline = properties.attributes['text-underline-style']
+        font = Roo::OpenOffice::Font.new
+        font.bold = attr(properties,'font-weight')
+        font.italic = attr(properties,'font-style')
+        font.underline = attr(properties,'text-underline-style')
         @style_definitions[style_name] = font
       end
     end
@@ -506,8 +516,16 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     result
   end
 
+
+  private
+  def attr(node, attr_name)
+    if node.attributes[attr_name]
+      node.attributes[attr_name].value
+    end
+  end
+
 end # class
 
-# Libreoffice is just an alias for Roo::Openoffice class
-class Roo::Libreoffice < Roo::Openoffice
+# LibreOffice is just an alias for Roo::OpenOffice class
+class Roo::LibreOffice < Roo::OpenOffice
 end
