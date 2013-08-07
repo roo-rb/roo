@@ -4,10 +4,6 @@ rescue LoadError => e
   raise e, "Using Roo::Google requires the google_drive gem"
 end
 
-class GoogleHTTPError < RuntimeError; end
-class GoogleReadError < RuntimeError; end
-class GoogleWriteError < RuntimeError; end
-
 class Roo::Google < Roo::GenericSpreadsheet
   attr_accessor :date_format, :datetime_format
 
