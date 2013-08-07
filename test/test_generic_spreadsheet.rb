@@ -177,53 +177,55 @@ class TestBase < Test::Unit::TestCase
 protected
   def setup_test_sheet(workbook=nil)
     workbook ||= @oo
-    %w{sheet_values sheet_types cells_read}.each do |meth|
-      send("set_#{meth}".to_sym,workbook)
-    end
+    set_sheet_values(workbook)
+    set_sheet_types(workbook)
+    set_cells_read(workbook)
   end
 
   def set_sheet_values(workbook)
-    vals = workbook.instance_variable_get(:@cell)
-    vals[workbook.default_sheet][[5,1]] = Date.civil(1961,11,21).to_s
+    workbook.instance_variable_get(:@cell)[workbook.default_sheet] = {
+      [5,1] => Date.civil(1961,11,21).to_s,
 
-    vals[workbook.default_sheet][[8,3]] = "thisisc8"
-    vals[workbook.default_sheet][[8,7]] = "thisisg8"
+      [8,3] => "thisisc8",
+      [8,7] => "thisisg8",
 
-    vals[workbook.default_sheet][[12,1]] = 41.0
-    vals[workbook.default_sheet][[12,2]] = 42.0
-    vals[workbook.default_sheet][[12,3]] = 43.0
-    vals[workbook.default_sheet][[12,4]] = 44.0
-    vals[workbook.default_sheet][[12,5]] = 45.0
+      [12,1] => 41.0,
+      [12,2] => 42.0,
+      [12,3] => 43.0,
+      [12,4] => 44.0,
+      [12,5] => 45.0,
 
-    vals[workbook.default_sheet][[15,3]] = 43.0
-    vals[workbook.default_sheet][[15,4]] = 44.0
-    vals[workbook.default_sheet][[15,5]] = 45.0
+      [15,3] => 43.0,
+      [15,4] => 44.0,
+      [15,5] => 45.0,
 
-    vals[workbook.default_sheet][[16,3]] = "dreiundvierzig"
-    vals[workbook.default_sheet][[16,4]] = "vierundvierzig"
-    vals[workbook.default_sheet][[16,5]] = "fuenfundvierzig"
+      [16,3] => "dreiundvierzig",
+      [16,4] => "vierundvierzig",
+      [16,5] => "fuenfundvierzig"
+    }
   end
 
   def set_sheet_types(workbook)
-    types = workbook.instance_variable_get(:@cell_type)
-    types[workbook.default_sheet][[5,1]] = :date
+    workbook.instance_variable_get(:@cell_type)[workbook.default_sheet] = {
+      [5,1] => :date,
 
-    types[workbook.default_sheet][[8,3]] = :string
-    types[workbook.default_sheet][[8,7]] = :string
+      [8,3] => :string,
+      [8,7] => :string,
 
-    types[workbook.default_sheet][[12,1]] = :float
-    types[workbook.default_sheet][[12,2]] = :float
-    types[workbook.default_sheet][[12,3]] = :float
-    types[workbook.default_sheet][[12,4]] = :float
-    types[workbook.default_sheet][[12,5]] = :float
+      [12,1] => :float,
+      [12,2] => :float,
+      [12,3] => :float,
+      [12,4] => :float,
+      [12,5] => :float,
 
-    types[workbook.default_sheet][[15,3]] = :float
-    types[workbook.default_sheet][[15,4]] = :float
-    types[workbook.default_sheet][[15,5]] = :float
+      [15,3] => :float,
+      [15,4] => :float,
+      [15,5] => :float,
 
-    types[workbook.default_sheet][[16,3]] = :string
-    types[workbook.default_sheet][[16,4]] = :string
-    types[workbook.default_sheet][[16,5]] = :string
+      [16,3] => :string,
+      [16,4] => :string,
+      [16,5] => :string,
+    }
   end
 
   def set_first_row(workbook)

@@ -37,9 +37,12 @@ class Roo::Base
 
   public
 
-  def initialize(filename, packed=nil, file_warning=:error, tmpdir=nil)
-    @cell = Hash.new{|h,k| h[k] = {}}
-    @cell_type = Hash.new{|h,k| h[k] = {}}
+  def initialize(filename, options={}, file_warning=:error, tmpdir=nil)
+    @filename = filename
+    @options = options
+
+    @cell = {}
+    @cell_type = {}
     @cells_read = {}
 
     @first_row = {}
@@ -47,12 +50,8 @@ class Roo::Base
     @first_column = {}
     @last_column = {}
 
-    @style = {}
-    @style_defaults = Hash.new { |h,k| h[k] = [] }
-    @style_definitions = {}
-
+    @header_line = 1
     @default_sheet = self.sheets.first
-    @formula = {}
     @header_line = 1
   end
 

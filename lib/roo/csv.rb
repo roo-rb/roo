@@ -13,16 +13,7 @@ require 'time'
 
 class Roo::CSV < Roo::Base
   def initialize(filename, options = {})
-    @filename = filename
-    @options = options
-    @cell = {}
-    @cell_type = {}
-    @cells_read = {}
-    @first_row = {}
-    @last_row = {}
-    @first_column = {}
-    @last_column = {}
-    @header_line = 1
+    super
   end
 
   attr_reader :filename
