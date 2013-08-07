@@ -8,31 +8,23 @@ class Roo::Google < Roo::Base
   attr_accessor :date_format, :datetime_format
 
   # Creates a new Google Drive object.
-  def initialize(spreadsheetkey, options = {})
-    @spreadsheetkey = spreadsheetkey
+  def initialize(spreadsheet_key, options = {})
     @user = options[:user] || ENV['GOOGLE_MAIL']
     @password = options[:password] || ENV['GOOGLE_PASSWORD']
 
     warn "user not set" if !@user || @user.empty?
     warn "password not set" if !@password || @password.empty?
 
+    session = GoogleDrive.login(@user, @password)
+    @worksheets = session.spreadsheet_by_key(@filername).worksheets
+    @sheets = @worksheets.map {|sheet| sheet.title }
+    super
     @cell = Hash.new {|h,k| h[k]=Hash.new}
     @cell_type = Hash.new {|h,k| h[k]=Hash.new}
     @formula = Hash.new
-    @first_row = Hash.new
-    @last_row = Hash.new
-    @first_column = Hash.new
-    @last_column = Hash.new
-    @cells_read = Hash.new
-    @header_line = 1
     @date_format = '%d/%m/%Y'
     @datetime_format = '%d/%m/%Y %H:%M:%S'
     @time_format = '%H:%M:%S'
-
-    session = GoogleDrive.login(@user, @password)
-    @worksheets = session.spreadsheet_by_key(@spreadsheetkey).worksheets
-    @sheets = @worksheets.map {|sheet| sheet.title }
-    @default_sheet = sheets.first
   end
 
   # returns an array of sheet names in the spreadsheet
@@ -298,6 +290,6 @@ class Roo::Google < Roo::Base
   private
 
   def reinitialize
-    initialize(@spreadsheetkey, user: @user, password: @password)
+    initialize(@filername, user: @user, password: @password)
   end
 end

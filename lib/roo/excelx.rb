@@ -80,7 +80,6 @@ class Roo::Excelx < Roo::Base
     make_tmpdir do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if uri?(filename)
       filename = unzip(filename, tmpdir) if packed == :zip
-      @cells_read = Hash.new
       @filename = filename
       unless File.file?(@filename)
         raise IOError, "file #{@filename} does not exist"
@@ -106,15 +105,8 @@ class Roo::Excelx < Roo::Base
         load_xml(item)
       end
     end
-    @default_sheet = self.sheets.first
-    @cell = Hash.new
-    @cell_type = Hash.new
+    super(filename, options)
     @formula = Hash.new
-    @first_row = Hash.new
-    @last_row = Hash.new
-    @first_column = Hash.new
-    @last_column = Hash.new
-    @header_line = 1
     @excelx_type = Hash.new
     @excelx_value = Hash.new
     @s_attribute = Hash.new # TODO: ggf. wieder entfernen nur lokal benoetigt

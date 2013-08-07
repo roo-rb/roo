@@ -48,7 +48,6 @@ class Roo::OpenOffice < Roo::Base
     make_tmpdir(tmpdir_root) do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if uri?(filename)
       filename = unzip(filename, tmpdir) if packed == :zip
-      @cells_read = Hash.new
       #TODO: @cells_read[:default] = false
       @filename = filename
       unless File.file?(@filename)
@@ -59,18 +58,11 @@ class Roo::OpenOffice < Roo::Base
         Nokogiri::XML(file)
       end
     end
-    @default_sheet = self.sheets.first
-    @cell = Hash.new
-    @cell_type = Hash.new
+    super(filename, options)
     @formula = Hash.new
-    @first_row = Hash.new
-    @last_row = Hash.new
-    @first_column = Hash.new
-    @last_column = Hash.new
     @style = Hash.new
     @style_defaults = Hash.new { |h,k| h[k] = [] }
     @style_definitions = Hash.new
-    @header_line = 1
     @comment = Hash.new
     @comments_read = Hash.new
   end
@@ -191,11 +183,9 @@ class Roo::OpenOffice < Roo::Base
   end
 
   def sheets
-    return_sheets = []
-    @doc.xpath("//*[local-name()='table']").each do |sheet|
-      return_sheets << sheet.attributes["name"].value
+    @doc.xpath("//*[local-name()='table']").map do |sheet|
+      sheet.attributes["name"].value
     end
-    return_sheets
   end
 
   # version of the Roo::OpenOffice document

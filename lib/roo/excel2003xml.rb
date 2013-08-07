@@ -23,22 +23,14 @@ class Roo::Excel2003XML < Roo::Base
       filename = unzip(filename, tmpdir) if packed == :zip
 
       file_type_check(filename,'.xml','an Excel 2003 XML', file_warning)
-      @cells_read = Hash.new
       @filename = filename
       unless File.file?(@filename)
         raise IOError, "file #{@filename} does not exist"
       end
       @doc = Nokogiri::XML(open(@filename))
     end
-    @default_sheet = self.sheets.first
-    @cell = Hash.new
-    @cell_type = Hash.new
+    super(filename, options)
     @formula = Hash.new
-    @first_row = Hash.new
-    @last_row = Hash.new
-    @first_column = Hash.new
-    @last_column = Hash.new
-    @header_line = 1
     @style = Hash.new
     @style_defaults = Hash.new { |h,k| h[k] = [] }
     @style_definitions = Hash.new
