@@ -22,6 +22,7 @@ class Roo::Csv < Roo::GenericSpreadsheet
     @last_row = {}
     @first_column = {}
     @last_column = {}
+    @header_line = 1
   end
 
   attr_reader :filename
