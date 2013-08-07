@@ -6,6 +6,7 @@ module Roo
   autoload :GenericSpreadsheet, 'roo/generic_spreadsheet'
 
   autoload :Openoffice,         'roo/openoffice'
+  autoload :Libreoffice,        'roo/openoffice'
   autoload :Excel,              'roo/excel'
   autoload :Excelx,             'roo/excelx'
   autoload :Excel2003XML,       'roo/excel2003xml'
