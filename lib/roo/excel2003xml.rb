@@ -4,7 +4,7 @@ require 'base64'
 require 'cgi'
 require 'nokogiri'
 
-class Roo::Excel2003XML < Roo::GenericSpreadsheet
+class Roo::Excel2003XML < Roo::Base
 
   # initialization and opening of a spreadsheet file
   # values for packed: :zip

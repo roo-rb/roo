@@ -3,7 +3,7 @@ require 'spreadsheet'
 #require 'parseexcel'
 
 # Class for handling Excel-Spreadsheets
-class Roo::Excel < Roo::GenericSpreadsheet
+class Roo::Excel < Roo::Base
   CHARGUESS =
     begin
       require 'charguess'

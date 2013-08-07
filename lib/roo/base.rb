@@ -5,7 +5,7 @@ require 'stringio'
 require 'zip/zipfilesystem'
 
 # Base class for all other types of spreadsheets
-class Roo::GenericSpreadsheet
+class Roo::Base
   include Enumerable
 
   TEMP_PREFIX = "oo_"
@@ -18,7 +18,7 @@ class Roo::GenericSpreadsheet
   protected
 
   def self.split_coordinate(str)
-    letter,number = Roo::GenericSpreadsheet.split_coord(str)
+    letter,number = Roo::Base.split_coord(str)
     x = letter_to_number(letter)
     y = number
     return y, x
@@ -67,12 +67,12 @@ class Roo::GenericSpreadsheet
 
   # first non-empty column as a letter
   def first_column_as_letter(sheet=nil)
-    Roo::GenericSpreadsheet.number_to_letter(first_column(sheet))
+    Roo::Base.number_to_letter(first_column(sheet))
   end
 
   # last non-empty column as a letter
   def last_column_as_letter(sheet=nil)
-    Roo::GenericSpreadsheet.number_to_letter(last_column(sheet))
+    Roo::Base.number_to_letter(last_column(sheet))
   end
 
   # returns the number of the first non-empty row
@@ -166,7 +166,7 @@ class Roo::GenericSpreadsheet
           result << "  col: #{col} \n"
           result << "  celltype: #{self.celltype(row,col,sheet)} \n"
           if self.celltype(row,col,sheet) == :time
-            result << "  value: #{Roo::GenericSpreadsheet.integer_to_timestring( self.cell(row,col,sheet))} \n"
+            result << "  value: #{Roo::Base.integer_to_timestring( self.cell(row,col,sheet))} \n"
           else
             result << "  value: #{self.cell(row,col,sheet)} \n"
           end
@@ -323,8 +323,8 @@ class Roo::GenericSpreadsheet
       else
         result << "  First row: #{first_row}\n"
         result << "  Last row: #{last_row}\n"
-        result << "  First column: #{Roo::GenericSpreadsheet.number_to_letter(first_column)}\n"
-        result << "  Last column: #{Roo::GenericSpreadsheet.number_to_letter(last_column)}"
+        result << "  First column: #{Roo::Base.number_to_letter(first_column)}\n"
+        result << "  Last column: #{Roo::Base.number_to_letter(last_column)}"
       end
       result << "\n" if sheet != sheets.last
       n += 1
@@ -364,7 +364,7 @@ class Roo::GenericSpreadsheet
     # #aa42 => #cell('aa',42)
     # #aa42('Sheet1')  => #cell('aa',42,'Sheet1')
     if m =~ /^([a-z]+)(\d)$/
-      col = Roo::GenericSpreadsheet.letter_to_number($1)
+      col = Roo::Base.letter_to_number($1)
       row = $2.to_i
       if args.empty?
         cell(row,col)
@@ -625,7 +625,7 @@ class Roo::GenericSpreadsheet
       end
     end
     if col.class == String
-      col = Roo::GenericSpreadsheet.letter_to_number(col)
+      col = Roo::Base.letter_to_number(col)
     end
     return row,col
   end
@@ -788,7 +788,7 @@ class Roo::GenericSpreadsheet
       when :date, :datetime
         onecell.to_s
       when :time
-        Roo::GenericSpreadsheet.integer_to_timestring(onecell)
+        Roo::Base.integer_to_timestring(onecell)
       else
         raise "unhandled celltype #{celltype(row,col,sheet)}"
       end || ""

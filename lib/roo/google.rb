@@ -4,7 +4,7 @@ rescue LoadError => e
   raise e, "Using Roo::Google requires the google_drive gem"
 end
 
-class Roo::Google < Roo::GenericSpreadsheet
+class Roo::Google < Roo::Base
   attr_accessor :date_format, :datetime_format
 
   # Creates a new Google Drive object.

@@ -11,7 +11,7 @@ require 'time'
 # :csv_options option.
 #
 
-class Roo::CSV < Roo::GenericSpreadsheet
+class Roo::CSV < Roo::Base
   def initialize(filename, options = {})
     @filename = filename
     @options = options

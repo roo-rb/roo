@@ -3,7 +3,7 @@ require 'date'
 require 'nokogiri'
 require 'cgi'
 require 'pp' #TODO
-class Roo::OpenOffice < Roo::GenericSpreadsheet
+class Roo::OpenOffice < Roo::Base
 
   class << self
     def extract_content(tmpdir, filename)
@@ -211,7 +211,7 @@ class Roo::OpenOffice < Roo::GenericSpreadsheet
     end
     if @label.has_key? labelname
       return @label[labelname][1].to_i,
-        Roo::GenericSpreadsheet.letter_to_number(@label[labelname][2]),
+        Roo::Base.letter_to_number(@label[labelname][2]),
         @label[labelname][0]
     else
       return nil,nil,nil
@@ -225,7 +225,7 @@ class Roo::OpenOffice < Roo::GenericSpreadsheet
     @label.map do |label|
       [ label[0], # name
         [ label[1][1].to_i, # row
-          Roo::GenericSpreadsheet.letter_to_number(label[1][2]), # column
+          Roo::Base.letter_to_number(label[1][2]), # column
           label[1][0], # sheet
         ] ]
     end
@@ -436,7 +436,7 @@ class Roo::OpenOffice < Roo::GenericSpreadsheet
     @comments_read[sheet] = true
   end
 
-  # Only calls read_cells because Roo::GenericSpreadsheet calls read_comments
+  # Only calls read_cells because Roo::Base calls read_comments
   # whereas the reading of comments is done in read_cells for Roo::OpenOffice-objects
   def read_comments(sheet=nil)
     read_cells(sheet)

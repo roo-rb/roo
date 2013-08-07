@@ -13,19 +13,22 @@ module Roo
     when :Csv
       warn "`Roo::Csv` has been deprecated. Use `Roo::CSV` instead."
       CSV
+    when :GenericSpreadsheet
+      warn "`Roo::GenericSpreadsheet` has been deprecated. Use `Roo::Base` instead."
+      Base
     else
       super
     end
   end
 
-  autoload :Spreadsheet, 'roo/spreadsheet'
-  autoload :GenericSpreadsheet, 'roo/generic_spreadsheet'
+  autoload :Spreadsheet,  'roo/spreadsheet'
+  autoload :Base,         'roo/base'
 
-  autoload :OpenOffice,         'roo/openoffice'
-  autoload :LibreOffice,        'roo/openoffice'
-  autoload :Excel,              'roo/excel'
-  autoload :Excelx,             'roo/excelx'
-  autoload :Excel2003XML,       'roo/excel2003xml'
-  autoload :Google,             'roo/google'
-  autoload :CSV,                'roo/csv'
+  autoload :OpenOffice,   'roo/openoffice'
+  autoload :LibreOffice,  'roo/openoffice'
+  autoload :Excel,        'roo/excel'
+  autoload :Excelx,       'roo/excelx'
+  autoload :Excel2003XML, 'roo/excel2003xml'
+  autoload :Google,       'roo/google'
+  autoload :CSV,          'roo/csv'
 end

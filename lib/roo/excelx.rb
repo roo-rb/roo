@@ -2,7 +2,7 @@ require 'fileutils'
 require 'date'
 require 'nokogiri'
 
-class Roo::Excelx < Roo::GenericSpreadsheet
+class Roo::Excelx < Roo::Base
   module Format
     EXCEPTIONAL_FORMATS = {
       'h:mm am/pm' => :date,
@@ -281,7 +281,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
       return nil,nil,nil
     else
       return @label[labelname][1].to_i,
-        Roo::GenericSpreadsheet.letter_to_number(@label[labelname][2]),
+        Roo::Base.letter_to_number(@label[labelname][2]),
         @label[labelname][0]
     end
   end
@@ -295,7 +295,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
     @label.map do |label|
       [ label[0], # name
         [ label[1][1].to_i, # row
-          Roo::GenericSpreadsheet.letter_to_number(label[1][2]), # column
+          Roo::Base.letter_to_number(label[1][2]), # column
           label[1][0], # sheet
         ] ]
     end
@@ -416,7 +416,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
               value_type = :string
               v = inlinestr_content
               excelx_type = :string
-              y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
+              y, x = Roo::Base.split_coordinate(c['r'])
               excelx_value = inlinestr_content #cell.content
               set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
             end
@@ -457,7 +457,7 @@ class Roo::Excelx < Roo::GenericSpreadsheet
               value_type = :float
               cell.content
             end
-          y, x = Roo::GenericSpreadsheet.split_coordinate(c['r'])
+          y, x = Roo::Base.split_coordinate(c['r'])
           set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
         end
       end
@@ -515,7 +515,7 @@ Datei xl/comments1.xml
     return unless @comments_doc[n] #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @comments_doc[n].xpath("//xmlns:comments/xmlns:commentList/xmlns:comment").each do |comment|
       ref = comment.attributes['ref'].to_s
-      row,col = Roo::GenericSpreadsheet.split_coordinate(ref)
+      row,col = Roo::Base.split_coordinate(ref)
       comment.xpath('./xmlns:text/xmlns:r/xmlns:t').each do |text|
         @comment[sheet] ||= {}
         @comment[sheet][[row,col]] = text.text
