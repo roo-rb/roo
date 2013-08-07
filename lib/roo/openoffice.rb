@@ -85,7 +85,7 @@ class Roo::OpenOffice < Roo::Base
   # cell at the first line and first row.
   def cell(row, col, sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     if celltype(row,col,sheet) == :date
       yyyy,mm,dd = @cell[sheet][[row,col]].to_s.split('-')
@@ -99,7 +99,7 @@ class Roo::OpenOffice < Roo::Base
   # The method #formula? checks if there is a formula.
   def formula(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     if @formula[sheet][[row,col]] == nil
       return nil
@@ -119,7 +119,7 @@ class Roo::OpenOffice < Roo::Base
   # true, if there is a formula
   def formula?(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     formula(row,col) != nil
   end
@@ -128,7 +128,7 @@ class Roo::OpenOffice < Roo::Base
   # [row, col, formula]
   def formulas(sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     if @formula[sheet]
       @formula[sheet].each.collect do |elem|
         [elem[0][0], elem[0][1], elem[1]]
@@ -157,7 +157,7 @@ class Roo::OpenOffice < Roo::Base
   # Given a cell, return the cell's style
   def font(row, col, sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     style_name = @style[sheet][[row,col]] || @style_defaults[sheet][col - 1] || 'Default'
     @style_definitions[style_name]
@@ -173,7 +173,7 @@ class Roo::OpenOffice < Roo::Base
   # * :datetime
   def celltype(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     if @formula[sheet][[row,col]]
       return :formula
@@ -199,7 +199,7 @@ class Roo::OpenOffice < Roo::Base
   # mainly for debugging purposes
   def to_s(sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     @cell[sheet].inspect
   end
 
@@ -236,7 +236,7 @@ class Roo::OpenOffice < Roo::Base
   # nil if there is no comment
   def comment(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     return nil unless @comment[sheet]
     @comment[sheet][[row,col]]
@@ -245,7 +245,7 @@ class Roo::OpenOffice < Roo::Base
   # true, if there is a comment
   def comment?(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     comment(row,col) != nil
   end
@@ -324,8 +324,9 @@ class Roo::OpenOffice < Roo::Base
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
     validate_sheet!(sheet)
-    sheet_found = false
+    return if @cells_read[sheet]
 
+    sheet_found = false
     @doc.xpath("//*[local-name()='table']").each do |ws|
       if sheet == attr(ws,'name')
         sheet_found = true

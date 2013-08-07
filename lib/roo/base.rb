@@ -77,7 +77,7 @@ class Roo::Base
   # returns the number of the first non-empty row
   def first_row(sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     if @first_row[sheet]
       return @first_row[sheet]
     end
@@ -95,7 +95,7 @@ class Roo::Base
   # returns the number of the last non-empty row
   def last_row(sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     if @last_row[sheet]
       return @last_row[sheet]
     end
@@ -113,7 +113,7 @@ class Roo::Base
   # returns the number of the first non-empty column
   def first_column(sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     if @first_column[sheet]
       return @first_column[sheet]
     end
@@ -131,7 +131,7 @@ class Roo::Base
   # returns the number of the last non-empty column
   def last_column(sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     if @last_column[sheet]
       return @last_column[sheet]
     end
@@ -254,7 +254,7 @@ class Roo::Base
   # row numbers are 1,2,3,... like in the spreadsheet
   def row(rownumber,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     first_column(sheet).upto(last_column(sheet)).map do |col|
       cell(rownumber,col,sheet)
     end
@@ -267,7 +267,7 @@ class Roo::Base
       columnnumber = Roo::Excel.letter_to_number(columnnumber)
     end
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     first_row(sheet).upto(last_row(sheet)).map do |row|
       cell(row,columnnumber,sheet)
     end
@@ -277,7 +277,7 @@ class Roo::Base
   # (this will not be saved back to the spreadsheet file!)
   def set(row,col,value,sheet=nil) #:nodoc:
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row, col = normalize(row,col)
     cell_type = case value
                 when Fixnum then :float
@@ -300,7 +300,7 @@ class Roo::Base
   # true if cell is empty
   def empty?(row, col, sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet] or self.class == Roo::Excel
+    read_cells(sheet)
     row,col = normalize(row,col)
     contents = cell(row, col, sheet)
     !contents || (celltype(row, col, sheet) == :string && contents.empty?) \
@@ -382,7 +382,7 @@ class Roo::Base
   def formulas(sheet=nil)
     theformulas = Array.new
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     return theformulas unless first_row(sheet) # if there is no first row then
     # there can't be formulas
     first_row(sheet).upto(last_row(sheet)) {|row|
@@ -578,7 +578,7 @@ class Roo::Base
   end
 
   def clean_sheet(sheet)
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     @cell[sheet].each_pair do |coord,value|
       if String === value
         @cell[sheet][coord] = sanitize_value(value)

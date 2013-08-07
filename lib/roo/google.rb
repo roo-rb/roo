@@ -68,7 +68,7 @@ class Roo::Google < Roo::Base
   def cell(row, col, sheet=nil)
     sheet ||= @default_sheet
     validate_sheet!(sheet) #TODO: 2007-12-16
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     value = @cell[sheet]["#{row},#{col}"]
     if celltype(row,col,sheet) == :date
@@ -97,7 +97,7 @@ class Roo::Google < Roo::Base
   # * :datetime
   def celltype(row, col, sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     if @formula.size > 0 && @formula[sheet]["#{row},#{col}"]
       return :formula
@@ -111,7 +111,7 @@ class Roo::Google < Roo::Base
   # The method #formula? checks if there is a formula.
   def formula(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     if @formula[sheet]["#{row},#{col}"] == nil
       return nil
@@ -123,7 +123,7 @@ class Roo::Google < Roo::Base
   # true, if there is a formula
   def formula?(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     formula(row,col) != nil
   end
@@ -222,6 +222,8 @@ class Roo::Google < Roo::Base
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
     validate_sheet!(sheet)
+    return if @cells_read[sheet]
+
     sheet_no = sheets.index(sheet)
     ws = @worksheets[sheet_no]
     for row in 1..ws.num_rows

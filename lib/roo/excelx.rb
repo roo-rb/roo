@@ -119,7 +119,7 @@ class Roo::Excelx < Roo::Base
     read_labels
     if @label.has_key?(m.to_s)
       sheet ||= @default_sheet
-      read_cells(sheet) unless @cells_read[sheet]
+      read_cells(sheet)
       row,col = label(m.to_s)
       cell(row,col)
     else
@@ -134,7 +134,7 @@ class Roo::Excelx < Roo::Base
   # cell at the first line and first row.
   def cell(row, col, sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     if celltype(row,col,sheet) == :date
       yyyy,mm,dd = @cell[sheet][[row,col]].split('-')
@@ -153,7 +153,7 @@ class Roo::Excelx < Roo::Base
   # The method #formula? checks if there is a formula.
   def formula(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     if @formula[sheet][[row,col]] == nil
       return nil
@@ -165,7 +165,7 @@ class Roo::Excelx < Roo::Base
   # true, if there is a formula
   def formula?(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     formula(row,col) != nil
   end
@@ -174,7 +174,7 @@ class Roo::Excelx < Roo::Base
   # [row, col, formula]
   def formulas(sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     if @formula[sheet]
       @formula[sheet].each.collect do |elem|
         [elem[0][0], elem[0][1], elem[1]]
@@ -203,7 +203,7 @@ class Roo::Excelx < Roo::Base
   # Given a cell, return the cell's style
   def font(row, col, sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     s_attribute = @s_attribute[sheet][[row,col]]
     s_attribute ||= 0
@@ -221,7 +221,7 @@ class Roo::Excelx < Roo::Base
   # * :datetime
   def celltype(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     if @formula[sheet][[row,col]]
       return :formula
@@ -236,7 +236,7 @@ class Roo::Excelx < Roo::Base
   # Note: this is only available within the Excelx class
   def excelx_type(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     return @excelx_type[sheet][[row,col]]
   end
@@ -245,7 +245,7 @@ class Roo::Excelx < Roo::Base
   # Note: this is only available within the Excelx class
   def excelx_value(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     return @excelx_value[sheet][[row,col]]
   end
@@ -253,7 +253,7 @@ class Roo::Excelx < Roo::Base
   # returns the internal format of an excel cell
   def excelx_format(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     s = @s_attribute[sheet][[row,col]]
     attribute2format(s).to_s
@@ -270,7 +270,7 @@ class Roo::Excelx < Roo::Base
   # for debugging purposes
   def to_s(sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     @cell[sheet].inspect
   end
 
@@ -291,7 +291,7 @@ class Roo::Excelx < Roo::Base
   # [labelname, [row,col,sheetname]]
   def labels
     # sheet ||= @default_sheet
-    # read_cells(sheet) unless @cells_read[sheet]
+    # read_cells(sheet)
     read_labels
     @label.map do |label|
       [ label[0], # name
@@ -306,7 +306,7 @@ class Roo::Excelx < Roo::Base
   # nil if there is no comment
   def comment(row,col,sheet=nil)
     sheet ||= @default_sheet
-    #read_cells(sheet) unless @cells_read[sheet]
+    #read_cells(sheet)
     read_comments(sheet) unless @comments_read[sheet]
     row,col = normalize(row,col)
     return nil unless @comment[sheet]
@@ -316,7 +316,7 @@ class Roo::Excelx < Roo::Base
   # true, if there is a comment
   def comment?(row,col,sheet=nil)
     sheet ||= @default_sheet
-    # read_cells(sheet) unless @cells_read[sheet]
+    # read_cells(sheet)
     read_comments(sheet) unless @comments_read[sheet]
     row,col = normalize(row,col)
     comment(row,col) != nil
@@ -384,6 +384,8 @@ class Roo::Excelx < Roo::Base
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
     validate_sheet!(sheet)
+    return if @cells_read[sheet]
+
     @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row/xmlns:c").each do |c|
       s_attribute = c['s'].to_i   # should be here
       # c: <c r="A5" s="2">

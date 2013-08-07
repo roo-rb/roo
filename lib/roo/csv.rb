@@ -26,16 +26,14 @@ class Roo::CSV < Roo::Base
 
   def cell(row, col, sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
-    row,col = normalize(row,col)
-    @cell[[row,col]]
+    read_cells(sheet)
+    @cell[normalize(row,col)]
   end
 
   def celltype(row, col, sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
-    row,col = normalize(row,col)
-    @cell_type[[row,col]]
+    read_cells(sheet)
+    @cell_type[normalize(row,col)]
   end
 
   def cell_postprocessing(row,col,value)
@@ -72,8 +70,7 @@ class Roo::CSV < Roo::Base
 
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
-    @cell_type = {} unless @cell_type
-    @cell = {} unless @cell
+    return if @cells_read[sheet]
     @first_row[sheet] = 1
     @last_row[sheet] = 0
     @first_column[sheet] = 1

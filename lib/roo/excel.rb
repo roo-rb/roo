@@ -55,7 +55,7 @@ class Roo::Excel < Roo::Base
     sheet ||= @default_sheet
     validate_sheet!(sheet)
 
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     raise "should be read" unless @cells_read[sheet]
     row,col = normalize(row,col)
     if celltype(row,col,sheet) == :date
@@ -83,7 +83,7 @@ class Roo::Excel < Roo::Base
   # * :datetime
   def celltype(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     begin
       if @formula[sheet] and @formula[sheet][[row,col]]
@@ -115,7 +115,7 @@ class Roo::Excel < Roo::Base
   # Given a cell, return the cell's font
   def font(row, col, sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     @fonts[sheet][[row,col]]
   end
@@ -124,7 +124,7 @@ class Roo::Excel < Roo::Base
   # mainly for debugging purposes
   def to_s(sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     @cell[sheet].inspect
   end
 
@@ -240,10 +240,7 @@ class Roo::Excel < Roo::Base
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
     validate_sheet!(sheet)
-
-    if @cells_read[sheet]
-      raise "sheet #{sheet} already read"
-    end
+    return if @cells_read[sheet]
 
     worksheet = @workbook.worksheet(sheet_no(sheet))
     row_index=1

@@ -43,7 +43,7 @@ class Roo::Excel2003XML < Roo::Base
   # cell at the first line and first row.
   def cell(row, col, sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     if celltype(row,col,sheet) == :date
       yyyy,mm,dd = @cell[sheet][[row,col]].split('-')
@@ -57,7 +57,7 @@ class Roo::Excel2003XML < Roo::Base
   # The method #formula? checks if there is a formula.
   def formula(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     if @formula[sheet][[row,col]] == nil
       return nil
@@ -69,7 +69,7 @@ class Roo::Excel2003XML < Roo::Base
   # true, if there is a formula
   def formula?(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     formula(row,col) != nil
   end
@@ -93,7 +93,7 @@ class Roo::Excel2003XML < Roo::Base
   # Given a cell, return the cell's style
   def font(row, col, sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     style_name = @style[sheet][[row,col]] || @style_defaults[sheet][col - 1] || 'Default'
     @style_definitions[style_name]
@@ -109,7 +109,7 @@ class Roo::Excel2003XML < Roo::Base
   # * :datetime
   def celltype(row,col,sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     row,col = normalize(row,col)
     if @formula[sheet][[row,col]]
       return :formula
@@ -135,7 +135,7 @@ class Roo::Excel2003XML < Roo::Base
   # mainly for debugging purposes
   def to_s(sheet=nil)
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     @cell[sheet].inspect
   end
 
@@ -149,7 +149,7 @@ class Roo::Excel2003XML < Roo::Base
   def formulas(sheet=nil)
     theformulas = Array.new
     sheet ||= @default_sheet
-    read_cells(sheet) unless @cells_read[sheet]
+    read_cells(sheet)
     first_row(sheet).upto(last_row(sheet)) {|row|
       first_column(sheet).upto(last_column(sheet)) {|col|
         if formula?(row,col,sheet)
@@ -205,9 +205,9 @@ class Roo::Excel2003XML < Roo::Base
   #++
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
+    validate_sheet!(sheet)
+    return if @cells_read[sheet]
     sheet_found = false
-    raise ArgumentError, "Error: sheet '#{sheet||'nil'}' not valid" if @default_sheet == nil and sheet==nil
-    raise RangeError unless self.sheets.include? sheet
     @doc.xpath("/ss:Workbook/ss:Worksheet[@ss:Name='#{sheet}']").each do |ws|
       sheet_found = true
       row = 1
