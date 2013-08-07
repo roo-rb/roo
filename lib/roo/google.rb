@@ -295,4 +295,9 @@ class Roo::Google < Roo::GenericSpreadsheet
     return rows.min, rows.max, cols.min, cols.max
   end
 
-end # class
+  private
+
+  def reinitialize
+    initialize(@spreadsheetkey, user: @user, password: @password)
+  end
+end

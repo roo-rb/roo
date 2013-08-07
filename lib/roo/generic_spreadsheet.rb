@@ -293,15 +293,9 @@ class Roo::GenericSpreadsheet
 
   # reopens and read a spreadsheet document
   def reload
-    # von Abfrage der Klasse direkt auf .to_s == '..' umgestellt
     ds = @default_sheet
-    if self.class.to_s == 'Google'
-      initialize(@spreadsheetkey,@user,@password)
-    else
-      initialize(@filename)
-    end
+    reinitialize
     self.default_sheet = ds
-    #@first_row = @last_row = @first_column = @last_column = nil
   end
 
   # true if cell is empty
@@ -573,6 +567,10 @@ class Roo::GenericSpreadsheet
   end
 
   private
+
+  def reinitialize
+    initialize(@filename)
+  end
 
   def make_tmpdir(tmp_root = nil)
     Dir.mktmpdir(TEMP_PREFIX, tmp_root || ENV['ROO_TMP']) do |tmpdir|
