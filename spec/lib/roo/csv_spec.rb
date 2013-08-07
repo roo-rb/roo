@@ -2,10 +2,17 @@ require 'spec_helper'
 
 describe Roo::Csv do
   let(:path) { 'test/files/csvtypes.csv' }
+  let(:csv) { Roo::Csv.new(path) }
+
+  describe '.new' do
+    it 'creates an instance' do
+      expect(csv).to be_a(Roo::Csv)
+    end
+  end
 
   describe '#parse' do
     subject {
-      Roo::Csv.new(path).parse(options)
+      csv.parse(options)
     }
     context 'with headers: true' do
       let(:options) { {headers: true} }

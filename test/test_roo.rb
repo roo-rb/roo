@@ -96,33 +96,6 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  def test_classes
-    if OPENOFFICE
-      oo = Roo::Openoffice.new(File.join(TESTDIR,"numbers1.ods"))
-      assert_kind_of Roo::Openoffice, oo
-    end
-    if EXCEL
-      oo = Roo::Excel.new(File.join(TESTDIR,"numbers1.xls"))
-      assert_kind_of Roo::Excel, oo
-    end
-    if GOOGLE
-      oo = Roo::Google.new(key_of("numbers1"))
-      assert_kind_of Roo::Google, oo
-    end
-    if EXCELX
-      oo = Roo::Excelx.new(File.join(TESTDIR,"numbers1.xlsx"))
-      assert_kind_of Roo::Excelx, oo
-    end
-    if LIBREOFFICE
-      oo = Roo::Libreoffice.new(File.join(TESTDIR,"numbers1.ods"))
-      assert_kind_of Roo::Libreoffice, oo
-    end
-    if CSV
-      oo = Roo::Csv.new(File.join(TESTDIR,"numbers1.csv"))
-      assert_kind_of Roo::Csv, oo
-    end
-  end
-
   def test_sheets_csv
     if CSV
       oo = Roo::Csv.new(File.join(TESTDIR,'numbers1.csv'))
