@@ -1,3 +1,4 @@
+warn "Roo's roo_rails_helper, aka the spreadsheet view method is currently deprecated with no replacement. If you find it helpful, tell http://github.com/Empact or extract it yourself."
 def spreadsheet(spreadsheet, sheets, options={})
   @rspreadsheet = spreadsheet
   coordinates = true # default
