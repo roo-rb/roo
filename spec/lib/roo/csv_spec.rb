@@ -3,6 +3,19 @@ require 'spec_helper'
 describe Roo::Csv do
   let(:path) { 'test/files/csvtypes.csv' }
 
+  describe '#parse' do
+    subject {
+      Roo::Csv.new(path).parse(options)
+    }
+    context 'with headers: true' do
+      let(:options) { {headers: true} }
+
+      it "doesn't blow up" do
+        expect { subject }.to_not raise_error
+      end
+    end
+  end
+
   describe '#csv_options' do
     context 'when created with the csv_options option' do
       let(:options) {
