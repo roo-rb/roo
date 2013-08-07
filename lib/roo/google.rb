@@ -1,7 +1,7 @@
 begin
-  require "google_spreadsheet"
+  require "google_drive"
 rescue LoadError => e
-  raise e, "Using Roo::Google requires the google-spreadsheet-ruby gem"
+  raise e, "Using Roo::Google requires the google_drive gem"
 end
 
 class GoogleHTTPError < RuntimeError; end
@@ -11,7 +11,7 @@ class GoogleWriteError < RuntimeError; end
 class Roo::Google < Roo::GenericSpreadsheet
   attr_accessor :date_format, :datetime_format
 
-  # Creates a new Google spreadsheet object.
+  # Creates a new Google Drive object.
   def initialize(spreadsheetkey, options = {})
     @spreadsheetkey = spreadsheetkey
     @user = options[:user] || ENV['GOOGLE_MAIL']
@@ -33,7 +33,7 @@ class Roo::Google < Roo::GenericSpreadsheet
     @datetime_format = '%d/%m/%Y %H:%M:%S'
     @time_format = '%H:%M:%S'
 
-    session = GoogleSpreadsheet.login(@user, @password)
+    session = GoogleDrive.login(@user, @password)
     @sheets = session.spreadsheet_by_key(@spreadsheetkey).worksheets.map do |sheet|
       sheet.title
     end
