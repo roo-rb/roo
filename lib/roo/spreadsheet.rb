@@ -5,13 +5,13 @@ module Roo
         file = File === file ? file.path : file
         case File.extname(file).downcase
         when '.xls'
-          Roo::Excel.new(file)
+          Roo::Excel.new(file, options)
         when '.xlsx'
-          Roo::Excelx.new(file)
+          Roo::Excelx.new(file, options)
         when '.ods'
-          Roo::OpenOffice.new(file)
+          Roo::OpenOffice.new(file, options)
         when '.xml'
-          Roo::Excel2003XML.new(file)
+          Roo::Excel2003XML.new(file, options)
         when ''
           Roo::Google.new(file, options)
         when '.csv'

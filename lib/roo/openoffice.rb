@@ -32,7 +32,18 @@ class Roo::OpenOffice < Roo::Base
 
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
-  def initialize(filename, packed=nil, file_warning=:error, tmpdir_root=nil)
+  def initialize(filename, options={}, deprecated_file_warning=:error, deprecated_tmpdir_root=nil)
+    if Hash === options
+      packed = options[:packed]
+      file_warning = options[:file_warning] || :error
+      tmpdir_root = options[:tmpdir_root]
+    else
+      warn 'Supplying `packed`, `file_warning`, or `tmpdir_root` as separate arguments to `Roo::OpenOffice.new` is deprected. Use an options hash instead.'
+      packed = options
+      file_warning = deprecated_file_warning
+      tmpdir_root = deprecated_tmpdir_root
+    end
+
     file_type_check(filename,'.ods','an Roo::OpenOffice', file_warning, packed)
     make_tmpdir(tmpdir_root) do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if uri?(filename)

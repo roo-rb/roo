@@ -6,7 +6,7 @@ describe Roo::Spreadsheet do
       let(:filename) { 'file.XLS' }
 
       it 'loads the proper type' do
-        Roo::Excel.should_receive(:new).with(filename)
+        Roo::Excel.should_receive(:new).with(filename, {})
         Roo::Spreadsheet.open(filename)
       end
     end

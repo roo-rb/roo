@@ -14,7 +14,16 @@ class Roo::Excel < Roo::Base
 
   # Creates a new Excel spreadsheet object.
   # Parameter packed: :zip - File is a zip-file
-  def initialize(filename, packed = nil, file_warning = :error)
+  def initialize(filename, options = {}, deprecated_file_warning = :error)
+    if Hash === options
+      packed = options[:packed]
+      file_warning = options[:file_warning] || :error
+    else
+      warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excel.new` is deprected. Use an options hash instead.'
+      packed = options
+      file_warning = deprecated_file_warning
+    end
+
     file_type_check(filename,'.xls','an Excel', file_warning, packed)
     make_tmpdir do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if uri?(filename)
