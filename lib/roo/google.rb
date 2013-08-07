@@ -34,11 +34,9 @@ class Roo::Google < Roo::GenericSpreadsheet
     @time_format = '%H:%M:%S'
 
     session = GoogleDrive.login(@user, @password)
-    @sheets = session.spreadsheet_by_key(@spreadsheetkey).worksheets.map do |sheet|
-      sheet.title
-    end
-    @default_sheet = sheets.first
     @worksheets = session.spreadsheet_by_key(@spreadsheetkey).worksheets
+    @sheets = @worksheets.map {|sheet| sheet.title }
+    @default_sheet = sheets.first
   end
 
   # returns an array of sheet names in the spreadsheet
