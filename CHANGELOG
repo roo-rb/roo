@@ -9,6 +9,8 @@
   * Add Roo::Excelx#load_xml so that people can customize to their data, e.g. https://github.com/Empact/roo/pull/23
   * Enable passing csv_options to Roo::Csv, which are passed through to the underlying CSV call.
   * Enable passing options through from Roo::Spreadsheet to any Roo type.
+  * Enable passing an :extension option to Roo::Spreadsheet.new, which will override
+  the extension detected on in the path https://github.com/Empact/roo/pull/15
   * Switch from google-spreadsheet-ruby to google_drive for Roo::Google access https://github.com/Empact/roo/pull/40
 
 * 1 bugfix

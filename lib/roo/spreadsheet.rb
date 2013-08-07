@@ -4,8 +4,13 @@ module Roo
       def open(file, options = {})
         file = File === file ? file.path : file
 
-        extension = options[:extension] ? ".#{options[:extension]}" : File.extname(file)
-        options[:file_warning] = options[:extension] ? :ignore : :error
+        extension =
+          if options[:extension]
+            options[:file_warning] = :ignore
+            ".#{options[:extension]}"
+          else
+            File.extname(file)
+          end
 
         case extension.downcase
         when '.xls'
