@@ -514,10 +514,10 @@ class Roo::GenericSpreadsheet
 
   def file_type_check(filename, ext, name, warning_level, packed=nil)
     new_expression = {
-      '.ods' => 'Roo::Openoffice.new',
+      '.ods' => 'Roo::OpenOffice.new',
       '.xls' => 'Roo::Excel.new',
       '.xlsx' => 'Roo::Excelx.new',
-      '.csv' => 'Roo::Csv.new',
+      '.csv' => 'Roo::CSV.new',
       '.xml' => 'Roo::Excel2003XML.new',
     }
     if packed == :zip

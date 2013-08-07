@@ -17,7 +17,7 @@ describe Roo::Spreadsheet do
 
       context 'with options' do
         it 'passes the options through' do
-          Roo::Csv.should_receive(:new).with(filename, options)
+          Roo::CSV.should_receive(:new).with(filename, options)
           Roo::Spreadsheet.open(filename, options)
         end
       end

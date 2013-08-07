@@ -3,7 +3,7 @@ require 'date'
 require 'nokogiri'
 require 'cgi'
 require 'pp' #TODO
-class Roo::Openoffice < Roo::GenericSpreadsheet
+class Roo::OpenOffice < Roo::GenericSpreadsheet
 
   class << self
     def extract_content(tmpdir, filename)
@@ -33,7 +33,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
   def initialize(filename, packed=nil, file_warning=:error, tmpdir_root=nil)
-    file_type_check(filename,'.ods','an Roo::Openoffice', file_warning, packed)
+    file_type_check(filename,'.ods','an Roo::OpenOffice', file_warning, packed)
     make_tmpdir(tmpdir_root) do |tmpdir|
       filename = open_from_uri(filename, tmpdir) if uri?(filename)
       filename = unzip(filename, tmpdir) if packed == :zip
@@ -187,7 +187,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
     return_sheets
   end
 
-  # version of the Roo::Openoffice document
+  # version of the Roo::OpenOffice document
   # at 2007 this is always "1.0"
   def officeversion
     oo_version
@@ -277,7 +277,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   def set_cell_values(sheet,x,y,i,v,value_type,formula,table_cell,str_v,style_name)
     key = [y,x+i]
     @cell_type[sheet] = {} unless @cell_type[sheet]
-    @cell_type[sheet][key] = Roo::Openoffice.oo_type_2_roo_type(value_type)
+    @cell_type[sheet][key] = Roo::OpenOffice.oo_type_2_roo_type(value_type)
     @formula[sheet] = {} unless @formula[sheet]
     if formula
       ['of:', 'oooc:'].each do |prefix|
@@ -437,7 +437,7 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   end
 
   # Only calls read_cells because Roo::GenericSpreadsheet calls read_comments
-  # whereas the reading of comments is done in read_cells for Roo::Openoffice-objects
+  # whereas the reading of comments is done in read_cells for Roo::OpenOffice-objects
   def read_comments(sheet=nil)
     read_cells(sheet)
   end
@@ -456,12 +456,12 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
   end
 
   def read_styles(style_elements)
-    @style_definitions['Default'] = Roo::Openoffice::Font.new
+    @style_definitions['Default'] = Roo::OpenOffice::Font.new
     style_elements.each do |style|
       next unless style.name == 'style'
       style_name = attr(style,'name')
       style.each do |properties|
-        font = Roo::Openoffice::Font.new
+        font = Roo::OpenOffice::Font.new
         font.bold = attr(properties,'font-weight')
         font.italic = attr(properties,'font-style')
         font.underline = attr(properties,'text-underline-style')
@@ -515,6 +515,6 @@ class Roo::Openoffice < Roo::GenericSpreadsheet
 
 end # class
 
-# Libreoffice is just an alias for Roo::Openoffice class
-class Roo::Libreoffice < Roo::Openoffice
+# LibreOffice is just an alias for Roo::OpenOffice class
+class Roo::LibreOffice < Roo::OpenOffice
 end

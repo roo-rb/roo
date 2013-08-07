@@ -1,12 +1,12 @@
 require 'spec_helper'
 
-describe Roo::Csv do
+describe Roo::CSV do
   let(:path) { 'test/files/csvtypes.csv' }
-  let(:csv) { Roo::Csv.new(path) }
+  let(:csv) { Roo::CSV.new(path) }
 
   describe '.new' do
     it 'creates an instance' do
-      expect(csv).to be_a(Roo::Csv)
+      expect(csv).to be_a(Roo::CSV)
     end
   end
 
@@ -33,16 +33,22 @@ describe Roo::Csv do
       }
 
       it 'returns the csv options' do
-        csv = Roo::Csv.new(path, csv_options: options)
+        csv = Roo::CSV.new(path, csv_options: options)
         csv.csv_options.should == options
       end
     end
 
     context 'when created without the csv_options option' do
       it 'returns a hash' do
-        csv = Roo::Csv.new(path)
+        csv = Roo::CSV.new(path)
         csv.csv_options.should == {}
       end
     end
+  end
+end
+
+describe Roo::Csv do
+  it 'is an alias of LibreOffice' do
+    expect(Roo::Csv).to eq(Roo::CSV)
   end
 end

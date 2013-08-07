@@ -9,13 +9,13 @@ module Roo
         when '.xlsx'
           Roo::Excelx.new(file)
         when '.ods'
-          Roo::Openoffice.new(file)
+          Roo::OpenOffice.new(file)
         when '.xml'
           Roo::Excel2003XML.new(file)
         when ''
           Roo::Google.new(file, options)
         when '.csv'
-          Roo::Csv.new(file, options)
+          Roo::CSV.new(file, options)
         else
           raise ArgumentError, "Don't know how to open file #{file}"
         end

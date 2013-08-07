@@ -1,17 +1,17 @@
 require 'csv'
 require 'time'
 
-# The Csv class can read csv files (must be separated with commas) which then
+# The CSV class can read csv files (must be separated with commas) which then
 # can be handled like spreadsheets. This means you can access cells like A5
 # within these files.
-# The Csv class provides only string objects. If you want conversions to other
+# The CSV class provides only string objects. If you want conversions to other
 # types you have to do it yourself.
 #
 # You can pass options to the underlying CSV parse operation, via the
 # :csv_options option.
 #
 
-class Roo::Csv < Roo::GenericSpreadsheet
+class Roo::CSV < Roo::GenericSpreadsheet
   def initialize(filename, options = {})
     @filename = filename
     @options = options
@@ -27,7 +27,7 @@ class Roo::Csv < Roo::GenericSpreadsheet
 
   attr_reader :filename
 
-  # Returns an array with the names of the sheets. In Csv class there is only
+  # Returns an array with the names of the sheets. In CSV class there is only
   # one dummy sheet, because a csv file cannot have more than one sheet.
   def sheets
     ['default']
@@ -122,4 +122,4 @@ class Roo::Csv < Roo::GenericSpreadsheet
       @last_column[sheet] -= 1
     end
   end
-end # class Csv
+end
