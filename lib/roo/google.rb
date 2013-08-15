@@ -9,14 +9,20 @@ class Roo::Google < Roo::Base
 
   # Creates a new Google Drive object.
   def initialize(spreadsheet_key, options = {})
+    @filename = spreadsheet_key
     @user = options[:user] || ENV['GOOGLE_MAIL']
     @password = options[:password] || ENV['GOOGLE_PASSWORD']
+    @access_token = options[:access_token] || ENV['GOOGLE_TOKEN']
 
-    warn "user not set" if !@user || @user.empty?
-    warn "password not set" if !@password || @password.empty?
+    session = if @user && @password
+                GoogleDrive.login(@user, @password)
+              elsif @access_token
+                GoogleDrive.login_with_oauth(@access_token)
+              else
+                warn 'set user and password or access token'
+              end
 
-    session = GoogleDrive.login(@user, @password)
-    @worksheets = session.spreadsheet_by_key(@filername).worksheets
+    @worksheets = session.spreadsheet_by_key(@filename).worksheets
     @sheets = @worksheets.map {|sheet| sheet.title }
     super
     @cell = Hash.new {|h,k| h[k]=Hash.new}
@@ -292,6 +298,6 @@ class Roo::Google < Roo::Base
   private
 
   def reinitialize
-    initialize(@filername, user: @user, password: @password)
+    initialize(@filename, user: @user, password: @password, access_token: @access_token)
   end
 end
