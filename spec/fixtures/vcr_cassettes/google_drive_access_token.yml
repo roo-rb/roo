@@ -1,0 +1,73 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://spreadsheets.google.com/feeds/worksheets/0AiokXJytm-hjdDhYbTNvZ3pDWm9oZm9yWURLX3ZoR2c/private/full
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Authorization:
+      - Bearer ya29.AHES6ZR1kGjlmlLJG9skjpO0IjzQ6qDohXwFJclzD7mHI9xa-cFzlg
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/atom+xml; charset=UTF-8
+      Expires:
+      - Thu, 15 Aug 2013 04:00:09 GMT
+      Date:
+      - Thu, 15 Aug 2013 04:00:09 GMT
+      Cache-Control:
+      - private, max-age=0, must-revalidate, no-transform
+      Vary:
+      - Accept, X-GData-Authorization, GData-Version
+      Gdata-Version:
+      - '1.0'
+      Last-Modified:
+      - Wed, 14 Aug 2013 23:58:45 GMT
+      Set-Cookie:
+      - NID=67=D_rMebxz1goCYPpOwOoQ0-aPMBQZeyMKudylvS2tIjwbMutBHnzJI57QMteOlIww8SWXXxkrak_-8SQ2RevOOV9ENC4we-6hR0LM_vRnbxPkAAqtkyaWtVgyNbCkAy4k;Domain=.google.com;Path=/;Expires=Fri,
+        14-Feb-2014 04:00:09 GMT;HttpOnly
+      P3p:
+      - CP="This is not a P3P policy! See http://www.google.com/support/accounts/bin/answer.py?hl=en&answer=151657
+        for more info."
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Server:
+      - GSE
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: <?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.org/2005/Atom'
+        xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/' xmlns:gs='http://schemas.google.com/spreadsheets/2006'><id>https://spreadsheets.google.com/feeds/worksheets/0AiokXJytm-hjdDhYbTNvZ3pDWm9oZm9yWURLX3ZoR2c/private/full</id><updated>2013-08-14T23:58:45.821Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#worksheet'/><title
+        type='text'>Test</title><link rel='alternate' type='text/html' href='https://spreadsheets.google.com/ccc?key=0AiokXJytm-hjdDhYbTNvZ3pDWm9oZm9yWURLX3ZoR2c'/><link
+        rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/worksheets/0AiokXJytm-hjdDhYbTNvZ3pDWm9oZm9yWURLX3ZoR2c/private/full'/><link
+        rel='http://schemas.google.com/g/2005#post' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/worksheets/0AiokXJytm-hjdDhYbTNvZ3pDWm9oZm9yWURLX3ZoR2c/private/full'/><link
+        rel='self' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/worksheets/0AiokXJytm-hjdDhYbTNvZ3pDWm9oZm9yWURLX3ZoR2c/private/full'/><author><name>cecillemanalang</name><email>cecillemanalang@gmail.com</email></author><openSearch:totalResults>1</openSearch:totalResults><openSearch:startIndex>1</openSearch:startIndex><entry><id>https://spreadsheets.google.com/feeds/worksheets/0AiokXJytm-hjdDhYbTNvZ3pDWm9oZm9yWURLX3ZoR2c/private/full/od6</id><updated>2013-08-14T23:58:45.821Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#worksheet'/><title
+        type='text'>Sheet1</title><content type='text'>Sheet1</content><link rel='http://schemas.google.com/spreadsheets/2006#listfeed'
+        type='application/atom+xml' href='https://spreadsheets.google.com/feeds/list/0AiokXJytm-hjdDhYbTNvZ3pDWm9oZm9yWURLX3ZoR2c/od6/private/full'/><link
+        rel='http://schemas.google.com/spreadsheets/2006#cellsfeed' type='application/atom+xml'
+        href='https://spreadsheets.google.com/feeds/cells/0AiokXJytm-hjdDhYbTNvZ3pDWm9oZm9yWURLX3ZoR2c/od6/private/full'/><link
+        rel='http://schemas.google.com/visualization/2008#visualizationApi' type='application/atom+xml'
+        href='https://spreadsheets.google.com/tq?key=0AiokXJytm-hjdDhYbTNvZ3pDWm9oZm9yWURLX3ZoR2c&amp;sheet=od6'/><link
+        rel='self' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/worksheets/0AiokXJytm-hjdDhYbTNvZ3pDWm9oZm9yWURLX3ZoR2c/private/full/od6'/><link
+        rel='edit' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/worksheets/0AiokXJytm-hjdDhYbTNvZ3pDWm9oZm9yWURLX3ZoR2c/private/full/od6/0'/><gs:rowCount>100</gs:rowCount><gs:colCount>20</gs:colCount></entry></feed>
+    http_version: 
+  recorded_at: Thu, 15 Aug 2013 04:00:09 GMT
+recorded_with: VCR 2.5.0
