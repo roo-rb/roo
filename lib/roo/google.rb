@@ -14,14 +14,6 @@ class Roo::Google < Roo::Base
     @password = options[:password] || ENV['GOOGLE_PASSWORD']
     @access_token = options[:access_token] || ENV['GOOGLE_TOKEN']
 
-    session = if @user && @password
-                GoogleDrive.login(@user, @password)
-              elsif @access_token
-                GoogleDrive.login_with_oauth(@access_token)
-              else
-                warn 'set user and password or access token'
-              end
-
     @worksheets = session.spreadsheet_by_key(@filename).worksheets
     @sheets = @worksheets.map {|sheet| sheet.title }
     super
@@ -299,5 +291,15 @@ class Roo::Google < Roo::Base
 
   def reinitialize
     initialize(@filename, user: @user, password: @password, access_token: @access_token)
+  end
+
+  def session
+    @session ||= if @user && @password
+                   GoogleDrive.login(@user, @password)
+                 elsif @access_token
+                   GoogleDrive.login_with_oauth(@access_token)
+                 else
+                   warn 'set user and password or access token'
+                 end
   end
 end
