@@ -70,10 +70,6 @@ s.font(1,1).italic?
 s.font(1,1).underline?
 
 
-see http://roo.rubyforge.org for a more complete tutorial
-
-# Fork Changelog / New Features
-
 # Spreadsheet.open can accept both files and paths
 
 xls = Roo::Spreadsheet.open('./new_prices.xls')
