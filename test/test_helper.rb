@@ -24,22 +24,6 @@ $log = Logger.new(LOG_FILE)
 $log.level = Logger::DEBUG
 
 DISPLAY_LOG = false
-DB_LOG = false
-
-if DB_LOG
-  require 'activerecord'
-
-  def activerecord_connect
-    ActiveRecord::Base.establish_connection(:adapter => "mysql",
-      :database => "test_runs",
-      :host => "localhost",
-      :username => "root",
-      :socket => "/var/run/mysqld/mysqld.sock")
-  end
-
-  class Testrun < ActiveRecord::Base
-  end
-end
 
 # helper method
 def local_only
@@ -132,41 +116,4 @@ class Test::Unit::TestCase
   def yaml_entry(row,col,type,value)
     "cell_#{row}_#{col}: \n  row: #{row} \n  col: #{col} \n  celltype: #{type} \n  value: #{value} \n"
   end
-
-  if DB_LOG
-    if ! (defined?(@connected) and @connected)
-      activerecord_connect
-    else
-      @connected = true
-    end
-  end
-  # alias unlogged_run run
-  # def run(result, &block)
-  #   t1 = Time.now
-  #   if DISPLAY_LOG
-  #       v1,v2,_ = RUBY_VERSION.split('.')
-  #       if v1.to_i > 1 or
-  #         (v1.to_i == 1 and v2.to_i > 8)
-  #         # Ruby 1.9.x
-  #       print "RUNNING #{self.class} #{self.__name__} \t#{Time.now.to_s}"
-  #       else
-  #         # Ruby < 1.9.x
-  #       print "RUNNING #{self.class} #{@method_name} \t#{Time.now.to_s}"
-  #       end
-  #     STDOUT.flush
-  #   end
-  #   unlogged_run result, &block
-  #   t2 = Time.now
-  #   if DISPLAY_LOG
-  #     puts "\t#{t2-t1} seconds"
-  #   end
-  #   if DB_LOG
-  #     Testrun.create(
-  #       :class_name => self.class.to_s,
-  #       :test_name => @method_name,
-  #       :start => t1,
-  #       :duration => t2-t1
-  #     )
-  #   end
-  # end
 end
