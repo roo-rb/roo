@@ -204,16 +204,12 @@ class TestRoo < Test::Unit::TestCase
       assert_raise(RangeError) { oo.celltype('C',5,"non existing sheet name")}
       assert_raise(RangeError) { oo.empty?('C',5,"non existing sheet name")}
       if oo.class == Roo::Excel
-        assert_raise(RuntimeError) { oo.formula?('C',5,"non existing sheet name")}
-        assert_raise(RuntimeError) { oo.formula('C',5,"non existing sheet name")}
+        assert_raise(NotImplementedError) { oo.formula?('C',5,"non existing sheet name")}
+        assert_raise(NotImplementedError) { oo.formula('C',5,"non existing sheet name")}
       else
         assert_raise(RangeError) { oo.formula?('C',5,"non existing sheet name")}
         assert_raise(RangeError) { oo.formula('C',5,"non existing sheet name")}
-        begin
-          assert_raise(RangeError) { oo.set('C',5,42,"non existing sheet name")}
-        rescue NameError
-          #
-        end
+        assert_raise(RangeError) { oo.set('C',5,42,"non existing sheet name")}
         assert_raise(RangeError) { oo.formulas("non existing sheet name")}
       end
       assert_raise(RangeError) { oo.to_yaml({},1,1,1,1,"non existing sheet name")}
@@ -884,9 +880,9 @@ class TestRoo < Test::Unit::TestCase
 
   def test_excel_does_not_support_formulas
     with_each_spreadsheet(:name=>'false_encoding', :format=>:excel) do |oo|
-      assert_raise(RuntimeError) { oo.formula('a',1) }
-      assert_raise(RuntimeError) { oo.formula?('a',1) }
-      assert_raise(RuntimeError) { oo.formulas(oo.sheets.first) }
+      assert_raise(NotImplementedError) { oo.formula('a',1) }
+      assert_raise(NotImplementedError) { oo.formula?('a',1) }
+      assert_raise(NotImplementedError) { oo.formulas(oo.sheets.first) }
     end
   end
 
