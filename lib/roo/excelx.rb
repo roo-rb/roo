@@ -326,12 +326,6 @@ class Roo::Excelx < Roo::Base
 
   private
 
-  def load_xml(path)
-    File.open(path) do |file|
-      Nokogiri::XML(file)
-    end
-  end
-
   # helper function to set the internal representation of cells
   def set_cell_values(sheet,x,y,i,v,value_type,formula,
       excelx_type=nil,

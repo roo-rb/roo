@@ -25,7 +25,7 @@ class Roo::Excel2003XML < Roo::Base
       unless File.file?(@filename)
         raise IOError, "file #{@filename} does not exist"
       end
-      @doc = Nokogiri::XML(open(@filename))
+      @doc = load_xml(@filename)
     end
     super(filename, options)
     @formula = Hash.new

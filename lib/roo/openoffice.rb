@@ -52,9 +52,7 @@ class Roo::OpenOffice < Roo::Base
         raise IOError, "file #{@filename} does not exist"
       end
       self.class.extract_content(tmpdir, @filename)
-      @doc = File.open(File.join(tmpdir, "roo_content.xml")) do |file|
-        Nokogiri::XML(file)
-      end
+      @doc = load_xml(File.join(tmpdir, "roo_content.xml"))
     end
     super(filename, options)
     @formula = Hash.new

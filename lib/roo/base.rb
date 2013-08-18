@@ -477,6 +477,12 @@ class Roo::Base
 
   protected
 
+  def load_xml(path)
+    File.open(path) do |file|
+      Nokogiri::XML(file)
+    end
+  end
+
   def file_type_check(filename, ext, name, warning_level, packed=nil)
     new_expression = {
       '.ods' => 'Roo::OpenOffice.new',

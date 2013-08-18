@@ -7,20 +7,21 @@
 
 * 3 enhancements
   * Add Roo::Excelx#load_xml so that people can customize to their data, e.g. https://github.com/Empact/roo/pull/23
-  * Enable passing csv_options to Roo::Csv, which are passed through to the underlying CSV call.
+  * Enable passing csv_options to Roo::CSV, which are passed through to the underlying CSV call.
   * Enable passing options through from Roo::Spreadsheet to any Roo type.
   * Enable passing an :extension option to Roo::Spreadsheet.new, which will override the extension detected on in the path https://github.com/Empact/roo/pull/15
   * Switch from google-spreadsheet-ruby to google_drive for Roo::Google access https://github.com/Empact/roo/pull/40
   * Make all the classes consistent in that #read_cells is only effective if the sheet has not been read.
   * Roo::Google supports login via oauth :access_token. https://github.com/Empact/roo/pull/61
   * Roo::Excel now exposes its Spreadsheet workbook via #workbook
+  * Pull #load_xml down into Roo::Base, and use it in Excel2003XML and OpenOffice.
 
 * 2 changes
   * #formula? now returns truthy or falsey, rather than true/false.
   * Base#longest_sheet was moved to Excel, as it only worked under Excel
 
 * 1 bugfix
-  * Fix that Roo::Csv#parse(headers: true) would blow up. https://github.com/Empact/roo/pull/37
+  * Fix that Roo::CSV#parse(headers: true) would blow up. https://github.com/Empact/roo/pull/37
 
 == 1.11.2 2013-04-10
 
