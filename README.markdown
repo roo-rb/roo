@@ -9,11 +9,16 @@ Google spreadsheets. It can handle
 * LibreOffice
 * CSV
 
-Using Roo to access Google spreadsheets requires you install the 'google-spreadsheet-ruby' gem separately.
+## Notes
 
-Unless the underlying 'spreadsheet' gem supports formulas there is no support
-for formulas in Roo for .xls files (you get the result of a formula in such a
-file but not the formula itself)
+### XLS
+
+There is no support for formulas in Roo for .xls files - you can get the result
+of a formula but not the formula itself.
+
+### Google Spreadsheet
+
+Using Roo to access Google spreadsheets requires you install the 'google-spreadsheet-ruby' gem separately.
 
 ## License
 
@@ -66,11 +71,11 @@ see http://roo.rubyforge.org for a more complete tutorial
 
     xls = Roo::Spreadsheet.open('./new_prices.xls')
 
-		# If the File.path or provided path string does not have an extension, you can optionally 
+		# If the File.path or provided path string does not have an extension, you can optionally
 		# provide one as a string or symbol
-		
+
 		xls = Roo::Spreadsheet.open('./rails_temp_upload', extension: :xls)
-		
+
     # no more setting xls.default_sheet, just use this
 
     xls.sheet('Info').row_count

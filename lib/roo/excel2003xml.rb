@@ -59,20 +59,9 @@ class Roo::Excel2003XML < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
-    if @formula[sheet][[row,col]] == nil
-      return nil
-    else
-      return @formula[sheet][[row,col]]["oooc:".length..-1]
-    end
+    @formula[sheet][[row,col]] && @formula[sheet][[row,col]]["oooc:".length..-1]
   end
-
-  # true, if there is a formula
-  def formula?(row,col,sheet=nil)
-    sheet ||= @default_sheet
-    read_cells(sheet)
-    row,col = normalize(row,col)
-    formula(row,col) != nil
-  end
+  alias_method :formula?, :formula
 
   class Font
     attr_accessor :bold, :italic, :underline

@@ -102,11 +102,7 @@ class Roo::Excel < Roo::Base
   def formula(row,col,sheet=nil)
     raise NotImplementedError, FORMULAS_MESSAGE
   end
-
-  # raises an exception because formulas are not supported for excel files
-  def formula?(row,col,sheet=nil)
-    raise NotImplementedError, FORMULAS_MESSAGE
-  end
+  alias_method :formula?, :formula
 
   # returns NO formulas in excel spreadsheets
   def formulas(sheet=nil)

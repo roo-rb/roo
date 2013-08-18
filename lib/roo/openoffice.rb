@@ -101,28 +101,9 @@ class Roo::OpenOffice < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
-    if @formula[sheet][[row,col]] == nil
-      return nil
-    else
-      # return @formula[sheet][[row,col]]["oooc:".length..-1]
-      # TODO:
-      #str = @formula[sheet][[row,col]]
-      #if str.include? ':'
-	      #return str[str.index(':')+1..-1]
-      #else
-	      #return str
-      #end
-      @formula[sheet][[row,col]]
-    end
+    @formula[sheet][[row,col]]
   end
-
-  # true, if there is a formula
-  def formula?(row,col,sheet=nil)
-    sheet ||= @default_sheet
-    read_cells(sheet)
-    row,col = normalize(row,col)
-    formula(row,col) != nil
-  end
+  alias_method :formula?, :formula
 
   # returns each formula in the selected sheet as an array of elements
   # [row, col, formula]

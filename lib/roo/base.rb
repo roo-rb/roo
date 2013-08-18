@@ -375,139 +375,112 @@ class Roo::Base
     end
   end
 
-=begin
-#TODO: hier entfernen
-  # returns each formula in the selected sheet as an array of elements
-  # [row, col, formula]
-  def formulas(sheet=nil)
-    theformulas = Array.new
-    sheet ||= @default_sheet
-    read_cells(sheet)
-    return theformulas unless first_row(sheet) # if there is no first row then
-    # there can't be formulas
-    first_row(sheet).upto(last_row(sheet)) {|row|
-      first_column(sheet).upto(last_column(sheet)) {|col|
-        if formula?(row,col,sheet)
-          theformulas << [row, col, formula(row,col,sheet)]
-        end
-      }
-    }
-    theformulas
+  # access different worksheets by calling spreadsheet.sheet(1)
+  # or spreadsheet.sheet('SHEETNAME')
+  def sheet(index,name=false)
+    @default_sheet = String === index ? index : self.sheets[index]
+    name ? [@default_sheet,self] : self
   end
-=end
 
-
-
-    # FestivalBobcats fork changes begin here
-
-
-
-    # access different worksheets by calling spreadsheet.sheet(1)
-    # or spreadsheet.sheet('SHEETNAME')
-    def sheet(index,name=false)
-      @default_sheet = String === index ? index : self.sheets[index]
-      name ? [@default_sheet,self] : self
+  # iterate through all worksheets of a document
+  def each_with_pagename
+    self.sheets.each do |s|
+      yield sheet(s,true)
     end
+  end
 
-    # iterate through all worksheets of a document
-    def each_with_pagename
-      self.sheets.each do |s|
-        yield sheet(s,true)
+  # by passing in headers as options, this method returns
+  # specific columns from your header assignment
+  # for example:
+  # xls.sheet('New Prices').parse(:upc => 'UPC', :price => 'Price') would return:
+  # [{:upc => 123456789012, :price => 35.42},..]
+
+  # the queries are matched with regex, so regex options can be passed in
+  # such as :price => '^(Cost|Price)'
+  # case insensitive by default
+
+
+  # by using the :header_search option, you can query for headers
+  # and return a hash of every row with the keys set to the header result
+  # for example:
+  # xls.sheet('New Prices').parse(:header_search => ['UPC*SKU','^Price*\sCost\s'])
+
+  # that example searches for a column titled either UPC or SKU and another
+  # column titled either Price or Cost (regex characters allowed)
+  # * is the wildcard character
+
+  # you can also pass in a :clean => true option to strip the sheet of
+  # odd unicode characters and white spaces around columns
+
+  def each(options={})
+    if options.empty?
+      1.upto(last_row) do |line|
+        yield row(line)
       end
-    end
+    else
+      if options[:clean]
+        options.delete(:clean)
+        @cleaned ||= {}
+        @cleaned[@default_sheet] || clean_sheet(@default_sheet)
+      end
 
-    # by passing in headers as options, this method returns
-    # specific columns from your header assignment
-    # for example:
-    # xls.sheet('New Prices').parse(:upc => 'UPC', :price => 'Price') would return:
-    # [{:upc => 123456789012, :price => 35.42},..]
-
-    # the queries are matched with regex, so regex options can be passed in
-    # such as :price => '^(Cost|Price)'
-    # case insensitive by default
-
-
-    # by using the :header_search option, you can query for headers
-    # and return a hash of every row with the keys set to the header result
-    # for example:
-    # xls.sheet('New Prices').parse(:header_search => ['UPC*SKU','^Price*\sCost\s'])
-
-    # that example searches for a column titled either UPC or SKU and another
-    # column titled either Price or Cost (regex characters allowed)
-    # * is the wildcard character
-
-    # you can also pass in a :clean => true option to strip the sheet of
-    # odd unicode characters and white spaces around columns
-
-    def each(options={})
-      if options.empty?
-        1.upto(last_row) do |line|
-          yield row(line)
-        end
+      if options[:header_search]
+        @headers = nil
+        @header_line = row_with(options[:header_search])
+      elsif [:first_row,true].include?(options[:headers])
+        @headers = []
+        row(first_row).each_with_index {|x,i| @headers << [x,i + 1]}
       else
-        if options[:clean]
-          options.delete(:clean)
-          @cleaned ||= {}
-          @cleaned[@default_sheet] || clean_sheet(@default_sheet)
-        end
+        set_headers(options)
+      end
 
-        if options[:header_search]
-          @headers = nil
-          @header_line = row_with(options[:header_search])
-        elsif [:first_row,true].include?(options[:headers])
-          @headers = []
-          row(first_row).each_with_index {|x,i| @headers << [x,i + 1]}
-        else
-          set_headers(options)
-        end
+      headers = @headers ||
+        Hash[(first_column..last_column).map do |col|
+          [cell(@header_line,col), col]
+        end]
 
-        headers = @headers ||
-          Hash[(first_column..last_column).map do |col|
-            [cell(@header_line,col), col]
-          end]
-
-        @header_line.upto(last_row) do |line|
-          yield(Hash[headers.map {|k,v| [k,cell(line,v)]}])
-        end
+      @header_line.upto(last_row) do |line|
+        yield(Hash[headers.map {|k,v| [k,cell(line,v)]}])
       end
     end
+  end
 
-    def parse(options={})
-      ary = []
-      if block_given?
-        each(options) {|row| ary << yield(row)}
-      else
-        each(options) {|row| ary << row}
+  def parse(options={})
+    ary = []
+    if block_given?
+      each(options) {|row| ary << yield(row)}
+    else
+      each(options) {|row| ary << row}
+    end
+    ary
+  end
+
+  def row_with(query,return_headers=false)
+    query.map! {|x| Array(x.split('*'))}
+    line_no = 0
+    each do |row|
+      line_no += 1
+      # makes sure headers is the first part of wildcard search for priority
+      # ex. if UPC and SKU exist for UPC*SKU search, UPC takes the cake
+      headers = query.map do |q|
+        q.map {|i| row.grep(/#{i}/i)[0]}.compact[0]
+      end.compact
+
+      if headers.length == query.length
+        @header_line = line_no
+        return return_headers ? headers : line_no
+      elsif line_no > 100
+        raise "Couldn't find header row."
       end
-      ary
     end
+  end
 
-    def row_with(query,return_headers=false)
-      query.map! {|x| Array(x.split('*'))}
-      line_no = 0
-      each do |row|
-        line_no += 1
-        # makes sure headers is the first part of wildcard search for priority
-        # ex. if UPC and SKU exist for UPC*SKU search, UPC takes the cake
-        headers = query.map do |q|
-          q.map {|i| row.grep(/#{i}/i)[0]}.compact[0]
-        end.compact
-
-        if headers.length == query.length
-          @header_line = line_no
-          return return_headers ? headers : line_no
-        elsif line_no > 100
-          raise "Couldn't find header row."
-        end
-      end
-    end
-
-    # this method lets you find the worksheet with the most data
-    def longest_sheet
-      sheet(@workbook.worksheets.inject {|m,o|
-        o.row_count > m.row_count ? o : m
-      }.name)
-    end
+  # this method lets you find the worksheet with the most data
+  def longest_sheet
+    sheet(@workbook.worksheets.inject {|m,o|
+      o.row_count > m.row_count ? o : m
+    }.name)
+  end
 
   protected
 

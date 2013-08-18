@@ -98,7 +98,7 @@ class Roo::Google < Roo::Base
     read_cells(sheet)
     row,col = normalize(row,col)
     if @formula.size > 0 && @formula[sheet]["#{row},#{col}"]
-      return :formula
+      :formula
     else
       @cell_type[sheet]["#{row},#{col}"]
     end
@@ -111,20 +111,9 @@ class Roo::Google < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
-    if @formula[sheet]["#{row},#{col}"] == nil
-      return nil
-    else
-      return @formula[sheet]["#{row},#{col}"]
-    end
+    @formula[sheet]["#{row},#{col}"] && @formula[sheet]["#{row},#{col}"]
   end
-
-  # true, if there is a formula
-  def formula?(row,col,sheet=nil)
-    sheet ||= @default_sheet
-    read_cells(sheet)
-    row,col = normalize(row,col)
-    formula(row,col) != nil
-  end
+  alias_method :formula?, :formula
 
   # true, if the cell is empty
   def empty?(row, col, sheet=nil)
