@@ -475,13 +475,6 @@ class Roo::Base
     end
   end
 
-  # this method lets you find the worksheet with the most data
-  def longest_sheet
-    sheet(@workbook.worksheets.inject {|m,o|
-      o.row_count > m.row_count ? o : m
-    }.name)
-  end
-
   protected
 
   def file_type_check(filename, ext, name, warning_level, packed=nil)

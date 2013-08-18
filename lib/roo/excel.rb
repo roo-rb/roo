@@ -49,6 +49,13 @@ class Roo::Excel < Roo::Base
     @workbook.worksheets.collect {|worksheet| normalize_string(worksheet.name)}
   end
 
+  # this method lets you find the worksheet with the most data
+  def longest_sheet
+    sheet(@workbook.worksheets.inject {|m,o|
+      o.row_count > m.row_count ? o : m
+    }.name)
+  end
+
   # returns the content of a cell. The upper left corner is (1,1) or ('A',1)
   def cell(row,col,sheet=nil)
     sheet ||= @default_sheet

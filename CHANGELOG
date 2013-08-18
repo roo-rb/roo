@@ -14,8 +14,9 @@
   * Make all the classes consistent in that #read_cells is only effective if the sheet has not been read.
   * Roo::Google supports login via oauth :access_token. https://github.com/Empact/roo/pull/61
 
-* 1 change
+* 2 changes
   * #formula? now returns truthy or falsey, rather than true/false.
+  * Base#longest_sheet was moved to Excel, as it only worked under Excel
 
 * 1 bugfix
   * Fix that Roo::Csv#parse(headers: true) would blow up. https://github.com/Empact/roo/pull/37
