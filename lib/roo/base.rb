@@ -608,19 +608,18 @@ class Roo::Base
 
   def open_from_uri(uri, tmpdir)
     require 'open-uri'
+    tempfilename = File.join(tmpdir, File.basename(uri))
     response = ''
     begin
-      open(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}") { |net|
-        response = net.read
-        tempfilename = File.join(tmpdir, File.basename(uri))
-        File.open(tempfilename,"wb") do |file|
-          file.write(response)
-        end
-      }
+      File.open(tempfilename,"wb") do |file|
+        open(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}") { |net|
+          file.write(net.read)
+        }
+      end
     rescue OpenURI::HTTPError
       raise "could not open #{uri}"
     end
-    File.join(tmpdir, File.basename(uri))
+    tempfilename
   end
 
   def open_from_stream(stream, tmpdir)
