@@ -97,10 +97,10 @@ class Roo::Excelx < Roo::Base
         @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
         read_styles(@styles_doc)
       end
-      @sheet_doc = @sheet_files.map do |item|
+      @sheet_doc = @sheet_files.compact.map do |item|
         load_xml(item)
       end
-      @comments_doc = @comments_files.map do |item|
+      @comments_doc = @comments_files.compact.map do |item|
         load_xml(item)
       end
     end
