@@ -34,7 +34,7 @@ Gem::Specification.new do |s|
     "lib/roo/excel.rb",
     "lib/roo/excel2003xml.rb",
     "lib/roo/excelx.rb",
-    "lib/roo/generic_spreadsheet.rb",
+    "lib/roo/base.rb",
     "lib/roo/google.rb",
     "lib/roo/openoffice.rb",
     "lib/roo/roo_rails_helper.rb",
