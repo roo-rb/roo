@@ -5,7 +5,7 @@
   * Enable Roo::Excel, Excel2003XML, Excelx, OpenOffice to accept an options hash, and deprecate the old method argument based approach to supplying them options
   * Roo's roo_rails_helper, aka the `spreadsheet` html-generating view method is currently deprecated with no replacement. If you find it helpful, tell http://github.com/Empact or extract it yourself.
 
-* 3 enhancements
+* 9 enhancements
   * Add Roo::Excelx#load_xml so that people can customize to their data, e.g. https://github.com/Empact/roo/pull/23
   * Enable passing csv_options to Roo::CSV, which are passed through to the underlying CSV call.
   * Enable passing options through from Roo::Spreadsheet to any Roo type.

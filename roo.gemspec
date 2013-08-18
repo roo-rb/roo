@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = "roo"
-  s.version = "1.11.2"
+  s.version = "1.12.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Thomas Preymesser", "Hugh McGowan", "Ben Woosley"]
@@ -14,8 +14,7 @@ Gem::Specification.new do |s|
   s.email = "ruby.ruby.ruby.roo@gmail.com"
   s.extra_rdoc_files = [
     "LICENSE",
-    "README.markdown",
-    "TODO"
+    "README.markdown"
   ]
   s.files = [
     "CHANGELOG",
@@ -24,7 +23,6 @@ Gem::Specification.new do |s|
     "LICENSE",
     "README.markdown",
     "Rakefile",
-    "TODO",
     "VERSION",
     "examples/roo_soap_client.rb",
     "examples/roo_soap_server.rb",
