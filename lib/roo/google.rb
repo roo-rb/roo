@@ -287,8 +287,6 @@ class Roo::Google < Roo::Base
     return rows.min, rows.max, cols.min, cols.max
   end
 
-  private
-
   def reinitialize
     initialize(@filename, user: @user, password: @password, access_token: @access_token)
   end

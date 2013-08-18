@@ -507,14 +507,11 @@ class Roo::OpenOffice < Roo::Base
     result
   end
 
-
-  private
   def attr(node, attr_name)
     if node.attributes[attr_name]
       node.attributes[attr_name].value
     end
   end
-
 end # class
 
 # LibreOffice is just an alias for Roo::OpenOffice class

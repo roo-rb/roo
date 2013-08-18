@@ -269,7 +269,6 @@ class Roo::Excel < Roo::Base
       false
     end
   end
-  private :date_or_time?
 
   # Read the date-time cell and convert to,
   # the date-time values for Roo
@@ -309,7 +308,6 @@ class Roo::Excel < Roo::Base
     end
     return value_type, value
   end
-  private :read_cell_date_or_time
 
   # Read the cell and based on the class,
   # return the values for Roo
@@ -328,6 +326,5 @@ class Roo::Excel < Roo::Base
     end # case
     return value_type, value
   end
-  private :read_cell
 
 end
