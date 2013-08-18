@@ -11,6 +11,8 @@ class Roo::Excel < Roo::Base
       false
     end
 
+  attr_reader :workbook
+
   # Creates a new Excel spreadsheet object.
   # Parameter packed: :zip - File is a zip-file
   def initialize(filename, options = {}, deprecated_file_warning = :error)

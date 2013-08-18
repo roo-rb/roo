@@ -13,6 +13,7 @@
   * Switch from google-spreadsheet-ruby to google_drive for Roo::Google access https://github.com/Empact/roo/pull/40
   * Make all the classes consistent in that #read_cells is only effective if the sheet has not been read.
   * Roo::Google supports login via oauth :access_token. https://github.com/Empact/roo/pull/61
+  * Roo::Excel now exposes its Spreadsheet workbook via #workbook
 
 * 2 changes
   * #formula? now returns truthy or falsey, rather than true/false.
