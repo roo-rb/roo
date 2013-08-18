@@ -39,10 +39,6 @@ class TestRoo < Test::Unit::TestCase
   ONLINE = false
   LONG_RUN = false
 
-  def test_internal_minutes
-    assert_equal 42*60, 42.minutes
-  end
-
   def fixture_filename(name, format)
     case format
     when :excel
