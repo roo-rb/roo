@@ -17,7 +17,7 @@ class Roo::Excel2003XML < Roo::Base
     end
 
     make_tmpdir do |tmpdir|
-      filename = open_from_uri(filename, tmpdir) if uri?(filename)
+      filename = download_uri(filename, tmpdir) if uri?(filename)
       filename = unzip(filename, tmpdir) if packed == :zip
 
       file_type_check(filename,'.xml','an Excel 2003 XML', file_warning)

@@ -44,7 +44,7 @@ class Roo::OpenOffice < Roo::Base
 
     file_type_check(filename,'.ods','an Roo::OpenOffice', file_warning, packed)
     make_tmpdir(tmpdir_root) do |tmpdir|
-      filename = open_from_uri(filename, tmpdir) if uri?(filename)
+      filename = download_uri(filename, tmpdir) if uri?(filename)
       filename = unzip(filename, tmpdir) if packed == :zip
       #TODO: @cells_read[:default] = false
       @filename = filename

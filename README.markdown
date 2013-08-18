@@ -33,7 +33,11 @@ s = Roo::Excel.new("myspreadsheet.xls")           # loads an Excel Spreadsheet
 s = Roo::Google.new("myspreadsheetkey_at_google") # loads a Google Spreadsheet
 s = Roo::Excelx.new("myspreadsheet.xlsx")         # loads an Excel Spreadsheet for Excel .xlsx files
 s = Roo::CSV.new("mycsv.csv")                     # loads a CSV file
-s = Roo::CSV.new("mytsv.tsv", csv_options: {col_sep: "\t"}) # loads a TSV file
+
+# You can use CSV to load TSV files, or files of a certain encoding by passing
+# in options under the :csv_options key
+s = Roo::CSV.new("mytsv.tsv", csv_options: {col_sep: "\t"}) # TSV
+s = Roo::CSV.new("mycsv.csv", csv_options: {encoding: Encoding::ISO_8859_1}) # csv with explicit encoding
 
 s.default_sheet = s.sheets.first             # first sheet in the spreadsheet file will be used
 

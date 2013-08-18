@@ -439,7 +439,7 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  def test_excel_open_from_uri_and_zipped
+  def test_excel_download_uri_and_zipped
     if EXCEL
       if ONLINE
         url = 'http://stiny-leonhard.de/bode-v1.xls.zip'
@@ -450,7 +450,7 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
-  def test_openoffice_open_from_uri_and_zipped
+  def test_openoffice_download_uri_and_zipped
     if OPENOFFICE
       if ONLINE
         url = 'http://spazioinwind.libero.it/s2/rata.ods.zip'
@@ -2052,7 +2052,7 @@ where the expected result is
     end
   end
 
-  def test_open_from_uri
+  def test_download_uri
     if ONLINE
       if OPENOFFICE
         assert_raises(RuntimeError) {
@@ -2072,7 +2072,7 @@ where the expected result is
     end
   end
 
-  def test_open_from_uri_with_query_string
+  def test_download_uri_with_query_string
     dir = File.expand_path("#{File.dirname __FILE__}/files")
     { xls:  [EXCEL,       Roo::Excel],
       xlsx: [EXCELX,      Roo::Excelx],
@@ -2203,7 +2203,7 @@ where the expected result is
 
   # We don't have the bode-v1.xlsx test file
   # #TODO: xlsx-Datei anpassen!
-  # def test_excelx_open_from_uri_and_zipped
+  # def test_excelx_download_uri_and_zipped
   #   #TODO: gezippte xlsx Datei online zum Testen suchen
   #   if EXCELX
   #     if ONLINE

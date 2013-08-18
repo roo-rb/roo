@@ -77,7 +77,7 @@ class Roo::Excelx < Roo::Base
 
     file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
     make_tmpdir do |tmpdir|
-      filename = open_from_uri(filename, tmpdir) if uri?(filename)
+      filename = download_uri(filename, tmpdir) if uri?(filename)
       filename = unzip(filename, tmpdir) if packed == :zip
       @filename = filename
       unless File.file?(@filename)

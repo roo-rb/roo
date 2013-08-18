@@ -57,15 +57,15 @@ class Roo::CSV < Roo::Base
     TYPE_MAP[value.class]
   end
 
-  def data
-    @data ||=
+  def each_row(options, &block)
+    if uri?(filename)
       make_tmpdir do |tmpdir|
-        File.open(
-          uri?(filename) ?
-            open_from_uri(filename, tmpdir) :
-            filename
-        ) { |f| f.read }
+        filename = download_uri(filename, tmpdir)
+        CSV.foreach(filename, options, &block)
       end
+    else
+      CSV.foreach(filename, options, &block)
+    end
   end
 
   def read_cells(sheet=nil)
@@ -76,7 +76,7 @@ class Roo::CSV < Roo::Base
     @first_column[sheet] = 1
     @last_column[sheet] = 1
     rownum = 1
-    CSV.parse data, csv_options do |row|
+    each_row csv_options do |row|
       row.each_with_index do |elem,i|
         @cell[[rownum,i+1]] = cell_postprocessing rownum,i+1, elem
         @cell_type[[rownum,i+1]] = celltype_class @cell[[rownum,i+1]]

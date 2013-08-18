@@ -606,7 +606,7 @@ class Roo::Base
     filename.start_with?("http://", "https://")
   end
 
-  def open_from_uri(uri, tmpdir)
+  def download_uri(uri, tmpdir)
     require 'open-uri'
     tempfilename = File.join(tmpdir, File.basename(uri))
     response = ''
