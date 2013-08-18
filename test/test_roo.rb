@@ -52,7 +52,7 @@ class TestRoo < Test::Unit::TestCase
     when :openoffice, :libreoffice
       "#{name}.ods"
     when :google
-      key_of(name) || name
+      key_of(name)
     end
   end
 

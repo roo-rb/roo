@@ -79,7 +79,7 @@ end
 
 class Test::Unit::TestCase
   def key_of(spreadsheetname)
-    return {
+    {
       #'formula' => 'rt4Pw1WmjxFtyfrqqy94wPw',
       'formula' => 'o10837434939102457526.3022866619437760118',
       #"write.me" => 'r6m7HFlUOwst0RTUTuhQ0Ow',
@@ -99,7 +99,6 @@ class Test::Unit::TestCase
       'datetime' => "ptu6bbahNZpYQEtZwzL_dZQ",
       'whitespace' => "rZyQaoFebVGeHKzjG6e9gRQ",
       'matrix' => '0AkCuGANLc3jFdHY3cWtYUkM4bVdadjZ5VGpfTzFEUEE',
-    }[spreadsheetname]
     # 'numbers1' => "o10837434939102457526.4784396906364855777",
     # 'borders' => "o10837434939102457526.664868920231926255",
     # 'simple_spreadsheet' => "ptu6bbahNZpYe-L1vEBmgGA",
@@ -109,7 +108,8 @@ class Test::Unit::TestCase
     # 'formula' => 'o10837434939102457526.3022866619437760118',
     # 'time-test' => 'ptu6bbahNZpYBMhk01UfXSg',
     # 'datetime' => "ptu6bbahNZpYQEtZwzL_dZQ",
-  rescue
+    }.fetch(spreadsheetname)
+  rescue KeyError
     raise "unknown spreadsheetname: #{spreadsheetname}"
   end
 
