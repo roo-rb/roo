@@ -1,7 +1,5 @@
-require 'fileutils'
 require 'date'
 require 'base64'
-require 'cgi'
 require 'nokogiri'
 
 class Roo::Excel2003XML < Roo::Base

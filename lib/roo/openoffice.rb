@@ -1,10 +1,8 @@
-require 'fileutils'
 require 'date'
 require 'nokogiri'
 require 'cgi'
-require 'pp' #TODO
-class Roo::OpenOffice < Roo::Base
 
+class Roo::OpenOffice < Roo::Base
   class << self
     def extract_content(tmpdir, filename)
       Zip::ZipFile.open(filename) do |zip|

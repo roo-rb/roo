@@ -1,6 +1,4 @@
 require 'spreadsheet'
-#require 'lib/roo/generic_spreadsheet'
-#require 'parseexcel'
 
 # Class for handling Excel-Spreadsheets
 class Roo::Excel < Roo::Base
