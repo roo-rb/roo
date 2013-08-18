@@ -30,8 +30,10 @@ require 'roo'
 
 s = Roo::OpenOffice.new("myspreadsheet.ods")      # loads an OpenOffice Spreadsheet
 s = Roo::Excel.new("myspreadsheet.xls")           # loads an Excel Spreadsheet
-s = Roo::Google.new("myspreadsheetkey_at_google") # loads an Google Spreadsheet
+s = Roo::Google.new("myspreadsheetkey_at_google") # loads a Google Spreadsheet
 s = Roo::Excelx.new("myspreadsheet.xlsx")         # loads an Excel Spreadsheet for Excel .xlsx files
+s = Roo::CSV.new("mycsv.csv")                     # loads a CSV file
+s = Roo::CSV.new("mytsv.tsv", csv_options: {col_sep: "\t"}) # loads a TSV file
 
 s.default_sheet = s.sheets.first             # first sheet in the spreadsheet file will be used
 
