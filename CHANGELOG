@@ -1,4 +1,4 @@
-== Unreleased
+== 1.12.1 2013-08-18
 
 * 1 enhancement
   * Support :boolean fields for CSV export via #cell_to_csv. #59

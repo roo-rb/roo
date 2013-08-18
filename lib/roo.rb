@@ -1,6 +1,6 @@
 module Roo
 
-  VERSION = '1.12.0'
+  VERSION = '1.12.1'
 
   def self.const_missing(const_name)
     case const_name
