@@ -2249,4 +2249,11 @@ where the expected result is
     parsed = oo.parse(:headers => true)
     assert_equal headers, parsed[1].keys
   end
+
+  def test_bug_numbered_sheet_names
+    with_each_spreadsheet(:name=>'bug-numbered-sheet-names', :format=>:excelx) do |oo|
+      assert_nothing_raised() { oo.each_with_pagename { } }
+    end
+  end
+
 end # class
