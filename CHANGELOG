@@ -12,6 +12,7 @@
   * Enable passing an :extension option to Roo::Spreadsheet.new, which will override the extension detected on in the path https://github.com/Empact/roo/pull/15
   * Switch from google-spreadsheet-ruby to google_drive for Roo::Google access https://github.com/Empact/roo/pull/40
   * Make all the classes consistent in that #read_cells is only effective if the sheet has not been read.
+  * Roo::Google supports login via oauth :access_token. https://github.com/Empact/roo/pull/61
 
 * 1 bugfix
   * Fix that Roo::Csv#parse(headers: true) would blow up. https://github.com/Empact/roo/pull/37
