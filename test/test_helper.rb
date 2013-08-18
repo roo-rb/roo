@@ -25,13 +25,6 @@ $log.level = Logger::DEBUG
 
 DISPLAY_LOG = false
 
-# helper method
-def local_only
-  if ENV["roo_local"] == "thomas-p"
-    yield
-  end
-end
-
 # very simple diff implementation
 # output is an empty string if the files are equal
 # otherwise differences a printen (not compatible to
