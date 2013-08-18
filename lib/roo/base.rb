@@ -732,6 +732,8 @@ class Roo::Base
         unless onecell.empty?
           %{"#{onecell.gsub(/"/,'""')}"}
         end
+      when :boolean
+        %{"#{onecell.gsub(/"/,'""').downcase}"}
       when :float, :percentage
         if onecell == onecell.to_i
           onecell.to_i.to_s
