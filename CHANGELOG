@@ -4,7 +4,6 @@
   * Rename Openoffice -> OpenOffice, Libreoffice -> LibreOffice, Csv -> CSV, and redirect the old names to the new constants
   * Enable Roo::Excel, Excel2003XML, Excelx, OpenOffice to accept an options hash, and deprecate the old method argument based approach to supplying them options
   * Roo's roo_rails_helper, aka the `spreadsheet` html-generating view method is currently deprecated with no replacement. If you find it helpful, tell http://github.com/Empact or extract it yourself.
-  * Remove Roo::Excel#formula, #forulas, #formula? outright, as they have always been placeholders
 
 * 3 enhancements
   * Add Roo::Excelx#load_xml so that people can customize to their data, e.g. https://github.com/Empact/roo/pull/23
