@@ -6,6 +6,7 @@
 * 1 bugfix
   * Fix that Excelx would error on files with gaps in the numbering of their
   internal sheet#.xml files. #58
+  * Fix that Base#info to preserve the original value of #default_sheet. #44
 
 == 1.12.0 2013-08-18
 

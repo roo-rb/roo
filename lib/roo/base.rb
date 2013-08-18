@@ -310,25 +310,27 @@ class Roo::Base
   # returns information of the spreadsheet document and all sheets within
   # this document.
   def info
-    result = "File: #{File.basename(@filename)}\n"+
-      "Number of sheets: #{sheets.size}\n"+
-      "Sheets: #{sheets.join(', ')}\n"
-    n = 1
-    sheets.each {|sheet|
-      self.default_sheet = sheet
-      result << "Sheet " + n.to_s + ":\n"
-      unless first_row
-        result << "  - empty -"
-      else
-        result << "  First row: #{first_row}\n"
-        result << "  Last row: #{last_row}\n"
-        result << "  First column: #{Roo::Base.number_to_letter(first_column)}\n"
-        result << "  Last column: #{Roo::Base.number_to_letter(last_column)}"
-      end
-      result << "\n" if sheet != sheets.last
-      n += 1
-    }
-    result
+    without_changing_default_sheet do
+      result = "File: #{File.basename(@filename)}\n"+
+        "Number of sheets: #{sheets.size}\n"+
+        "Sheets: #{sheets.join(', ')}\n"
+      n = 1
+      sheets.each {|sheet|
+        self.default_sheet = sheet
+        result << "Sheet " + n.to_s + ":\n"
+        unless first_row
+          result << "  - empty -"
+        else
+          result << "  First row: #{first_row}\n"
+          result << "  Last row: #{last_row}\n"
+          result << "  First column: #{Roo::Base.number_to_letter(first_column)}\n"
+          result << "  Last column: #{Roo::Base.number_to_letter(last_column)}"
+        end
+        result << "\n" if sheet != sheets.last
+        n += 1
+      }
+      result
+    end
   end
 
   # returns an XML representation of all sheets of a spreadsheet file
@@ -538,6 +540,13 @@ class Roo::Base
   end
 
   private
+
+  def without_changing_default_sheet
+    original_default_sheet = default_sheet
+    yield
+  ensure
+    self.default_sheet = original_default_sheet
+  end
 
   def reinitialize
     initialize(@filename)

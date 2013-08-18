@@ -943,6 +943,14 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
+  def test_info_doesnt_set_default_sheet
+    with_each_spreadsheet(:name=>'numbers1') do |oo|
+      oo.default_sheet = 'Sheet3'
+      oo.info
+      assert_equal 'Sheet3', oo.default_sheet
+    end
+  end
+
   def test_bug_excel_numbers1_sheet5_last_row
     with_each_spreadsheet(:name=>'numbers1', :format=>:excel) do |oo|
       oo.default_sheet = "Tabelle1"
