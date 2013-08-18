@@ -1,3 +1,0 @@
-- New parameter at #new specifying the name of the directory for the roo temporary files?
-- Current #parse(headers: true)'s first entry is a hash of the header row as both
-  keys and values. :-P
