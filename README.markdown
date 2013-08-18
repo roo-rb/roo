@@ -84,8 +84,8 @@ xls = Roo::Spreadsheet.open('./rails_temp_upload', extension: :xls)
 
 # no more setting xls.default_sheet, just use this
 
-xls.sheet('Info').row_count
-xls.sheet(0).row_count
+xls.sheet('Info').row(1)
+xls.sheet(0).row(1)
 
 # excel likes to create random "Data01" sheets for macros
 # use this to find the sheet with the most data to parse
@@ -94,8 +94,8 @@ xls.longest_sheet
 
 # this excel file has multiple worksheets, let's iterate through each of them and process
 
-xls.each_with_pagename do |name,sheet|
-puts sheet.row_count
+xls.each_with_pagename do |name, sheet|
+  p sheet.row(1)
 end
 
 # pull out a hash of exclusive column data (get rid of useless columns and save memory)
