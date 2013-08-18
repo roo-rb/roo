@@ -97,21 +97,6 @@ class Roo::Excel < Roo::Base
     end
   end
 
-  # returns NO formula in excel spreadsheets
-  def formula(row,col,sheet=nil)
-    wait_for_version_080
-  end
-
-  # raises an exception because formulas are not supported for excel files
-  def formula?(row,col,sheet=nil)
-    wait_for_version_080
-  end
-
-  # returns NO formulas in excel spreadsheets
-  def formulas(sheet=nil)
-    wait_for_version_080
-  end
-
   # Given a cell, return the cell's font
   def font(row, col, sheet=nil)
     sheet ||= @default_sheet
@@ -344,14 +329,5 @@ class Roo::Excel < Roo::Base
     return value_type, value
   end
   private :read_cell
-
-  def wait_for_version_080
-    if Spreadsheet::VERSION<='0.8.0'
-      raise 'Formulas are not supported for excel spreadsheets.' +
-        " We have to wait for the 0.8.0 version of the Spreadsheet gem (currently used version is #{Spreadsheet::VERSION})"
-    else
-      raise 'Thomas should implement formulas from Spreadsheet gem'
-    end
-  end
 
 end
