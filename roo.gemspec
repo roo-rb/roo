@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = "roo"
-  s.version = "1.11.2"
+  s.version = "1.11.2.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Thomas Preymesser", "Hugh McGowan", "Ben Woosley"]
@@ -30,11 +30,11 @@ Gem::Specification.new do |s|
     "examples/roo_soap_server.rb",
     "examples/write_me.rb",
     "lib/roo.rb",
+    "lib/roo/base.rb",
     "lib/roo/csv.rb",
     "lib/roo/excel.rb",
     "lib/roo/excel2003xml.rb",
     "lib/roo/excelx.rb",
-    "lib/roo/generic_spreadsheet.rb",
     "lib/roo/google.rb",
     "lib/roo/openoffice.rb",
     "lib/roo/roo_rails_helper.rb",
