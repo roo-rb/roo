@@ -36,7 +36,7 @@ class Roo::OpenOffice < Roo::Base
       file_warning = options[:file_warning] || :error
       tmpdir_root = options[:tmpdir_root]
     else
-      warn 'Supplying `packed`, `file_warning`, or `tmpdir_root` as separate arguments to `Roo::OpenOffice.new` is deprected. Use an options hash instead.'
+      warn 'Supplying `packed`, `file_warning`, or `tmpdir_root` as separate arguments to `Roo::OpenOffice.new` is deprecated. Use an options hash instead.'
       packed = options
       file_warning = deprecated_file_warning
       tmpdir_root = deprecated_tmpdir_root
