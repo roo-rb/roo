@@ -2,7 +2,7 @@
 
 require 'tmpdir'
 require 'stringio'
-require 'zip/zipfilesystem'
+require 'zip/filesystem'
 
 # Base class for all other types of spreadsheets
 class Roo::Base
@@ -674,7 +674,7 @@ class Roo::Base
   end
 
   def unzip(filename, tmpdir)
-    Zip::ZipFile.open(filename) do |zip|
+    Zip::File.open(filename) do |zip|
       process_zipfile_packed(zip, tmpdir)
     end
   end

@@ -521,7 +521,7 @@ Datei xl/comments1.xml
   # Extracts all needed files from the zip file
   def process_zipfile(tmpdir, zipfilename, zip, path='')
     @sheet_files = []
-    Zip::ZipFile.open(zipfilename) {|zf|
+    Zip::File.open(zipfilename) {|zf|
       zf.entries.each {|entry|
         if entry.to_s.end_with?('workbook.xml')
           open(tmpdir+'/'+'roo_workbook.xml','wb') {|f|
@@ -564,7 +564,7 @@ Datei xl/comments1.xml
 
   # extract files from the zip file
   def extract_content(tmpdir, zipfilename)
-    Zip::ZipFile.open(@filename) do |zip|
+    Zip::File.open(@filename) do |zip|
       process_zipfile(tmpdir, zipfilename,zip)
     end
   end
