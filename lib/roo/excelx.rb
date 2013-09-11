@@ -70,7 +70,7 @@ class Roo::Excelx < Roo::Base
       packed = options[:packed]
       file_warning = options[:file_warning] || :error
     else
-      warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excelx.new` is deprected. Use an options hash instead.'
+      warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excelx.new` is deprecated. Use an options hash instead.'
       packed = options
       file_warning = deprecated_file_warning
     end
