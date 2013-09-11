@@ -1,8 +1,9 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    addressable (2.3.2)
-    crack (0.3.1)
+    addressable (2.3.5)
+    crack (0.4.1)
+      safe_yaml (~> 0.9.0)
     diff-lcs (1.2.1)
     faraday (0.8.7)
       multipart-post (~> 1.1)
@@ -48,6 +49,7 @@ GEM
     rspec-mocks (2.13.0)
     ruby-ole (1.2.11.6)
     rubyzip (1.0.0)
+    safe_yaml (0.9.4)
     shoulda (3.0.1)
       shoulda-context (~> 1.0.0)
       shoulda-matchers (~> 1.0.0)
@@ -56,9 +58,9 @@ GEM
     spreadsheet (0.8.2)
       ruby-ole (>= 1.0)
     vcr (2.5.0)
-    webmock (1.9.0)
+    webmock (1.13.0)
       addressable (>= 2.2.7)
-      crack (>= 0.1.7)
+      crack (>= 0.3.2)
 
 PLATFORMS
   java
@@ -69,7 +71,7 @@ DEPENDENCIES
   jeweler
   nokogiri
   rspec
-  rubyzip
+  rubyzip (>= 1.0.0)
   shoulda
   spreadsheet (> 0.6.4)
   vcr
