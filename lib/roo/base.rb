@@ -2,7 +2,15 @@
 
 require 'tmpdir'
 require 'stringio'
-require 'zip/filesystem'
+
+begin
+  require 'zip/zipfilesystem'
+  Roo::ZipFile = Zip::ZipFile
+rescue LoadError
+  # For rubyzip >= 1.0.0
+  require 'zip/filesystem'
+  Roo::ZipFile = Zip::File
+end
 
 # Base class for all other types of spreadsheets
 class Roo::Base
@@ -674,7 +682,7 @@ class Roo::Base
   end
 
   def unzip(filename, tmpdir)
-    Zip::File.open(filename) do |zip|
+    Roo::ZipFile.open(filename) do |zip|
       process_zipfile_packed(zip, tmpdir)
     end
   end

@@ -71,7 +71,7 @@ DEPENDENCIES
   jeweler
   nokogiri
   rspec
-  rubyzip (>= 1.0.0)
+  rubyzip
   shoulda
   spreadsheet (> 0.6.4)
   vcr

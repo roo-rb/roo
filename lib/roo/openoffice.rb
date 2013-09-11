@@ -5,7 +5,7 @@ require 'cgi'
 class Roo::OpenOffice < Roo::Base
   class << self
     def extract_content(tmpdir, filename)
-      Zip::File.open(filename) do |zip|
+      Roo::ZipFile.open(filename) do |zip|
         process_zipfile(tmpdir, zip)
       end
     end

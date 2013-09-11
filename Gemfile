@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 
 gem 'spreadsheet', '> 0.6.4'
 gem 'nokogiri'
-gem 'rubyzip', '>= 1.0.0'
+gem 'rubyzip'
 
 group :development do
   gem 'google_drive'
