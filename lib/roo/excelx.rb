@@ -324,6 +324,28 @@ class Roo::Excelx < Roo::Base
     end
   end
 
+  def each_row(options = {})
+    sheet = options[:sheet] || @default_sheet
+    @sheet_doc[sheet.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row").each do |row|
+      yield row if block_given?
+    end
+  end
+
+  def cells_for_row(row, options = {})
+    cells = []
+    row.children.each do |cell|
+      cells << parse_cell(cell, options)
+    end
+    cells
+  end
+
+  def cells_for_row_at_index(row_idx, options = {})
+    sheet = options[:sheet] || @default_sheet
+    rows = @sheet_doc[sheet.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row")
+    row = rows[row_idx]
+    cells_for_row(row, options)
+  end
+
   private
 
   # helper function to set the internal representation of cells
@@ -362,6 +384,30 @@ class Roo::Excelx < Roo::Base
     @s_attribute[sheet][key] = s_attribute
   end
 
+  class Cell
+    attr_accessor :coordinate, :value, :excelx_value, :excelx_type, :s_attribute, :formula, :type, :sheet
+
+    def initialize(coordinate, value, options)
+      @coordinate = coordinate
+      @value =  value
+      @excelx_value = options[:excelx_value]
+      @excelx_type = options[:excelx_type]
+      @s_attribute = options[:s_attribute]
+      @formula = options[:formula]
+      @type = options[:type]
+      @sheet = options[:sheet]
+    end
+
+    class Coordinate
+      attr_accessor :x, :y
+
+      def initialize(x, y)
+        @x = x
+        @y = y
+      end
+    end
+  end
+
   # read all cells in the selected sheet
   def read_cells(sheet=nil)
     sheet ||= @default_sheet
@@ -369,83 +415,9 @@ class Roo::Excelx < Roo::Base
     return if @cells_read[sheet]
 
     @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row/xmlns:c").each do |c|
-      s_attribute = c['s'].to_i   # should be here
-      # c: <c r="A5" s="2">
-      # <v>22606</v>
-      # </c>, format: , tmp_type: float
-      value_type =
-        case c['t']
-        when 's'
-          :shared
-        when 'b'
-          :boolean
-          # 2011-02-25 BEGIN
-        when 'str'
-          :string
-          # 2011-02-25 END
-          # 2011-09-15 BEGIN
-        when 'inlineStr'
-          :inlinestr
-          # 2011-09-15 END
-        else
-          format = attribute2format(s_attribute)
-          Format.to_type(format)
-        end
-      formula = nil
-      c.children.each do |cell|
-        case cell.name
-        when 'is'
-          cell.children.each do |is|
-            if is.name == 't'
-              inlinestr_content = is.content
-              value_type = :string
-              v = inlinestr_content
-              excelx_type = :string
-              y, x = Roo::Base.split_coordinate(c['r'])
-              excelx_value = inlinestr_content #cell.content
-              set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
-            end
-          end
-        when 'f'
-          formula = cell.content
-        when 'v'
-          if [:time, :datetime].include?(value_type) && cell.content.to_f >= 1.0
-            value_type =
-              if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001
-                :datetime
-              else
-                :date
-              end
-          end
-          excelx_type = [:numeric_or_formula,format.to_s]
-          excelx_value = cell.content
-          v =
-            case value_type
-            when :shared
-              value_type = :string
-              excelx_type = :string
-              @shared_table[cell.content.to_i]
-            when :boolean
-              (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
-            when :date
-              cell.content
-            when :time
-              cell.content
-            when :datetime
-              cell.content
-            when :formula
-              cell.content.to_f #TODO: !!!!
-            when :string
-              excelx_type = :string
-              cell.content
-            else
-              value_type = :float
-              cell.content
-            end
-          y, x = Roo::Base.split_coordinate(c['r'])
-          set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
-        end
-      end
+      cell = parse_cell(c, sheet: sheet)
+      set_cell_values(cell.sheet, cell.coordinate.x, cell.coordinate.y, 0, cell.value, cell.type,
+                      cell.formula, cell.excelx_type, cell.excelx_value, cell.s_attribute)
     end
     @cells_read[sheet] = true
     # begin comments
@@ -490,6 +462,98 @@ Datei xl/comments1.xml
     end
 =end
     #end comments
+  end
+
+  def parse_cell(cell_element, options)
+    s_attribute = cell_element['s'].to_i   # should be here
+   # c: <c r="A5" s="2">
+   # <v>22606</v>
+   # </c>, format: , tmp_type: float
+    value_type =
+        case cell_element['t']
+          when 's'
+            :shared
+          when 'b'
+            :boolean
+          # 2011-02-25 BEGIN
+          when 'str'
+            :string
+          # 2011-02-25 END
+          # 2011-09-15 BEGIN
+          when 'inlineStr'
+            :inlinestr
+          # 2011-09-15 END
+          else
+            format = attribute2format(s_attribute)
+            Format.to_type(format)
+        end
+    formula = nil
+    cell_element.children.each do |cell|
+      case cell.name
+        when 'is'
+          cell.children.each do |is|
+            if is.name == 't'
+              inlinestr_content = is.content
+              value_type = :string
+              v = inlinestr_content
+              excelx_type = :string
+              y, x = Roo::Base.split_coordinate(cell_element['r'])
+              excelx_value = inlinestr_content #cell.content
+              return Cell.new(Cell::Coordinate.new(x, y), v,
+                              excelx_value: excelx_value,
+                              excelx_type: excelx_type,
+                              formula: formula,
+                              type: value_type,
+                              s_attribute: s_attribute,
+                              sheet: options[:sheet])
+            end
+          end
+        when 'f'
+          formula = cell.content
+        when 'v'
+          if [:time, :datetime].include?(value_type) && cell.content.to_f >= 1.0
+            value_type =
+              if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001
+                :datetime
+              else
+                :date
+              end
+          end
+          excelx_type = [:numeric_or_formula,format.to_s]
+          excelx_value = cell.content
+          v =
+            case value_type
+            when :shared
+              value_type = :string
+              excelx_type = :string
+              @shared_table[cell.content.to_i]
+            when :boolean
+              (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
+            when :date
+              cell.content
+            when :time
+              cell.content
+            when :datetime
+              cell.content
+            when :formula
+              cell.content.to_f #TODO: !!!!
+            when :string
+              excelx_type = :string
+              cell.content
+            else
+              value_type = :float
+              cell.content
+            end
+          y, x = Roo::Base.split_coordinate(cell_element['r'])
+          return Cell.new(Cell::Coordinate.new(x, y), v,
+                          excelx_value: excelx_value,
+                          excelx_type: excelx_type,
+                          formula: formula,
+                          type: value_type,
+                          s_attribute: s_attribute,
+                          sheet: options[:sheet])
+      end
+    end
   end
 
   # Reads all comments from a sheet
