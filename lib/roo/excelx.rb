@@ -332,8 +332,7 @@ class Roo::Excelx < Roo::Base
   end
 
   def cells_for_row(row, options = {})
-    cells = []
-    row.children.each do |cell|
+    row.children.each_with_object(cells = []) do |cell|
       cells << parse_cell(cell, options)
     end
     cells
@@ -343,7 +342,7 @@ class Roo::Excelx < Roo::Base
     sheet = options[:sheet] || @default_sheet
     rows = @sheet_doc[sheet.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row")
     row = rows[row_idx]
-    cells_for_row(row, options)
+    cells_for_row(row, { sheet: sheet }.merge(options))
   end
 
   private
@@ -417,7 +416,7 @@ class Roo::Excelx < Roo::Base
     @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row/xmlns:c").each do |c|
       cell = parse_cell(c, sheet: sheet)
       set_cell_values(cell.sheet, cell.coordinate.x, cell.coordinate.y, 0, cell.value, cell.type,
-                      cell.formula, cell.excelx_type, cell.excelx_value, cell.s_attribute)
+                      cell.formula, cell.excelx_type, cell.excelx_value, cell.s_attribute) unless cell == 0
     end
     @cells_read[sheet] = true
     # begin comments
