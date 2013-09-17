@@ -324,6 +324,11 @@ class Roo::Excelx < Roo::Base
     end
   end
 
+  # pass a block to be performed on each row.
+  # this method does not require you to read
+  # all rows first.
+  # options[:sheet] can be used to specify a
+  # sheet other than the default
   def each_row(options = {})
     sheet = options[:sheet] || @default_sheet
     @sheet_doc[sheet.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row").each do |row|
@@ -331,13 +336,21 @@ class Roo::Excelx < Roo::Base
     end
   end
 
+  # fetch cells for a given row
+  # this method does not require you to read
+  # all rows first, empty cells will be padded with
+  # nil
   def cells_for_row(row, options = {})
+    return [] unless row.present?
     row.children.each_with_object(cells = []) do |cell|
       cells << parse_cell(cell, options)
     end
     cells
   end
 
+  # fetch cells for a row at a given index
+  # options[:sheet] can be used to specify a
+  # sheet other than the default
   def cells_for_row_at_index(row_idx, options = {})
     sheet = options[:sheet] || @default_sheet
     rows = @sheet_doc[sheet.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row")
@@ -383,6 +396,8 @@ class Roo::Excelx < Roo::Base
     @s_attribute[sheet][key] = s_attribute
   end
 
+  # internal cell model to help keep track of all of a cells
+  # associated values when being parsed, etc.
   class Cell
     attr_accessor :coordinate, :value, :excelx_value, :excelx_type, :s_attribute, :formula, :type, :sheet
 
@@ -416,7 +431,7 @@ class Roo::Excelx < Roo::Base
     @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row/xmlns:c").each do |c|
       cell = parse_cell(c, sheet: sheet)
       set_cell_values(cell.sheet, cell.coordinate.x, cell.coordinate.y, 0, cell.value, cell.type,
-                      cell.formula, cell.excelx_type, cell.excelx_value, cell.s_attribute) unless cell == 0
+                      cell.formula, cell.excelx_type, cell.excelx_value, cell.s_attribute) unless cell.nil?
     end
     @cells_read[sheet] = true
     # begin comments
@@ -463,6 +478,7 @@ Datei xl/comments1.xml
     #end comments
   end
 
+  # parse an individual cell xml element
   def parse_cell(cell_element, options)
     s_attribute = cell_element['s'].to_i   # should be here
    # c: <c r="A5" s="2">
@@ -553,6 +569,7 @@ Datei xl/comments1.xml
                           sheet: options[:sheet])
       end
     end
+    nil
   end
 
   # Reads all comments from a sheet
