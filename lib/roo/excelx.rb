@@ -262,12 +262,16 @@ class Roo::Excelx < Roo::Base
   # shows the internal representation of all cells
   # for debugging purposes
   # TODO: This is called everytime a file is loaded, which
-  # means read_cells(expensive) is always called immediatley. I suspect
+  # means read_cells(expensive) is always called immediately. I suspect
   # it should be off unless specifically needed for debug.
   def to_s(sheet=nil)
-    #sheet ||= @default_sheet
+    sheet ||= @default_sheet
     #read_cells(sheet)
-    #@cell[sheet].inspect
+    if cells_read[sheet]
+      @cell[sheet].inspect
+    else
+      super
+    end
   end
 
   # returns the row,col values of the labelled cell
