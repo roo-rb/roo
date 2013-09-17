@@ -91,17 +91,22 @@ class Roo::Excelx < Roo::Base
         @sharedstring_doc = load_xml(File.join(tmpdir, 'roo_sharedStrings.xml'))
         read_shared_strings(@sharedstring_doc)
       end
-      @styles_table = []
-      @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
-      if File.exist?(File.join(tmpdir, 'roo_styles.xml'))
-        @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
-        read_styles(@styles_doc)
-      end
-      @sheet_doc = @sheet_files.compact.map do |item|
-        load_xml(item)
-      end
-      @comments_doc = @comments_files.compact.map do |item|
-        load_xml(item)
+      if options[:minimal_load] == :true
+        warn ':minimal_load option will not load ANY sheets, comments, or styles into memory, do not use unless you are
+              ONLY interested in using each_row_streaming to iterate over a sheet and extract values for each row'
+      else
+        @styles_table = []
+        @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
+        if File.exist?(File.join(tmpdir, 'roo_styles.xml'))
+          @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
+          read_styles(@styles_doc)
+        end
+        @sheet_doc = @sheet_files.compact.map do |item|
+          load_xml(item)
+        end
+        @comments_doc = @comments_files.compact.map do |item|
+          load_xml(item)
+        end
       end
     end
     super(filename, options)
@@ -256,10 +261,13 @@ class Roo::Excelx < Roo::Base
 
   # shows the internal representation of all cells
   # for debugging purposes
+  # TODO: This is called everytime a file is loaded, which
+  # means read_cells(expensive) is always called immediatley. I suspect
+  # it should be off unless specifically needed for debug.
   def to_s(sheet=nil)
-    sheet ||= @default_sheet
-    read_cells(sheet)
-    @cell[sheet].inspect
+    #sheet ||= @default_sheet
+    #read_cells(sheet)
+    #@cell[sheet].inspect
   end
 
   # returns the row,col values of the labelled cell
@@ -324,38 +332,45 @@ class Roo::Excelx < Roo::Base
     end
   end
 
-  # pass a block to be performed on each row.
+  # Use this with initialize option, :minimal_load = :true
+  # To process large files which you do not wish
+  # to pull entirely into memory
+  #
+  # yields each row as array of Roo::Excelx::Cell objects
+  # to given block
+  #
+  # options[:sheet] can be used to specify a
+  # sheet other than the default
+  def each_row_streaming(options = {})
+    raise "Documents already loaded, streaming futile" if @sheet_doc
+    sheet = options[:sheet] || @default_sheet
+    sheet_idx = sheets.index(sheet)
+    make_tmpdir do |tmpdir|
+      file = extract_sheet_at_index(tmpdir, sheet_idx)
+      raise "Invalid sheet" unless File.exists?(file)
+      Nokogiri::XML::Reader(File.open(file)).each do |node|
+        next if node.name      != 'row'
+        next if node.node_type != Nokogiri::XML::Reader::TYPE_ELEMENT
+        yield cells_for_row_element(Nokogiri::XML(node.outer_xml).root) if block_given?
+      end
+    end
+  end
+
   # this method does not require you to read
-  # all rows first.
+  # all rows first. However, this does require
+  # row xml to be loaded.
+  # If you do not want to load the entire xml
+  # document into memory, try each_row_streaming
+  #
   # options[:sheet] can be used to specify a
   # sheet other than the default
   def each_row(options = {})
     sheet = options[:sheet] || @default_sheet
-    @sheet_doc[sheet.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row").each do |row|
-      yield row if block_given?
+    raise "Sheets not loaded! Do not use this interface with :minimal_load" if @sheet_files && !@sheet_doc
+    return unless @sheet_doc[sheets.index(sheet)]
+    @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row").each do |row|
+      yield cells_for_row_element(row) if block_given?
     end
-  end
-
-  # fetch cells for a given row
-  # this method does not require you to read
-  # all rows first, empty cells will be padded with
-  # nil
-  def cells_for_row(row, options = {})
-    return [] unless row.present?
-    row.children.each_with_object(cells = []) do |cell|
-      cells << parse_cell(cell, options)
-    end
-    cells
-  end
-
-  # fetch cells for a row at a given index
-  # options[:sheet] can be used to specify a
-  # sheet other than the default
-  def cells_for_row_at_index(row_idx, options = {})
-    sheet = options[:sheet] || @default_sheet
-    rows = @sheet_doc[sheet.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row")
-    row = rows[row_idx]
-    cells_for_row(row, { sheet: sheet }.merge(options))
   end
 
   private
@@ -401,7 +416,7 @@ class Roo::Excelx < Roo::Base
   class Cell
     attr_accessor :coordinate, :value, :excelx_value, :excelx_type, :s_attribute, :formula, :type, :sheet
 
-    def initialize(coordinate, value, options)
+    def initialize(coordinate, value, options = {})
       @coordinate = coordinate
       @value =  value
       @excelx_value = options[:excelx_value]
@@ -427,11 +442,11 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     validate_sheet!(sheet)
     return if @cells_read[sheet]
-
+    return unless @sheet_doc[sheets.index(sheet)]
     @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row/xmlns:c").each do |c|
       cell = parse_cell(c, sheet: sheet)
       set_cell_values(cell.sheet, cell.coordinate.x, cell.coordinate.y, 0, cell.value, cell.type,
-                      cell.formula, cell.excelx_type, cell.excelx_value, cell.s_attribute) unless cell.nil?
+                      cell.formula, cell.excelx_type, cell.excelx_value, cell.s_attribute) unless cell == 0
     end
     @cells_read[sheet] = true
     # begin comments
@@ -476,6 +491,15 @@ Datei xl/comments1.xml
     end
 =end
     #end comments
+  end
+
+  # fetch cells for a given row XML
+  def cells_for_row_element(row_element, options = {})
+    return [] unless row_element.present?
+    row_element.children.each_with_object(cells = []) do |cell|
+      cells << parse_cell(cell, options)
+    end
+    cells
   end
 
   # parse an individual cell xml element
@@ -569,7 +593,6 @@ Datei xl/comments1.xml
                           sheet: options[:sheet])
       end
     end
-    nil
   end
 
   # Reads all comments from a sheet
@@ -646,6 +669,21 @@ Datei xl/comments1.xml
   def extract_content(tmpdir, zipfilename)
     Roo::ZipFile.open(@filename) do |zip|
       process_zipfile(tmpdir, zipfilename,zip)
+    end
+  end
+
+  # extract single sheet and open it for parsing
+  def extract_sheet_at_index(tmpdir, idx)
+    Roo::ZipFile.open(@filename) do |zip|
+      Roo::ZipFile.open(@filename) do |zf|
+        zf.entries.each do |entry|
+          if entry.to_s.downcase =~ /sheet([#{idx+1}]+).xml$/
+            file_name = "roo_sheet#{idx}"
+            open(tmpdir+'/'+file_name,'wb') {|f| f << zip.read(entry) }
+            return File.join(tmpdir, file_name)
+          end
+        end
+      end
     end
   end
 
