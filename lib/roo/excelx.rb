@@ -91,16 +91,16 @@ class Roo::Excelx < Roo::Base
         @sharedstring_doc = load_xml(File.join(tmpdir, 'roo_sharedStrings.xml'))
         read_shared_strings(@sharedstring_doc)
       end
+      @styles_table = []
+      @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
+      if File.exist?(File.join(tmpdir, 'roo_styles.xml'))
+        @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
+        read_styles(@styles_doc)
+      end
       if options[:minimal_load] == :true
-        warn ':minimal_load option will not load ANY sheets, comments, or styles into memory, do not use unless you are
+        warn ':minimal_load option will not load ANY sheets, or comments into memory, do not use unless you are
               ONLY interested in using each_row_streaming to iterate over a sheet and extract values for each row'
       else
-        @styles_table = []
-        @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
-        if File.exist?(File.join(tmpdir, 'roo_styles.xml'))
-          @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
-          read_styles(@styles_doc)
-        end
         @sheet_doc = @sheet_files.compact.map do |item|
           load_xml(item)
         end
@@ -262,7 +262,7 @@ class Roo::Excelx < Roo::Base
   # shows the internal representation of all cells
   # for debugging purposes
   # TODO: This is called everytime a file is loaded, which
-  # means read_cells(expensive) is always called immediately. I suspect
+  # means read_cells(expensive) is always called immediately via XML parser. I suspect
   # it should be off unless specifically needed for debug.
   def to_s(sheet=nil)
     sheet ||= @default_sheet
@@ -349,6 +349,7 @@ class Roo::Excelx < Roo::Base
     raise "Documents already loaded, streaming futile" if @sheet_doc
     sheet = options[:sheet] || @default_sheet
     sheet_idx = sheets.index(sheet)
+    row_count = 0
     make_tmpdir do |tmpdir|
       file = extract_sheet_at_index(tmpdir, sheet_idx)
       raise "Invalid sheet" unless File.exists?(file)
@@ -356,6 +357,8 @@ class Roo::Excelx < Roo::Base
         next if node.name      != 'row'
         next if node.node_type != Nokogiri::XML::Reader::TYPE_ELEMENT
         yield cells_for_row_element(Nokogiri::XML(node.outer_xml).root) if block_given?
+        row_count += 1
+        break if row_count == options[:max_rows] + 1 # dont count header
       end
     end
   end
