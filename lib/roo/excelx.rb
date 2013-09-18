@@ -97,7 +97,7 @@ class Roo::Excelx < Roo::Base
         @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
         read_styles(@styles_doc)
       end
-      if options[:minimal_load] == :true
+      if options[:minimal_load] == true
         warn ':minimal_load option will not load ANY sheets, or comments into memory, do not use unless you are
               ONLY interested in using each_row_streaming to iterate over a sheet and extract values for each row'
       else
@@ -336,7 +336,7 @@ class Roo::Excelx < Roo::Base
     end
   end
 
-  # Use this with initialize option, :minimal_load = :true
+  # Use this with initialize option, :minimal_load == true
   # To process large files which you do not wish
   # to pull entirely into memory
   #
@@ -701,11 +701,10 @@ Datei xl/comments1.xml
     Roo::ZipFile.open(@filename) do |zip|
       Roo::ZipFile.open(@filename) do |zf|
         zf.entries.each do |entry|
-          if entry.to_s.downcase =~ /sheet([#{idx+1}]+).xml$/
-            file_name = "roo_sheet#{idx}"
-            open(tmpdir+'/'+file_name,'wb') {|f| f << zip.read(entry) }
-            return File.join(tmpdir, file_name)
-          end
+          next unless entry.to_s.downcase =~ /sheet([#{idx+1}]+).xml$/
+          file_name = "roo_sheet#{idx}"
+          open(tmpdir+'/'+file_name,'wb') {|f| f << zip.read(entry) }
+          return File.join(tmpdir, file_name)
         end
       end
     end
