@@ -267,7 +267,7 @@ class Roo::Excelx < Roo::Base
   def to_s(sheet=nil)
     sheet ||= @default_sheet
     #read_cells(sheet)
-    if cells_read[sheet]
+    if @cells_read[sheet]
       @cell[sheet].inspect
     else
       super
@@ -345,6 +345,10 @@ class Roo::Excelx < Roo::Base
   #
   # options[:sheet] can be used to specify a
   # sheet other than the default
+  # options[:max_rows] break when parsed max rows + 1 for header
+  # options[:pad_cells] can be used to track empty cells
+  # nil is inserted for each empty cell.
+  # Does not pad past the last present cell
   def each_row_streaming(options = {})
     raise "Documents already loaded, streaming futile" if @sheet_doc
     sheet = options[:sheet] || @default_sheet
@@ -356,9 +360,9 @@ class Roo::Excelx < Roo::Base
       Nokogiri::XML::Reader(File.open(file)).each do |node|
         next if node.name      != 'row'
         next if node.node_type != Nokogiri::XML::Reader::TYPE_ELEMENT
-        yield cells_for_row_element(Nokogiri::XML(node.outer_xml).root) if block_given?
+        yield cells_for_row_element(Nokogiri::XML(node.outer_xml).root, options) if block_given?
         row_count += 1
-        break if row_count == options[:max_rows] + 1 # dont count header
+        break if options[:max_rows] && row_count == options[:max_rows] + 1 # dont count header
       end
     end
   end
@@ -371,12 +375,15 @@ class Roo::Excelx < Roo::Base
   #
   # options[:sheet] can be used to specify a
   # sheet other than the default
+  # options[:pad_cells] can be used to track empty cells
+  # nil is inserted for each empty cell.
+  # Does not pad past the last present cell
   def each_row(options = {})
     sheet = options[:sheet] || @default_sheet
     raise "Sheets not loaded! Do not use this interface with :minimal_load" if @sheet_files && !@sheet_doc
     return unless @sheet_doc[sheets.index(sheet)]
     @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row").each do |row|
-      yield cells_for_row_element(row) if block_given?
+      yield cells_for_row_element(row, options) if block_given?
     end
   end
 
@@ -503,10 +510,20 @@ Datei xl/comments1.xml
   # fetch cells for a given row XML
   def cells_for_row_element(row_element, options = {})
     return [] unless row_element.present?
-    row_element.children.each_with_object(cells = []) do |cell|
-      cells << parse_cell(cell, options)
+    cell_col = 0
+    row_element.children.each_with_object(cells = []) do |cell_element|
+      cell = parse_cell(cell_element, options)
+      cells.concat(pad_cells(cell, cell_col)) if options[:pad_cells]
+      cells << cell
+      cell_col = cell.coordinate.x
     end
     cells
+  end
+
+  def pad_cells(cell, last_column)
+    pad = []
+    (cell.coordinate.x - 1 - last_column).times { pad << nil }
+    pad
   end
 
   # parse an individual cell xml element
