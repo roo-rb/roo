@@ -42,6 +42,14 @@ class Roo::Base
     return letter, number
   end
 
+  def self.cells_in_range(str)
+    cells = str.split(':')
+    raise "invalid range string: #{str}. Supported range format 'A1:B2'" if cells.count != 2
+    x1, y1 = split_coordinate(cells.first)
+    x2, y2 = split_coordinate(cells.second)
+    (x2 - (x1 - 1)) * (y2 - (y1 - 1))
+  end
+
 
   public
 

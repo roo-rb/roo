@@ -63,6 +63,8 @@ class Roo::Excelx < Roo::Base
     module_function :to_type
   end
 
+  class ExceedsMaxError < Exception; end
+
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
   def initialize(filename, options = {}, deprecated_file_warning = :error)
@@ -86,6 +88,8 @@ class Roo::Excelx < Roo::Base
       @comments_files = Array.new
       extract_content(tmpdir, @filename)
       @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml"))
+      cell_count = Roo::Base.cells_in_range(dimensions) if options[:cell_max]
+      raise ExceedsMaxError, "Excel file exceeds cell maximum: #{cell_count} > #{options[:cell_max]}" if cell_count && cell_count > options[:cell_max]
       @shared_table = []
       if File.exist?(File.join(tmpdir, 'roo_sharedStrings.xml'))
         @sharedstring_doc = load_xml(File.join(tmpdir, 'roo_sharedStrings.xml'))
@@ -97,9 +101,9 @@ class Roo::Excelx < Roo::Base
         @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
         read_styles(@styles_doc)
       end
-      if options[:minimal_load] == :true
-        warn ':minimal_load option will not load ANY sheets, or comments into memory, do not use unless you are
-              ONLY interested in using each_row_streaming to iterate over a sheet and extract values for each row'
+      if options[:minimal_load] == true
+        #warn ':minimal_load option will not load ANY sheets, or comments into memory, do not use unless you are
+        #      ONLY interested in using each_row_streaming to iterate over a sheet and extract values for each row'
       else
         @sheet_doc = @sheet_files.compact.map do |item|
           load_xml(item)
@@ -267,10 +271,10 @@ class Roo::Excelx < Roo::Base
   def to_s(sheet=nil)
     sheet ||= @default_sheet
     #read_cells(sheet)
-    if @cells_read[sheet]
+    if @cells_read && @cells_read[sheet]
       @cell[sheet].inspect
     else
-      super
+      super()
     end
   end
 
@@ -336,7 +340,25 @@ class Roo::Excelx < Roo::Base
     end
   end
 
-  # Use this with initialize option, :minimal_load = :true
+  # Get the dimensions of a given sheet without parsing the whole
+  # sheet. This is useful for determining if a file is realistically
+  # consumable without having to parse a large xml file.
+  def dimensions(options = {})
+    sheet = options[:sheet] || @default_sheet
+    sheet_idx = sheets.index(sheet) || 0
+    row_count = 0
+    make_tmpdir do |tmpdir|
+      file = extract_sheet_at_index(tmpdir, sheet_idx)
+      Nokogiri::XML::Reader(File.open(file)).each do |node|
+        next if node.name      != 'dimension'
+        next if node.node_type != Nokogiri::XML::Reader::TYPE_ELEMENT
+        dimension = node.attribute('ref')
+        return dimension
+      end
+    end
+  end
+
+  # Use this with initialize option, :minimal_load == true
   # To process large files which you do not wish
   # to pull entirely into memory
   #
@@ -350,7 +372,7 @@ class Roo::Excelx < Roo::Base
   # nil is inserted for each empty cell.
   # Does not pad past the last present cell
   def each_row_streaming(options = {})
-    raise "Documents already loaded, streaming futile" if @sheet_doc
+    raise StandardError, "Documents already loaded, streaming futile" if @sheet_doc
     sheet = options[:sheet] || @default_sheet
     sheet_idx = sheets.index(sheet)
     row_count = 0
@@ -380,7 +402,7 @@ class Roo::Excelx < Roo::Base
   # Does not pad past the last present cell
   def each_row(options = {})
     sheet = options[:sheet] || @default_sheet
-    raise "Sheets not loaded! Do not use this interface with :minimal_load" if @sheet_files && !@sheet_doc
+    raise StandardError, "Sheets not loaded! Do not use this interface with :minimal_load" if @sheet_files && !@sheet_doc
     return unless @sheet_doc[sheets.index(sheet)]
     @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row").each do |row|
       yield cells_for_row_element(row, options) if block_given?
@@ -551,6 +573,7 @@ Datei xl/comments1.xml
             Format.to_type(format)
         end
     formula = nil
+    y, x = Roo::Base.split_coordinate(cell_element['r'])
     cell_element.children.each do |cell|
       case cell.name
         when 'is'
@@ -560,7 +583,6 @@ Datei xl/comments1.xml
               value_type = :string
               v = inlinestr_content
               excelx_type = :string
-              y, x = Roo::Base.split_coordinate(cell_element['r'])
               excelx_value = inlinestr_content #cell.content
               return Cell.new(Cell::Coordinate.new(x, y), v,
                               excelx_value: excelx_value,
@@ -607,7 +629,6 @@ Datei xl/comments1.xml
               value_type = :float
               cell.content
             end
-          y, x = Roo::Base.split_coordinate(cell_element['r'])
           return Cell.new(Cell::Coordinate.new(x, y), v,
                           excelx_value: excelx_value,
                           excelx_type: excelx_type,
@@ -617,6 +638,7 @@ Datei xl/comments1.xml
                           sheet: options[:sheet])
       end
     end
+    Cell.new(Cell::Coordinate.new(x, y), nil)
   end
 
   # Reads all comments from a sheet
@@ -701,11 +723,10 @@ Datei xl/comments1.xml
     Roo::ZipFile.open(@filename) do |zip|
       Roo::ZipFile.open(@filename) do |zf|
         zf.entries.each do |entry|
-          if entry.to_s.downcase =~ /sheet([#{idx+1}]+).xml$/
-            file_name = "roo_sheet#{idx}"
-            open(tmpdir+'/'+file_name,'wb') {|f| f << zip.read(entry) }
-            return File.join(tmpdir, file_name)
-          end
+          next unless entry.to_s.downcase =~ /sheet([#{idx+1}]+).xml$/
+          file_name = "roo_sheet#{idx}"
+          open(tmpdir+'/'+file_name,'wb') {|f| f << zip.read(entry) }
+          return File.join(tmpdir, file_name)
         end
       end
     end
