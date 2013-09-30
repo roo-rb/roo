@@ -44,6 +44,7 @@ class Roo::Base
 
   def self.cells_in_range(str)
     cells = str.split(':')
+    return 1 if cells.count == 1
     raise "invalid range string: #{str}. Supported range format 'A1:B2'" if cells.count != 2
     x1, y1 = split_coordinate(cells.first)
     x2, y2 = split_coordinate(cells.second)
