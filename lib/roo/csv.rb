@@ -60,8 +60,8 @@ class Roo::CSV < Roo::Base
   def each_row(options, &block)
     if uri?(filename)
       make_tmpdir do |tmpdir|
-        filename = download_uri(filename, tmpdir)
-        CSV.foreach(filename, options, &block)
+        tmp_filename = download_uri(filename, tmpdir)
+        CSV.foreach(tmp_filename, options, &block)
       end
     else
       CSV.foreach(filename, options, &block)
