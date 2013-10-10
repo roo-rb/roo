@@ -645,7 +645,8 @@ Datei xl/comments1.xml
               excelx_type = :string
               cell.content
             else
-              value_type = cell.content.include?('.')  ? :float : :string
+              val = Integer(cell.content) rescue Float(cell.content) rescue nil
+              value_type = val && val.is_a?(Float)  ? :float : :string
               cell.content
             end
           return Cell.new(Cell::Coordinate.new(x, y), v,
