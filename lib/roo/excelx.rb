@@ -463,6 +463,25 @@ class Roo::Excelx < Roo::Base
       @sheet = options[:sheet]
     end
 
+    def value
+      case type
+        when :float
+          @value.to_f
+        when :string
+          @value
+        when :date
+          (base_date+@value.to_i).strftime("%Y-%m-%d")
+        when :datetime
+          (base_date+@value.to_f).strftime("%Y-%m-%d %H:%M:%S")
+        when :percentage
+          @value.to_f
+        when :time
+          @value.to_f*(24*60*60)
+        else
+          @value
+      end
+    end
+
     class Coordinate
       attr_accessor :x, :y
 
