@@ -138,8 +138,8 @@ class Roo::Google < Roo::Base
     if @cells_read[sheet]
       value, value_type = determine_datatype(value.to_s)
 
-      _set_value(col,row,value,sheet)
-      set_type(col,row,value_type,sheet)
+      _set_value(row,col,value,sheet)
+      set_type(row,col,value_type,sheet)
     end
   end
 
