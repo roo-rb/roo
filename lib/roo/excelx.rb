@@ -461,6 +461,7 @@ class Roo::Excelx < Roo::Base
       @formula = options[:formula]
       @type = options[:type]
       @sheet = options[:sheet]
+      @base_data = options[:base_date]
     end
 
     def value
@@ -470,9 +471,9 @@ class Roo::Excelx < Roo::Base
         when :string
           @value
         when :date
-          (base_date+@value.to_i).strftime("%Y-%m-%d")
+          (@base_data+@value.to_i).strftime("%Y-%m-%d")
         when :datetime
-          (base_date+@value.to_f).strftime("%Y-%m-%d %H:%M:%S")
+          (@base_data+@value.to_f).strftime("%Y-%m-%d %H:%M:%S")
         when :percentage
           @value.to_f
         when :time
@@ -609,7 +610,8 @@ Datei xl/comments1.xml
                               formula: formula,
                               type: value_type,
                               s_attribute: s_attribute,
-                              sheet: options[:sheet])
+                              sheet: options[:sheet],
+                              base_date: base_date)
             end
           end
         when 'f'
@@ -655,7 +657,8 @@ Datei xl/comments1.xml
                           formula: formula,
                           type: value_type,
                           s_attribute: s_attribute,
-                          sheet: options[:sheet])
+                          sheet: options[:sheet],
+                          base_date: base_date)
       end
     end
     Cell.new(Cell::Coordinate.new(x, y), nil)
