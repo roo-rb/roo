@@ -44,6 +44,7 @@ class Roo::Base
 
   def self.cells_in_range(str)
     cells = str.split(':')
+    return 1 if cells.count == 1
     raise "invalid range string: #{str}. Supported range format 'A1:B2'" if cells.count != 2
     x1, y1 = split_coordinate(cells.first)
     x2, y2 = split_coordinate(cells.second)
@@ -242,7 +243,7 @@ class Roo::Base
           cell(rownum,j + 1)
         }
       end
-    #-- :all
+      #-- :all
     elsif args[0] == :all
       rows = first_row.upto(last_row)
 
@@ -296,10 +297,10 @@ class Roo::Base
     read_cells(sheet)
     row, col = normalize(row,col)
     cell_type = case value
-                when Fixnum then :float
-                when String, Float then :string
-                else
-                  raise ArgumentError, "Type for #{value} not set"
+                  when Fixnum then :float
+                  when String, Float then :string
+                  else
+                    raise ArgumentError, "Type for #{value} not set"
                 end
 
     set_value(row,col,value,sheet)
@@ -328,8 +329,8 @@ class Roo::Base
   def info
     without_changing_default_sheet do
       result = "File: #{File.basename(@filename)}\n"+
-        "Number of sheets: #{sheets.size}\n"+
-        "Sheets: #{sheets.join(', ')}\n"
+          "Number of sheets: #{sheets.size}\n"+
+          "Sheets: #{sheets.join(', ')}\n"
       n = 1
       sheets.each {|sheet|
         self.default_sheet = sheet
@@ -362,9 +363,9 @@ class Roo::Base
                 first_column.upto(last_column) do |col|
                   unless empty?(row,col)
                     x.cell(cell(row,col),
-                      :row =>row,
-                      :column => col,
-                      :type => celltype(row,col))
+                           :row =>row,
+                           :column => col,
+                           :type => celltype(row,col))
                   end
                 end
               end
@@ -453,9 +454,9 @@ class Roo::Base
       end
 
       headers = @headers ||
-        Hash[(first_column..last_column).map do |col|
-          [cell(@header_line,col), col]
-        end]
+          Hash[(first_column..last_column).map do |col|
+            [cell(@header_line,col), col]
+          end]
 
       @header_line.upto(last_row) do |line|
         yield(Hash[headers.map {|k,v| [k,cell(line,v)]}])
@@ -503,23 +504,23 @@ class Roo::Base
 
   def file_type_check(filename, ext, name, warning_level, packed=nil)
     new_expression = {
-      '.ods' => 'Roo::OpenOffice.new',
-      '.xls' => 'Roo::Excel.new',
-      '.xlsx' => 'Roo::Excelx.new',
-      '.csv' => 'Roo::CSV.new',
-      '.xml' => 'Roo::Excel2003XML.new',
+        '.ods' => 'Roo::OpenOffice.new',
+        '.xls' => 'Roo::Excel.new',
+        '.xlsx' => 'Roo::Excelx.new',
+        '.csv' => 'Roo::CSV.new',
+        '.xml' => 'Roo::Excel2003XML.new',
     }
     if packed == :zip
-	    # lalala.ods.zip => lalala.ods
-	    # hier wird KEIN unzip gemacht, sondern nur der Name der Datei
-	    # getestet, falls es eine gepackte Datei ist.
-	    filename = File.basename(filename,File.extname(filename))
+      # lalala.ods.zip => lalala.ods
+      # hier wird KEIN unzip gemacht, sondern nur der Name der Datei
+      # getestet, falls es eine gepackte Datei ist.
+      filename = File.basename(filename,File.extname(filename))
     end
     case ext
-    when '.ods', '.xls', '.xlsx', '.csv', '.xml'
-      correct_class = "use #{new_expression[ext]} to handle #{ext} spreadsheet files. This has #{File.extname(filename).downcase}"
-    else
-      raise "unknown file type: #{ext}"
+      when '.ods', '.xls', '.xlsx', '.csv', '.xml'
+        correct_class = "use #{new_expression[ext]} to handle #{ext} spreadsheet files. This has #{File.extname(filename).downcase}"
+      else
+        raise "unknown file type: #{ext}"
     end
 
     if uri?(filename) && qs_begin = filename.rindex('?')
@@ -527,16 +528,16 @@ class Roo::Base
     end
     if File.extname(filename).downcase != ext
       case warning_level
-      when :error
-        warn correct_class
-        raise TypeError, "#{filename} is not #{name} file"
-      when :warning
-        warn "are you sure, this is #{name} spreadsheet file?"
-        warn correct_class
-      when :ignore
-        # ignore
-      else
-        raise "#{warning_level} illegal state of file_warning"
+        when :error
+          warn correct_class
+          raise TypeError, "#{filename} is not #{name} file"
+        when :warning
+          warn "are you sure, this is #{name} spreadsheet file?"
+          warn correct_class
+        when :ignore
+          # ignore
+        else
+          raise "#{warning_level} illegal state of file_warning"
       end
     end
   end
@@ -698,18 +699,18 @@ class Roo::Base
   # check if default_sheet was set and exists in sheets-array
   def validate_sheet!(sheet)
     case sheet
-    when nil
-      raise ArgumentError, "Error: sheet 'nil' not valid"
-    when Fixnum
-      self.sheets.fetch(sheet-1) do
-        raise RangeError, "sheet index #{sheet} not found"
-      end
-    when String
-      if !sheets.include? sheet
-        raise RangeError, "sheet '#{sheet}' not found"
-      end
-    else
-      raise TypeError, "not a valid sheet type: #{sheet.inspect}"
+      when nil
+        raise ArgumentError, "Error: sheet 'nil' not valid"
+      when Fixnum
+        self.sheets.fetch(sheet-1) do
+          raise RangeError, "sheet index #{sheet} not found"
+        end
+      when String
+        if !sheets.include? sheet
+          raise RangeError, "sheet '#{sheet}' not found"
+        end
+      else
+        raise TypeError, "not a valid sheet type: #{sheet.inspect}"
     end
   end
 
@@ -753,41 +754,41 @@ class Roo::Base
       onecell = cell(row,col,sheet)
 
       case celltype(row,col,sheet)
-      when :string
-        unless onecell.empty?
-          %{"#{onecell.gsub(/"/,'""')}"}
-        end
-      when :boolean
-        %{"#{onecell.gsub(/"/,'""').downcase}"}
-      when :float, :percentage
-        if onecell == onecell.to_i
-          onecell.to_i.to_s
-        else
-          onecell.to_s
-        end
-      when :formula
-        case onecell
-        when String
+        when :string
           unless onecell.empty?
             %{"#{onecell.gsub(/"/,'""')}"}
           end
-        when Float
+        when :boolean
+          %{"#{onecell.gsub(/"/,'""').downcase}"}
+        when :float, :percentage
           if onecell == onecell.to_i
             onecell.to_i.to_s
           else
             onecell.to_s
           end
-        when DateTime
+        when :formula
+          case onecell
+            when String
+              unless onecell.empty?
+                %{"#{onecell.gsub(/"/,'""')}"}
+              end
+            when Float
+              if onecell == onecell.to_i
+                onecell.to_i.to_s
+              else
+                onecell.to_s
+              end
+            when DateTime
+              onecell.to_s
+            else
+              raise "unhandled onecell-class #{onecell.class}"
+          end
+        when :date, :datetime
           onecell.to_s
+        when :time
+          Roo::Base.integer_to_timestring(onecell)
         else
-          raise "unhandled onecell-class #{onecell.class}"
-        end
-      when :date, :datetime
-        onecell.to_s
-      when :time
-        Roo::Base.integer_to_timestring(onecell)
-      else
-        raise "unhandled celltype #{celltype(row,col,sheet)}"
+          raise "unhandled celltype #{celltype(row,col,sheet)}"
       end || ""
     end
   end
