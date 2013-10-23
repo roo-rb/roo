@@ -552,7 +552,7 @@ Datei xl/comments1.xml
 
   # fetch cells for a given row XML
   def cells_for_row_element(row_element, options = {})
-    return [] unless row_element.present?
+    return [] unless row_element
     cell_col = 0
     row_element.children.each_with_object(cells = []) do |cell_element|
       cell = parse_cell(cell_element, options)
