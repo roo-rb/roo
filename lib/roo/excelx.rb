@@ -71,6 +71,7 @@ class Roo::Excelx < Roo::Base
     if Hash === options
       packed = options[:packed]
       file_warning = options[:file_warning] || :error
+      cell_max = options[:cell_max]
     else
       warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excelx.new` is deprecated. Use an options hash instead.'
       packed = options
@@ -88,8 +89,8 @@ class Roo::Excelx < Roo::Base
       @comments_files = Array.new
       extract_content(tmpdir, @filename)
       @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml"))
-      cell_count = Roo::Base.cells_in_range(dimensions) if options[:cell_max]
-      raise ExceedsMaxError, "Excel file exceeds cell maximum: #{cell_count} > #{options[:cell_max]}" if cell_count && cell_count > options[:cell_max]
+      cell_count = Roo::Base.cells_in_range(dimensions) if cell_max
+      raise ExceedsMaxError, "Excel file exceeds cell maximum: #{cell_count} > #{cell_max}" if cell_count && cell_count > cell_max
       @shared_table = []
       if File.exist?(File.join(tmpdir, 'roo_sharedStrings.xml'))
         @sharedstring_doc = load_xml(File.join(tmpdir, 'roo_sharedStrings.xml'))
