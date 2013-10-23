@@ -72,10 +72,12 @@ class Roo::Excelx < Roo::Base
       packed = options[:packed]
       file_warning = options[:file_warning] || :error
       cell_max = options[:cell_max]
+      minimal_load = options[:minimal_load] || false
     else
       warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excelx.new` is deprecated. Use an options hash instead.'
       packed = options
       file_warning = deprecated_file_warning
+      minimal_load = false
     end
 
     file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
@@ -102,7 +104,7 @@ class Roo::Excelx < Roo::Base
         @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
         read_styles(@styles_doc)
       end
-      if options[:minimal_load] == true
+      if minimal_load == true
         #warn ':minimal_load option will not load ANY sheets, or comments into memory, do not use unless you are
         #      ONLY interested in using each_row_streaming to iterate over a sheet and extract values for each row'
       else
