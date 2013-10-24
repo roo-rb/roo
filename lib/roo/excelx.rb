@@ -381,7 +381,6 @@ class Roo::Excelx < Roo::Base
   def each_row_streaming(options = {})
     raise StandardError, "Documents already loaded, streaming futile" if @sheet_doc
 
-    # default options[:pad_cells] to true unless user has already specificed
     options[:pad_cells] = true if options[:pad_cells].nil?
 
     sheet = options[:sheet] || @default_sheet
