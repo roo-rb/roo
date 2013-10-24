@@ -382,7 +382,7 @@ class Roo::Excelx < Roo::Base
     raise StandardError, "Documents already loaded, streaming futile" if @sheet_doc
 
     # default options[:pad_cells] to true unless user has already specificed
-    options[:pad_cells] = options[:pad_cells] or true
+    options[:pad_cells] = true if options[:pad_cells].nil?
 
     sheet = options[:sheet] || @default_sheet
     sheet_idx = sheets.index(sheet)
