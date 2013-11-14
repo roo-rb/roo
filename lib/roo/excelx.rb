@@ -88,7 +88,8 @@ class Roo::Excelx < Roo::Base
       @comments_files = Array.new
       extract_content(tmpdir, @filename)
       @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml"))
-      cell_count = Roo::Base.cells_in_range(dimensions) if options[:cell_max]
+      dimension_range = dimensions if options[:cell_max]
+      cell_count = Roo::Base.cells_in_range(dimension_range) if dimension_range
       raise ExceedsMaxError, "Excel file exceeds cell maximum: #{cell_count} > #{options[:cell_max]}" if cell_count && cell_count > options[:cell_max]
       @shared_table = []
       if File.exist?(File.join(tmpdir, 'roo_sharedStrings.xml'))
