@@ -91,8 +91,12 @@ class Roo::Excelx < Roo::Base
       @comments_files = Array.new
       extract_content(tmpdir, @filename)
       @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml"))
-      cell_count = Roo::Base.cells_in_range(dimensions) if cell_max
-      raise ExceedsMaxError, "Excel file exceeds cell maximum: #{cell_count} > #{cell_max}" if cell_count && cell_count > cell_max
+
+      if cell_max
+        cell_count = Roo::Base.cells_in_range(dimensions)
+        raise ExceedsMaxError, "Excel file exceeds cell maximum: #{cell_count} > #{cell_max}" if cell_count > cell_max
+      end
+
       @shared_table = []
       if File.exist?(File.join(tmpdir, 'roo_sharedStrings.xml'))
         @sharedstring_doc = load_xml(File.join(tmpdir, 'roo_sharedStrings.xml'))
@@ -371,11 +375,14 @@ class Roo::Excelx < Roo::Base
   # options[:sheet] can be used to specify a
   # sheet other than the default
   # options[:max_rows] break when parsed max rows + 1 for header
-  # options[:pad_cells] can be used to track empty cells
+  # options[:pad_cells] can be used to track empty cells, defaults to true
   # nil is inserted for each empty cell.
   # Does not pad past the last present cell
   def each_row_streaming(options = {})
     raise StandardError, "Documents already loaded, streaming futile" if @sheet_doc
+
+    options[:pad_cells] = true if options[:pad_cells].nil?
+
     sheet = options[:sheet] || @default_sheet
     sheet_idx = sheets.index(sheet)
     row_count = 0

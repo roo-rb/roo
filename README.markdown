@@ -16,6 +16,10 @@ Google spreadsheets. It can handle
 There is no support for formulas in Roo for .xls files - you can get the result
 of a formula but not the formula itself.
 
+### XLSX
+
+Support for streaming .xlsx files is supported. Pass `:minimal_load => true` as an initialize parameter when loading an .xlsx file. You will then need to use the `each_row_streaming` method for iterating rows on a worksheet. See examples under Usage.
+
 ### Google Spreadsheet
 
 Using Roo to access Google spreadsheets requires you install the 'google-spreadsheet-ruby' gem separately.
@@ -33,6 +37,7 @@ s = Roo::OpenOffice.new("myspreadsheet.ods")      # loads an OpenOffice Spreadsh
 s = Roo::Excel.new("myspreadsheet.xls")           # loads an Excel Spreadsheet
 s = Roo::Google.new("myspreadsheetkey_at_google") # loads a Google Spreadsheet
 s = Roo::Excelx.new("myspreadsheet.xlsx")         # loads an Excel Spreadsheet for Excel .xlsx files
+s = Roo::Excelx.new("myspreadsheet.xlsx", :minimal_load => true)    # loads an Excel Spreadsheet for Excel .xlsx files with streaming iteration support (much less memory intensive)
 s = Roo::CSV.new("mycsv.csv")                     # loads a CSV file
 
 # You can use CSV to load TSV files, or files of a certain encoding by passing
@@ -123,4 +128,12 @@ xls.parse(:clean => true)
 # thousands and thousands of blank lines. i got fed up after watching my computer
 # nearly catch fire for 4 hours for a spreadsheet with only 200 ACTUAL lines
 # - located in lib/roo/worksheet.rb
+
+# if you want to load and stream .xlsx rows
+
+s = Roo::Excelx.new("./test_data/test_small.xlsx", :minimal_load => true)
+s.each_row_streaming do |row|
+    puts row.inspect # Array of Excelx::Cell objects
+end
+
 ```
