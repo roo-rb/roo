@@ -1771,6 +1771,16 @@ Sheet 3:
     end
   end
 
+  def test_matrix_specifying_sheet
+    with_each_spreadsheet(:name => 'matrix', :format => [:openoffice, :excel, :google]) do |oo|
+      oo.default_sheet = oo.sheets.first
+      assert_equal Matrix[
+        [1.0, nil, 3.0],
+        [4.0, 5.0, 6.0],
+        [7.0, 8.0, nil] ], oo.to_matrix(nil, nil, nil, nil, 'Sheet3')
+    end
+  end
+
   # unter Windows soll es laut Bug-Reports nicht moeglich sein, eine Excel-Datei, die
   # mit Excel.new geoeffnet wurde nach dem Processing anschliessend zu loeschen.
   # Anmerkung: Das Spreadsheet-Gem erlaubt kein explizites Close von Spreadsheet-Dateien,
