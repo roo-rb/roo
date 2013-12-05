@@ -298,10 +298,7 @@ class Roo::Excelx < Roo::Base
   end
 
   def hyperlink?(row,col,sheet=nil)
-    sheet ||= @default_sheet
-    read_hyperlinks(sheet) unless @hyperlinks_read[sheet]
-    row,col = normalize(row,col)
-    hyperlink(row,col) != nil
+    hyperlink(row, col, sheet) != nil
   end
 
   # returns the hyperlink at (row/col)
