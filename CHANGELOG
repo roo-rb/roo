@@ -1,3 +1,16 @@
+== 1.13.0 2013-12-05
+
+* enhancements
+  * Support extracting link data from Excel and Excelx spreadsheets,
+    via Excel#read_cell(_content) and Excelx#hyperlink(?). #47
+  * Support setting the Excel Spreadsheet mode via the :mode option. #88
+  * Support Spreadsheet.open with a declared :extension that includes a leading '.'. #73
+  * Enable file type detection for URI's with parameters / anchors. #51
+
+* bugfixes
+  * Fix that CSV#each_row could overwrite the filename when run against a uri. #77
+  * Fix that #to_matrix wasn't respecting the sheet argument. #87
+
 == 1.12.2 2013-09-11
 
 * 1 enhancement
