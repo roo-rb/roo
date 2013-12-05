@@ -566,50 +566,36 @@ Datei xl/comments1.xml
     @sheet_files = []
     Roo::ZipFile.open(zipfilename) {|zf|
       zf.entries.each {|entry|
-        if entry.to_s.end_with?('workbook.xml')
-          open(tmpdir+'/'+'roo_workbook.xml','wb') {|f|
-            f << zip.read(entry)
-          }
-        end
-        # if entry.to_s.end_with?('sharedStrings.xml')
-        # at least one application creates this file with another (incorrect?)
-        # casing. It doesn't hurt, if we ignore here the correct casing - there
-        # won't be both names in the archive.
-        # Changed the casing of all the following filenames.
-        if entry.to_s.downcase.end_with?('sharedstrings.xml')
-          open(tmpdir+'/'+'roo_sharedStrings.xml','wb') {|f|
-            f << zip.read(entry)
-          }
-        end
-        if entry.to_s.downcase.end_with?('styles.xml')
-          open(tmpdir+'/'+'roo_styles.xml','wb') {|f|
-            f << zip.read(entry)
-          }
-        end
-        if entry.to_s.downcase =~ /sheet([0-9]+).xml$/
-          nr = $1
-          open(tmpdir+'/'+"roo_sheet#{nr}",'wb') {|f|
-            f << zip.read(entry)
-          }
-          @sheet_files[nr.to_i-1] = tmpdir+'/'+"roo_sheet#{nr}"
-        end
-        if entry.to_s.downcase =~ /comments([0-9]+).xml$/
-          nr = $1
-          open(tmpdir+'/'+"roo_comments#{nr}",'wb') {|f|
-            f << zip.read(entry)
-          }
-          @comments_files[nr.to_i-1] = tmpdir+'/'+"roo_comments#{nr}"
-        end
-        if entry.to_s.downcase =~ /sheet([0-9]+).xml.rels$/
-          nr = $1
-          open(tmpdir+'/'+"roo_rels#{nr}",'wb') {|f|
-            f << zip.read(entry)
-          }
-          @rels_files[nr.to_i-1] = tmpdir+'/'+"roo_rels#{nr}"
+        entry_name = entry.to_s.downcase
+
+        path =
+          if entry_name.end_with?('workbook.xml')
+            "#{tmpdir}/roo_workbook.xml"
+          elsif entry_name.end_with?('sharedstrings.xml')
+            "#{tmpdir}/roo_sharedStrings.xml"
+          elsif entry_name.end_with?('styles.xml')
+            "#{tmpdir}/roo_styles.xml"
+          elsif entry_name =~ /sheet([0-9]+).xml$/
+            nr = $1
+            @sheet_files[nr.to_i-1] = "#{tmpdir}/roo_sheet#{nr}"
+          elsif entry_name =~ /comments([0-9]+).xml$/
+            nr = $1
+            @comments_files[nr.to_i-1] = "#{tmpdir}/roo_comments#{nr}"
+          elsif entry_name =~ /sheet([0-9]+).xml.rels$/
+            nr = $1
+            @rels_files[nr.to_i-1] = "#{tmpdir}/roo_rels#{nr}"
+          end
+        if path
+          extract_file(zip, entry, path)
         end
       }
     }
-    # return
+  end
+
+  def extract_file(source_zip, entry, destination_path)
+    open(destination_path,'wb') {|f|
+      f << source_zip.read(entry)
+    }
   end
 
   # extract files from the zip file
