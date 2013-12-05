@@ -537,17 +537,13 @@ Datei xl/comments1.xml
     sheet ||= @default_sheet
     validate_sheet!(sheet)
     n = self.sheets.index(sheet)
-    unless @rels_doc[n].nil?
-      rels = {}
-      @rels_doc[n].xpath("/xmlns:Relationships/xmlns:Relationship").each do |r|
-        rels[r.attribute('Id').text] = r
-      end
+    if rels_doc = @rels_doc[n]
+      rels = Hash[rels_doc.xpath("/xmlns:Relationships/xmlns:Relationship").map do |r|
+        [r.attribute('Id').text, r]
+      end]
       @sheet_doc[n].xpath("/xmlns:worksheet/xmlns:hyperlinks/xmlns:hyperlink").each do |h|
-        relid = h.attribute('id').text
-        ref = h.attributes['ref'].to_s
-        row,col = Roo::GenericSpreadsheet.split_coordinate(ref)
-        rel_element = rels[relid]
-        unless rel_element.nil?
+        if rel_element = rels[h.attribute('id').text]
+          row,col = Roo::Base.split_coordinate(h.attributes['ref'].to_s)
           @hyperlink[sheet] ||= {}
           @hyperlink[sheet][[row,col]] = rel_element.attribute('Target').text
         end
