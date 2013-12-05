@@ -19,9 +19,11 @@ class Roo::Excel < Roo::Base
     if Hash === options
       packed = options[:packed]
       file_warning = options[:file_warning] || :error
+      mode = options[:mode] || "rb+"
     else
       warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excel.new` is deprecated. Use an options hash instead.'
       packed = options
+      mode = "rb+"
       file_warning = deprecated_file_warning
     end
 
@@ -35,7 +37,7 @@ class Roo::Excel < Roo::Base
       unless File.file?(@filename)
         raise IOError, "file #{@filename} does not exist"
       end
-      @workbook = Spreadsheet.open(filename, options[:mode] || "rb+")
+      @workbook = Spreadsheet.open(filename, mode)
     end
     super(filename, options)
     @formula = Hash.new
