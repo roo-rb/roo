@@ -208,7 +208,7 @@ class Roo::Base
 
     Matrix.rows((from_row||first_row(sheet)).upto(to_row||last_row(sheet)).map do |row|
       (from_column||first_column(sheet)).upto(to_column||last_column(sheet)).map do |col|
-        cell(row,col)
+        cell(row,col,sheet)
       end
     end)
   end
