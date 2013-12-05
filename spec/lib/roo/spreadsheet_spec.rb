@@ -6,8 +6,19 @@ describe Roo::Spreadsheet do
       let(:filename) { 'file.XLS' }
 
       it 'loads the proper type' do
-        Roo::Excel.should_receive(:new).with(filename, {})
+        expect(Roo::Excel).to receive(:new).with(filename, {})
         Roo::Spreadsheet.open(filename)
+      end
+    end
+
+    context 'for a url' do
+      context 'that is csv' do
+        let(:filename) { 'http://example.com/file.csv?with=params#and=anchor' }
+
+        it 'treats the url as CSV' do
+          expect(Roo::CSV).to receive(:new).with(filename, {})
+          Roo::Spreadsheet.open(filename)
+        end
       end
     end
 
@@ -17,7 +28,7 @@ describe Roo::Spreadsheet do
 
       context 'with options' do
         it 'passes the options through' do
-          Roo::CSV.should_receive(:new).with(filename, options)
+          expect(Roo::CSV).to receive(:new).with(filename, options)
           Roo::Spreadsheet.open(filename, options)
         end
       end
@@ -26,20 +37,20 @@ describe Roo::Spreadsheet do
     context 'when the file extension' do
       let(:filename) { 'file.xls' }
 
-      context "is xls" do 
+      context "is xls" do
         let(:options) { { extension: "xls" } }
 
         it 'loads with xls extension options' do
-          Roo::Excel.should_receive(:new).with(filename, options)
+          expect(Roo::Excel).to receive(:new).with(filename, options)
           Roo::Spreadsheet.open(filename, options)
         end
       end
 
-      context "is .xls" do 
+      context "is .xls" do
         let(:options) { { extension: ".xls" } }
 
         it 'loads with .xls extension options' do
-          Roo::Excel.should_receive(:new).with(filename, options)
+          expect(Roo::Excel).to receive(:new).with(filename, options)
           Roo::Spreadsheet.open(filename, options)
         end
       end
