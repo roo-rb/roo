@@ -9,7 +9,7 @@ module Roo
             options[:file_warning] = :ignore
             ".#{options[:extension]}".gsub(/[.]+/, ".")
           else
-            File.extname(file)
+            File.extname(URI.parse(file).path)
           end
 
         case extension.downcase
