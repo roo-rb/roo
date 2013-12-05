@@ -274,6 +274,7 @@ class Roo::Excel < Roo::Base
   # way formula stores the value
   def read_cell_content(row, idx)
     cell = row.at(idx)
+    cell = row[idx] if row[idx].class == Spreadsheet::Link
     cell = cell.value if cell.class == Spreadsheet::Formula
     cell
   end
@@ -336,6 +337,9 @@ class Roo::Excel < Roo::Base
     when Float, Integer, Fixnum, Bignum
       value_type = :float
       value = cell.to_f
+    when Spreadsheet::Link
+      value_type = :link
+      value = cell
     when String, TrueClass, FalseClass
       value_type = :string
       value = cell.to_s
