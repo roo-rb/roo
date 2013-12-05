@@ -35,7 +35,7 @@ class Roo::Excel < Roo::Base
       unless File.file?(@filename)
         raise IOError, "file #{@filename} does not exist"
       end
-      @workbook = Spreadsheet.open(filename)
+      @workbook = Spreadsheet.open(filename, options[:mode] || "rb+")
     end
     super(filename, options)
     @formula = Hash.new
