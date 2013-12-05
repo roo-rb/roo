@@ -22,5 +22,28 @@ describe Roo::Spreadsheet do
         end
       end
     end
+
+    context 'when the file extension' do
+      let(:filename) { 'file.xls' }
+
+      context "is xls" do 
+        let(:options) { { extension: "xls" } }
+
+        it 'loads with xls extension options' do
+          Roo::Excel.should_receive(:new).with(filename, options)
+          Roo::Spreadsheet.open(filename, options)
+        end
+      end
+
+      context "is .xls" do 
+        let(:options) { { extension: ".xls" } }
+
+        it 'loads with .xls extension options' do
+          Roo::Excel.should_receive(:new).with(filename, options)
+          Roo::Spreadsheet.open(filename, options)
+        end
+      end
+
+    end
   end
 end

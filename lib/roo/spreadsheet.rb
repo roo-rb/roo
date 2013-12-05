@@ -7,7 +7,7 @@ module Roo
         extension =
           if options[:extension]
             options[:file_warning] = :ignore
-            ".#{options[:extension]}"
+            ".#{options[:extension]}".gsub(/[.]+/, ".")
           else
             File.extname(file)
           end
