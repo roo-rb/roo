@@ -1,0 +1,857 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://www.google.com/accounts/ClientLogin
+    body:
+      encoding: UTF-8
+      string: accountType=HOSTED_OR_GOOGLE&Email=user&Passwd=password&service=wise&source=Gimite-RubyGoogleDrive-1.00
+    headers:
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - text/plain
+      X-Frame-Options:
+      - DENY
+      Cache-Control:
+      - no-cache, no-store
+      Pragma:
+      - no-cache
+      Expires:
+      - Mon, 01-Jan-1990 00:00:00 GMT
+      Date:
+      - Fri, 06 Dec 2013 18:42:35 GMT
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '1095'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: UTF-8
+      string: |
+        SID=DQAAAMoAAAA8IKlqi2aGAAGTzd6pCfMwqwabb79_cvhermJV2M78CNvpiYiujQEkQMienaye4SnKIV-oS6r6KEdGp46SZy5radXnkV5pxGSHLWvExZh7pGH7o3cgmvF8N3WX_FWdGQatg_-ypztq4tgHb_E3wlQtRmT1snh8lqVDIqoaXXdlQJ_WKvgPW8NBAOQBMsnb2fV0FX2abuth0DzS6t9gpR_f-1w8d8jI7rwgBhVg0PxxHPUJMnciPDaEjK3WxLj-zGgPCZfr6vBG8asFAjFzCDYO
+        LSID=DQAAAMsAAADMWltQuejlYd78Px9RfXhcHnb7tlPHfKPY4i69F9Hi0dhIQbyFRlHVcyMKaR3ajpm39Tx27o5qgddVcti2kZ3CoOB6bthhPlKls7s4G9nz8ObyHSilTTNP5tjNdNNz0--4NP9lacZ-UHhKoDGKnH6lgKFi6BaCAHpQzXo-vsvStxXqo0D1OE81zL2UOYRvN1rc9evr04qtlSvCHQ8THv7eH8SGwZrdf_okjtKQDyLaEJFn5d0_YP-CiM1JLNyNtjwk6E3cWEi8NUrZh459-Lif
+        Auth=DQAAAMwAAADMWltQuejlYd78Px9RfXhcHnb7tlPHfKPY4i69F9Hi0dhIQbyFRlHVcyMKaR3ajpn7yZLj-g3LYQk1SM-i9ejg3r4yH0rj9yZsBcy0ZiJV1L45w4jGXlgrvse68D5axixvDp7T7u6P6K-eOJj2SaKw8vBj156hBEyn4CQFJ0tVUjl5UPAN9Wt8hJmRNqULG3LoxYwLidLgPVjCtL-lF0YnUiSwbolVBzZAbyeYk1QSzX9xT5ms3sTQ4ESz42Bg9SQbc6kdlcWzvmQ_sO5GfrTY
+    http_version: 
+  recorded_at: Fri, 06 Dec 2013 18:42:32 GMT
+- request:
+    method: post
+    uri: https://www.google.com/accounts/ClientLogin
+    body:
+      encoding: UTF-8
+      string: accountType=HOSTED_OR_GOOGLE&Email=user&Passwd=password&service=writely&source=Gimite-RubyGoogleDrive-1.00
+    headers:
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - text/plain
+      X-Frame-Options:
+      - DENY
+      Cache-Control:
+      - no-cache, no-store
+      Pragma:
+      - no-cache
+      Expires:
+      - Mon, 01-Jan-1990 00:00:00 GMT
+      Date:
+      - Fri, 06 Dec 2013 18:42:35 GMT
+      X-Content-Type-Options:
+      - nosniff
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '1073'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: UTF-8
+      string: |
+        SID=DQAAAMoAAAA8IKlqi2aGAAGTzd6pCfMwqwabb79_cvhermJV2M78CNvpiYiujQEkQMienaye4SnKIV-oS6r6KEdGp46SZy5radXnkV5pxGSHLWvExZh7pGH7o3cgmvF8N3WX_FWdGQatg_-ypztq4tgHb_E3wlQtRmT1snh8lqVDIqoaXXdlQJ_WKvgPW8NBAOQBMsnb2fV0FX2abuth0DzS6t9gpR_f-1w8d8jI7rwgBhVg0PxxHPUJMnciPDaEjK3WxLj-zGgPCZfr6vBG8asFAjFzCDYO
+        LSID=DQAAAMsAAADMWltQuejlYd78Px9RfXhcHnb7tlPHfKPY4i69F9Hi0dhIQbyFRlHVcyMKaR3ajpm39Tx27o5qgddVcti2kZ3CoOB6bthhPlKls7s4G9nz8ObyHSilTTNP5tjNdNNz0--4NP9lacZ-UHhKoDGKnH6lgKFi6BaCAHpQzXo-vsvStxXqo0D1OE81zL2UOYRvN1rc9evr04qtlSvCHQ8THv7eH8SGwZrdf_okjtKQDyLaEJFn5d0_YP-CiM1JLNyNtjwk6E3cWEi8NUrZh459-Lif
+        Auth=DQAAAMwAAADMWltQuejlYd78Px9RfXhcHnb7tlPHfKPY4i69F9Hi0dhIQbyFRlHVcyMKaR3ajpn7yZLj-g3LYQk1SM-i9ejg3r4yH0rj9yZsBcy0ZiJV1L45w4jGXlgrvse68D5axixvDp7T7u6P6K-eOJj2SaKw8vBj156hBEyn4CQFJ0tVUjl5UPAN9Wt8hJmRNqULG3LoxYwLidLgPVjCtL-lF0YnUiSwbolVBzZAbyeYk1QSzX9xT5ms3sTQ4ESz42Bg9SQbc6kdlcWzvmQ_sO5GfrTY
+    http_version: 
+  recorded_at: Fri, 06 Dec 2013 18:42:32 GMT
+- request:
+    method: get
+    uri: https://spreadsheets.google.com/feeds/worksheets/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/private/full
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Authorization:
+      Authorization:
+      - GoogleLogin auth=DQAAAMwAAADMWltQuejlYd78Px9RfXhcHnb7tlPHfKPY4i69F9Hi0dhIQbyFRlHVcyMKaR3ajpn7yZLj-g3LYQk1SM-i9ejg3r4yH0rj9yZsBcy0ZiJV1L45w4jGXlgrvse68D5axixvDp7T7u6P6K-eOJj2SaKw8vBj156hBEyn4CQFJ0tVUjl5UPAN9Wt8hJmRNqULG3LoxYwLidLgPVjCtL-lF0YnUiSwbolVBzZAbyeYk1QSzX9xT5ms3sTQ4ESz42Bg9SQbc6kdlcWzvmQ_sO5GfrTY
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/atom+xml; charset=UTF-8
+      Expires:
+      - Fri, 06 Dec 2013 18:42:35 GMT
+      Date:
+      - Fri, 06 Dec 2013 18:42:35 GMT
+      Cache-Control:
+      - private, max-age=0, must-revalidate, no-transform
+      Vary:
+      - Accept, X-GData-Authorization, GData-Version
+      Gdata-Version:
+      - '1.0'
+      Last-Modified:
+      - Fri, 06 Dec 2013 18:42:13 GMT
+      Set-Cookie:
+      - NID=67=P6-qngqROR4Rd40ur5alzTcL4Ymf77hX1baonK7-UvwB4TfiXr0KHJipkoLhh9v2fsZJuF__XCss6QXQTYOJrhaalaHkDCjivh162BKtMvOZOQ__hqLgx3jynuNbXPTL;Domain=.google.com;Path=/;Expires=Sat,
+        07-Jun-2014 18:42:35 GMT;HttpOnly
+      P3p:
+      - CP="This is not a P3P policy! See http://www.google.com/support/accounts/bin/answer.py?hl=en&answer=151657
+        for more info."
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: <?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.org/2005/Atom'
+        xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/' xmlns:gs='http://schemas.google.com/spreadsheets/2006'><id>https://spreadsheets.google.com/feeds/worksheets/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/private/full</id><updated>2013-12-06T18:42:13.795Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#worksheet'/><title
+        type='text'>Roo test</title><link rel='alternate' type='text/html' href='https://spreadsheets.google.com/ccc?key=0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc'/><link
+        rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/worksheets/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/private/full'/><link
+        rel='http://schemas.google.com/g/2005#post' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/worksheets/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/private/full'/><link
+        rel='self' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/worksheets/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/private/full'/><author><name>paul.jungwirth</name><email>paul.jungwirth@gmail.com</email></author><openSearch:totalResults>1</openSearch:totalResults><openSearch:startIndex>1</openSearch:startIndex><entry><id>https://spreadsheets.google.com/feeds/worksheets/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/private/full/od6</id><updated>2013-12-06T18:42:13.795Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#worksheet'/><title
+        type='text'>Sheet1</title><content type='text'>Sheet1</content><link rel='http://schemas.google.com/spreadsheets/2006#listfeed'
+        type='application/atom+xml' href='https://spreadsheets.google.com/feeds/list/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full'/><link
+        rel='http://schemas.google.com/spreadsheets/2006#cellsfeed' type='application/atom+xml'
+        href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full'/><link
+        rel='http://schemas.google.com/visualization/2008#visualizationApi' type='application/atom+xml'
+        href='https://spreadsheets.google.com/tq?key=0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc&amp;sheet=od6'/><link
+        rel='self' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/worksheets/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/private/full/od6'/><link
+        rel='edit' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/worksheets/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/private/full/od6/dnf6uj3veg'/><gs:rowCount>100</gs:rowCount><gs:colCount>20</gs:colCount></entry></feed>
+    http_version: 
+  recorded_at: Fri, 06 Dec 2013 18:42:33 GMT
+- request:
+    method: get
+    uri: https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Authorization:
+      Authorization:
+      - GoogleLogin auth=DQAAAMwAAADMWltQuejlYd78Px9RfXhcHnb7tlPHfKPY4i69F9Hi0dhIQbyFRlHVcyMKaR3ajpn7yZLj-g3LYQk1SM-i9ejg3r4yH0rj9yZsBcy0ZiJV1L45w4jGXlgrvse68D5axixvDp7T7u6P6K-eOJj2SaKw8vBj156hBEyn4CQFJ0tVUjl5UPAN9Wt8hJmRNqULG3LoxYwLidLgPVjCtL-lF0YnUiSwbolVBzZAbyeYk1QSzX9xT5ms3sTQ4ESz42Bg9SQbc6kdlcWzvmQ_sO5GfrTY
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/atom+xml; charset=UTF-8
+      Expires:
+      - Fri, 06 Dec 2013 18:42:36 GMT
+      Date:
+      - Fri, 06 Dec 2013 18:42:36 GMT
+      Cache-Control:
+      - private, max-age=0, must-revalidate, no-transform
+      Vary:
+      - Accept, X-GData-Authorization, GData-Version
+      Gdata-Version:
+      - '1.0'
+      Last-Modified:
+      - Fri, 06 Dec 2013 18:42:13 GMT
+      Set-Cookie:
+      - NID=67=tZw2vXm2UjFtmkwMXxS9aO0pvNxSWLJpLAQ4exwsBXTAWB9zrS-HMztaLet6prwWCL1Tnb0jfQ2O84S4-Quoc_CZV7H8HgFM8wbXpHiBDzIAEx5MteO1NnCCvkBxWBdb;Domain=.google.com;Path=/;Expires=Sat,
+        07-Jun-2014 18:42:36 GMT;HttpOnly
+      P3p:
+      - CP="This is not a P3P policy! See http://www.google.com/support/accounts/bin/answer.py?hl=en&answer=151657
+        for more info."
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: <?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.org/2005/Atom'
+        xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/' xmlns:gs='http://schemas.google.com/spreadsheets/2006'
+        xmlns:batch='http://schemas.google.com/gdata/batch'><id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full</id><updated>2013-12-06T18:42:13.795Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><title
+        type='text'>Sheet1</title><link rel='alternate' type='text/html' href='https://spreadsheets.google.com/ccc?key=0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc'/><link
+        rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full'/><link
+        rel='http://schemas.google.com/g/2005#post' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full'/><link
+        rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/batch'/><link
+        rel='self' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full'/><author><name>paul.jungwirth</name><email>paul.jungwirth@gmail.com</email></author><openSearch:totalResults>4</openSearch:totalResults><openSearch:startIndex>1</openSearch:startIndex><gs:rowCount>100</gs:rowCount><gs:colCount>20</gs:colCount><entry><id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C1</id><updated>2013-12-06T18:42:13.795Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><title
+        type='text'>A1</title><content type='text'>1x1</content><link rel='self' type='application/atom+xml'
+        href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C1'/><link
+        rel='edit' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C1/138q'/><gs:cell
+        row='1' col='1' inputValue='1x1'>1x1</gs:cell></entry><entry><id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C2</id><updated>2013-12-06T18:42:13.795Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><title
+        type='text'>B1</title><content type='text'>1x2</content><link rel='self' type='application/atom+xml'
+        href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C2'/><link
+        rel='edit' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C2/a0omj'/><gs:cell
+        row='1' col='2' inputValue='1x2'>1x2</gs:cell></entry><entry><id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C1</id><updated>2013-12-06T18:42:13.795Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><title
+        type='text'>A2</title><content type='text'>2x1</content><link rel='self' type='application/atom+xml'
+        href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C1'/><link
+        rel='edit' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C1/2ijv'/><gs:cell
+        row='2' col='1' inputValue='2x1'>2x1</gs:cell></entry><entry><id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C2</id><updated>2013-12-06T18:42:13.795Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><title
+        type='text'>B2</title><content type='text'>2x2</content><link rel='self' type='application/atom+xml'
+        href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C2'/><link
+        rel='edit' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C2/a23xo'/><gs:cell
+        row='2' col='2' inputValue='2x2'>2x2</gs:cell></entry></feed>
+    http_version: 
+  recorded_at: Fri, 06 Dec 2013 18:42:33 GMT
+- request:
+    method: get
+    uri: https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full?max-col=1&max-row=1&min-col=1&min-row=1&return-empty=true
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Authorization:
+      Authorization:
+      - GoogleLogin auth=DQAAAMwAAADMWltQuejlYd78Px9RfXhcHnb7tlPHfKPY4i69F9Hi0dhIQbyFRlHVcyMKaR3ajpn7yZLj-g3LYQk1SM-i9ejg3r4yH0rj9yZsBcy0ZiJV1L45w4jGXlgrvse68D5axixvDp7T7u6P6K-eOJj2SaKw8vBj156hBEyn4CQFJ0tVUjl5UPAN9Wt8hJmRNqULG3LoxYwLidLgPVjCtL-lF0YnUiSwbolVBzZAbyeYk1QSzX9xT5ms3sTQ4ESz42Bg9SQbc6kdlcWzvmQ_sO5GfrTY
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/atom+xml; charset=UTF-8
+      Expires:
+      - Fri, 06 Dec 2013 18:42:36 GMT
+      Date:
+      - Fri, 06 Dec 2013 18:42:36 GMT
+      Cache-Control:
+      - private, max-age=0, must-revalidate, no-transform
+      Vary:
+      - Accept, X-GData-Authorization, GData-Version
+      Gdata-Version:
+      - '1.0'
+      Last-Modified:
+      - Fri, 06 Dec 2013 18:42:13 GMT
+      Set-Cookie:
+      - NID=67=daYpj77OMuRnSTCPbAE3O_WkWmcaH_CUTFTOfwSJmZCFCrAxhYtgPM0H6MK9HJaq21e3EPg0uvngJ94R_3QgYkCSgpC5tvmWHPpI4jraUD9K5TPt3O4KUfCfLMbJhG9z;Domain=.google.com;Path=/;Expires=Sat,
+        07-Jun-2014 18:42:36 GMT;HttpOnly
+      P3p:
+      - CP="This is not a P3P policy! See http://www.google.com/support/accounts/bin/answer.py?hl=en&answer=151657
+        for more info."
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: <?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.org/2005/Atom'
+        xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/' xmlns:gs='http://schemas.google.com/spreadsheets/2006'
+        xmlns:batch='http://schemas.google.com/gdata/batch'><id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full</id><updated>2013-12-06T18:42:13.795Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><title
+        type='text'>Sheet1</title><link rel='alternate' type='text/html' href='https://spreadsheets.google.com/ccc?key=0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc'/><link
+        rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full'/><link
+        rel='http://schemas.google.com/g/2005#post' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full'/><link
+        rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/batch'/><link
+        rel='self' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full?min-col=1&amp;max-col=1&amp;return-empty=true&amp;max-row=1&amp;min-row=1'/><author><name>paul.jungwirth</name><email>paul.jungwirth@gmail.com</email></author><openSearch:totalResults>1</openSearch:totalResults><openSearch:startIndex>1</openSearch:startIndex><gs:rowCount>100</gs:rowCount><gs:colCount>20</gs:colCount><entry><id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C1</id><updated>2013-12-06T18:42:13.795Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><title
+        type='text'>A1</title><content type='text'>1x1</content><link rel='self' type='application/atom+xml'
+        href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C1'/><link
+        rel='edit' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C1/138q'/><gs:cell
+        row='1' col='1' inputValue='1x1'>1x1</gs:cell></entry></feed>
+    http_version: 
+  recorded_at: Fri, 06 Dec 2013 18:42:33 GMT
+- request:
+    method: post
+    uri: https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/batch
+    body:
+      encoding: UTF-8
+      string: |2
+                        <feed xmlns="http://www.w3.org/2005/Atom"
+                              xmlns:batch="http://schemas.google.com/gdata/batch"
+                              xmlns:gs="http://schemas.google.com/spreadsheets/2006">
+                          <id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full</id>
+                          <entry>
+                            <batch:id>1,1</batch:id>
+                            <batch:operation type="update"/>
+                            <id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C1</id>
+                            <link rel="edit" type="application/atom+xml"
+                              href="https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C1/138q"/>
+                            <gs:cell row="1" col="1" inputValue="1x1"/>
+                          </entry>
+                        </feed>
+    headers:
+      Authorization:
+      Authorization:
+      - GoogleLogin auth=DQAAAMwAAADMWltQuejlYd78Px9RfXhcHnb7tlPHfKPY4i69F9Hi0dhIQbyFRlHVcyMKaR3ajpn7yZLj-g3LYQk1SM-i9ejg3r4yH0rj9yZsBcy0ZiJV1L45w4jGXlgrvse68D5axixvDp7T7u6P6K-eOJj2SaKw8vBj156hBEyn4CQFJ0tVUjl5UPAN9Wt8hJmRNqULG3LoxYwLidLgPVjCtL-lF0YnUiSwbolVBzZAbyeYk1QSzX9xT5ms3sTQ4ESz42Bg9SQbc6kdlcWzvmQ_sO5GfrTY
+      Content-Type:
+      - application/atom+xml
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/atom+xml; charset=UTF-8
+      Gdata-Version:
+      - '1.0'
+      Set-Cookie:
+      - NID=67=wQmh2rA0psG9Dw1Q5cz3waZRudK84WUs7qtSv2Y_ROVwI0U5uKu0S9AcWRO9rHVjjfxmb4F8S0YYLuh0SIPeDbWU25qHG0gwEsCyGEkV0eWewcz6qeT2vGQp3L6A8cBw;Domain=.google.com;Path=/;Expires=Sat,
+        07-Jun-2014 18:42:36 GMT;HttpOnly
+      P3p:
+      - CP="This is not a P3P policy! See http://www.google.com/support/accounts/bin/answer.py?hl=en&answer=151657
+        for more info."
+      Date:
+      - Fri, 06 Dec 2013 18:42:36 GMT
+      Expires:
+      - Fri, 06 Dec 2013 18:42:36 GMT
+      Cache-Control:
+      - private, max-age=0
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: <?xml version='1.0' encoding='UTF-8'?><atom:feed xmlns:atom='http://www.w3.org/2005/Atom'
+        xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/' xmlns:gs='http://schemas.google.com/spreadsheets/2006'
+        xmlns:batch='http://schemas.google.com/gdata/batch'><atom:id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/batch/1386355356544</atom:id><atom:updated>2013-12-06T18:42:36.555Z</atom:updated><atom:title
+        type='text'>Batch Feed</atom:title><atom:entry><atom:id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C1</atom:id><atom:updated>2013-12-06T18:42:36.550Z</atom:updated><atom:category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><atom:title
+        type='text'>A1</atom:title><atom:content type='text'>1x1</atom:content><atom:link
+        rel='self' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C1'/><atom:link
+        rel='edit' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C1/138q'/><gs:cell
+        row='1' col='1' inputValue='1x1'>1x1</gs:cell><batch:id>1,1</batch:id><batch:status
+        code='200' reason='Success'/><batch:operation type='update'/></atom:entry></atom:feed>
+    http_version: 
+  recorded_at: Fri, 06 Dec 2013 18:42:33 GMT
+- request:
+    method: get
+    uri: https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full?max-col=2&max-row=1&min-col=2&min-row=1&return-empty=true
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Authorization:
+      Authorization:
+      - GoogleLogin auth=DQAAAMwAAADMWltQuejlYd78Px9RfXhcHnb7tlPHfKPY4i69F9Hi0dhIQbyFRlHVcyMKaR3ajpn7yZLj-g3LYQk1SM-i9ejg3r4yH0rj9yZsBcy0ZiJV1L45w4jGXlgrvse68D5axixvDp7T7u6P6K-eOJj2SaKw8vBj156hBEyn4CQFJ0tVUjl5UPAN9Wt8hJmRNqULG3LoxYwLidLgPVjCtL-lF0YnUiSwbolVBzZAbyeYk1QSzX9xT5ms3sTQ4ESz42Bg9SQbc6kdlcWzvmQ_sO5GfrTY
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/atom+xml; charset=UTF-8
+      Expires:
+      - Fri, 06 Dec 2013 18:42:36 GMT
+      Date:
+      - Fri, 06 Dec 2013 18:42:36 GMT
+      Cache-Control:
+      - private, max-age=0, must-revalidate, no-transform
+      Vary:
+      - Accept, X-GData-Authorization, GData-Version
+      Gdata-Version:
+      - '1.0'
+      Last-Modified:
+      - Fri, 06 Dec 2013 18:42:36 GMT
+      Set-Cookie:
+      - NID=67=hhR3BKtLhLtG5S2t0nQaY4JGPepDUM1oEg9hVFPsovK6AmMJUZT2qFNPlAPMQh3hNeekREIDFd8mJrRKbQObDz1j1cSgeaEXQfqG5kojHxLDhIi8vppQ4CSYiprjxa_p;Domain=.google.com;Path=/;Expires=Sat,
+        07-Jun-2014 18:42:36 GMT;HttpOnly
+      P3p:
+      - CP="This is not a P3P policy! See http://www.google.com/support/accounts/bin/answer.py?hl=en&answer=151657
+        for more info."
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: <?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.org/2005/Atom'
+        xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/' xmlns:gs='http://schemas.google.com/spreadsheets/2006'
+        xmlns:batch='http://schemas.google.com/gdata/batch'><id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full</id><updated>2013-12-06T18:42:36.550Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><title
+        type='text'>Sheet1</title><link rel='alternate' type='text/html' href='https://spreadsheets.google.com/ccc?key=0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc'/><link
+        rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full'/><link
+        rel='http://schemas.google.com/g/2005#post' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full'/><link
+        rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/batch'/><link
+        rel='self' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full?min-col=2&amp;max-col=2&amp;return-empty=true&amp;max-row=1&amp;min-row=1'/><author><name>paul.jungwirth</name><email>paul.jungwirth@gmail.com</email></author><openSearch:totalResults>1</openSearch:totalResults><openSearch:startIndex>1</openSearch:startIndex><gs:rowCount>100</gs:rowCount><gs:colCount>20</gs:colCount><entry><id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C2</id><updated>2013-12-06T18:42:36.550Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><title
+        type='text'>B1</title><content type='text'>1x2</content><link rel='self' type='application/atom+xml'
+        href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C2'/><link
+        rel='edit' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C2/a0omj'/><gs:cell
+        row='1' col='2' inputValue='1x2'>1x2</gs:cell></entry></feed>
+    http_version: 
+  recorded_at: Fri, 06 Dec 2013 18:42:34 GMT
+- request:
+    method: post
+    uri: https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/batch
+    body:
+      encoding: UTF-8
+      string: |2
+                        <feed xmlns="http://www.w3.org/2005/Atom"
+                              xmlns:batch="http://schemas.google.com/gdata/batch"
+                              xmlns:gs="http://schemas.google.com/spreadsheets/2006">
+                          <id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full</id>
+                          <entry>
+                            <batch:id>1,2</batch:id>
+                            <batch:operation type="update"/>
+                            <id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C2</id>
+                            <link rel="edit" type="application/atom+xml"
+                              href="https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C2/a0omj"/>
+                            <gs:cell row="1" col="2" inputValue="1x2"/>
+                          </entry>
+                        </feed>
+    headers:
+      Authorization:
+      Authorization:
+      - GoogleLogin auth=DQAAAMwAAADMWltQuejlYd78Px9RfXhcHnb7tlPHfKPY4i69F9Hi0dhIQbyFRlHVcyMKaR3ajpn7yZLj-g3LYQk1SM-i9ejg3r4yH0rj9yZsBcy0ZiJV1L45w4jGXlgrvse68D5axixvDp7T7u6P6K-eOJj2SaKw8vBj156hBEyn4CQFJ0tVUjl5UPAN9Wt8hJmRNqULG3LoxYwLidLgPVjCtL-lF0YnUiSwbolVBzZAbyeYk1QSzX9xT5ms3sTQ4ESz42Bg9SQbc6kdlcWzvmQ_sO5GfrTY
+      Content-Type:
+      - application/atom+xml
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/atom+xml; charset=UTF-8
+      Gdata-Version:
+      - '1.0'
+      Set-Cookie:
+      - NID=67=WJlvr-zjLEBTHM3AILcNGXJCtQU7Ws80r_fjKRTUlZu7Thu-BXXbTT-uPjMuwwlh4TB5RBo26S6SsFmR6roLsMqKYIECSGxbxul99InG1vOqjS4Ee7f3t46uZ-ypq-Ge;Domain=.google.com;Path=/;Expires=Sat,
+        07-Jun-2014 18:42:37 GMT;HttpOnly
+      P3p:
+      - CP="This is not a P3P policy! See http://www.google.com/support/accounts/bin/answer.py?hl=en&answer=151657
+        for more info."
+      Date:
+      - Fri, 06 Dec 2013 18:42:37 GMT
+      Expires:
+      - Fri, 06 Dec 2013 18:42:37 GMT
+      Cache-Control:
+      - private, max-age=0
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: <?xml version='1.0' encoding='UTF-8'?><atom:feed xmlns:atom='http://www.w3.org/2005/Atom'
+        xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/' xmlns:gs='http://schemas.google.com/spreadsheets/2006'
+        xmlns:batch='http://schemas.google.com/gdata/batch'><atom:id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/batch/1386355357170</atom:id><atom:updated>2013-12-06T18:42:37.181Z</atom:updated><atom:title
+        type='text'>Batch Feed</atom:title><atom:entry><atom:id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C2</atom:id><atom:updated>2013-12-06T18:42:37.175Z</atom:updated><atom:category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><atom:title
+        type='text'>B1</atom:title><atom:content type='text'>1x2</atom:content><atom:link
+        rel='self' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C2'/><atom:link
+        rel='edit' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R1C2/a0omj'/><gs:cell
+        row='1' col='2' inputValue='1x2'>1x2</gs:cell><batch:id>1,2</batch:id><batch:status
+        code='200' reason='Success'/><batch:operation type='update'/></atom:entry></atom:feed>
+    http_version: 
+  recorded_at: Fri, 06 Dec 2013 18:42:34 GMT
+- request:
+    method: get
+    uri: https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full?max-col=1&max-row=2&min-col=1&min-row=2&return-empty=true
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Authorization:
+      Authorization:
+      - GoogleLogin auth=DQAAAMwAAADMWltQuejlYd78Px9RfXhcHnb7tlPHfKPY4i69F9Hi0dhIQbyFRlHVcyMKaR3ajpn7yZLj-g3LYQk1SM-i9ejg3r4yH0rj9yZsBcy0ZiJV1L45w4jGXlgrvse68D5axixvDp7T7u6P6K-eOJj2SaKw8vBj156hBEyn4CQFJ0tVUjl5UPAN9Wt8hJmRNqULG3LoxYwLidLgPVjCtL-lF0YnUiSwbolVBzZAbyeYk1QSzX9xT5ms3sTQ4ESz42Bg9SQbc6kdlcWzvmQ_sO5GfrTY
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/atom+xml; charset=UTF-8
+      Expires:
+      - Fri, 06 Dec 2013 18:42:37 GMT
+      Date:
+      - Fri, 06 Dec 2013 18:42:37 GMT
+      Cache-Control:
+      - private, max-age=0, must-revalidate, no-transform
+      Vary:
+      - Accept, X-GData-Authorization, GData-Version
+      Gdata-Version:
+      - '1.0'
+      Last-Modified:
+      - Fri, 06 Dec 2013 18:42:37 GMT
+      Set-Cookie:
+      - NID=67=qlpkP4soWbj82eIRnnuyRBgS2Dhtnme752d7DANDieb5DLamkoMJ2l6DeLbIpgqK2Li1Qd-Ere-TGYfc0D9p2i-JnezagCE1Hc_YzPX9Ln2zsSVSjMLMP6f_sRowsHSJ;Domain=.google.com;Path=/;Expires=Sat,
+        07-Jun-2014 18:42:37 GMT;HttpOnly
+      P3p:
+      - CP="This is not a P3P policy! See http://www.google.com/support/accounts/bin/answer.py?hl=en&answer=151657
+        for more info."
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: <?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.org/2005/Atom'
+        xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/' xmlns:gs='http://schemas.google.com/spreadsheets/2006'
+        xmlns:batch='http://schemas.google.com/gdata/batch'><id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full</id><updated>2013-12-06T18:42:37.175Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><title
+        type='text'>Sheet1</title><link rel='alternate' type='text/html' href='https://spreadsheets.google.com/ccc?key=0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc'/><link
+        rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full'/><link
+        rel='http://schemas.google.com/g/2005#post' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full'/><link
+        rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/batch'/><link
+        rel='self' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full?min-col=1&amp;max-col=1&amp;return-empty=true&amp;max-row=2&amp;min-row=2'/><author><name>paul.jungwirth</name><email>paul.jungwirth@gmail.com</email></author><openSearch:totalResults>1</openSearch:totalResults><openSearch:startIndex>1</openSearch:startIndex><gs:rowCount>100</gs:rowCount><gs:colCount>20</gs:colCount><entry><id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C1</id><updated>2013-12-06T18:42:37.175Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><title
+        type='text'>A2</title><content type='text'>2x1</content><link rel='self' type='application/atom+xml'
+        href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C1'/><link
+        rel='edit' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C1/2ijv'/><gs:cell
+        row='2' col='1' inputValue='2x1'>2x1</gs:cell></entry></feed>
+    http_version: 
+  recorded_at: Fri, 06 Dec 2013 18:42:34 GMT
+- request:
+    method: post
+    uri: https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/batch
+    body:
+      encoding: UTF-8
+      string: |2
+                        <feed xmlns="http://www.w3.org/2005/Atom"
+                              xmlns:batch="http://schemas.google.com/gdata/batch"
+                              xmlns:gs="http://schemas.google.com/spreadsheets/2006">
+                          <id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full</id>
+                          <entry>
+                            <batch:id>2,1</batch:id>
+                            <batch:operation type="update"/>
+                            <id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C1</id>
+                            <link rel="edit" type="application/atom+xml"
+                              href="https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C1/2ijv"/>
+                            <gs:cell row="2" col="1" inputValue="2x1"/>
+                          </entry>
+                        </feed>
+    headers:
+      Authorization:
+      Authorization:
+      - GoogleLogin auth=DQAAAMwAAADMWltQuejlYd78Px9RfXhcHnb7tlPHfKPY4i69F9Hi0dhIQbyFRlHVcyMKaR3ajpn7yZLj-g3LYQk1SM-i9ejg3r4yH0rj9yZsBcy0ZiJV1L45w4jGXlgrvse68D5axixvDp7T7u6P6K-eOJj2SaKw8vBj156hBEyn4CQFJ0tVUjl5UPAN9Wt8hJmRNqULG3LoxYwLidLgPVjCtL-lF0YnUiSwbolVBzZAbyeYk1QSzX9xT5ms3sTQ4ESz42Bg9SQbc6kdlcWzvmQ_sO5GfrTY
+      Content-Type:
+      - application/atom+xml
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/atom+xml; charset=UTF-8
+      Gdata-Version:
+      - '1.0'
+      Set-Cookie:
+      - NID=67=glsIXLsUxvEjIZeV_caboBdJfweLOgsi15nO8M-4es2Wu32kx35phIfTTDp9ujhK_HyC8n1AeREHBwh3IH1Nmq4MovOypQI3q1XdTPWvPC7Q-3WfiUFQ-YljhIrbI8KE;Domain=.google.com;Path=/;Expires=Sat,
+        07-Jun-2014 18:42:38 GMT;HttpOnly
+      P3p:
+      - CP="This is not a P3P policy! See http://www.google.com/support/accounts/bin/answer.py?hl=en&answer=151657
+        for more info."
+      Date:
+      - Fri, 06 Dec 2013 18:42:38 GMT
+      Expires:
+      - Fri, 06 Dec 2013 18:42:38 GMT
+      Cache-Control:
+      - private, max-age=0
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: <?xml version='1.0' encoding='UTF-8'?><atom:feed xmlns:atom='http://www.w3.org/2005/Atom'
+        xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/' xmlns:gs='http://schemas.google.com/spreadsheets/2006'
+        xmlns:batch='http://schemas.google.com/gdata/batch'><atom:id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/batch/1386355358339</atom:id><atom:updated>2013-12-06T18:42:38.351Z</atom:updated><atom:title
+        type='text'>Batch Feed</atom:title><atom:entry><atom:id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C1</atom:id><atom:updated>2013-12-06T18:42:38.344Z</atom:updated><atom:category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><atom:title
+        type='text'>A2</atom:title><atom:content type='text'>2x1</atom:content><atom:link
+        rel='self' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C1'/><atom:link
+        rel='edit' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C1/2ijv'/><gs:cell
+        row='2' col='1' inputValue='2x1'>2x1</gs:cell><batch:id>2,1</batch:id><batch:status
+        code='200' reason='Success'/><batch:operation type='update'/></atom:entry></atom:feed>
+    http_version: 
+  recorded_at: Fri, 06 Dec 2013 18:42:35 GMT
+- request:
+    method: get
+    uri: https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full?max-col=2&max-row=2&min-col=2&min-row=2&return-empty=true
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Authorization:
+      Authorization:
+      - GoogleLogin auth=DQAAAMwAAADMWltQuejlYd78Px9RfXhcHnb7tlPHfKPY4i69F9Hi0dhIQbyFRlHVcyMKaR3ajpn7yZLj-g3LYQk1SM-i9ejg3r4yH0rj9yZsBcy0ZiJV1L45w4jGXlgrvse68D5axixvDp7T7u6P6K-eOJj2SaKw8vBj156hBEyn4CQFJ0tVUjl5UPAN9Wt8hJmRNqULG3LoxYwLidLgPVjCtL-lF0YnUiSwbolVBzZAbyeYk1QSzX9xT5ms3sTQ4ESz42Bg9SQbc6kdlcWzvmQ_sO5GfrTY
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/atom+xml; charset=UTF-8
+      Expires:
+      - Fri, 06 Dec 2013 18:42:40 GMT
+      Date:
+      - Fri, 06 Dec 2013 18:42:40 GMT
+      Cache-Control:
+      - private, max-age=0, must-revalidate, no-transform
+      Vary:
+      - Accept, X-GData-Authorization, GData-Version
+      Gdata-Version:
+      - '1.0'
+      Last-Modified:
+      - Fri, 06 Dec 2013 18:42:38 GMT
+      Set-Cookie:
+      - NID=67=cQbD3pRJf1bzd_ftYzzrk1sCcdgkDT-b4GGscg8WBm-bIuyOYxIZL86VrMvC0wDSAjQeKiaH65AVd2Q_Ve5YxvWinnnZdg30pktLVmFxwHFkJ-pVnk0xtjyoM_QHg219;Domain=.google.com;Path=/;Expires=Sat,
+        07-Jun-2014 18:42:40 GMT;HttpOnly
+      P3p:
+      - CP="This is not a P3P policy! See http://www.google.com/support/accounts/bin/answer.py?hl=en&answer=151657
+        for more info."
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: <?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.org/2005/Atom'
+        xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/' xmlns:gs='http://schemas.google.com/spreadsheets/2006'
+        xmlns:batch='http://schemas.google.com/gdata/batch'><id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full</id><updated>2013-12-06T18:42:38.344Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><title
+        type='text'>Sheet1</title><link rel='alternate' type='text/html' href='https://spreadsheets.google.com/ccc?key=0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc'/><link
+        rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full'/><link
+        rel='http://schemas.google.com/g/2005#post' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full'/><link
+        rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/batch'/><link
+        rel='self' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full?min-col=2&amp;max-col=2&amp;return-empty=true&amp;max-row=2&amp;min-row=2'/><author><name>paul.jungwirth</name><email>paul.jungwirth@gmail.com</email></author><openSearch:totalResults>1</openSearch:totalResults><openSearch:startIndex>1</openSearch:startIndex><gs:rowCount>100</gs:rowCount><gs:colCount>20</gs:colCount><entry><id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C2</id><updated>2013-12-06T18:42:38.344Z</updated><category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><title
+        type='text'>B2</title><content type='text'>2x2</content><link rel='self' type='application/atom+xml'
+        href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C2'/><link
+        rel='edit' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C2/a23xo'/><gs:cell
+        row='2' col='2' inputValue='2x2'>2x2</gs:cell></entry></feed>
+    http_version: 
+  recorded_at: Fri, 06 Dec 2013 18:42:37 GMT
+- request:
+    method: post
+    uri: https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/batch
+    body:
+      encoding: UTF-8
+      string: |2
+                        <feed xmlns="http://www.w3.org/2005/Atom"
+                              xmlns:batch="http://schemas.google.com/gdata/batch"
+                              xmlns:gs="http://schemas.google.com/spreadsheets/2006">
+                          <id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full</id>
+                          <entry>
+                            <batch:id>2,2</batch:id>
+                            <batch:operation type="update"/>
+                            <id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C2</id>
+                            <link rel="edit" type="application/atom+xml"
+                              href="https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C2/a23xo"/>
+                            <gs:cell row="2" col="2" inputValue="2x2"/>
+                          </entry>
+                        </feed>
+    headers:
+      Authorization:
+      - GoogleLogin auth=DQAAAMwAAADMWltQuejlYd78Px9RfXhcHnb7tlPHfKPY4i69F9Hi0dhIQbyFRlHVcyMKaR3ajpn7yZLj-g3LYQk1SM-i9ejg3r4yH0rj9yZsBcy0ZiJV1L45w4jGXlgrvse68D5axixvDp7T7u6P6K-eOJj2SaKw8vBj156hBEyn4CQFJ0tVUjl5UPAN9Wt8hJmRNqULG3LoxYwLidLgPVjCtL-lF0YnUiSwbolVBzZAbyeYk1QSzX9xT5ms3sTQ4ESz42Bg9SQbc6kdlcWzvmQ_sO5GfrTY
+      Content-Type:
+      - application/atom+xml
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/atom+xml; charset=UTF-8
+      Gdata-Version:
+      - '1.0'
+      Set-Cookie:
+      - NID=67=O0n3ybyFFr3VP3s97FT61XHlZhk4M01SSuzeiYHZIy0xktykBbJeWQwthVsIRXZsU41IoB59PhzsYpjGc88JTzvOKlSeNHNahUXdz-Q3XUG26k7j3OJJTJMfCPt-hn1d;Domain=.google.com;Path=/;Expires=Sat,
+        07-Jun-2014 18:42:42 GMT;HttpOnly
+      P3p:
+      - CP="This is not a P3P policy! See http://www.google.com/support/accounts/bin/answer.py?hl=en&answer=151657
+        for more info."
+      Date:
+      - Fri, 06 Dec 2013 18:42:42 GMT
+      Expires:
+      - Fri, 06 Dec 2013 18:42:42 GMT
+      Cache-Control:
+      - private, max-age=0
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: <?xml version='1.0' encoding='UTF-8'?><atom:feed xmlns:atom='http://www.w3.org/2005/Atom'
+        xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/' xmlns:gs='http://schemas.google.com/spreadsheets/2006'
+        xmlns:batch='http://schemas.google.com/gdata/batch'><atom:id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/batch/1386355362467</atom:id><atom:updated>2013-12-06T18:42:42.478Z</atom:updated><atom:title
+        type='text'>Batch Feed</atom:title><atom:entry><atom:id>https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C2</atom:id><atom:updated>2013-12-06T18:42:42.472Z</atom:updated><atom:category
+        scheme='http://schemas.google.com/spreadsheets/2006' term='http://schemas.google.com/spreadsheets/2006#cell'/><atom:title
+        type='text'>B2</atom:title><atom:content type='text'>2x2</atom:content><atom:link
+        rel='self' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C2'/><atom:link
+        rel='edit' type='application/atom+xml' href='https://spreadsheets.google.com/feeds/cells/0AiVSev9-0p-PdEVrQldEY1I4dDJjVlpEQUkwblprcnc/od6/private/full/R2C2/a23xo'/><gs:cell
+        row='2' col='2' inputValue='2x2'>2x2</gs:cell><batch:id>2,2</batch:id><batch:status
+        code='200' reason='Success'/><batch:operation type='update'/></atom:entry></atom:feed>
+    http_version: 
+  recorded_at: Fri, 06 Dec 2013 18:42:39 GMT
+recorded_with: VCR 2.5.0
