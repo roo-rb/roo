@@ -4,39 +4,39 @@ require 'nokogiri'
 class Roo::Excelx < Roo::Base
   module Format
     EXCEPTIONAL_FORMATS = {
-        'h:mm am/pm' => :date,
-        'h:mm:ss am/pm' => :date,
+      'h:mm am/pm' => :date,
+      'h:mm:ss am/pm' => :date,
     }
 
     STANDARD_FORMATS = {
-        0 => 'General',
-        1 => '0',
-        2 => '0.00',
-        3 => '#,##0',
-        4 => '#,##0.00',
-        9 => '0%',
-        10 => '0.00%',
-        11 => '0.00E+00',
-        12 => '# ?/?',
-        13 => '# ??/??',
-        14 => 'mm-dd-yy',
-        15 => 'd-mmm-yy',
-        16 => 'd-mmm',
-        17 => 'mmm-yy',
-        18 => 'h:mm AM/PM',
-        19 => 'h:mm:ss AM/PM',
-        20 => 'h:mm',
-        21 => 'h:mm:ss',
-        22 => 'm/d/yy h:mm',
-        37 => '#,##0 ;(#,##0)',
-        38 => '#,##0 ;[Red](#,##0)',
-        39 => '#,##0.00;(#,##0.00)',
-        40 => '#,##0.00;[Red](#,##0.00)',
-        45 => 'mm:ss',
-        46 => '[h]:mm:ss',
-        47 => 'mmss.0',
-        48 => '##0.0E+0',
-        49 => '@',
+      0 => 'General',
+      1 => '0',
+      2 => '0.00',
+      3 => '#,##0',
+      4 => '#,##0.00',
+      9 => '0%',
+      10 => '0.00%',
+      11 => '0.00E+00',
+      12 => '# ?/?',
+      13 => '# ??/??',
+      14 => 'mm-dd-yy',
+      15 => 'd-mmm-yy',
+      16 => 'd-mmm',
+      17 => 'mmm-yy',
+      18 => 'h:mm AM/PM',
+      19 => 'h:mm:ss AM/PM',
+      20 => 'h:mm',
+      21 => 'h:mm:ss',
+      22 => 'm/d/yy h:mm',
+      37 => '#,##0 ;(#,##0)',
+      38 => '#,##0 ;[Red](#,##0)',
+      39 => '#,##0.00;(#,##0.00)',
+      40 => '#,##0.00;[Red](#,##0.00)',
+      45 => 'mm:ss',
+      46 => '[h]:mm:ss',
+      47 => 'mmss.0',
+      48 => '##0.0E+0',
+      49 => '@',
     }
 
     def to_type(format)
@@ -63,7 +63,7 @@ class Roo::Excelx < Roo::Base
     module_function :to_type
   end
 
-  class ExceedsMaxError < Exception; end
+  ExceedsMaxError = Class.new(StandardError)
 
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
@@ -289,8 +289,8 @@ class Roo::Excelx < Roo::Base
       return nil,nil,nil
     else
       return @label[labelname][1].to_i,
-          Roo::Base.letter_to_number(@label[labelname][2]),
-          @label[labelname][0]
+        Roo::Base.letter_to_number(@label[labelname][2]),
+        @label[labelname][0]
     end
   end
 
@@ -427,20 +427,20 @@ class Roo::Excelx < Roo::Base
     @cell[sheet] ||= {}
     @cell[sheet][key] =
         case @cell_type[sheet][key]
-          when :float
-            v.to_f
-          when :string
-            v
-          when :date
-            (base_date+v.to_i).strftime("%Y-%m-%d")
-          when :datetime
-            (base_date+v.to_f).strftime("%Y-%m-%d %H:%M:%S")
-          when :percentage
-            v.to_f
-          when :time
-            v.to_f*(24*60*60)
-          else
-            v
+        when :float
+          v.to_f
+        when :string
+          v
+        when :date
+          (base_date+v.to_i).strftime("%Y-%m-%d")
+        when :datetime
+          (base_date+v.to_f).strftime("%Y-%m-%d %H:%M:%S")
+        when :percentage
+          v.to_f
+        when :time
+          v.to_f*(24*60*60)
+        else
+          v
         end
     @excelx_type[sheet] ||= {}
     @excelx_type[sheet][key] = excelx_type
@@ -469,20 +469,20 @@ class Roo::Excelx < Roo::Base
 
     def value
       case type
-        when :float
-          @value.to_f
-        when :string
-          @value
-        when :date
-          (@base_data+@value.to_i).strftime("%Y-%m-%d")
-        when :datetime
-          (@base_data+@value.to_f).strftime("%Y-%m-%d %H:%M:%S")
-        when :percentage
-          @value.to_f
-        when :time
-          @value.to_f*(24*60*60)
-        else
-          @value
+      when :float
+        @value.to_f
+      when :string
+        @value
+      when :date
+        (@base_data+@value.to_i).strftime("%Y-%m-%d")
+      when :datetime
+        (@base_data+@value.to_f).strftime("%Y-%m-%d %H:%M:%S")
+      when :percentage
+        @value.to_f
+      when :time
+        @value.to_f*(24*60*60)
+      else
+        @value
       end
     end
 
@@ -579,89 +579,89 @@ Datei xl/comments1.xml
                                            # </c>, format: , tmp_type: float
     value_type =
         case cell_element['t']
-          when 's'
-            :shared
-          when 'b'
-            :boolean
-          # 2011-02-25 BEGIN
-          when 'str'
-            :string
-          # 2011-02-25 END
-          # 2011-09-15 BEGIN
-          when 'inlineStr'
-            :inlinestr
-          # 2011-09-15 END
-          else
-            format = attribute2format(s_attribute)
-            Format.to_type(format)
+        when 's'
+          :shared
+        when 'b'
+          :boolean
+        # 2011-02-25 BEGIN
+        when 'str'
+          :string
+        # 2011-02-25 END
+        # 2011-09-15 BEGIN
+        when 'inlineStr'
+          :inlinestr
+        # 2011-09-15 END
+        else
+          format = attribute2format(s_attribute)
+          Format.to_type(format)
         end
     formula = nil
     y, x = Roo::Base.split_coordinate(cell_element['r'])
     cell_element.children.each do |cell|
       case cell.name
-        when 'is'
-          cell.children.each do |is|
-            if is.name == 't'
-              inlinestr_content = is.content
-              value_type = :string
-              v = inlinestr_content
-              excelx_type = :string
-              excelx_value = inlinestr_content #cell.content
-              return Cell.new(Cell::Coordinate.new(x, y), v,
-                              excelx_value: excelx_value,
-                              excelx_type: excelx_type,
-                              formula: formula,
-                              type: value_type,
-                              s_attribute: s_attribute,
-                              sheet: options[:sheet],
-                              base_date: base_date)
-            end
+      when 'is'
+        cell.children.each do |is|
+          if is.name == 't'
+            inlinestr_content = is.content
+            value_type = :string
+            v = inlinestr_content
+            excelx_type = :string
+            excelx_value = inlinestr_content #cell.content
+            return Cell.new(Cell::Coordinate.new(x, y), v,
+                            excelx_value: excelx_value,
+                            excelx_type: excelx_type,
+                            formula: formula,
+                            type: value_type,
+                            s_attribute: s_attribute,
+                            sheet: options[:sheet],
+                            base_date: base_date)
           end
-        when 'f'
-          formula = cell.content
-        when 'v'
-          if [:time, :datetime].include?(value_type) && cell.content.to_f >= 1.0
-            value_type =
-                if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001
-                  :datetime
-                else
-                  :date
-                end
-          end
-          excelx_type = [:numeric_or_formula,format.to_s]
-          excelx_value = cell.content
-          v =
-              case value_type
-                when :shared
-                  value_type = :string
-                  excelx_type = :string
-                  @shared_table[cell.content.to_i]
-                when :boolean
-                  (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
-                when :date
-                  cell.content
-                when :time
-                  cell.content
-                when :datetime
-                  cell.content
-                when :formula
-                  cell.content.to_f #TODO: !!!!
-                when :string
-                  excelx_type = :string
-                  cell.content
-                else
-                  val = Integer(cell.content) rescue Float(cell.content) rescue nil
-                  value_type = val && val.is_a?(Float)  ? :float : :string
-                  cell.content
+        end
+      when 'f'
+        formula = cell.content
+      when 'v'
+        if [:time, :datetime].include?(value_type) && cell.content.to_f >= 1.0
+          value_type =
+              if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001
+                :datetime
+              else
+                :date
               end
-          return Cell.new(Cell::Coordinate.new(x, y), v,
-                          excelx_value: excelx_value,
-                          excelx_type: excelx_type,
-                          formula: formula,
-                          type: value_type,
-                          s_attribute: s_attribute,
-                          sheet: options[:sheet],
-                          base_date: base_date)
+        end
+        excelx_type = [:numeric_or_formula,format.to_s]
+        excelx_value = cell.content
+        v =
+            case value_type
+            when :shared
+              value_type = :string
+              excelx_type = :string
+              @shared_table[cell.content.to_i]
+            when :boolean
+              (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
+            when :date
+              cell.content
+            when :time
+              cell.content
+            when :datetime
+              cell.content
+            when :formula
+              cell.content.to_f #TODO: !!!!
+            when :string
+              excelx_type = :string
+              cell.content
+            else
+              val = Integer(cell.content) rescue Float(cell.content) rescue nil
+              value_type = val && val.is_a?(Float)  ? :float : :string
+              cell.content
+            end
+        return Cell.new(Cell::Coordinate.new(x, y), v,
+                        excelx_value: excelx_value,
+                        excelx_type: excelx_type,
+                        formula: formula,
+                        type: value_type,
+                        s_attribute: s_attribute,
+                        sheet: options[:sheet],
+                        base_date: base_date)
       end
     end
     Cell.new(Cell::Coordinate.new(x, y), nil)
