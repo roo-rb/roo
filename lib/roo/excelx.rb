@@ -106,7 +106,7 @@ class Roo::Excelx < Roo::Base
         load_xml(item)
       end
       @rels_doc = @rels_files.map do |item|
-        load_xml(item)
+        load_xml(item) unless item.nil?
       end
     end
     super(filename, options)
