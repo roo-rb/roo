@@ -11,6 +11,16 @@ describe Roo::Spreadsheet do
       end
     end
 
+    context 'for a tempfile' do
+      let(:tempfile) { Tempfile.new('foo.csv') }
+      let(:filename) { tempfile.path }
+
+      it 'loads the proper type' do
+        expect(Roo::CSV).to receive(:new).with(filename, file_warning: :ignore).and_call_original
+        expect(Roo::Spreadsheet.open(tempfile, extension: 'csv')).to be_a(Roo::CSV)
+      end
+    end
+
     context 'for a url' do
       context 'that is csv' do
         let(:filename) { 'http://example.com/file.csv?with=params#and=anchor' }
@@ -26,18 +36,18 @@ describe Roo::Spreadsheet do
       let(:filename) { 'file.csv' }
       let(:options) { {csv_options: {col_sep: '"'}} }
 
-      context 'with options' do
-        it 'passes the options through' do
+      context 'with csv_options' do
+        it 'passes the csv_options through' do
           expect(Roo::CSV).to receive(:new).with(filename, options)
           Roo::Spreadsheet.open(filename, options)
         end
       end
     end
 
-    context 'when the file extension' do
+    context 'with a file extension option' do
       let(:filename) { 'file.xls' }
 
-      context "is xls" do
+      context "xls" do
         let(:options) { { extension: "xls" } }
 
         it 'loads with xls extension options' do
@@ -46,7 +56,7 @@ describe Roo::Spreadsheet do
         end
       end
 
-      context "is .xls" do
+      context ".xls" do
         let(:options) { { extension: ".xls" } }
 
         it 'loads with .xls extension options' do

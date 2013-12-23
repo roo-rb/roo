@@ -1,3 +1,8 @@
+== unreleased
+
+* enhancements
+  * Extend Roo::Spreadsheet.open to accept Tempfiles and other arguments responding to #path. Note they require an :extension option to be declared, as the tempfile mangles the extension. #84.
+
 == 1.13.2 2013-12-23
 
 * bugfixes

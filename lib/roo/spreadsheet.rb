@@ -2,12 +2,12 @@ module Roo
   class Spreadsheet
     class << self
       def open(file, options = {})
-        file = File === file ? file.path : file
+        file = file.respond_to?(:path) ? file.path : file
 
         extension =
           if options[:extension]
             options[:file_warning] = :ignore
-            ".#{options[:extension]}".gsub(/[.]+/, ".")
+            ".#{options.delete(:extension)}".gsub(/[.]+/, ".")
           else
             File.extname(URI.parse(file).path)
           end
@@ -26,7 +26,8 @@ module Roo
         when '.csv'
           Roo::CSV.new(file, options)
         else
-          raise ArgumentError, "Don't know how to open file #{file}"
+          raise ArgumentError,
+            "Can't detect the type of #{file} - please use the :extension option to declare its type."
         end
       end
     end
