@@ -376,7 +376,7 @@ class Roo::Excelx < Roo::Base
         v
       end
 
-    @cell[sheet][key] = Spreadsheet::Link.new(@hyperlink[sheet][key], @cell[sheet][key]) if hyperlink?(y,x+i)
+    @cell[sheet][key] = Spreadsheet::Link.new(@hyperlink[sheet][key], @cell[sheet][key].to_s) if hyperlink?(y,x+i)
     @excelx_type[sheet] ||= {}
     @excelx_type[sheet][key] = excelx_type
     @excelx_value[sheet] ||= {}
