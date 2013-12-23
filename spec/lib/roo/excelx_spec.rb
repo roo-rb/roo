@@ -9,5 +9,15 @@ describe Roo::Excelx do
     it 'creates an instance' do
       expect(subject).to be_a(Roo::Excelx)
     end
+
+    context 'given a file with missing rels' do
+      subject {
+        Roo::Excelx.new('test/files/file_item_error.xlsx')
+      }
+
+      it 'creates an instance' do
+        expect(subject).to be_a(Roo::Excelx)
+      end
+    end
   end
 end

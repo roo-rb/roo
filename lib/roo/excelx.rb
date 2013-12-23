@@ -99,15 +99,9 @@ class Roo::Excelx < Roo::Base
         @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
         read_styles(@styles_doc)
       end
-      @sheet_doc = @sheet_files.compact.map do |item|
-        load_xml(item)
-      end
-      @comments_doc = @comments_files.compact.map do |item|
-        load_xml(item)
-      end
-      @rels_doc = @rels_files.map do |item|
-        load_xml(item) unless item.nil?
-      end
+      @sheet_doc = load_xmls(@sheet_files)
+      @comments_doc = load_xmls(@comments_files)
+      @rels_doc = load_xmls(@rels_files)
     end
     super(filename, options)
     @formula = Hash.new
@@ -346,6 +340,12 @@ class Roo::Excelx < Roo::Base
   end
 
   private
+
+  def load_xmls(paths)
+    paths.compact.map do |item|
+      load_xml(item)
+    end
+  end
 
   # helper function to set the internal representation of cells
   def set_cell_values(sheet,x,y,i,v,value_type,formula,
