@@ -1113,7 +1113,19 @@ Sheet 3:
       end
     end
   end
-
+  def test_link_to_csv
+    with_each_spreadsheet(:name=>'link',:format=>:excel) do |oo|
+      Dir.mktmpdir do |tempdir|
+        csv_output = File.join(tempdir,'link.csv')
+        assert oo.to_csv(csv_output)
+        assert File.exists?(csv_output)
+puts `diff --strip-trailing-cr #{TESTDIR}/link.csv #{csv_output}`
+        assert_equal "", `diff --strip-trailing-cr #{TESTDIR}/link.csv #{csv_output}`
+        # --strip-trailing-cr is needed because the test-file use 0A and
+        # the test on an windows box generates 0D 0A as line endings
+      end
+    end
+  end
   def test_date_time_yaml
     with_each_spreadsheet(:name=>'time-test') do |oo|
       expected =

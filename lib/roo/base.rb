@@ -778,6 +778,8 @@ class Roo::Base
         onecell.to_s
       when :time
         Roo::Base.integer_to_timestring(onecell)
+      when :link
+          %{"#{onecell.url.gsub(/"/,'""')}"}
       else
         raise "unhandled celltype #{celltype(row,col,sheet)}"
       end || ""
