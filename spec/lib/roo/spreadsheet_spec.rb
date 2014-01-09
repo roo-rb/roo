@@ -44,6 +44,15 @@ describe Roo::Spreadsheet do
       end
     end
 
+    context "with spaces in the filename" do
+      let(:filename) { 'path with spaces.xls'}
+
+      it 'loads the proper type' do
+        expect(Roo::Excel).to receive(:new).with(filename, {})
+        Roo::Spreadsheet.open(filename)
+      end
+    end
+
     context 'with a file extension option' do
       let(:filename) { 'file.xls' }
 
