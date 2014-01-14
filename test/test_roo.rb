@@ -2289,4 +2289,12 @@ where the expected result is
     end
   end
 
+  def test_comment_xpath_option
+    sheet =
+      Roo::Excelx.new('test/files/comment_sheet.xlsx',
+                      comment_xpath: './xmlns:text/xmlns:t')
+
+    assert_equal false, sheet.comments.empty?
+  end
+
 end # class
