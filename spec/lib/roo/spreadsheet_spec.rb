@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+
 describe Roo::Spreadsheet do
   describe '.open' do
     context 'when the file extension is uppercase' do
@@ -65,6 +66,15 @@ describe Roo::Spreadsheet do
         end
       end
 
+    end
+
+    context 'when the file name contains a space' do
+      let(:filename) { 'foo bar.csv' }
+
+      it 'loads the proper type' do
+        expect(Roo::CSV).to receive(:new).with(filename, {})
+        Roo::Spreadsheet.open(filename)
+      end
     end
   end
 end
