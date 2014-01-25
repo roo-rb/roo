@@ -13,6 +13,6 @@ group :test do
   # additional testing libs
   gem 'webmock'
   gem 'shoulda'
-  gem 'rspec'
+  gem 'rspec', '>= 2.14'
   gem 'vcr'
 end
