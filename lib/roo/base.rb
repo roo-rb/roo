@@ -60,7 +60,6 @@ class Roo::Base
 
     @header_line = 1
     @default_sheet = self.sheets.first
-    @header_line = 1
   end
 
   # sets the working sheet in the document
