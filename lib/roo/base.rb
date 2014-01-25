@@ -218,43 +218,11 @@ class Roo::Base
   # (experimental. see examples in the test_roo.rb file)
   def find(*args) # :nodoc
     options = (args.last.is_a?(Hash) ? args.pop : {})
-    result_array = options[:array]
-    header_for = Hash[1.upto(last_column).map do |col|
-      [col, cell(@header_line,col)]
-    end]
-    #-- id
+
     if args[0].class == Fixnum
-      rownum = args[0]
-      if @header_line
-        [Hash[1.upto(self.row().size).map {|j|
-          [header_for.fetch(j), cell(rownum,j)]
-        }]]
-      else
-        self.row(rownum).size.times.map {|j|
-          cell(rownum,j + 1)
-        }
-      end
-    #-- :all
+      find_by_row(args)
     elsif args[0] == :all
-      rows = first_row.upto(last_row)
-
-      # are all conditions met?
-      if (conditions = options[:conditions]) && !conditions.empty?
-        column_with = header_for.invert
-        rows = rows.select do |i|
-          conditions.all? { |key,val| cell(i,column_with[key]) == val }
-        end
-      end
-
-      rows.map do |i|
-        if result_array
-          self.row(i)
-        else
-          Hash[1.upto(self.row(i).size).map do |j|
-            [header_for.fetch(j), cell(i,j)]
-          end]
-        end
-      end
+      find_by_conditions(options)
     end
   end
 
@@ -548,6 +516,43 @@ class Roo::Base
   end
 
   private
+
+  def find_by_row(args)
+    rownum = args[0]
+    current_row = rownum
+    current_row += header_line - 1 if @header_line
+
+    self.row(current_row).size.times.map do |j|
+      cell(current_row, j + 1)
+    end
+  end
+
+  def find_by_conditions(options)
+    rows = first_row.upto(last_row)
+    result_array = options[:array]
+    header_for = Hash[1.upto(last_column).map do |col|
+      [col, cell(@header_line,col)]
+    end]
+
+    # are all conditions met?
+    if (conditions = options[:conditions]) && !conditions.empty?
+      column_with = header_for.invert
+      rows = rows.select do |i|
+        conditions.all? { |key,val| cell(i,column_with[key]) == val }
+      end
+    end
+
+    rows.map do |i|
+      if result_array
+        self.row(i)
+      else
+        Hash[1.upto(self.row(i).size).map do |j|
+          [header_for.fetch(j), cell(i,j)]
+        end]
+      end
+    end
+  end
+
 
   def without_changing_default_sheet
     original_default_sheet = default_sheet
