@@ -702,6 +702,20 @@ class TestRoo < Test::Unit::TestCase
     end
   end
 
+  def test_find_by_row_if_header_line_is_not_nil
+    with_each_spreadsheet(:name=>'numbers1') do |oo|
+      oo.header_line = 2
+      assert_not_nil oo.header_line
+      rec = oo.find 1
+      assert rec
+      assert_equal 5, rec[0]
+      assert_equal 6, rec[1]
+      rec = oo.find 15
+      assert rec
+      assert_equal "einundvierzig", rec[0]
+    end
+  end
+
   def test_find_by_conditions
     if LONG_RUN
       with_each_spreadsheet(:name=>'Bibelbund', :format=>[:openoffice,
