@@ -223,10 +223,13 @@ class Roo::Base
   def find(*args) # :nodoc
     options = (args.last.is_a?(Hash) ? args.pop : {})
 
-    if args[0].class == Fixnum
-      find_by_row(args)
-    elsif args[0] == :all
+    case args[0]
+    when Fixnum
+      find_by_row(args[0])
+    when :all
       find_by_conditions(options)
+    else
+      raise ArgumentError, "unexpected arg #{args[0].inspect}, pass a row index or :all"
     end
   end
 
@@ -521,35 +524,33 @@ class Roo::Base
 
   private
 
-  def find_by_row(args)
-    rownum = args[0]
-    current_row = rownum
-    current_row += header_line - 1 if @header_line
+  def find_by_row(row_index)
+    row_index += (header_line - 1) if @header_line
 
-    self.row(current_row).size.times.map do |j|
-      cell(current_row, j + 1)
+    row(row_index).size.times.map do |cell_index|
+      cell(row_index, cell_index + 1)
     end
   end
 
   def find_by_conditions(options)
     rows = first_row.upto(last_row)
-    result_array = options[:array]
     header_for = Hash[1.upto(last_column).map do |col|
       [col, cell(@header_line,col)]
     end]
 
     # are all conditions met?
-    if (conditions = options[:conditions]) && !conditions.empty?
+    conditions = options[:conditions]
+    if conditions && !conditions.empty?
       column_with = header_for.invert
       rows = rows.select do |i|
         conditions.all? { |key,val| cell(i,column_with[key]) == val }
       end
     end
 
-    rows.map do |i|
-      if result_array
-        self.row(i)
-      else
+    if options[:array]
+      rows.map {|i| self.row(i) }
+    else
+      rows.map do |i|
         Hash[1.upto(self.row(i).size).map do |j|
           [header_for.fetch(j), cell(i,j)]
         end]
