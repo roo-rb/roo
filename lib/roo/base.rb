@@ -183,16 +183,16 @@ class Roo::Base
   end
 
   # write the current spreadsheet to stdout or into a file
-  def to_csv(filename=nil,sheet=nil)
+  def to_csv(filename=nil,sheet=nil,separator=',')
     sheet ||= @default_sheet
     if filename
       File.open(filename,"w") do |file|
-        write_csv_content(file,sheet)
+        write_csv_content(file,sheet,separator)
       end
       return true
     else
       sio = StringIO.new
-      write_csv_content(sio,sheet)
+      write_csv_content(sio,sheet,separator)
       sio.rewind
       return sio.read
     end
@@ -728,12 +728,12 @@ class Roo::Base
 
   # Write all cells to the csv file. File can be a filename or nil. If the this
   # parameter is nil the output goes to STDOUT
-  def write_csv_content(file=nil,sheet=nil)
+  def write_csv_content(file=nil,sheet=nil,separator=',')
     file ||= STDOUT
     if first_row(sheet) # sheet is not empty
       1.upto(last_row(sheet)) do |row|
         1.upto(last_column(sheet)) do |col|
-          file.print(",") if col > 1
+          file.print(separator) if col > 1
           file.print cell_to_csv(row,col,sheet)
         end
         file.print("\n")
