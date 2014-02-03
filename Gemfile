@@ -15,4 +15,6 @@ group :test do
   gem 'shoulda'
   gem 'rspec', '>= 2.14'
   gem 'vcr'
+  gem 'pry'
+  gem 'pry-nav'
 end
