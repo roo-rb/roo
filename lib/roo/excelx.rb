@@ -367,7 +367,7 @@ class Roo::Excelx < Roo::Base
       when :date
         (base_date+v.to_i).strftime("%Y-%m-%d")
       when :datetime
-        (base_date+v.to_f).strftime("%Y-%m-%d %H:%M:%S")
+        (base_date+v.to_f.round(6)).strftime("%Y-%m-%d %H:%M:%S")
       when :percentage
         v.to_f
       when :time
