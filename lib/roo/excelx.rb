@@ -70,6 +70,7 @@ class Roo::Excelx < Roo::Base
     if Hash === options
       packed = options[:packed]
       file_warning = options[:file_warning] || :error
+      @comment_xpath = options[:comment_xpath] || './xmlns:text/xmlns:r/xmlns:t'
     else
       warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excelx.new` is deprecated. Use an options hash instead.'
       packed = options
@@ -524,7 +525,7 @@ Datei xl/comments1.xml
     @comments_doc[n].xpath("//xmlns:comments/xmlns:commentList/xmlns:comment").each do |comment|
       ref = comment.attributes['ref'].to_s
       row,col = Roo::Base.split_coordinate(ref)
-      comment.xpath('./xmlns:text/xmlns:r/xmlns:t').each do |text|
+      comment.xpath(@comment_xpath).each do |text|
         @comment[sheet] ||= {}
         @comment[sheet][[row,col]] = text.text
       end
