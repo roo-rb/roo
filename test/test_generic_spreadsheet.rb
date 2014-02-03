@@ -174,6 +174,10 @@ class TestBase < Test::Unit::TestCase
   def test_to_csv
     assert_equal expected_csv,@oo.to_csv
   end
+
+  def test_to_csv_with_separator
+    assert_equal expected_csv_with_semicolons,@oo.to_csv(nil, nil, ';')
+  end
 protected
   def setup_test_sheet(workbook=nil)
     workbook ||= @oo
@@ -255,5 +259,8 @@ protected
 
   def expected_csv
     ",,,,,,\n,,,,,,\n,,,,,,\n,,,,,,\n1961-11-21,,,,,,\n,,,,,,\n,,,,,,\n,,\"thisisc8\",,,,\"thisisg8\"\n,,,,,,\n,,,,,,\n,,,,,,\n41,42,43,44,45,,\n,,,,,,\n,,,,,,\n,,43,44,45,,\n,,\"dreiundvierzig\",\"vierundvierzig\",\"fuenfundvierzig\",,\n"
+  end
+  def expected_csv_with_semicolons
+    expected_csv.gsub /\,/, ';' 
   end
 end
