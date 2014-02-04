@@ -140,10 +140,7 @@ class Roo::Excelx < Roo::Base
       yyyy,mm,dd = @cell[sheet][[row,col]].split('-')
       return Date.new(yyyy.to_i,mm.to_i,dd.to_i)
     elsif celltype(row,col,sheet) == :datetime
-      date_part,time_part = @cell[sheet][[row,col]].split(' ')
-      yyyy,mm,dd = date_part.split('-')
-      hh,mi,ss = time_part.split(':')
-      return DateTime.civil(yyyy.to_i,mm.to_i,dd.to_i,hh.to_i,mi.to_i,ss.to_i)
+      return create_datetime_from( @cell[sheet][[row,col]] )
     end
     @cell[sheet][[row,col]]
   end
@@ -367,7 +364,7 @@ class Roo::Excelx < Roo::Base
       when :date
         (base_date+v.to_i).strftime("%Y-%m-%d")
       when :datetime
-        (base_date+v.to_f.round(6)).strftime("%Y-%m-%d %H:%M:%S")
+        (base_date+v.to_f.round(6)).strftime("%Y-%m-%d %H:%M:%S.%N")
       when :percentage
         v.to_f
       when :time
@@ -671,4 +668,17 @@ Datei xl/comments1.xml
     base_date
   end
 
+  def create_datetime_from(datetime_string)
+    date_part,time_part = round_time_from(datetime_string).split(' ')
+    yyyy,mm,dd = date_part.split('-')
+    hh,mi,ss = time_part.split(':')
+    return DateTime.civil(yyyy.to_i,mm.to_i,dd.to_i,hh.to_i,mi.to_i,ss.to_i)
+  end
+
+  def round_time_from(datetime_string)
+    date_part,time_part = datetime_string.split(' ')
+    yyyy,mm,dd = date_part.split('-')
+    hh,mi,ss = time_part.split(':')
+    Time.new(yyyy.to_i, mm.to_i, dd.to_i, hh.to_i, mi.to_i, ss.to_r).round(0).strftime("%Y-%m-%d %H:%M:%S")
+  end
 end # class
