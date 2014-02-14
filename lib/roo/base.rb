@@ -12,6 +12,9 @@ rescue LoadError
   Roo::ZipFile = Zip::File
 end
 
+
+
+
 # Base class for all other types of spreadsheets
 class Roo::Base
   include Enumerable
@@ -23,42 +26,23 @@ class Roo::Base
   # sets the line with attribute names (default: 1)
   attr_accessor :header_line
 
-  protected
 
-  def self.split_coordinate(str)
-    letter,number = Roo::Base.split_coord(str)
-    x = letter_to_number(letter)
-    y = number
-    return y, x
-  end
-
-  def self.split_coord(s)
-    if s =~ /([a-zA-Z]+)([0-9]+)/
-      letter = $1
-      number = $2.to_i
-    else
-      raise ArgumentError
-    end
-    return letter, number
-  end
-
-
-  public
+public
 
   def initialize(filename, options={}, file_warning=:error, tmpdir=nil)
     @filename = filename
-    @options = options
+    @options  = options
 
-    @cell = {}
-    @cell_type = {}
-    @cells_read = {}
+    @cell        = {}
+    @cell_type   = {}
+    @cells_read  = {}
 
-    @first_row = {}
-    @last_row = {}
+    @first_row    = {}
+    @last_row     = {}
     @first_column = {}
-    @last_column = {}
+    @last_column  = {}
 
-    @header_line = 1
+    @header_line   = 1
     @default_sheet = self.sheets.first
   end
 
@@ -67,8 +51,12 @@ class Roo::Base
   def default_sheet=(sheet)
     validate_sheet!(sheet)
     @default_sheet = sheet
-    @first_row[sheet] = @last_row[sheet] = @first_column[sheet] = @last_column[sheet] = nil
-    @cells_read[sheet] = false
+
+    @first_row[sheet]    = nil
+    @last_row[sheet]     = nil
+    @first_column[sheet] = nil 
+    @last_column[sheet]  = nil
+    @cells_read[sheet]   = false
   end
 
   # first non-empty column as a letter
@@ -81,6 +69,7 @@ class Roo::Base
     Roo::Base.number_to_letter(last_column(sheet))
   end
 
+  #TODO These next four methods use a lot of repeatable logic.  Refactor.
   # returns the number of the first non-empty row
   def first_row(sheet=nil)
     sheet ||= @default_sheet
@@ -90,13 +79,18 @@ class Roo::Base
     end
     impossible_value = 999_999 # more than a spreadsheet can hold
     result = impossible_value
-    @cell[sheet].each_pair {|key,value|
-      y = key.first.to_i # _to_string(key).split(',')
-      result = [result, y].min if value
-    } if @cell[sheet]
+    
+    if @cell[sheet]
+      @cell[sheet].each_pair do |key,value|
+        y = key.first.to_i # _to_string(key).split(',')
+        result = [result, y].min if value
+      end
+    end
+    
     result = nil if result == impossible_value
+    
     @first_row[sheet] = result
-    result
+    return result
   end
 
   # returns the number of the last non-empty row
@@ -311,10 +305,10 @@ class Roo::Base
   # returns an XML representation of all sheets of a spreadsheet file
   def to_xml
     Nokogiri::XML::Builder.new do |xml|
-      xml.spreadsheet {
+      xml.spreadsheet do
         self.sheets.each do |sheet|
           self.default_sheet = sheet
-          xml.sheet(:name => sheet) { |x|
+          xml.sheet(:name => sheet) do |x|
             if first_row and last_row and first_column and last_column
               # sonst gibt es Fehler bei leeren Blaettern
               first_row.upto(last_row) do |row|
@@ -328,9 +322,9 @@ class Roo::Base
                 end
               end
             end
-          }
+          end
         end
-      }
+      end
     end.to_xml
   end
 
@@ -452,28 +446,53 @@ class Roo::Base
     end
   end
 
-  protected
+protected
+  ##
+  # 
+  def self.split_coordinate(str)
+    letter,number = Roo::Base.split_coord(str)
+    x = letter_to_number(letter)
+    y = number
+    return y, x
+  end
 
+  ##
+  #
+  def self.split_coord(s)
+    if s =~ /([a-zA-Z]+)([0-9]+)/
+      letter = $1
+      number = $2.to_i
+    else
+      raise ArgumentError
+    end
+    return letter, number
+  end
+
+  ##
+  # Loads XML from a path
   def load_xml(path)
     File.open(path) do |file|
       Nokogiri::XML(file)
     end
   end
 
+  # TODO This does something, but I have no idea what or why.  Figure it out and comment.
   def file_type_check(filename, ext, name, warning_level, packed=nil)
     new_expression = {
-      '.ods' => 'Roo::OpenOffice.new',
-      '.xls' => 'Roo::Excel.new',
+      '.ods'  => 'Roo::OpenOffice.new',
+      '.xls'  => 'Roo::Excel.new',
       '.xlsx' => 'Roo::Excelx.new',
-      '.csv' => 'Roo::CSV.new',
-      '.xml' => 'Roo::Excel2003XML.new',
+      '.csv'  => 'Roo::CSV.new',
+      '.xml'  => 'Roo::Excel2003XML.new',
     }
+
     if packed == :zip
 	    # lalala.ods.zip => lalala.ods
-	    # hier wird KEIN unzip gemacht, sondern nur der Name der Datei
-	    # getestet, falls es eine gepackte Datei ist.
+	    # Here is NOT made ​​unzip, but only the name of the file 
+      # Tested, if it is a compressed file.
 	    filename = File.basename(filename,File.extname(filename))
     end
+
     case ext
     when '.ods', '.xls', '.xlsx', '.csv', '.xml'
       correct_class = "use #{new_expression[ext]} to handle #{ext} spreadsheet files. This has #{File.extname(filename).downcase}"
@@ -484,6 +503,7 @@ class Roo::Base
     if uri?(filename) && qs_begin = filename.rindex('?')
       filename = filename[0..qs_begin-1]
     end
+
     if File.extname(filename).downcase != ext
       case warning_level
       when :error
@@ -500,10 +520,11 @@ class Roo::Base
     end
   end
 
-  # konvertiert einen Key in der Form "12,45" (=row,column) in
-  # ein Array mit numerischen Werten ([12,45])
-  # Diese Methode ist eine temp. Loesung, um zu erforschen, ob der
-  # Zugriff mit numerischen Keys schneller ist.
+  ##
+  # Converts a key of the form "12.45" (= row, column) in 
+  # An array with numeric values ​​([12,45])
+  # This method is a temp. Solution in order to explore whether the 
+  # Access with numeric keys is faster.
   def key_to_num(str)
     r,c = str.split(',')
     [r.to_i,c.to_i]
@@ -514,7 +535,7 @@ class Roo::Base
     "#{arr[0]},#{arr[1]}"
   end
 
-  private
+private
 
   def find_by_row(args)
     rownum = args[0]
@@ -572,14 +593,18 @@ class Roo::Base
 
   def clean_sheet(sheet)
     read_cells(sheet)
+
     @cell[sheet].each_pair do |coord,value|
       if String === value
         @cell[sheet][coord] = sanitize_value(value)
       end
     end
+
     @cleaned[sheet] = true
   end
 
+  ##
+  # What does this do?
   def sanitize_value(v)
     v.strip.unpack('U*').select {|b| b < 127}.pack('U*')
   end
@@ -605,6 +630,7 @@ class Roo::Base
     @cell_type[sheet][[row,col]] = type
   end
 
+  ##
   # converts cell coordinate to numeric values of row,col
   def normalize(row,col)
     if row.class == String
@@ -622,10 +648,14 @@ class Roo::Base
     return row,col
   end
 
+  ##
+  # TODO: More robust check
   def uri?(filename)
     filename.start_with?("http://", "https://")
   end
 
+  ##
+  # Add option for download to RAM
   def download_uri(uri, tmpdir)
     require 'open-uri'
     tempfilename = File.join(tmpdir, File.basename(uri))
@@ -642,6 +672,7 @@ class Roo::Base
     tempfilename
   end
 
+  #TODO This is a foolish non-thread safe manner of opening spreadsheets
   def open_from_stream(stream, tmpdir)
     tempfilename = File.join(tmpdir, "spreadsheet")
     File.open(tempfilename,"wb") do |file|
@@ -652,37 +683,50 @@ class Roo::Base
 
   LETTERS = %w{A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
 
-  # convert a number to something like 'AB' (1 => 'A', 2 => 'B', ...)
-  def self.number_to_letter(n)
-    letters=""
-    if n > 26
-      while n % 26 == 0 && n != 0
-        letters << 'Z'
-        n = (n - 26) / 26
-      end
-      while n > 0
-        num = n%26
-        letters = LETTERS[num-1] + letters
-        n = (n / 26)
-      end
-    else
-      letters = LETTERS[n-1]
+  ##
+  # Convert a number to letters as per the standard spreadsheet columnation 
+  # eg. 27 => 'AA' (1 => 'A', 2 => 'B', ...)
+  def self.number_to_letter(number)
+    result = ""
+    number = number.to_i
+    
+    while number > 0 do
+      modulo = (number - 1) % 26;
+      number = (number - modulo) / 26
+
+      result = LETTERS[modulo] + result
     end
-    letters
+
+    return result
   end
 
   # convert letters like 'AB' to a number ('A' => 1, 'B' => 2, ...)
+  ##
+  # Convert a letters to numbers as per the standard spreadsheet columnation 
+  # eg. 'AA' => 27 (1 => 'A', 2 => 'B', ...)
   def self.letter_to_number(letters)
     result = 0
+
     while letters && letters.length > 0
       character = letters[0,1].upcase
       num = LETTERS.index(character)
       raise ArgumentError, "invalid column character '#{letters[0,1]}'" if num == nil
       num += 1
-      result = result * 26 + num
+      result  = result * 26 + num
       letters = letters[1..-1]
     end
     result
+  end
+
+  ##
+  # Converts an integer value to a time string like '02:05:06'
+  def self.integer_to_timestring(content)
+    h = (content/3600.0).floor
+    content = content - h*3600
+    m = (content/60.0).floor
+    content = content - m*60
+    s = content
+    sprintf("%02d:%02d:%02d", h, m, s)
   end
 
   def unzip(filename, tmpdir)
@@ -788,15 +832,5 @@ class Roo::Base
         raise "unhandled celltype #{celltype(row,col,sheet)}"
       end || ""
     end
-  end
-
-  # converts an integer value to a time string like '02:05:06'
-  def self.integer_to_timestring(content)
-    h = (content/3600.0).floor
-    content = content - h*3600
-    m = (content/60.0).floor
-    content = content - m*60
-    s = content
-    sprintf("%02d:%02d:%02d",h,m,s)
   end
 end

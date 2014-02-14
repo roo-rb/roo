@@ -16,7 +16,7 @@ class Roo::Excel < Roo::Base
   # Creates a new Excel spreadsheet object.
   # Parameter packed: :zip - File is a zip-file
   def initialize(filename, options = {}, deprecated_file_warning = :error)
-    if Hash === options
+    if options.is_a? Hash
       packed = options[:packed]
       file_warning = options[:file_warning] || :error
       mode = options[:mode] || "rb+"

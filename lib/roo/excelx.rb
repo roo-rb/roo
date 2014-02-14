@@ -5,17 +5,17 @@ require 'spreadsheet'
 class Roo::Excelx < Roo::Base
   module Format
     EXCEPTIONAL_FORMATS = {
-      'h:mm am/pm' => :date,
+      'h:mm am/pm'    => :date,
       'h:mm:ss am/pm' => :date,
     }
 
     STANDARD_FORMATS = {
-      0 => 'General',
-      1 => '0',
-      2 => '0.00',
-      3 => '#,##0',
-      4 => '#,##0.00',
-      9 => '0%',
+      0  => 'General',
+      1  => '0',
+      2  => '0.00',
+      3  => '#,##0',
+      4  => '#,##0.00',
+      9  => '0%',
       10 => '0.00%',
       11 => '0.00E+00',
       12 => '# ?/?',
@@ -67,8 +67,9 @@ class Roo::Excelx < Roo::Base
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
   def initialize(filename, options = {}, deprecated_file_warning = :error)
-    if Hash === options
-      packed = options[:packed]
+    
+    if options.is_a? Hash
+      packed       = options[:packed]
       file_warning = options[:file_warning] || :error
     else
       warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excelx.new` is deprecated. Use an options hash instead.'
@@ -77,46 +78,57 @@ class Roo::Excelx < Roo::Base
     end
 
     file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
+
     make_tmpdir do |tmpdir|
       filename = download_uri(filename, tmpdir) if uri?(filename)
-      filename = unzip(filename, tmpdir) if packed == :zip
+      filename = unzip(filename, tmpdir)        if packed == :zip
+      
       @filename = filename
+
+      @comments_files    = Array.new
+      @rels_files        = Array.new
+      @shared_table      = Array.new
+      @styles_table      = Array.new
+      @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
+
       unless File.file?(@filename)
         raise IOError, "file #{@filename} does not exist"
       end
-      @comments_files = Array.new
-      @rels_files = Array.new
+
       extract_content(tmpdir, @filename)
       @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml"))
-      @shared_table = []
+      
       if File.exist?(File.join(tmpdir, 'roo_sharedStrings.xml'))
         @sharedstring_doc = load_xml(File.join(tmpdir, 'roo_sharedStrings.xml'))
         read_shared_strings(@sharedstring_doc)
       end
-      @styles_table = []
-      @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
+
       if File.exist?(File.join(tmpdir, 'roo_styles.xml'))
         @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
         read_styles(@styles_doc)
       end
-      @sheet_doc = load_xmls(@sheet_files)
+
+      @sheet_doc    = load_xmls(@sheet_files   )
       @comments_doc = load_xmls(@comments_files)
-      @rels_doc = load_xmls(@rels_files)
+      @rels_doc     = load_xmls(@rels_files    )
     end
+
     super(filename, options)
-    @formula = Hash.new
-    @excelx_type = Hash.new
-    @excelx_value = Hash.new
-    @s_attribute = Hash.new # TODO: ggf. wieder entfernen nur lokal benoetigt
-    @comment = Hash.new
-    @comments_read = Hash.new
-    @hyperlink = Hash.new
+
+    @formula         = Hash.new
+    @excelx_type     = Hash.new
+    @excelx_value    = Hash.new
+    @s_attribute     = Hash.new # TODO: only be used, if necessary, remove locally
+    @comment         = Hash.new
+    @comments_read   = Hash.new
+    @hyperlink       = Hash.new
     @hyperlinks_read = Hash.new
   end
 
   def method_missing(m,*args)
     # is method name a label name
     read_labels
+
     if @label.has_key?(m.to_s)
       sheet ||= @default_sheet
       read_cells(sheet)
@@ -142,7 +154,7 @@ class Roo::Excelx < Roo::Base
     elsif celltype(row,col,sheet) == :datetime
       date_part,time_part = @cell[sheet][[row,col]].split(' ')
       yyyy,mm,dd = date_part.split('-')
-      hh,mi,ss = time_part.split(':')
+      hh,mi,ss   = time_part.split(':')
       return DateTime.civil(yyyy.to_i,mm.to_i,dd.to_i,hh.to_i,mi.to_i,ss.to_i)
     end
     @cell[sheet][[row,col]]
@@ -564,8 +576,8 @@ Datei xl/comments1.xml
   # Extracts all needed files from the zip file
   def process_zipfile(tmpdir, zipfilename, zip, path='')
     @sheet_files = []
-    Roo::ZipFile.open(zipfilename) {|zf|
-      zf.entries.each {|entry|
+    Roo::ZipFile.open(zipfilename) do |zf|
+      zf.entries.each do |entry|
         entry_name = entry.to_s.downcase
 
         path =
@@ -588,8 +600,8 @@ Datei xl/comments1.xml
         if path
           extract_file(zip, entry, path)
         end
-      }
-    }
+      end
+    end
   end
 
   def extract_file(source_zip, entry, destination_path)
@@ -634,8 +646,8 @@ Datei xl/comments1.xml
     end]
     fonts = doc.xpath("//xmlns:fonts/xmlns:font").map do |font_el|
       Font.new.tap do |font|
-        font.bold = !font_el.xpath('./xmlns:b').empty?
-        font.italic = !font_el.xpath('./xmlns:i').empty?
+        font.bold      = !font_el.xpath('./xmlns:b').empty?
+        font.italic    = !font_el.xpath('./xmlns:i').empty?
         font.underline = !font_el.xpath('./xmlns:u').empty?
       end
     end
@@ -671,4 +683,4 @@ Datei xl/comments1.xml
     base_date
   end
 
-end # class
+end 

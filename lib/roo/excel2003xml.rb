@@ -7,7 +7,7 @@ class Roo::Excel2003XML < Roo::Base
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
   def initialize(filename, options={}, deprecated_file_warning=:error)
-    if Hash === options
+    if options.is_a? Hash
       packed = options[:packed]
       file_warning = options[:file_warning] || :error
     else

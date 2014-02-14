@@ -15,4 +15,7 @@ group :test do
   gem 'shoulda'
   gem 'rspec', '>= 2.14'
   gem 'vcr'
+  gem 'turn'
+  gem 'simplecov'
+  gem 'debugger'
 end

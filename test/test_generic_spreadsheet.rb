@@ -98,7 +98,7 @@ class TestBase < Test::Unit::TestCase
     end
 
     should "return the correct letter when passed a Float" do
-      assert_equal 'A',Roo::Base.number_to_letter(1.0)
+      assert_equal 'A', Roo::Base.number_to_letter(1.0)
     end
   end
 

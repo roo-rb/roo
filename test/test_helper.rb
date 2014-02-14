@@ -9,12 +9,11 @@ require 'logger'
 require 'date'
 require 'webmock/test_unit'
 
-# require gem files
 require File.dirname(__FILE__) + '/../lib/roo'
 
-TESTDIR =  File.join(File.dirname(__FILE__), 'files')
-
+TESTDIR = File.join(File.dirname(__FILE__), 'files')
 LOG_DIR = File.join(File.dirname(__FILE__),'../log')
+
 FileUtils.mkdir_p(LOG_DIR)
 
 LOG_FILE = File.join(LOG_DIR,'roo_test.log')
