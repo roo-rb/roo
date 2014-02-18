@@ -20,7 +20,7 @@ module Roo
         case extension.downcase
         when '.xls'
           Roo::Excel.new(file, options)
-        when '.xlsx'
+        when '.xlsx', '.xlsm'
           Roo::Excelx.new(file, options)
         when '.ods'
           Roo::OpenOffice.new(file, options)
