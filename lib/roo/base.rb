@@ -73,6 +73,7 @@ public
   # returns the number of the first non-empty row
   def first_row(sheet=nil)
     sheet ||= @default_sheet
+
     read_cells(sheet)
     if @first_row[sheet]
       return @first_row[sheet]
@@ -102,10 +103,12 @@ public
     end
     impossible_value = 0
     result = impossible_value
-    @cell[sheet].each_pair {|key,value|
+    
+    @cell[sheet].each_pair do |key,value|
       y = key.first.to_i # _to_string(key).split(',')
       result = [result, y].max if value
-    } if @cell[sheet]
+    end if @cell[sheet]
+
     result = nil if result == impossible_value
     @last_row[sheet] = result
     result
@@ -691,31 +694,28 @@ private
     number = number.to_i
     
     while number > 0 do
-      modulo = (number - 1) % 26;
+      modulo = (number - 1) % 26
       number = (number - modulo) / 26
 
-      result = LETTERS[modulo] + result
+      result += LETTERS[modulo]
     end
 
-    return result
+    return result.reverse
   end
 
-  # convert letters like 'AB' to a number ('A' => 1, 'B' => 2, ...)
   ##
   # Convert a letters to numbers as per the standard spreadsheet columnation 
   # eg. 'AA' => 27 (1 => 'A', 2 => 'B', ...)
   def self.letter_to_number(letters)
     result = 0
 
-    while letters && letters.length > 0
-      character = letters[0,1].upcase
-      num = LETTERS.index(character)
-      raise ArgumentError, "invalid column character '#{letters[0,1]}'" if num == nil
-      num += 1
-      result  = result * 26 + num
-      letters = letters[1..-1]
+    letters.each_char do |character|
+      num = LETTERS.index(character.upcase)
+      raise ArgumentError, "invalid column character '#{character}'" if num == nil
+      result  = result * 26 + num + 1
     end
-    result
+
+    return result
   end
 
   ##
@@ -740,6 +740,7 @@ private
     case sheet
     when nil
       raise ArgumentError, "Error: sheet 'nil' not valid"
+
     when Fixnum
       self.sheets.fetch(sheet-1) do
         raise RangeError, "sheet index #{sheet} not found"

@@ -2,6 +2,9 @@
 
 * enhancements
   * Extend Roo::Spreadsheet.open to accept Tempfiles and other arguments responding to #path. Note they require an :extension option to be declared, as the tempfile mangles the extension. #84.
+  
+  2014-02-13
+  * Testing:: Refactored to conform with new API for constructor parameters.  Reduces warnings  
 
 == 1.13.2 2013-12-23
 

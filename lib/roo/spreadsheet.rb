@@ -31,8 +31,7 @@ module Roo
         when '.csv'
           Roo::CSV.new(file, options)
         else
-          raise ArgumentError,
-            "Can't detect the type of #{file} - please use the :extension option to declare its type."
+          raise ArgumentError, "Can't detect the type of #{file} - please use the :extension option to declare its type."
         end
       end
     end
