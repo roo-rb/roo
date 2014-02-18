@@ -36,6 +36,7 @@ class TestRoo < Test::Unit::TestCase
   FORMATS = {
     excel:        EXCEL,
     excelx:       EXCELX,
+    excelxm:      EXCELX,
     openoffice:   OPENOFFICE,
     google:       GOOGLE,
     libreoffice:  LIBREOFFICE
@@ -50,6 +51,8 @@ class TestRoo < Test::Unit::TestCase
       "#{name}.xls"
     when :excelx
       "#{name}.xlsx"
+    when :excelxm
+      "#{name}.xlsm"
     when :openoffice, :libreoffice
       "#{name}.ods"
     when :google

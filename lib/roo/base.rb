@@ -103,7 +103,7 @@ public
     end
     impossible_value = 0
     result = impossible_value
-    
+
     @cell[sheet].each_pair do |key,value|
       y = key.first.to_i # _to_string(key).split(',')
       result = [result, y].max if value
@@ -479,12 +479,13 @@ protected
     end
   end
 
-  # TODO This does something, but I have no idea what or why.  Figure it out and comment.
+  # TODO Refactor this file type check
   def file_type_check(filename, ext, name, warning_level, packed=nil)
     new_expression = {
       '.ods'  => 'Roo::OpenOffice.new',
       '.xls'  => 'Roo::Excel.new',
       '.xlsx' => 'Roo::Excelx.new',
+      '.xlsm' => 'Roo::Excelx.new',
       '.csv'  => 'Roo::CSV.new',
       '.xml'  => 'Roo::Excel2003XML.new',
     }
@@ -497,7 +498,7 @@ protected
     end
 
     case ext
-    when '.ods', '.xls', '.xlsx', '.csv', '.xml'
+    when '.ods', '.xls', '.xlsx', '.csv', '.xml', '.xlsm'
       correct_class = "use #{new_expression[ext]} to handle #{ext} spreadsheet files. This has #{File.extname(filename).downcase}"
     else
       raise "unknown file type: #{ext}"
@@ -507,7 +508,10 @@ protected
       filename = filename[0..qs_begin-1]
     end
 
-    if File.extname(filename).downcase != ext
+    extension = File.extname(filename).downcase
+
+    ## TODO: Rewire this check to not have a hardcoded extension check
+    if extension != ext and (extension != '.xlsm' and ext != '.xlsx')
       case warning_level
       when :error
         warn correct_class
