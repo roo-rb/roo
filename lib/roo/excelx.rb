@@ -69,21 +69,24 @@ class Roo::Excelx < Roo::Base
   def initialize(filename, options = {}, deprecated_file_warning = :error)
     
     if options.is_a? Hash
-      packed       = options[:packed]
-      file_warning = options[:file_warning] || :error
+      @packed       = options[:packed]
+      @file_warning = options[:file_warning] || :error
+      @tmpdir       = options[:tmpdir]
     else
       warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excelx.new` is deprecated. Use an options hash instead.'
-      packed = options
-      file_warning = deprecated_file_warning
+      @packed       = options
+      @file_warning = deprecated_file_warning
+      @tmpdir       = nil
     end
 
-    file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
+    file_type_check(filename,'.xlsx','an Excel-xlsx', @file_warning, @packed)
 
-    make_tmpdir do |tmpdir|
+    make_tmpdir(@tmpdir) do |tmpdir|
       filename = download_uri(filename, tmpdir) if uri?(filename)
-      filename = unzip(filename, tmpdir)        if packed == :zip
+      filename = unzip(filename, tmpdir)        if @packed == :zip
       
       @filename = filename
+
 
       @comments_files    = Array.new
       @rels_files        = Array.new
@@ -148,15 +151,18 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
+
     if celltype(row,col,sheet) == :date
       yyyy,mm,dd = @cell[sheet][[row,col]].split('-')
       return Date.new(yyyy.to_i,mm.to_i,dd.to_i)
+
     elsif celltype(row,col,sheet) == :datetime
       date_part,time_part = @cell[sheet][[row,col]].split(' ')
       yyyy,mm,dd = date_part.split('-')
       hh,mi,ss   = time_part.split(':')
       return DateTime.civil(yyyy.to_i,mm.to_i,dd.to_i,hh.to_i,mi.to_i,ss.to_i)
     end
+
     @cell[sheet][[row,col]]
   end
 
@@ -206,9 +212,8 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
-    s_attribute = @s_attribute[sheet][[row,col]]
-    s_attribute ||= 0
-    s_attribute = s_attribute.to_i
+
+    s_attribute = @s_attribute[sheet][[row,col]].to_i || 0
     @style_definitions[s_attribute]
   end
 
@@ -224,6 +229,7 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
+
     if @formula[sheet][[row,col]]
       return :formula
     else
@@ -239,6 +245,7 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
+
     return @excelx_type[sheet][[row,col]]
   end
 
@@ -248,6 +255,7 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
+
     return @excelx_value[sheet][[row,col]]
   end
 
@@ -256,6 +264,7 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
+
     s = @s_attribute[sheet][[row,col]]
     attribute2format(s).to_s
   end
@@ -279,6 +288,7 @@ class Roo::Excelx < Roo::Base
   # (nil,nil) if label is not defined
   def label(labelname)
     read_labels
+
     if @label.empty? || !@label.has_key?(labelname)
       return nil,nil,nil
     else
@@ -313,6 +323,7 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_hyperlinks(sheet) unless @hyperlinks_read[sheet]
     row,col = normalize(row,col)
+
     return nil unless @hyperlink[sheet]
     @hyperlink[sheet][[row,col]]
   end
@@ -324,16 +335,13 @@ class Roo::Excelx < Roo::Base
     #read_cells(sheet)
     read_comments(sheet) unless @comments_read[sheet]
     row,col = normalize(row,col)
+
     return nil unless @comment[sheet]
     @comment[sheet][[row,col]]
   end
 
   # true, if there is a comment
   def comment?(row,col,sheet=nil)
-    sheet ||= @default_sheet
-    # read_cells(sheet)
-    read_comments(sheet) unless @comments_read[sheet]
-    row,col = normalize(row,col)
     comment(row,col) != nil
   end
 
@@ -342,6 +350,7 @@ class Roo::Excelx < Roo::Base
   def comments(sheet=nil)
     sheet ||= @default_sheet
     read_comments(sheet) unless @comments_read[sheet]
+
     if @comment[sheet]
       @comment[sheet].each.collect do |elem|
         [elem[0][0],elem[0][1],elem[1]]
@@ -389,12 +398,14 @@ class Roo::Excelx < Roo::Base
       end
 
     @cell[sheet][key] = Spreadsheet::Link.new(@hyperlink[sheet][key], @cell[sheet][key].to_s) if hyperlink?(y,x+i)
-    @excelx_type[sheet] ||= {}
-    @excelx_type[sheet][key] = excelx_type
+
+    @excelx_type[sheet]  ||= {}
     @excelx_value[sheet] ||= {}
+    @s_attribute[sheet]  ||= {}
+
+    @excelx_type[sheet][key]  = excelx_type
     @excelx_value[sheet][key] = excelx_value
-    @s_attribute[sheet] ||= {}
-    @s_attribute[sheet][key] = s_attribute
+    @s_attribute[sheet][key]  = s_attribute
   end
 
   # read all cells in the selected sheet
@@ -427,6 +438,7 @@ class Roo::Excelx < Roo::Base
           Format.to_type(format)
         end
       formula = nil
+
       c.children.each do |cell|
         case cell.name
         when 'is'
@@ -482,6 +494,7 @@ class Roo::Excelx < Roo::Base
         end
       end
     end
+
     @cells_read[sheet] = true
     # begin comments
 =begin
@@ -532,6 +545,7 @@ Datei xl/comments1.xml
     sheet ||= @default_sheet
     validate_sheet!(sheet)
     n = self.sheets.index(sheet)
+    
     return unless @comments_doc[n] #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @comments_doc[n].xpath("//xmlns:comments/xmlns:commentList/xmlns:comment").each do |comment|
       ref = comment.attributes['ref'].to_s
@@ -549,6 +563,7 @@ Datei xl/comments1.xml
     sheet ||= @default_sheet
     validate_sheet!(sheet)
     n = self.sheets.index(sheet)
+
     if rels_doc = @rels_doc[n]
       rels = Hash[rels_doc.xpath("/xmlns:Relationships/xmlns:Relationship").map do |r|
         [r.attribute('Id').text, r]

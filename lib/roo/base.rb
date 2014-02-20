@@ -14,7 +14,6 @@ end
 
 
 
-
 # Base class for all other types of spreadsheets
 class Roo::Base
   include Enumerable
@@ -33,6 +32,7 @@ public
     @filename = filename
     @options  = options
 
+    # Format for cells is @cell[sheet][[row,col]] = value
     @cell        = {}
     @cell_type   = {}
     @cells_read  = {}
@@ -70,25 +70,30 @@ public
   end
 
   #TODO These next four methods use a lot of repeatable logic.  Refactor.
-  # returns the number of the first non-empty row
+  ##
+  # Returns the number of the first non-empty row
   def first_row(sheet=nil)
     sheet ||= @default_sheet
 
     read_cells(sheet)
+
+    # Memoized
     if @first_row[sheet]
       return @first_row[sheet]
     end
-    impossible_value = 999_999 # more than a spreadsheet can hold
-    result = impossible_value
+
+    sentinel = 999_999 # more than a spreadsheet can hold
+    
+    result = sentinel
     
     if @cell[sheet]
-      @cell[sheet].each_pair do |key,value|
+      @cell[sheet].each_pair do |key, value|
         y = key.first.to_i # _to_string(key).split(',')
         result = [result, y].min if value
       end
     end
     
-    result = nil if result == impossible_value
+    result = nil if result == sentinel
     
     @first_row[sheet] = result
     return result
@@ -581,6 +586,8 @@ private
   end
 
 
+  ##
+  # Perform an operation without changing the default spreadsheet
   def without_changing_default_sheet
     original_default_sheet = default_sheet
     yield
@@ -588,12 +595,16 @@ private
     self.default_sheet = original_default_sheet
   end
 
+  ##
+  # Reinitializes the file
   def reinitialize
     initialize(@filename)
   end
 
-  def make_tmpdir(tmp_root = nil)
-    Dir.mktmpdir(TEMP_PREFIX, tmp_root || ENV['ROO_TMP']) do |tmpdir|
+  ##
+  # Creates a temproary directory for us to work in
+  def make_tmpdir(tmp_folder = nil)
+    Dir.mktmpdir(TEMP_PREFIX, tmp_folder || ENV['ROO_TMP']) do |tmpdir|
       yield tmpdir
     end
   end
@@ -649,10 +660,12 @@ private
         raise ArgumentError
       end
     end
+
     if col.class == String
       col = Roo::Base.letter_to_number(col)
     end
-    return row,col
+
+    return row, col
   end
 
   ##
@@ -662,10 +675,12 @@ private
   end
 
   ##
-  # Add option for download to RAM
+  # TODO: Add option for download to RAM
   def download_uri(uri, tmpdir)
     require 'open-uri'
+
     tempfilename = File.join(tmpdir, File.basename(uri))
+
     response = ''
     begin
       File.open(tempfilename,"wb") do |file|
@@ -676,10 +691,12 @@ private
     rescue OpenURI::HTTPError
       raise "could not open #{uri}"
     end
+
     tempfilename
   end
 
-  #TODO This is a foolish non-thread safe manner of opening spreadsheets
+  ##
+  # TODO Provide option for workign in memory
   def open_from_stream(stream, tmpdir)
     tempfilename = File.join(tmpdir, "spreadsheet")
     File.open(tempfilename,"wb") do |file|

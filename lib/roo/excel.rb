@@ -3,6 +3,7 @@ require 'spreadsheet'
 # Class for handling Excel-Spreadsheets
 class Roo::Excel < Roo::Base
   FORMULAS_MESSAGE = 'the spreadsheet gem does not support forumulas, so roo can not.'
+  
   CHARGUESS =
     begin
       require 'charguess'
@@ -17,31 +18,35 @@ class Roo::Excel < Roo::Base
   # Parameter packed: :zip - File is a zip-file
   def initialize(filename, options = {}, deprecated_file_warning = :error)
     if options.is_a? Hash
-      packed = options[:packed]
+      packed       = options[:packed]
+      mode         = options[:mode] || "rb+"
       file_warning = options[:file_warning] || :error
-      mode = options[:mode] || "rb+"
     else
       warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excel.new` is deprecated. Use an options hash instead.'
-      packed = options
-      mode = "rb+"
+      packed       = options
+      mode         = "rb+"
       file_warning = deprecated_file_warning
     end
 
     file_type_check(filename,'.xls','an Excel', file_warning, packed)
+
     make_tmpdir do |tmpdir|
-      filename = download_uri(filename, tmpdir) if uri?(filename)
+      filename = download_uri(filename, tmpdir)            if uri?(filename)
       filename = open_from_stream(filename[7..-1], tmpdir) if filename[0,7] == "stream:"
-      filename = unzip(filename, tmpdir) if packed == :zip
+      filename = unzip(filename, tmpdir)                   if packed == :zip
 
       @filename = filename
       unless File.file?(@filename)
         raise IOError, "file #{@filename} does not exist"
       end
+
       @workbook = Spreadsheet.open(filename, mode)
     end
+
     super(filename, options)
+
     @formula = Hash.new
-    @fonts = Hash.new
+    @fonts   = Hash.new
   end
 
   def encoding=(codepage)
@@ -196,14 +201,17 @@ class Roo::Excel < Roo::Base
   # helper function to set the internal representation of cells
   def set_cell_values(sheet,row,col,i,v,value_type,formula,tr,font)
     #key = "#{y},#{x+i}"
-    key = [row,col+i]
-    @cell_type[sheet] = {} unless @cell_type[sheet]
+    key = [row, col+i]
+    
+    # Initialize shee values
+    @cell[sheet]      ||= {}
+    @cell_type[sheet] ||= {}
+    @formula[sheet]   ||= {} 
+    @fonts[sheet]     ||= {}
+
     @cell_type[sheet][key] = value_type
-    @formula[sheet] = {} unless @formula[sheet]
-    @formula[sheet][key] = formula  if formula
-    @cell[sheet]    = {} unless @cell[sheet]
-    @fonts[sheet] = {} unless @fonts[sheet]
-    @fonts[sheet][key] = font
+    @formula[sheet][key]   = formula if formula
+    @fonts[sheet][key]     = font
 
     @cell[sheet][key] =
       case value_type
@@ -276,8 +284,8 @@ class Roo::Excel < Roo::Base
   # way formula stores the value
   def read_cell_content(row, idx)
     cell = row.at(idx)
-    cell = row[idx] if row[idx].class == Spreadsheet::Link
-    cell = cell.value if cell.class == Spreadsheet::Formula
+    cell = row[idx]   if row[idx].class == Spreadsheet::Link
+    cell = cell.value if cell.class     == Spreadsheet::Formula
     cell
   end
 
@@ -297,6 +305,7 @@ class Roo::Excel < Roo::Base
   def read_cell_date_or_time(row, idx)
     cell = read_cell_content(row, idx)
     cell = cell.to_s.to_f
+
     if cell < 1.0
       value_type = :time
       f = cell*24.0*60.0*60.0
@@ -306,7 +315,7 @@ class Roo::Excel < Roo::Base
       m = (secs / 60.0).floor
       secs = secs - 60*m
       s = secs
-      value = h*3600+m*60+s
+      value = h*3600 + m*60 + s
     else
       if row.at(idx).class == Spreadsheet::Formula
         datetime = row.send(:_datetime, cell)
@@ -338,16 +347,16 @@ class Roo::Excel < Roo::Base
     case cell
     when Float, Integer, Fixnum, Bignum
       value_type = :float
-      value = cell.to_f
+      value      = cell.to_f
     when Spreadsheet::Link
       value_type = :link
-      value = cell
+      value      = cell
     when String, TrueClass, FalseClass
       value_type = :string
-      value = cell.to_s
+      value      = cell.to_s
     else
       value_type = cell.class.to_s.downcase.to_sym
-      value = nil
+      value      = nil
     end # case
     return value_type, value
   end

@@ -3,7 +3,7 @@ module Roo
     ## 
     # Why are we using the eigenclass?
     class << self
-      #TODO This does not work with file paths in OSX.  Fix it.
+
       #TODO This should also work with file streams.    Fix it.
       #TODO This doesn't seem to read the extension properly.  Fix it.
       def open(file, options = {})
