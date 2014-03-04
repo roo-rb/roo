@@ -212,6 +212,11 @@ class Roo::Base
     end)
   end
 
+  # call to_s method defined on subclasses
+  def inspect
+    to_s
+  end
+
   # find a row either by row number or a condition
   # Caution: this works only within the default sheet -> set default_sheet before you call this method
   # (experimental. see examples in the test_roo.rb file)
