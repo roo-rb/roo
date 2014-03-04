@@ -2315,4 +2315,19 @@ where the expected result is
     end
   end
 
+  def test_parsing_xslx_from_numbers
+    return unless EXCELX
+    xlsx  = Roo::Excelx.new(File.join(TESTDIR, "numbers-export.xlsx"))
+
+    xlsx.default_sheet = xlsx.sheets.first
+    assert_equal 'Sheet 1', xlsx.cell('a',1)
+
+    # Another buggy behavior of Numbers 3.1: if a warkbook has more than a
+    # single sheet, all sheets except the first one will have an extra row and
+    # column added to the beginning. That's why we assert against cell B2 and
+    # not A1
+    xlsx.default_sheet = xlsx.sheets.last
+    assert_equal 'Sheet 2', xlsx.cell('b',2)
+  end
+
 end # class

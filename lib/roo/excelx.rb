@@ -575,9 +575,23 @@ Datei xl/comments1.xml
             "#{tmpdir}/roo_sharedStrings.xml"
           elsif entry_name.end_with?('styles.xml')
             "#{tmpdir}/roo_styles.xml"
-          elsif entry_name =~ /sheet([0-9]+).xml$/
+          elsif entry_name =~ /sheet([0-9]+)?.xml$/
             nr = $1
-            @sheet_files[nr.to_i-1] = "#{tmpdir}/roo_sheet#{nr}"
+            path = "#{tmpdir}/roo_sheet#{nr.to_i}"
+
+            # Numbers 3.1 exports first sheet without sheet number. Such sheets
+            # are always added to the beginning of the array which, naturally,
+            # causes other sheets to be pushed to the next index which could
+            # lead to sheet references getting overwritten, so we need to
+            # handle that case specifically.
+            if nr
+              sheet_files_index = nr.to_i - 1
+              sheet_files_index += 1 if @sheet_files[sheet_files_index]
+              @sheet_files[sheet_files_index] = path
+            else
+              @sheet_files.unshift path
+              path
+            end
           elsif entry_name =~ /comments([0-9]+).xml$/
             nr = $1
             @comments_files[nr.to_i-1] = "#{tmpdir}/roo_comments#{nr}"
