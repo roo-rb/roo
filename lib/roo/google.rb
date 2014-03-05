@@ -229,7 +229,10 @@ class Roo::Google < Roo::Base
   end
 
   def determine_datatype(val, numval=nil)
-    if val.nil? || val[0,1] == '='
+    if @options[:untyped]
+      ty  = :string
+      val = numval
+    elsif val.nil? || val[0,1] == '='
       ty = :formula
       if numeric?(numval)
         val = numval.to_f

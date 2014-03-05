@@ -23,6 +23,7 @@ class Roo::Excel < Roo::Base
     else
       warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excel.new` is deprecated. Use an options hash instead.'
       packed = options
+      options = {}
       mode = "rb+"
       file_warning = deprecated_file_warning
     end
@@ -335,20 +336,25 @@ class Roo::Excel < Roo::Base
   # return the values for Roo
   def read_cell(row, idx)
     cell = read_cell_content(row, idx)
-    case cell
-    when Float, Integer, Fixnum, Bignum
-      value_type = :float
-      value = cell.to_f
-    when Spreadsheet::Link
-      value_type = :link
-      value = cell
-    when String, TrueClass, FalseClass
+    if @options[:untyped]
       value_type = :string
-      value = cell.to_s
+      value      = cell.to_s
     else
-      value_type = cell.class.to_s.downcase.to_sym
-      value = nil
-    end # case
+      case cell
+      when Float, Integer, Fixnum, Bignum
+        value_type = :float
+        value = cell.to_f
+      when Spreadsheet::Link
+        value_type = :link
+        value = cell
+      when String, TrueClass, FalseClass
+        value_type = :string
+        value = cell.to_s
+      else
+        value_type = cell.class.to_s.downcase.to_sym
+        value = nil
+      end # case
+    end
     return value_type, value
   end
 

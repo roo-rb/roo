@@ -34,5 +34,14 @@ describe Roo::Excelx do
         end
       end
     end
+
+    context 'for a number cell' do
+      it 'typed parse returns a Numeric' do
+        expect(Roo::Excelx.new('test/files/numbers1.xlsx').cell('A', 1)).to be_a(Numeric)
+      end
+      it 'untyped parse returns a String' do
+        expect(Roo::Excelx.new('test/files/numbers1.xlsx', :untyped => true).cell('A', 1)).to be_a(String)
+      end
+    end
   end
 end
