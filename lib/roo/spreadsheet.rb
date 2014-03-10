@@ -1,6 +1,11 @@
 module Roo
   class Spreadsheet
+    ## 
+    # Why are we using the eigenclass?
     class << self
+
+      #TODO This should also work with file streams.    Fix it.
+      #TODO This doesn't seem to read the extension properly.  Fix it.
       def open(file, options = {})
         file = file.respond_to?(:path) ? file.path : file
 
@@ -15,7 +20,7 @@ module Roo
         case extension.downcase
         when '.xls'
           Roo::Excel.new(file, options)
-        when '.xlsx'
+        when '.xlsx', '.xlsm'
           Roo::Excelx.new(file, options)
         when '.ods'
           Roo::OpenOffice.new(file, options)
@@ -26,8 +31,7 @@ module Roo
         when '.csv'
           Roo::CSV.new(file, options)
         else
-          raise ArgumentError,
-            "Can't detect the type of #{file} - please use the :extension option to declare its type."
+          raise ArgumentError, "Can't detect the type of #{file} - please use the :extension option to declare its type."
         end
       end
     end

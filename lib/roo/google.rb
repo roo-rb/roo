@@ -10,19 +10,21 @@ class Roo::Google < Roo::Base
   # Creates a new Google Drive object.
   def initialize(spreadsheet_key, options = {})
     @filename = spreadsheet_key
-    @user = options[:user] || ENV['GOOGLE_MAIL']
+    @user     = options[:user] || ENV['GOOGLE_MAIL']
     @password = options[:password] || ENV['GOOGLE_PASSWORD']
     @access_token = options[:access_token] || ENV['GOOGLE_TOKEN']
 
     @worksheets = session.spreadsheet_by_key(@filename).worksheets
     @sheets = @worksheets.map {|sheet| sheet.title }
+    
     super
-    @cell = Hash.new {|h,k| h[k]=Hash.new}
-    @cell_type = Hash.new {|h,k| h[k]=Hash.new}
-    @formula = Hash.new
+
+    @cell        = Hash.new {|h,k| h[k]=Hash.new}
+    @cell_type   = Hash.new {|h,k| h[k]=Hash.new}
+    @formula     = Hash.new
     @date_format = '%d/%m/%Y'
-    @datetime_format = '%d/%m/%Y %H:%M:%S'
     @time_format = '%H:%M:%S'
+    @datetime_format = '%d/%m/%Y %H:%M:%S'
   end
 
   # returns an array of sheet names in the spreadsheet
