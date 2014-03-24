@@ -46,7 +46,7 @@ class Roo::Excelx < Roo::Base
         type
       elsif format.include?('#')
         :float
-      elsif format.include?('d') || format.include?('y')
+      elsif !format.match(/d+(?![\]])/).nil? || format.include?('y')
         if format.include?('h') || format.include?('s')
           :datetime
         else
