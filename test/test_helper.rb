@@ -8,6 +8,8 @@ require 'timeout'
 require 'logger'
 require 'date'
 require 'webmock/test_unit'
+require 'pry'
+require 'pry-nav'
 
 # require gem files
 require File.dirname(__FILE__) + '/../lib/roo'
