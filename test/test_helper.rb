@@ -49,7 +49,7 @@ def file_diff(fn1,fn2)
       if f2.eof? == false
         while f2.eof? == false
           line2 = f2.gets
-          result ">#{line2}\n"
+          result << ">#{line2}\n"
         end
       end
     end
