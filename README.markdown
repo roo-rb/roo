@@ -70,6 +70,9 @@ s.font(1,1).italic?
 s.font(1,1).underline?
 
 
+# Roo::Spreadsheet requires spreadsheet gem
+require 'spreadsheet'
+
 # Spreadsheet.open can accept both files and paths
 
 xls = Roo::Spreadsheet.open('./new_prices.xls')
