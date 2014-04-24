@@ -315,11 +315,7 @@ class Roo::Excelx < Roo::Base
 
   # true, if there is a comment
   def comment?(row,col,sheet=nil)
-    sheet ||= @default_sheet
-    # read_cells(sheet)
-    read_comments(sheet) unless @comments_read[sheet]
-    row,col = normalize(row,col)
-    comment(row,col) != nil
+    comment(row,col,sheet) != nil
   end
 
   # returns each comment in the selected sheet as an array of elements
