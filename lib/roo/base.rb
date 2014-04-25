@@ -17,33 +17,64 @@ class Roo::Base
   include Enumerable
 
   TEMP_PREFIX = "oo_"
+  LETTERS = %w{A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
 
   attr_reader :default_sheet, :headers
 
   # sets the line with attribute names (default: 1)
   attr_accessor :header_line
 
-  protected
-
-  def self.split_coordinate(str)
-    letter,number = Roo::Base.split_coord(str)
-    x = letter_to_number(letter)
-    y = number
-    return y, x
-  end
-
-  def self.split_coord(s)
-    if s =~ /([a-zA-Z]+)([0-9]+)/
-      letter = $1
-      number = $2.to_i
-    else
-      raise ArgumentError
+  class << self
+    def split_coordinate(str)
+      letter,number = split_coord(str)
+      x = letter_to_number(letter)
+      y = number
+      return y, x
     end
-    return letter, number
+
+    def split_coord(s)
+      if s =~ /([a-zA-Z]+)([0-9]+)/
+        letter = $1
+        number = $2.to_i
+      else
+        raise ArgumentError
+      end
+      return letter, number
+    end
+
+    # convert a number to something like 'AB' (1 => 'A', 2 => 'B', ...)
+    def number_to_letter(n)
+      letters=""
+      if n > 26
+        while n % 26 == 0 && n != 0
+          letters << 'Z'
+          n = (n - 26) / 26
+        end
+        while n > 0
+          num = n%26
+          letters = LETTERS[num-1] + letters
+          n = (n / 26)
+        end
+      else
+        letters = LETTERS[n-1]
+      end
+      letters
+    end
+
+    # convert letters like 'AB' to a number ('A' => 1, 'B' => 2, ...)
+    def letter_to_number(letters)
+      result = 0
+      while letters && letters.length > 0
+        character = letters[0,1].upcase
+        num = LETTERS.index(character)
+        raise ArgumentError, "invalid column character '#{letters[0,1]}'" if num == nil
+        num += 1
+        result = result * 26 + num
+        letters = letters[1..-1]
+      end
+      result
+    end
   end
-
-
-  public
 
   def initialize(filename, options={}, file_warning=:error, tmpdir=nil)
     @filename = filename
@@ -73,84 +104,72 @@ class Roo::Base
 
   # first non-empty column as a letter
   def first_column_as_letter(sheet=nil)
-    Roo::Base.number_to_letter(first_column(sheet))
+    self.class.number_to_letter(first_column(sheet))
   end
 
   # last non-empty column as a letter
   def last_column_as_letter(sheet=nil)
-    Roo::Base.number_to_letter(last_column(sheet))
+    self.class.number_to_letter(last_column(sheet))
   end
 
   # returns the number of the first non-empty row
   def first_row(sheet=nil)
     sheet ||= @default_sheet
     read_cells(sheet)
-    if @first_row[sheet]
-      return @first_row[sheet]
-    end
-    impossible_value = 999_999 # more than a spreadsheet can hold
-    result = impossible_value
-    @cell[sheet].each_pair {|key,value|
-      y = key.first.to_i # _to_string(key).split(',')
-      result = [result, y].min if value
-    } if @cell[sheet]
-    result = nil if result == impossible_value
-    @first_row[sheet] = result
-    result
+    @first_row[sheet] ||=
+      begin
+        impossible_value = 999_999 # more than a spreadsheet can hold
+        result = impossible_value
+        @cell[sheet].each_pair {|key,value|
+          result = [result, key.first.to_i].min if value
+        } if @cell[sheet]
+        result unless result == impossible_value
+      end
   end
 
   # returns the number of the last non-empty row
   def last_row(sheet=nil)
     sheet ||= @default_sheet
     read_cells(sheet)
-    if @last_row[sheet]
-      return @last_row[sheet]
-    end
-    impossible_value = 0
-    result = impossible_value
-    @cell[sheet].each_pair {|key,value|
-      y = key.first.to_i # _to_string(key).split(',')
-      result = [result, y].max if value
-    } if @cell[sheet]
-    result = nil if result == impossible_value
-    @last_row[sheet] = result
-    result
+    @last_row[sheet] ||=
+      begin
+        impossible_value = 0
+        result = impossible_value
+        @cell[sheet].each_pair {|key,value|
+          result = [result, key.first.to_i].max if value
+        } if @cell[sheet]
+        result unless result == impossible_value
+      end
   end
 
   # returns the number of the first non-empty column
   def first_column(sheet=nil)
     sheet ||= @default_sheet
     read_cells(sheet)
-    if @first_column[sheet]
-      return @first_column[sheet]
-    end
-    impossible_value = 999_999 # more than a spreadsheet can hold
-    result = impossible_value
-    @cell[sheet].each_pair {|key,value|
-      x = key.last.to_i # _to_string(key).split(',')
-      result = [result, x].min if value
-    } if @cell[sheet]
-    result = nil if result == impossible_value
-    @first_column[sheet] = result
-    result
+    @first_column[sheet] ||=
+      begin
+        impossible_value = 999_999 # more than a spreadsheet can hold
+        result = impossible_value
+        @cell[sheet].each_pair {|key,value|
+          result = [result, key.last.to_i].min if value
+        } if @cell[sheet]
+        result unless result == impossible_value
+      end
   end
 
   # returns the number of the last non-empty column
   def last_column(sheet=nil)
     sheet ||= @default_sheet
     read_cells(sheet)
-    if @last_column[sheet]
-      return @last_column[sheet]
-    end
-    impossible_value = 0
-    result = impossible_value
-    @cell[sheet].each_pair {|key,value|
-      x = key.last.to_i # _to_string(key).split(',')
-      result = [result, x].max if value
-    } if @cell[sheet]
-    result = nil if result == impossible_value
-    @last_column[sheet] = result
-    result
+    @last_column[sheet] ||=
+      begin
+        impossible_value = 0
+        result = impossible_value
+        @cell[sheet].each_pair {|key,value|
+          result = [result, key.last.to_i].max if value
+        } if @cell[sheet]
+        result unless result == impossible_value
+      end
   end
 
   # returns a rectangular area (default: all cells) as yaml-output
@@ -158,11 +177,16 @@ class Roo::Base
   # oo.to_yaml({"file"=>"flightdata_2007-06-26", "sheet" => "1"})
   def to_yaml(prefix={}, from_row=nil, from_column=nil, to_row=nil, to_column=nil,sheet=nil)
     sheet ||= @default_sheet
-    result = "--- \n"
     return '' unless first_row # empty result if there is no first_row in a sheet
 
-    (from_row||first_row(sheet)).upto(to_row||last_row(sheet)) do |row|
-      (from_column||first_column(sheet)).upto(to_column||last_column(sheet)) do |col|
+    from_row ||= first_row(sheet)
+    to_row ||= last_row(sheet)
+    from_column ||= first_column(sheet)
+    to_column ||= last_column(sheet)
+
+    result = "--- \n"
+    from_row.upto(to_row) do |row|
+      from_column.upto(to_column) do |col|
         unless empty?(row,col,sheet)
           result << "cell_#{row}_#{col}: \n"
           prefix.each {|k,v|
@@ -171,11 +195,11 @@ class Roo::Base
           result << "  row: #{row} \n"
           result << "  col: #{col} \n"
           result << "  celltype: #{self.celltype(row,col,sheet)} \n"
-          if self.celltype(row,col,sheet) == :time
-            result << "  value: #{Roo::Base.integer_to_timestring( self.cell(row,col,sheet))} \n"
-          else
-            result << "  value: #{self.cell(row,col,sheet)} \n"
+          value = cell(row,col,sheet)
+          if celltype(row,col,sheet) == :time
+            value = integer_to_timestring(value)
           end
+          result << "  value: #{value} \n"
         end
       end
     end
@@ -205,8 +229,13 @@ class Roo::Base
     sheet ||= @default_sheet
     return Matrix.empty unless first_row
 
-    Matrix.rows((from_row||first_row(sheet)).upto(to_row||last_row(sheet)).map do |row|
-      (from_column||first_column(sheet)).upto(to_column||last_column(sheet)).map do |col|
+    from_row ||= first_row(sheet)
+    to_row ||= last_row(sheet)
+    from_column ||= first_column(sheet)
+    to_column ||= last_column(sheet)
+
+    Matrix.rows(from_row.upto(to_row).map do |row|
+      from_column.upto(to_column).map do |col|
         cell(row,col,sheet)
       end
     end)
@@ -262,12 +291,13 @@ class Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row, col = normalize(row,col)
-    cell_type = case value
-                when Fixnum then :float
-                when String, Float then :string
-                else
-                  raise ArgumentError, "Type for #{value} not set"
-                end
+    cell_type =
+      case value
+      when Fixnum then :float
+      when String, Float then :string
+      else
+        raise ArgumentError, "Type for #{value} not set"
+      end
 
     set_value(row,col,value,sheet)
     set_type(row,col,cell_type,sheet)
@@ -306,8 +336,8 @@ class Roo::Base
         else
           result << "  First row: #{first_row}\n"
           result << "  Last row: #{last_row}\n"
-          result << "  First column: #{Roo::Base.number_to_letter(first_column)}\n"
-          result << "  Last column: #{Roo::Base.number_to_letter(last_column)}"
+          result << "  First column: #{self.class.number_to_letter(first_column)}\n"
+          result << "  Last column: #{self.class.number_to_letter(last_column)}"
         end
         result << "\n" if sheet != sheets.last
         n += 1
@@ -348,7 +378,7 @@ class Roo::Base
     # #aa42 => #cell('aa',42)
     # #aa42('Sheet1')  => #cell('aa',42,'Sheet1')
     if m =~ /^([a-z]+)(\d)$/
-      col = Roo::Base.letter_to_number($1)
+      col = self.class.letter_to_number($1)
       row = $2.to_i
       if args.empty?
         cell(row,col)
@@ -623,7 +653,7 @@ class Roo::Base
       end
     end
     if col.class == String
-      col = Roo::Base.letter_to_number(col)
+      col = self.class.letter_to_number(col)
     end
     return row,col
   end
@@ -654,41 +684,6 @@ class Roo::Base
       file.write(stream[7..-1])
     end
     File.join(tmpdir, "spreadsheet")
-  end
-
-  LETTERS = %w{A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
-
-  # convert a number to something like 'AB' (1 => 'A', 2 => 'B', ...)
-  def self.number_to_letter(n)
-    letters=""
-    if n > 26
-      while n % 26 == 0 && n != 0
-        letters << 'Z'
-        n = (n - 26) / 26
-      end
-      while n > 0
-        num = n%26
-        letters = LETTERS[num-1] + letters
-        n = (n / 26)
-      end
-    else
-      letters = LETTERS[n-1]
-    end
-    letters
-  end
-
-  # convert letters like 'AB' to a number ('A' => 1, 'B' => 2, ...)
-  def self.letter_to_number(letters)
-    result = 0
-    while letters && letters.length > 0
-      character = letters[0,1].upcase
-      num = LETTERS.index(character)
-      raise ArgumentError, "invalid column character '#{letters[0,1]}'" if num == nil
-      num += 1
-      result = result * 26 + num
-      letters = letters[1..-1]
-    end
-    result
   end
 
   def unzip(filename, tmpdir)
@@ -787,7 +782,7 @@ class Roo::Base
       when :date, :datetime
         onecell.to_s
       when :time
-        Roo::Base.integer_to_timestring(onecell)
+        integer_to_timestring(onecell)
       when :link
           %{"#{onecell.url.gsub(/"/,'""')}"}
       else
@@ -796,8 +791,10 @@ class Roo::Base
     end
   end
 
+  private
+
   # converts an integer value to a time string like '02:05:06'
-  def self.integer_to_timestring(content)
+  def integer_to_timestring(content)
     h = (content/3600.0).floor
     content = content - h*3600
     m = (content/60.0).floor
