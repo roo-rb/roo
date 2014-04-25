@@ -600,7 +600,7 @@ Datei xl/comments1.xml
   end
 
   def extract_file(source_zip, entry, destination_path)
-    open(destination_path,'wb') {|f|
+    File.open(destination_path,'wb') {|f|
       f << source_zip.read(entry)
     }
   end
