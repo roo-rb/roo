@@ -70,15 +70,17 @@ class Roo::Excelx < Roo::Base
     if Hash === options
       packed = options[:packed]
       file_warning = options[:file_warning] || :error
+      open_uri_options = options[:open_uri_options]
     else
       warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excelx.new` is deprecated. Use an options hash instead.'
       packed = options
       file_warning = deprecated_file_warning
+      open_uri_options = nil
     end
 
     file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
     make_tmpdir do |tmpdir|
-      filename = download_uri(filename, tmpdir) if uri?(filename)
+      filename = download_uri(filename, tmpdir, open_uri_options) if uri?(filename)
       filename = unzip(filename, tmpdir) if packed == :zip
       @filename = filename
       unless File.file?(@filename)
