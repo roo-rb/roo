@@ -2,3 +2,5 @@
 /log/
 .ruby-version
 .project
+.idea/
+roo.iml
