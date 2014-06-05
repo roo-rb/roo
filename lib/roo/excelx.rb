@@ -538,8 +538,8 @@ Datei xl/comments1.xml
       rels = Hash[rels_doc.xpath("/xmlns:Relationships/xmlns:Relationship").map do |r|
         [r.attribute('Id').text, r]
       end]
-      @sheet_doc[n].xpath("/xmlns:worksheet/xmlns:hyperlinks/xmlns:hyperlink[id]").each do |h|
-        if rel_element = rels[h.attribute('id').text]
+      @sheet_doc[n].xpath("/xmlns:worksheet/xmlns:hyperlinks/xmlns:hyperlink").each do |h|
+        if h.attribute('id') && rel_element = rels[h.attribute('id').text]
           row,col = Roo::Base.split_coordinate(h.attributes['ref'].to_s)
           @hyperlink[sheet] ||= {}
           @hyperlink[sheet][[row,col]] = rel_element.attribute('Target').text
