@@ -90,8 +90,7 @@ class Roo::Excelx < Roo::Base
       @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml"))
       @shared_table = []
       if File.exist?(File.join(tmpdir, 'roo_sharedStrings.xml'))
-        @sharedstring_doc = load_xml(File.join(tmpdir, 'roo_sharedStrings.xml'))
-        read_shared_strings(@sharedstring_doc)
+        read_shared_strings(File.join(tmpdir, 'roo_sharedStrings.xml'))
       end
       @styles_table = []
       @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
@@ -616,9 +615,13 @@ Datei xl/comments1.xml
     end
   end
 
-  # read the shared strings xml document
-  def read_shared_strings(doc)
-    doc.xpath("/xmlns:sst/xmlns:si").each do |si|
+  # read the shared strings xml document (now via Nokogiri::XML::Reader for speed)
+  def read_shared_strings(tmpfile)
+    Nokogiri::XML::Reader(File.open(tmpfile)).each do |node|
+      next if node.name != 'si'
+      next if node.node_type != Nokogiri::XML::Reader::TYPE_ELEMENT
+
+      si = Nokogiri::XML(node.outer_xml).root
       shared_table_entry = ''
       si.children.each do |elem|
         if elem.name == 'r' and elem.children
