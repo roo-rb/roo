@@ -6,8 +6,8 @@ describe Roo::Excelx do
       largexlsx = Roo::Excelx.new('test/files/bigfile-multitab-excelx.xlsx')
 
       expect(largexlsx.instance_variable_get(:@shared_table).first.should eq('Key'))
-      expect(largexlsx.instance_variable_get(:@shared_table).last.should eq('HELLO-4485'))
-      expect(largexlsx.instance_variable_get(:@shared_table).count.should eq(4489))
+      expect(largexlsx.instance_variable_get(:@shared_table).last.should eq('HELLO-4199'))
+      expect(largexlsx.instance_variable_get(:@shared_table).count.should eq(4203))
     end
     it 'reads large files quickly' do
 
