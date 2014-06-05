@@ -86,7 +86,7 @@ class Roo::Excelx < Roo::Base
       end
       @comments_files = Array.new
       @rels_files = Array.new
-      extract_content(tmpdir, @filename)
+      process_zipfile(tmpdir, @filename)
       @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml"))
       @shared_table = []
       if File.exist?(File.join(tmpdir, 'roo_sharedStrings.xml'))
@@ -538,8 +538,8 @@ Datei xl/comments1.xml
       rels = Hash[rels_doc.xpath("/xmlns:Relationships/xmlns:Relationship").map do |r|
         [r.attribute('Id').text, r]
       end]
-      @sheet_doc[n].xpath("/xmlns:worksheet/xmlns:hyperlinks/xmlns:hyperlink[id]").each do |h|
-        if rel_element = rels[h.attribute('id').text]
+      @sheet_doc[n].xpath("/xmlns:worksheet/xmlns:hyperlinks/xmlns:hyperlink").each do |h|
+        if h.attribute('id') && rel_element = rels[h.attribute('id').text]
           row,col = Roo::Base.split_coordinate(h.attributes['ref'].to_s)
           @hyperlink[sheet] ||= {}
           @hyperlink[sheet][[row,col]] = rel_element.attribute('Target').text
@@ -559,7 +559,7 @@ Datei xl/comments1.xml
   end
 
   # Extracts all needed files from the zip file
-  def process_zipfile(tmpdir, zipfilename, zip, path='')
+  def process_zipfile(tmpdir, zipfilename)
     @sheet_files = []
     Roo::ZipFile.open(zipfilename) {|zf|
       zf.entries.each {|entry|
@@ -597,7 +597,7 @@ Datei xl/comments1.xml
             @rels_files[nr.to_i-1] = "#{tmpdir}/roo_rels#{nr}"
           end
         if path
-          extract_file(zip, entry, path)
+          extract_file(zf, entry, path)
         end
       }
     }
@@ -607,13 +607,6 @@ Datei xl/comments1.xml
     open(destination_path,'wb') {|f|
       f << source_zip.read(entry)
     }
-  end
-
-  # extract files from the zip file
-  def extract_content(tmpdir, zipfilename)
-    Roo::ZipFile.open(@filename) do |zip|
-      process_zipfile(tmpdir, zipfilename,zip)
-    end
   end
 
   # read the shared strings xml document
