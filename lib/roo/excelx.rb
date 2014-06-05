@@ -86,7 +86,7 @@ class Roo::Excelx < Roo::Base
       end
       @comments_files = Array.new
       @rels_files = Array.new
-      extract_content(tmpdir, @filename)
+      process_zipfile(tmpdir, @filename)
       @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml"))
       @shared_table = []
       if File.exist?(File.join(tmpdir, 'roo_sharedStrings.xml'))
@@ -559,7 +559,7 @@ Datei xl/comments1.xml
   end
 
   # Extracts all needed files from the zip file
-  def process_zipfile(tmpdir, zipfilename, zip, path='')
+  def process_zipfile(tmpdir, zipfilename)
     @sheet_files = []
     Roo::ZipFile.open(zipfilename) {|zf|
       zf.entries.each {|entry|
@@ -597,7 +597,7 @@ Datei xl/comments1.xml
             @rels_files[nr.to_i-1] = "#{tmpdir}/roo_rels#{nr}"
           end
         if path
-          extract_file(zip, entry, path)
+          extract_file(zf, entry, path)
         end
       }
     }
@@ -607,13 +607,6 @@ Datei xl/comments1.xml
     open(destination_path,'wb') {|f|
       f << source_zip.read(entry)
     }
-  end
-
-  # extract files from the zip file
-  def extract_content(tmpdir, zipfilename)
-    Roo::ZipFile.open(@filename) do |zip|
-      process_zipfile(tmpdir, zipfilename,zip)
-    end
   end
 
   # read the shared strings xml document
