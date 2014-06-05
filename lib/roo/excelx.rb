@@ -381,38 +381,33 @@ class Roo::Excelx < Roo::Base
     @s_attribute[sheet][key] = s_attribute
   end
 
-  # read all cells in the selected sheet
-  def read_cells(sheet=nil)
-    sheet ||= @default_sheet
-    validate_sheet!(sheet)
-    return if @cells_read[sheet]
-
-    @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row/xmlns:c").each do |c|
-      s_attribute = c['s'].to_i   # should be here
-      # c: <c r="A5" s="2">
-      # <v>22606</v>
-      # </c>, format: , tmp_type: float
-      value_type =
+  def read_cell_from_xml(sheet, cell_xml)
+    c = cell_xml
+    s_attribute = c['s'].to_i   # should be here
+    # c: <c r="A5" s="2">
+    # <v>22606</v>
+    # </c>, format: , tmp_type: float
+    value_type =
         case c['t']
-        when 's'
-          :shared
-        when 'b'
-          :boolean
+          when 's'
+            :shared
+          when 'b'
+            :boolean
           # 2011-02-25 BEGIN
-        when 'str'
-          :string
+          when 'str'
+            :string
           # 2011-02-25 END
           # 2011-09-15 BEGIN
-        when 'inlineStr'
-          :inlinestr
+          when 'inlineStr'
+            :inlinestr
           # 2011-09-15 END
-        else
-          format = attribute2format(s_attribute)
-          Format.to_type(format)
+          else
+            format = attribute2format(s_attribute)
+            Format.to_type(format)
         end
-      formula = nil
-      c.children.each do |cell|
-        case cell.name
+    formula = nil
+    c.children.each do |cell|
+      case cell.name
         when 'is'
           cell.children.each do |is|
             if is.name == 't'
@@ -430,41 +425,51 @@ class Roo::Excelx < Roo::Base
         when 'v'
           if [:time, :datetime].include?(value_type) && cell.content.to_f >= 1.0
             value_type =
-              if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001
-                :datetime
-              else
-                :date
-              end
+                if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001
+                  :datetime
+                else
+                  :date
+                end
           end
           excelx_type = [:numeric_or_formula,format.to_s]
           excelx_value = cell.content
           v =
-            case value_type
-            when :shared
-              value_type = :string
-              excelx_type = :string
-              @shared_table[cell.content.to_i]
-            when :boolean
-              (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
-            when :date
-              cell.content
-            when :time
-              cell.content
-            when :datetime
-              cell.content
-            when :formula
-              cell.content.to_f #TODO: !!!!
-            when :string
-              excelx_type = :string
-              cell.content
-            else
-              value_type = :float
-              cell.content
-            end
+              case value_type
+                when :shared
+                  value_type = :string
+                  excelx_type = :string
+                  @shared_table[cell.content.to_i]
+                when :boolean
+                  (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
+                when :date
+                  cell.content
+                when :time
+                  cell.content
+                when :datetime
+                  cell.content
+                when :formula
+                  cell.content.to_f #TODO: !!!!
+                when :string
+                  excelx_type = :string
+                  cell.content
+                else
+                  value_type = :float
+                  cell.content
+              end
           y, x = Roo::Base.split_coordinate(c['r'])
           set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
-        end
       end
+    end
+  end
+
+  # read all cells in the selected sheet
+  def read_cells(sheet=nil)
+    sheet ||= @default_sheet
+    validate_sheet!(sheet)
+    return if @cells_read[sheet]
+
+    @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row/xmlns:c").each do |c|
+      read_cell_from_xml(sheet, c)
     end
     @cells_read[sheet] = true
     # begin comments
