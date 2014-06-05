@@ -68,30 +68,29 @@ class Roo::Excelx < Roo::Base
   # values for packed: :zip
   def initialize(filename, options = {}, deprecated_file_warning = :error)
     if Hash === options
-      packed = options[:packed]
+      @packed = options[:packed]
       file_warning = options[:file_warning] || :error
     else
       warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excelx.new` is deprecated. Use an options hash instead.'
-      packed = options
+      @packed = options
       file_warning = deprecated_file_warning
     end
 
-    file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
+    original_filename = filename
+
+    file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, @packed)
     make_tmpdir do |tmpdir|
       filename = download_uri(filename, tmpdir) if uri?(filename)
-      filename = unzip(filename, tmpdir) if packed == :zip
+      filename = unzip(filename, tmpdir) if @packed == :zip
       @filename = filename
       unless File.file?(@filename)
         raise IOError, "file #{@filename} does not exist"
       end
-      @comments_files = Array.new
-      @rels_files = Array.new
-      extract_content(tmpdir, @filename)
+      process_zipfile_for_shared(tmpdir, @filename)
       @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml"))
       @shared_table = []
       if File.exist?(File.join(tmpdir, 'roo_sharedStrings.xml'))
-        @sharedstring_doc = load_xml(File.join(tmpdir, 'roo_sharedStrings.xml'))
-        read_shared_strings(@sharedstring_doc)
+        read_shared_strings(File.join(tmpdir, 'roo_sharedStrings.xml'))
       end
       @styles_table = []
       @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
@@ -99,11 +98,11 @@ class Roo::Excelx < Roo::Base
         @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
         read_styles(@styles_doc)
       end
-      @sheet_doc = load_xmls(@sheet_files)
-      @comments_doc = load_xmls(@comments_files)
-      @rels_doc = load_xmls(@rels_files)
+      # we no longer load sheets/comments/rels - those happen on-demand
     end
-    super(filename, options)
+
+    super(original_filename, options)
+
     @formula = Hash.new
     @excelx_type = Hash.new
     @excelx_value = Hash.new
@@ -112,6 +111,9 @@ class Roo::Excelx < Roo::Base
     @comments_read = Hash.new
     @hyperlink = Hash.new
     @hyperlinks_read = Hash.new
+    @rel = Hash.new
+
+    @sheet_data_read = Hash.new
   end
 
   def method_missing(m,*args)
@@ -373,7 +375,11 @@ class Roo::Excelx < Roo::Base
         v
       end
 
-    @cell[sheet][key] = Spreadsheet::Link.new(@hyperlink[sheet][key], @cell[sheet][key].to_s) if hyperlink?(y,x+i)
+    # not sure if hyperlinks come before or after cells, so we set it here if we know about hyperlinks
+    # Otherwise, we set it later, when we process the hyperlink
+    if @hyperlink[sheet] && @hyperlink[sheet][key]
+      @cell[sheet][key] = Spreadsheet::Link.new(@hyperlink[sheet][key], @cell[sheet][key].to_s)
+    end
     @excelx_type[sheet] ||= {}
     @excelx_type[sheet][key] = excelx_type
     @excelx_value[sheet] ||= {}
@@ -382,38 +388,33 @@ class Roo::Excelx < Roo::Base
     @s_attribute[sheet][key] = s_attribute
   end
 
-  # read all cells in the selected sheet
-  def read_cells(sheet=nil)
-    sheet ||= @default_sheet
-    validate_sheet!(sheet)
-    return if @cells_read[sheet]
-
-    @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row/xmlns:c").each do |c|
-      s_attribute = c['s'].to_i   # should be here
-      # c: <c r="A5" s="2">
-      # <v>22606</v>
-      # </c>, format: , tmp_type: float
-      value_type =
+  def read_cell_from_xml(sheet, cell_xml)
+    c = cell_xml
+    s_attribute = c['s'].to_i   # should be here
+    # c: <c r="A5" s="2">
+    # <v>22606</v>
+    # </c>, format: , tmp_type: float
+    value_type =
         case c['t']
-        when 's'
-          :shared
-        when 'b'
-          :boolean
+          when 's'
+            :shared
+          when 'b'
+            :boolean
           # 2011-02-25 BEGIN
-        when 'str'
-          :string
+          when 'str'
+            :string
           # 2011-02-25 END
           # 2011-09-15 BEGIN
-        when 'inlineStr'
-          :inlinestr
+          when 'inlineStr'
+            :inlinestr
           # 2011-09-15 END
-        else
-          format = attribute2format(s_attribute)
-          Format.to_type(format)
+          else
+            format = attribute2format(s_attribute)
+            Format.to_type(format)
         end
-      formula = nil
-      c.children.each do |cell|
-        case cell.name
+    formula = nil
+    c.children.each do |cell|
+      case cell.name
         when 'is'
           cell.children.each do |is|
             if is.name == 't'
@@ -431,44 +432,139 @@ class Roo::Excelx < Roo::Base
         when 'v'
           if [:time, :datetime].include?(value_type) && cell.content.to_f >= 1.0
             value_type =
-              if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001
-                :datetime
-              else
-                :date
-              end
+                if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001
+                  :datetime
+                else
+                  :date
+                end
           end
           excelx_type = [:numeric_or_formula,format.to_s]
           excelx_value = cell.content
           v =
-            case value_type
-            when :shared
-              value_type = :string
-              excelx_type = :string
-              @shared_table[cell.content.to_i]
-            when :boolean
-              (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
-            when :date
-              cell.content
-            when :time
-              cell.content
-            when :datetime
-              cell.content
-            when :formula
-              cell.content.to_f #TODO: !!!!
-            when :string
-              excelx_type = :string
-              cell.content
-            else
-              value_type = :float
-              cell.content
-            end
+              case value_type
+                when :shared
+                  value_type = :string
+                  excelx_type = :string
+                  @shared_table[cell.content.to_i]
+                when :boolean
+                  (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
+                when :date
+                  cell.content
+                when :time
+                  cell.content
+                when :datetime
+                  cell.content
+                when :formula
+                  cell.content.to_f #TODO: !!!!
+                when :string
+                  excelx_type = :string
+                  cell.content
+                else
+                  value_type = :float
+                  cell.content
+              end
           y, x = Roo::Base.split_coordinate(c['r'])
           set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
+      end
+    end
+  end
+
+  def read_cells_hyperlinks_and_comments(sheet=nil)
+    sheet ||= @default_sheet
+    validate_sheet!(sheet)
+    return if @sheet_data_read[sheet]
+
+    make_tmpdir do |tmpdir|
+      # TODO: This is inefficient... we need to redownload it every time we're looking at a new tab...
+      filename = @filename
+      filename = download_uri(filename, tmpdir) if uri?(filename)
+      filename = unzip(filename, tmpdir) if @packed == :zip
+      @filename = filename
+      unless File.file?(filename)
+        raise IOError, "file #{filename} does not exist"
+      end
+      process_zipfile_for_sheet(tmpdir, filename, sheet)
+
+      read_rels_from_xml_with_reader(sheet, "#{tmpdir}/roo_rels.xml")
+      read_cells_and_links_from_xml_with_reader(sheet, "#{tmpdir}/roo_sheet.xml")
+      read_comments_from_xml_with_reader(sheet, "#{tmpdir}/roo_comments.xml")
+    end
+
+    @sheet_data_read[sheet] = true
+  end
+
+  # Builds up @rel[sheet] as a Hash with Id => href
+  def read_rels_from_xml_with_reader(sheet, tmpfilename)
+    @rel[sheet] = {}
+    if File.exist?(tmpfilename)
+      Nokogiri::XML::Reader(File.open(tmpfilename)).each do |node|
+        next if node.name != 'Relationship'
+        next if node.node_type != Nokogiri::XML::Reader::TYPE_ELEMENT
+
+        @rel[sheet][node.attributes['Id']] = node.attributes['Target']
+      end
+    end
+  end
+
+  def read_cells_and_links_from_xml_with_reader(sheet, tmpfilename)
+    @hyperlink[sheet] = {}
+    if File.exist?(tmpfilename)
+      Nokogiri::XML::Reader(File.open(tmpfilename)).each do |node|
+        next if node.node_type != Nokogiri::XML::Reader::TYPE_ELEMENT
+
+        if node.name == 'c'
+          c = Nokogiri::XML(node.outer_xml).root
+          # this will set the hyperlinks, if we already know about them.
+          read_cell_from_xml(sheet, c)
+        elsif node.name == 'hyperlink'
+          rel_id = node.attributes['id']  # can't do node.attribute['id'] due to namespace issues (comes in as r:id)
+          ref = node.attributes['ref'].to_s
+          row,col = Roo::Base.split_coordinate(ref)
+          @hyperlink[sheet][[row,col]] = @rel[sheet][rel_id] if @rel[sheet][rel_id]
+
+          # not sure if we'll get hyperlinks or cells first, so set the cell if needed
+          if @cell[sheet][[row,col]] && !@cell[sheet][[row,col]].is_a?(Spreadsheet::Link)
+            @cell[sheet][[row,col]] = Spreadsheet::Link.new(@hyperlink[sheet][[row,col]], @cell[sheet][[row,col]].to_s)
+          end
         end
       end
     end
+
+    @hyperlinks_read[sheet] = true
     @cells_read[sheet] = true
-    # begin comments
+  end
+
+  # Builds up @comment[sheet]
+  def read_comments_from_xml_with_reader(sheet, tmpfilename)
+    @comment[sheet] = {}
+
+    if File.exist?(tmpfilename)
+      Nokogiri::XML::Reader(File.open(tmpfilename)).each do |node|
+        next if node.name != 'comment'
+        next if node.node_type != Nokogiri::XML::Reader::TYPE_ELEMENT
+        ref = node.attributes['ref'].to_s
+        row,col = Roo::Base.split_coordinate(ref)
+
+        comment = Nokogiri::XML(node.outer_xml).root
+        comment.xpath('./xmlns:text/xmlns:r/xmlns:t').each do |text|
+          @comment[sheet][[row,col]] = text.text
+        end
+      end
+    end
+
+    @comments_read[sheet] = true
+  end
+
+
+  # read all cells in the selected sheet
+  def read_cells(sheet=nil)
+    sheet ||= @default_sheet
+    validate_sheet!(sheet)
+    return if @cells_read[sheet]
+    read_cells_hyperlinks_and_comments(sheet)
+  end
+
+  # begin comments
 =begin
 Datei xl/comments1.xml
   <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
@@ -509,44 +605,22 @@ Datei xl/comments1.xml
       read_comments(sheet)
     end
 =end
-    #end comments
-  end
-
+  #end comments
   # Reads all comments from a sheet
   def read_comments(sheet=nil)
     sheet ||= @default_sheet
     validate_sheet!(sheet)
-    n = self.sheets.index(sheet)
-    return unless @comments_doc[n] #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    @comments_doc[n].xpath("//xmlns:comments/xmlns:commentList/xmlns:comment").each do |comment|
-      ref = comment.attributes['ref'].to_s
-      row,col = Roo::Base.split_coordinate(ref)
-      comment.xpath('./xmlns:text/xmlns:r/xmlns:t').each do |text|
-        @comment[sheet] ||= {}
-        @comment[sheet][[row,col]] = text.text
-      end
-    end
-    @comments_read[sheet] = true
+
+    read_cells_hyperlinks_and_comments(sheet)
+
   end
 
   # Reads all hyperlinks from a sheet
   def read_hyperlinks(sheet=nil)
     sheet ||= @default_sheet
     validate_sheet!(sheet)
-    n = self.sheets.index(sheet)
-    if rels_doc = @rels_doc[n]
-      rels = Hash[rels_doc.xpath("/xmlns:Relationships/xmlns:Relationship").map do |r|
-        [r.attribute('Id').text, r]
-      end]
-      @sheet_doc[n].xpath("/xmlns:worksheet/xmlns:hyperlinks/xmlns:hyperlink[id]").each do |h|
-        if rel_element = rels[h.attribute('id').text]
-          row,col = Roo::Base.split_coordinate(h.attributes['ref'].to_s)
-          @hyperlink[sheet] ||= {}
-          @hyperlink[sheet][[row,col]] = rel_element.attribute('Target').text
-        end
-      end
-    end
-    @hyperlinks_read[sheet] = true
+
+    read_cells_hyperlinks_and_comments(sheet)
   end
 
   def read_labels
@@ -558,9 +632,8 @@ Datei xl/comments1.xml
     end]
   end
 
-  # Extracts all needed files from the zip file
-  def process_zipfile(tmpdir, zipfilename, zip, path='')
-    @sheet_files = []
+  # Extracts all needed files from the zip file - just for shared elements.  per-sheet items are processed on-demand
+  def process_zipfile_for_shared(tmpdir, zipfilename)
     Roo::ZipFile.open(zipfilename) {|zf|
       zf.entries.each {|entry|
         entry_name = entry.to_s.downcase
@@ -572,32 +645,49 @@ Datei xl/comments1.xml
             "#{tmpdir}/roo_sharedStrings.xml"
           elsif entry_name.end_with?('styles.xml')
             "#{tmpdir}/roo_styles.xml"
-          elsif entry_name =~ /sheet([0-9]+)?.xml$/
-            nr = $1
-            path = "#{tmpdir}/roo_sheet#{nr.to_i}"
-
-            # Numbers 3.1 exports first sheet without sheet number. Such sheets
-            # are always added to the beginning of the array which, naturally,
-            # causes other sheets to be pushed to the next index which could
-            # lead to sheet references getting overwritten, so we need to
-            # handle that case specifically.
-            if nr
-              sheet_files_index = nr.to_i - 1
-              sheet_files_index += 1 if @sheet_files[sheet_files_index]
-              @sheet_files[sheet_files_index] = path
-            else
-              @sheet_files.unshift path
-              path
-            end
-          elsif entry_name =~ /comments([0-9]+).xml$/
-            nr = $1
-            @comments_files[nr.to_i-1] = "#{tmpdir}/roo_comments#{nr}"
-          elsif entry_name =~ /sheet([0-9]+).xml.rels$/
-            nr = $1
-            @rels_files[nr.to_i-1] = "#{tmpdir}/roo_rels#{nr}"
           end
         if path
-          extract_file(zip, entry, path)
+          extract_file(zf, entry, path)
+        end
+      }
+    }
+  end
+
+  # Extract sheet, coments, and rels for a given sheet from the zipfile.
+  # They will be stored in tmpdir/roo_sheet.xml, tmpdir/roo_comments.xml, and tmpdir/roo_rels.xml
+  def process_zipfile_for_sheet(tmpdir, zipfilename, sheet)
+    sheet ||= @default_sheet
+    validate_sheet!(sheet)
+    sheet_index = sheets.index(sheet)
+
+    Roo::ZipFile.open(zipfilename) {|zf|
+
+      # pre-process to detect sheet names so that we can pick the right files for:
+      #   sheet?.xml    comments?.xml    sheet?.xml.rels
+      # Numbers 3.1 exports first sheet without sheet number. Handle this case
+      sheet_suffixes = []
+      zf.entries.each do |entry|
+        if entry.to_s.downcase =~ /sheet([0-9]+)?.xml$/
+          suffix = $1 || ""
+          sheet_suffixes << suffix
+        end
+      end
+      sheet_suffixes.sort! {|a,b| a.to_i <=> b.to_i }
+      suffix = sheet_suffixes[sheet_index]
+
+      zf.entries.each {|entry|
+        entry_name = entry.to_s.downcase
+
+        path =
+            if entry_name =~ /sheet#{suffix}.xml$/
+              "#{tmpdir}/roo_sheet.xml"
+            elsif entry_name =~ /comments#{suffix}.xml$/
+              "#{tmpdir}/roo_comments.xml"
+            elsif entry_name =~ /sheet#{suffix}.xml.rels$/
+              "#{tmpdir}/roo_rels.xml"
+            end
+        if path
+          extract_file(zf, entry, path)
         end
       }
     }
@@ -609,16 +699,13 @@ Datei xl/comments1.xml
     }
   end
 
-  # extract files from the zip file
-  def extract_content(tmpdir, zipfilename)
-    Roo::ZipFile.open(@filename) do |zip|
-      process_zipfile(tmpdir, zipfilename,zip)
-    end
-  end
+  # read the shared strings xml document (now via Nokogiri::XML::Reader for speed)
+  def read_shared_strings(tmpfile)
+    Nokogiri::XML::Reader(File.open(tmpfile)).each do |node|
+      next if node.name != 'si'
+      next if node.node_type != Nokogiri::XML::Reader::TYPE_ELEMENT
 
-  # read the shared strings xml document
-  def read_shared_strings(doc)
-    doc.xpath("/xmlns:sst/xmlns:si").each do |si|
+      si = Nokogiri::XML(node.outer_xml).root
       shared_table_entry = ''
       si.children.each do |elem|
         if elem.name == 'r' and elem.children

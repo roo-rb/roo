@@ -755,7 +755,7 @@ class Roo::Base
       onecell = cell(row,col,sheet)
 
       case celltype(row,col,sheet)
-      when :string, :link
+      when :string
         unless onecell.empty?
           %{"#{onecell.gsub(/"/,'""')}"}
         end

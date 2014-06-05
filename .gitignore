@@ -2,3 +2,5 @@
 /log/
 .ruby-version
 .project
+.rvmrc
+.idea
