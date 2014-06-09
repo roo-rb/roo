@@ -189,7 +189,7 @@ class Roo::OpenOffice < Roo::Base
     end
     if @label.has_key? labelname
       return @label[labelname][1].to_i,
-        Roo::Base.letter_to_number(@label[labelname][2]),
+        self.class.letter_to_number(@label[labelname][2]),
         @label[labelname][0]
     else
       return nil,nil,nil
@@ -203,7 +203,7 @@ class Roo::OpenOffice < Roo::Base
     @label.map do |label|
       [ label[0], # name
         [ label[1][1].to_i, # row
-          Roo::Base.letter_to_number(label[1][2]), # column
+          self.class.letter_to_number(label[1][2]), # column
           label[1][0], # sheet
         ] ]
     end
