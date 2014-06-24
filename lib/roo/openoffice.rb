@@ -35,16 +35,18 @@ class Roo::OpenOffice < Roo::Base
       packed = options[:packed]
       file_warning = options[:file_warning] || :error
       tmpdir_root = options[:tmpdir_root]
+      open_uri_options = options[:open_uri_options]
     else
       warn 'Supplying `packed`, `file_warning`, or `tmpdir_root` as separate arguments to `Roo::OpenOffice.new` is deprecated. Use an options hash instead.'
       packed = options
       file_warning = deprecated_file_warning
       tmpdir_root = deprecated_tmpdir_root
+      open_uri_options = nil
     end
 
     file_type_check(filename,'.ods','an Roo::OpenOffice', file_warning, packed)
     make_tmpdir(tmpdir_root) do |tmpdir|
-      filename = download_uri(filename, tmpdir) if uri?(filename)
+      filename = download_uri(filename, tmpdir, open_uri_options) if uri?(filename)
       filename = unzip(filename, tmpdir) if packed == :zip
       #TODO: @cells_read[:default] = false
       @filename = filename

@@ -662,13 +662,19 @@ class Roo::Base
     filename.start_with?("http://", "https://")
   end
 
-  def download_uri(uri, tmpdir)
+  def download_uri(uri, tmpdir, open_uri_options=nil)
     require 'open-uri'
     tempfilename = File.join(tmpdir, File.basename(uri))
     response = ''
+    default_options = {"User-Agent" => "Ruby/#{RUBY_VERSION}"}
+    if open_uri_options
+      open_uri_options = open_uri_options.merge(default_options)
+    else
+      open_uri_options = default_options
+    end
     begin
       File.open(tempfilename,"wb") do |file|
-        open(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}") { |net|
+        open(uri, open_uri_options) { |net|
           file.write(net.read)
         }
       end

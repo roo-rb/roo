@@ -10,14 +10,16 @@ class Roo::Excel2003XML < Roo::Base
     if Hash === options
       packed = options[:packed]
       file_warning = options[:file_warning] || :error
+      open_uri_options = options[:open_uri_options]
     else
       warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excel2003XML.new` is deprecated. Use an options hash instead.'
       packed = options
       file_warning = deprecated_file_warning
+      open_uri_options = nil
     end
 
     make_tmpdir do |tmpdir|
-      filename = download_uri(filename, tmpdir) if uri?(filename)
+      filename = download_uri(filename, tmpdir, open_uri_options) if uri?(filename)
       filename = unzip(filename, tmpdir) if packed == :zip
 
       file_type_check(filename,'.xml','an Excel 2003 XML', file_warning)
