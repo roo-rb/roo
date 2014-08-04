@@ -102,6 +102,21 @@ class TestBase < Test::Unit::TestCase
     end
   end
 
+  context 'private method Roo::Base.uri?(filename)' do
+    should "return true when passed a filename starts with http(s)://" do
+      assert_equal true, @oo.send(:uri?, 'http://example.com/')
+      assert_equal true, @oo.send(:uri?, 'https://example.com/')
+    end
+
+    should "return false when passed a filename which does not start with http(s)://" do
+      assert_equal false, @oo.send(:uri?, 'example.com')
+    end
+
+    should "return false when passed non-String object such as Tempfile" do
+      assert_equal false, @oo.send(:uri?, Tempfile.new('test'))
+    end
+  end
+
   def test_setting_invalid_type_does_not_update_cell
     @oo.set(1,1,1)
     assert_raise(ArgumentError){@oo.set(1,1, :invalid_type)}

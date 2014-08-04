@@ -659,7 +659,11 @@ class Roo::Base
   end
 
   def uri?(filename)
-    filename.start_with?("http://", "https://")
+    begin
+      filename.start_with?("http://", "https://")
+    rescue
+      false
+    end
   end
 
   def download_uri(uri, tmpdir)
