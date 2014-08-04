@@ -1,4 +1,4 @@
-# README for Roo
+# README
 
 Roo implements read access for all spreadsheet types and read/write access for
 Google spreadsheets. It can handle
@@ -10,6 +10,17 @@ Google spreadsheets. It can handle
 * CSV
 
 ## Notes
+
+### Help Maintain Roo!
+
+I've worked a bit over 2012-2013 to refine and improve Roo, but now I'm off to
+other things so the library needs your help!
+
+Specifically, we need someone(s) who can take over stewardship of the project
+and see that it continues to progress.
+
+If you're interested in helping out with more than a pull request, just contact me.
+In the mean time I'll continue to contribute in what spare moments I have.
 
 ### XLS
 
@@ -69,6 +80,9 @@ s.font(1,1).bold?
 s.font(1,1).italic?
 s.font(1,1).underline?
 
+
+# Roo::Spreadsheet requires spreadsheet gem
+require 'spreadsheet'
 
 # Spreadsheet.open can accept both files and paths
 

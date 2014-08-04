@@ -8,6 +8,8 @@ require 'timeout'
 require 'logger'
 require 'date'
 require 'webmock/test_unit'
+require 'pry'
+require 'pry-nav'
 
 # require gem files
 require File.dirname(__FILE__) + '/../lib/roo'
@@ -47,7 +49,7 @@ def file_diff(fn1,fn2)
       if f2.eof? == false
         while f2.eof? == false
           line2 = f2.gets
-          result ">#{line2}\n"
+          result << ">#{line2}\n"
         end
       end
     end

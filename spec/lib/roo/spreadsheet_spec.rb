@@ -2,6 +2,15 @@ require 'spec_helper'
 
 describe Roo::Spreadsheet do
   describe '.open' do
+    context 'when the file name includes a space' do
+      let(:filename) { 'great scott.xls' }
+
+      it 'loads the proper type' do
+        expect(Roo::Excel).to receive(:new).with(filename, {})
+        Roo::Spreadsheet.open(filename)
+      end
+    end
+
     context 'when the file extension is uppercase' do
       let(:filename) { 'file.XLS' }
 

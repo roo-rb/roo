@@ -46,7 +46,7 @@ class Roo::Excelx < Roo::Base
         type
       elsif format.include?('#')
         :float
-      elsif format.include?('d') || format.include?('y')
+      elsif !format.match(/d+(?![\]])/).nil? || format.include?('y')
         if format.include?('h') || format.include?('s')
           :datetime
         else
@@ -84,8 +84,8 @@ class Roo::Excelx < Roo::Base
       unless File.file?(@filename)
         raise IOError, "file #{@filename} does not exist"
       end
-      @comments_files = Array.new
-      @rels_files = Array.new
+      @comments_files = []
+      @rels_files = []
       extract_content(tmpdir, @filename)
       @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml"))
       @shared_table = []
@@ -94,7 +94,7 @@ class Roo::Excelx < Roo::Base
         read_shared_strings(@sharedstring_doc)
       end
       @styles_table = []
-      @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
+      @style_definitions = [] # TODO: ??? { |h,k| h[k] = {} }
       if File.exist?(File.join(tmpdir, 'roo_styles.xml'))
         @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
         read_styles(@styles_doc)
@@ -104,14 +104,14 @@ class Roo::Excelx < Roo::Base
       @rels_doc = load_xmls(@rels_files)
     end
     super(filename, options)
-    @formula = Hash.new
-    @excelx_type = Hash.new
-    @excelx_value = Hash.new
-    @s_attribute = Hash.new # TODO: ggf. wieder entfernen nur lokal benoetigt
-    @comment = Hash.new
-    @comments_read = Hash.new
-    @hyperlink = Hash.new
-    @hyperlinks_read = Hash.new
+    @formula = {}
+    @excelx_type = {}
+    @excelx_value = {}
+    @s_attribute = {} # TODO: ggf. wieder entfernen nur lokal benoetigt
+    @comment = {}
+    @comments_read = {}
+    @hyperlink = {}
+    @hyperlinks_read = {}
   end
 
   def method_missing(m,*args)
@@ -138,14 +138,12 @@ class Roo::Excelx < Roo::Base
     row,col = normalize(row,col)
     if celltype(row,col,sheet) == :date
       yyyy,mm,dd = @cell[sheet][[row,col]].split('-')
-      return Date.new(yyyy.to_i,mm.to_i,dd.to_i)
+      Date.new(yyyy.to_i,mm.to_i,dd.to_i)
     elsif celltype(row,col,sheet) == :datetime
-      date_part,time_part = @cell[sheet][[row,col]].split(' ')
-      yyyy,mm,dd = date_part.split('-')
-      hh,mi,ss = time_part.split(':')
-      return DateTime.civil(yyyy.to_i,mm.to_i,dd.to_i,hh.to_i,mi.to_i,ss.to_i)
+      create_datetime_from( @cell[sheet][[row,col]] )
+    else
+      @cell[sheet][[row,col]]
     end
-    @cell[sheet][[row,col]]
   end
 
   # Returns the formula at (row,col).
@@ -165,8 +163,8 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     if @formula[sheet]
-      @formula[sheet].each.collect do |elem|
-        [elem[0][0], elem[0][1], elem[1]]
+      @formula[sheet].map do |coord, formula|
+        [coord[0], coord[1], formula]
       end
     else
       []
@@ -213,7 +211,7 @@ class Roo::Excelx < Roo::Base
     read_cells(sheet)
     row,col = normalize(row,col)
     if @formula[sheet][[row,col]]
-      return :formula
+      :formula
     else
       @cell_type[sheet][[row,col]]
     end
@@ -227,7 +225,7 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
-    return @excelx_type[sheet][[row,col]]
+    @excelx_type[sheet][[row,col]]
   end
 
   # returns the internal value of an excelx cell
@@ -236,7 +234,7 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
-    return @excelx_value[sheet][[row,col]]
+    @excelx_value[sheet][[row,col]]
   end
 
   # returns the internal format of an excel cell
@@ -268,11 +266,11 @@ class Roo::Excelx < Roo::Base
   def label(labelname)
     read_labels
     if @label.empty? || !@label.has_key?(labelname)
-      return nil,nil,nil
+      [nil,nil,nil]
     else
-      return @label[labelname][1].to_i,
-        Roo::Base.letter_to_number(@label[labelname][2]),
-        @label[labelname][0]
+      [@label[labelname][1].to_i,
+        self.class.letter_to_number(@label[labelname][2]),
+        @label[labelname][0]]
     end
   end
 
@@ -285,7 +283,7 @@ class Roo::Excelx < Roo::Base
     @label.map do |label|
       [ label[0], # name
         [ label[1][1].to_i, # row
-          Roo::Base.letter_to_number(label[1][2]), # column
+          self.class.letter_to_number(label[1][2]), # column
           label[1][0], # sheet
         ] ]
     end
@@ -301,8 +299,7 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_hyperlinks(sheet) unless @hyperlinks_read[sheet]
     row,col = normalize(row,col)
-    return nil unless @hyperlink[sheet]
-    @hyperlink[sheet][[row,col]]
+    @hyperlink[sheet] && @hyperlink[sheet][[row,col]]
   end
 
   # returns the comment at (row/col)
@@ -312,17 +309,12 @@ class Roo::Excelx < Roo::Base
     #read_cells(sheet)
     read_comments(sheet) unless @comments_read[sheet]
     row,col = normalize(row,col)
-    return nil unless @comment[sheet]
-    @comment[sheet][[row,col]]
+    @comment[sheet] && @comment[sheet][[row,col]]
   end
 
   # true, if there is a comment
   def comment?(row,col,sheet=nil)
-    sheet ||= @default_sheet
-    # read_cells(sheet)
-    read_comments(sheet) unless @comments_read[sheet]
-    row,col = normalize(row,col)
-    comment(row,col) != nil
+    comment(row,col,sheet) != nil
   end
 
   # returns each comment in the selected sheet as an array of elements
@@ -356,7 +348,7 @@ class Roo::Excelx < Roo::Base
     @cell_type[sheet] ||= {}
     @cell_type[sheet][key] = value_type
     @formula[sheet] ||= {}
-    @formula[sheet][key] = formula  if formula
+    @formula[sheet][key] = formula if formula
     @cell[sheet] ||= {}
     @cell[sheet][key] =
       case @cell_type[sheet][key]
@@ -367,7 +359,7 @@ class Roo::Excelx < Roo::Base
       when :date
         (base_date+v.to_i).strftime("%Y-%m-%d")
       when :datetime
-        (base_date+v.to_f).strftime("%Y-%m-%d %H:%M:%S")
+        (base_date+v.to_f.round(6)).strftime("%Y-%m-%d %H:%M:%S.%N")
       when :percentage
         v.to_f
       when :time
@@ -424,7 +416,7 @@ class Roo::Excelx < Roo::Base
               value_type = :string
               v = inlinestr_content
               excelx_type = :string
-              y, x = Roo::Base.split_coordinate(c['r'])
+              y, x = self.class.split_coordinate(c['r'])
               excelx_value = inlinestr_content #cell.content
               set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
             end
@@ -465,7 +457,7 @@ class Roo::Excelx < Roo::Base
               value_type = :float
               cell.content
             end
-          y, x = Roo::Base.split_coordinate(c['r'])
+          y, x = self.class.split_coordinate(c['r'])
           set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
         end
       end
@@ -523,7 +515,7 @@ Datei xl/comments1.xml
     return unless @comments_doc[n] #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     @comments_doc[n].xpath("//xmlns:comments/xmlns:commentList/xmlns:comment").each do |comment|
       ref = comment.attributes['ref'].to_s
-      row,col = Roo::Base.split_coordinate(ref)
+      row,col = self.class.split_coordinate(ref)
       comment.xpath('./xmlns:text/xmlns:r/xmlns:t').each do |text|
         @comment[sheet] ||= {}
         @comment[sheet][[row,col]] = text.text
@@ -541,9 +533,9 @@ Datei xl/comments1.xml
       rels = Hash[rels_doc.xpath("/xmlns:Relationships/xmlns:Relationship").map do |r|
         [r.attribute('Id').text, r]
       end]
-      @sheet_doc[n].xpath("/xmlns:worksheet/xmlns:hyperlinks/xmlns:hyperlink").each do |h|
+      @sheet_doc[n].xpath("/xmlns:worksheet/xmlns:hyperlinks/xmlns:hyperlink[id]").each do |h|
         if rel_element = rels[h.attribute('id').text]
-          row,col = Roo::Base.split_coordinate(h.attributes['ref'].to_s)
+          row,col = self.class.split_coordinate(h.attributes['ref'].to_s)
           @hyperlink[sheet] ||= {}
           @hyperlink[sheet][[row,col]] = rel_element.attribute('Target').text
         end
@@ -575,9 +567,23 @@ Datei xl/comments1.xml
             "#{tmpdir}/roo_sharedStrings.xml"
           elsif entry_name.end_with?('styles.xml')
             "#{tmpdir}/roo_styles.xml"
-          elsif entry_name =~ /sheet([0-9]+).xml$/
+          elsif entry_name =~ /sheet([0-9]+)?.xml$/
             nr = $1
-            @sheet_files[nr.to_i-1] = "#{tmpdir}/roo_sheet#{nr}"
+            path = "#{tmpdir}/roo_sheet#{nr.to_i}"
+
+            # Numbers 3.1 exports first sheet without sheet number. Such sheets
+            # are always added to the beginning of the array which, naturally,
+            # causes other sheets to be pushed to the next index which could
+            # lead to sheet references getting overwritten, so we need to
+            # handle that case specifically.
+            if nr
+              sheet_files_index = nr.to_i - 1
+              sheet_files_index += 1 if @sheet_files[sheet_files_index]
+              @sheet_files[sheet_files_index] = path
+            else
+              @sheet_files.unshift path
+              path
+            end
           elsif entry_name =~ /comments([0-9]+).xml$/
             nr = $1
             @comments_files[nr.to_i-1] = "#{tmpdir}/roo_comments#{nr}"
@@ -593,7 +599,7 @@ Datei xl/comments1.xml
   end
 
   def extract_file(source_zip, entry, destination_path)
-    open(destination_path,'wb') {|f|
+    File.open(destination_path,'wb') {|f|
       f << source_zip.read(entry)
     }
   end
@@ -655,20 +661,31 @@ Datei xl/comments1.xml
   end
 
   def base_date
-    @base_date ||= read_base_date
-  end
-
-  # Default to 1900 (minus one day due to excel quirk) but use 1904 if
-  # it's set in the Workbook's workbookPr
-  # http://msdn.microsoft.com/en-us/library/ff530155(v=office.12).aspx
-  def read_base_date
-    base_date = Date.new(1899,12,30)
-    @workbook_doc.xpath("//xmlns:workbookPr").map do |workbookPr|
-      if workbookPr["date1904"] && workbookPr["date1904"] =~ /true|1/i
-        base_date = Date.new(1904,01,01)
+    @base_date ||=
+      begin
+        # Default to 1900 (minus one day due to excel quirk) but use 1904 if
+        # it's set in the Workbook's workbookPr
+        # http://msdn.microsoft.com/en-us/library/ff530155(v=office.12).aspx
+        @workbook_doc.xpath("//xmlns:workbookPr[date1904]").each do |workbookPr|
+          if workbookPr["date1904"] =~ /true|1/i
+            return Date.new(1904,01,01)
+          end
+        end
+        Date.new(1899,12,30)
       end
-    end
-    base_date
   end
 
-end # class
+  def create_datetime_from(datetime_string)
+    date_part,time_part = round_time_from(datetime_string).split(' ')
+    yyyy,mm,dd = date_part.split('-')
+    hh,mi,ss = time_part.split(':')
+    DateTime.civil(yyyy.to_i,mm.to_i,dd.to_i,hh.to_i,mi.to_i,ss.to_i)
+  end
+
+  def round_time_from(datetime_string)
+    date_part,time_part = datetime_string.split(' ')
+    yyyy,mm,dd = date_part.split('-')
+    hh,mi,ss = time_part.split(':')
+    Time.new(yyyy.to_i, mm.to_i, dd.to_i, hh.to_i, mi.to_i, ss.to_r).round(0).strftime("%Y-%m-%d %H:%M:%S")
+  end
+end

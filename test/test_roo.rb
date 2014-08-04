@@ -1413,6 +1413,9 @@ puts `diff --strip-trailing-cr #{TESTDIR}/link.csv #{csv_output}`
       assert_equal Date.new(1961,11,21), oo.cell('a',7)
       assert_equal Date.new(1961,11,21), oo.cell('b',7)
       assert_equal Date.new(1961,11,21), oo.cell('c',7)
+      assert_equal DateTime.new(2013,11,5,11,45,00), oo.cell('a',8)
+      assert_equal DateTime.new(2013,11,5,11,45,00), oo.cell('b',8)
+      assert_equal DateTime.new(2013,11,5,11,45,00), oo.cell('c',8)
     end
   end
 
@@ -2313,6 +2316,21 @@ where the expected result is
     with_each_spreadsheet(:name=>'bug-numbered-sheet-names', :format=>:excelx) do |oo|
       assert_nothing_raised() { oo.each_with_pagename { } }
     end
+  end
+
+  def test_parsing_xslx_from_numbers
+    return unless EXCELX
+    xlsx  = Roo::Excelx.new(File.join(TESTDIR, "numbers-export.xlsx"))
+
+    xlsx.default_sheet = xlsx.sheets.first
+    assert_equal 'Sheet 1', xlsx.cell('a',1)
+
+    # Another buggy behavior of Numbers 3.1: if a warkbook has more than a
+    # single sheet, all sheets except the first one will have an extra row and
+    # column added to the beginning. That's why we assert against cell B2 and
+    # not A1
+    xlsx.default_sheet = xlsx.sheets.last
+    assert_equal 'Sheet 2', xlsx.cell('b',2)
   end
 
 end # class

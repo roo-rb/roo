@@ -40,7 +40,8 @@ describe Roo::Excelx::Format do
       'dd/mmm/yy\\ hh:mm' => :datetime,
       'dd/mmm/yy' => :date, # 2011-05-21
       'yyyy-mm-dd' => :date, # 2011-09-16
-      'yyyy-mm-dd;@' => :date
+      'yyyy-mm-dd;@' => :date,
+      '#0_);[Red]\(0\)' => :float
     }.each do |format, type|
       it "translates #{format} to #{type}" do
         Roo::Excelx::Format.to_type(format).should == type
