@@ -617,7 +617,7 @@ class Roo::Base
   end
 
   def sanitize_value(v)
-    v.strip.unpack('U*').select {|b| b < 127}.pack('U*')
+    v.unpack('U*').select {|b| b < 127}.pack('U*').strip
   end
 
   def set_headers(hash={})
