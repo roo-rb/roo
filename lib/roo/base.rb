@@ -493,8 +493,8 @@ class Roo::Base
   protected
 
   def load_xml(path)
-    File.open(path) do |file|
-      Nokogiri::XML(file)
+    ::File.open(path, 'rb') do |file|
+      ::Nokogiri::XML(file)
     end
   end
 

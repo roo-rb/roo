@@ -87,16 +87,16 @@ class Roo::Excelx < Roo::Base
       @comments_files = []
       @rels_files = []
       process_zipfile(tmpdir, @filename)
-      @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml"))
+      @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml")).remove_namespaces!
       @shared_table = []
       if File.exist?(File.join(tmpdir, 'roo_sharedStrings.xml'))
-        @sharedstring_doc = load_xml(File.join(tmpdir, 'roo_sharedStrings.xml'))
+        @sharedstring_doc = load_xml(File.join(tmpdir, 'roo_sharedStrings.xml')).remove_namespaces!
         read_shared_strings(@sharedstring_doc)
       end
       @styles_table = []
       @style_definitions = [] # TODO: ??? { |h,k| h[k] = {} }
       if File.exist?(File.join(tmpdir, 'roo_styles.xml'))
-        @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
+        @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml')).remove_namespaces!
         read_styles(@styles_doc)
       end
       @sheet_doc = load_xmls(@sheet_files)
@@ -248,7 +248,7 @@ class Roo::Excelx < Roo::Base
 
   # returns an array of sheet names in the spreadsheet
   def sheets
-    @workbook_doc.xpath("//xmlns:sheet").map do |sheet|
+    @workbook_doc.xpath("//sheet").map do |sheet|
       sheet['name']
     end
   end
@@ -335,7 +335,7 @@ class Roo::Excelx < Roo::Base
 
   def load_xmls(paths)
     paths.compact.map do |item|
-      load_xml(item)
+      load_xml(item).remove_namespaces!
     end
   end
 
@@ -464,7 +464,7 @@ class Roo::Excelx < Roo::Base
     validate_sheet!(sheet)
     return if @cells_read[sheet]
 
-    @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row/xmlns:c").each do |c|
+    @sheet_doc[sheets.index(sheet)].xpath("/worksheet/sheetData/row/c").each do |c|
       read_cell_from_xml(sheet, c)
     end
     @cells_read[sheet] = true
@@ -518,10 +518,10 @@ Datei xl/comments1.xml
     validate_sheet!(sheet)
     n = self.sheets.index(sheet)
     return unless @comments_doc[n] #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    @comments_doc[n].xpath("//xmlns:comments/xmlns:commentList/xmlns:comment").each do |comment|
+    @comments_doc[n].xpath("//comments/commentList/comment").each do |comment|
       ref = comment.attributes['ref'].to_s
       row,col = self.class.split_coordinate(ref)
-      comment.xpath('./xmlns:text/xmlns:r/xmlns:t').each do |text|
+      comment.xpath('./text/r/t').each do |text|
         @comment[sheet] ||= {}
         @comment[sheet][[row,col]] = text.text
       end
@@ -535,12 +535,12 @@ Datei xl/comments1.xml
     validate_sheet!(sheet)
     n = self.sheets.index(sheet)
     if rels_doc = @rels_doc[n]
-      rels = Hash[rels_doc.xpath("/xmlns:Relationships/xmlns:Relationship").map do |r|
+      rels = Hash[rels_doc.xpath("/Relationships/Relationship").map do |r|
         [r.attribute('Id').text, r]
       end]
-      @sheet_doc[n].xpath("/xmlns:worksheet/xmlns:hyperlinks/xmlns:hyperlink").each do |h|
+      @sheet_doc[n].xpath("/worksheet/hyperlinks/hyperlink").each do |h|
         if h.attribute('id') && rel_element = rels[h.attribute('id').text]
-          row,col = Roo::Base.split_coordinate(h.attributes['ref'].to_s)
+          row,col = self.class.split_coordinate(h.attributes['ref'].to_s)
           @hyperlink[sheet] ||= {}
           @hyperlink[sheet][[row,col]] = rel_element.attribute('Target').text
         end
@@ -550,7 +550,7 @@ Datei xl/comments1.xml
   end
 
   def read_labels
-    @label ||= Hash[@workbook_doc.xpath("//xmlns:definedName").map do |defined_name|
+    @label ||= Hash[@workbook_doc.xpath("//definedName").map do |defined_name|
       # "Sheet1!$C$5"
       sheet, coordinates = defined_name.text.split('!$', 2)
       col,row = coordinates.split('$')
@@ -611,7 +611,7 @@ Datei xl/comments1.xml
 
   # read the shared strings xml document
   def read_shared_strings(doc)
-    doc.xpath("/xmlns:sst/xmlns:si").each do |si|
+    doc.xpath("/sst/si").each do |si|
       shared_table_entry = ''
       si.children.each do |elem|
         if elem.name == 'r' and elem.children
@@ -633,18 +633,18 @@ Datei xl/comments1.xml
   def read_styles(doc)
     @cellXfs = []
 
-    @numFmts = Hash[doc.xpath("//xmlns:numFmt").map do |numFmt|
+    @numFmts = Hash[doc.xpath("//numFmt").map do |numFmt|
       [numFmt['numFmtId'], numFmt['formatCode']]
     end]
-    fonts = doc.xpath("//xmlns:fonts/xmlns:font").map do |font_el|
+    fonts = doc.xpath("//fonts/font").map do |font_el|
       Font.new.tap do |font|
-        font.bold = !font_el.xpath('./xmlns:b').empty?
-        font.italic = !font_el.xpath('./xmlns:i').empty?
-        font.underline = !font_el.xpath('./xmlns:u').empty?
+        font.bold = !font_el.xpath('./b').empty?
+        font.italic = !font_el.xpath('./i').empty?
+        font.underline = !font_el.xpath('./u').empty?
       end
     end
 
-    doc.xpath("//xmlns:cellXfs").each do |xfs|
+    doc.xpath("//cellXfs").each do |xfs|
       xfs.children.each do |xf|
         @cellXfs << xf['numFmtId']
         @style_definitions << fonts[xf['fontId'].to_i]
@@ -664,7 +664,7 @@ Datei xl/comments1.xml
         # Default to 1900 (minus one day due to excel quirk) but use 1904 if
         # it's set in the Workbook's workbookPr
         # http://msdn.microsoft.com/en-us/library/ff530155(v=office.12).aspx
-        @workbook_doc.xpath("//xmlns:workbookPr[date1904]").each do |workbookPr|
+        @workbook_doc.xpath("//workbookPr[date1904]").each do |workbookPr|
           if workbookPr["date1904"] =~ /true|1/i
             return Date.new(1904,01,01)
           end
