@@ -73,6 +73,7 @@ class Roo::Excelx < Roo::Base
     else
       warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excelx.new` is deprecated. Use an options hash instead.'
       packed = options
+      options = {}
       file_warning = deprecated_file_warning
     end
 
@@ -385,27 +386,33 @@ class Roo::Excelx < Roo::Base
 
     @sheet_doc[sheets.index(sheet)].xpath("/xmlns:worksheet/xmlns:sheetData/xmlns:row/xmlns:c").each do |c|
       s_attribute = c['s'].to_i   # should be here
-      # c: <c r="A5" s="2">
-      # <v>22606</v>
-      # </c>, format: , tmp_type: float
-      value_type =
-        case c['t']
-        when 's'
-          :shared
-        when 'b'
-          :boolean
-          # 2011-02-25 BEGIN
-        when 'str'
-          :string
-          # 2011-02-25 END
-          # 2011-09-15 BEGIN
-        when 'inlineStr'
-          :inlinestr
-          # 2011-09-15 END
-        else
-          format = attribute2format(s_attribute)
-          Format.to_type(format)
-        end
+
+
+      value_type = if @options[:untyped]
+                     :string
+                   else
+                     # c: <c r="A5" s="2">
+                     # <v>22606</v>
+                     # </c>, format: , tmp_type: float
+                     case c['t']
+                       when 's'
+                         :shared
+                       when 'b'
+                         :boolean
+                       # 2011-02-25 BEGIN
+                       when 'str'
+                         :string
+                       # 2011-02-25 END
+                       # 2011-09-15 BEGIN
+                       when 'inlineStr'
+                         :inlinestr
+                       # 2011-09-15 END
+                       else
+                         format = attribute2format(s_attribute)
+                         Format.to_type(format)
+                     end
+                   end
+
       formula = nil
       c.children.each do |cell|
         case cell.name

@@ -13,6 +13,7 @@ class Roo::Excel2003XML < Roo::Base
     else
       warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excel2003XML.new` is deprecated. Use an options hash instead.'
       packed = options
+      options = {}
       file_warning = deprecated_file_warning
     end
 
@@ -168,21 +169,26 @@ class Roo::Excel2003XML < Roo::Base
     @style[sheet] = {} unless @style[sheet]
     @style[sheet][key] = style_name
     @cell[sheet][key] =
-      case @cell_type[sheet][key]
-      when :float
-        v.to_f
-      when :string
-        str_v
-      when :datetime
-        DateTime.parse(v)
-      when :percentage
-        v.to_f
-      # when :time
-      #   hms = v.split(':')
-      #   hms[0].to_i*3600 + hms[1].to_i*60 + hms[2].to_i
-      else
+      if @options[:untyped]
         v
+      else
+        case @cell_type[sheet][key]
+        when :float
+          v.to_f
+        when :string
+          str_v
+        when :datetime
+          DateTime.parse(v)
+        when :percentage
+          v.to_f
+        # when :time
+        #   hms = v.split(':')
+        #   hms[0].to_i*3600 + hms[1].to_i*60 + hms[2].to_i
+        else
+          v
+        end
       end
+
   end
 
   # read all cells in the selected sheet
