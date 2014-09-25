@@ -1,6 +1,6 @@
 module Roo
 
-  VERSION = '1.12.1'
+  VERSION = File.read(File.join(__dir__, "../VERSION")) rescue "0.0.0-unknown"
 
   def self.const_missing(const_name)
     case const_name
