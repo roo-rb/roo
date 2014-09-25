@@ -17,7 +17,7 @@ class Roo::Base
   include Enumerable
 
   TEMP_PREFIX = "oo_"
-  LETTERS = %w{A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}
+  LETTERS = ('A'..'Z').to_a
 
   attr_reader :default_sheet, :headers
 
@@ -48,12 +48,12 @@ class Roo::Base
       if n > 26
         while n % 26 == 0 && n != 0
           letters << 'Z'
-          n = (n - 26) / 26
+          n = ((n - 26) / 26).to_i
         end
         while n > 0
           num = n%26
           letters = LETTERS[num-1] + letters
-          n = (n / 26)
+          n = (n / 26).to_i
         end
       else
         letters = LETTERS[n-1]
