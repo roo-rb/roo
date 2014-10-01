@@ -27,6 +27,9 @@ class Roo::Excel2003XML < Roo::Base
       end
       @doc = load_xml(@filename)
     end
+    # "xmlns:???" => "urn:schemas-microsoft-com:office:spreadsheet"
+    namespace = @doc.namespaces.select{|xmlns, urn| urn == 'urn:schemas-microsoft-com:office:spreadsheet'}.keys.last
+    @namespace = namespace.nil? || namespace.empty? ? 'ss' : namespace.split(':').last
     super(filename, options)
     @formula = Hash.new
     @style = Hash.new
@@ -106,8 +109,8 @@ class Roo::Excel2003XML < Roo::Base
   end
 
   def sheets
-    @doc.xpath("/ss:Workbook/ss:Worksheet").map do |sheet|
-      sheet['ss:Name']
+    @doc.xpath("/#{@namespace}:Workbook/#{@namespace}:Worksheet").map do |sheet|
+      sheet["#{@namespace}:Name"]
     end
   end
 
@@ -195,20 +198,20 @@ class Roo::Excel2003XML < Roo::Base
     validate_sheet!(sheet)
     return if @cells_read[sheet]
     sheet_found = false
-    @doc.xpath("/ss:Workbook/ss:Worksheet[@ss:Name='#{sheet}']").each do |ws|
+    @doc.xpath("/#{@namespace}:Workbook/#{@namespace}:Worksheet[@#{@namespace}:Name='#{sheet}']").each do |ws|
       sheet_found = true
       row = 1
       col = 1
       column_attributes = {}
       idx = 0
-      ws.xpath('./ss:Table/ss:Column').each do |c|
+      ws.xpath("./#{@namespace}:Table/#{@namespace}:Column").each do |c|
         column_attributes[(idx += 1).to_s] = c['StyleID']
       end
-      ws.xpath('./ss:Table/ss:Row').each do |r|
+      ws.xpath("./#{@namespace}:Table/#{@namespace}:Row").each do |r|
         skip_to_row = r['Index'].to_i
         row = skip_to_row if skip_to_row > 0
         style_name = r['StyleID'] if r['StyleID']
-        r.xpath('./ss:Cell').each do |c|
+        r.xpath("./#{@namespace}:Cell").each do |c|
           skip_to_col = c['Index'].to_i
           col = skip_to_col if skip_to_col > 0
           if c['StyleID']
@@ -216,9 +219,9 @@ class Roo::Excel2003XML < Roo::Base
           elsif
             style_name ||= column_attributes[c['Index']]
           end
-          c.xpath('./ss:Data').each do |cell|
+          c.xpath("./#{@namespace}:Data").each do |cell|
             formula = cell['Formula']
-            value_type = cell['ss:Type'].downcase.to_sym
+            value_type = cell["#{@namespace}:Type"].downcase.to_sym
             v =  cell.content
             str_v = v
             case value_type
@@ -251,10 +254,10 @@ class Roo::Excel2003XML < Roo::Base
   end
 
   def read_styles
-    @doc.xpath("/ss:Workbook/ss:Styles/ss:Style").each do |style|
+    @doc.xpath("/#{@namespace}:Workbook/#{@namespace}:Styles/#{@namespace}:Style").each do |style|
       style_id = style['ID']
       @style_definitions[style_id] = Roo::Excel2003XML::Font.new
-      if font = style.at_xpath('./ss:Font')
+      if font = style.at_xpath("./#{@namespace}:Font")
         @style_definitions[style_id].bold = font['Bold']
         @style_definitions[style_id].italic = font['Italic']
         @style_definitions[style_id].underline = font['Underline']
@@ -263,11 +266,11 @@ class Roo::Excel2003XML < Roo::Base
   end
 
   A_ROO_TYPE = {
-    "float"      => :float,
-    "string"     => :string,
-    "date"       => :date,
-    "percentage" => :percentage,
-    "time"       => :time,
+    'float'      => :float,
+    'string'     => :string,
+    'date'       => :date,
+    'percentage' => :percentage,
+    'time'       => :time,
   }
 
   def self.oo_type_2_roo_type(ootype)
