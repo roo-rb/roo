@@ -6,7 +6,6 @@ gem 'rubyzip'
 
 group :development do
   gem 'google_drive'
-  gem 'jeweler'
 end
 
 group :test do
