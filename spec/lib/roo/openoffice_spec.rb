@@ -13,9 +13,3 @@ describe Roo::OpenOffice do
 
   # OpenOffice is an alias of LibreOffice. See libreoffice_spec.
 end
-
-describe Roo::Openoffice do
-  it 'is an alias of LibreOffice' do
-    expect(Roo::Openoffice).to eq(Roo::OpenOffice)
-  end
-end

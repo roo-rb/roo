@@ -46,9 +46,3 @@ describe Roo::CSV do
     end
   end
 end
-
-describe Roo::Csv do
-  it 'is an alias of LibreOffice' do
-    expect(Roo::Csv).to eq(Roo::CSV)
-  end
-end

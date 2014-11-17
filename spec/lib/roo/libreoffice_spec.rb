@@ -11,9 +11,3 @@ describe Roo::LibreOffice do
     end
   end
 end
-
-describe Roo::Libreoffice do
-  it 'is an alias of LibreOffice' do
-    expect(Roo::Libreoffice).to eq(Roo::LibreOffice)
-  end
-end

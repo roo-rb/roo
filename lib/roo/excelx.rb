@@ -66,15 +66,9 @@ class Roo::Excelx < Roo::Base
 
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
-  def initialize(filename, options = {}, deprecated_file_warning = :error)
-    if Hash === options
-      packed = options[:packed]
-      file_warning = options[:file_warning] || :error
-    else
-      warn 'Supplying `packed` or `file_warning` as separate arguments to `Roo::Excelx.new` is deprecated. Use an options hash instead.'
-      packed = options
-      file_warning = deprecated_file_warning
-    end
+  def initialize(filename, options = {})
+    packed = options[:packed]
+    file_warning = options[:file_warning] || :error
 
     file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
     make_tmpdir do |tmpdir|

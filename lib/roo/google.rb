@@ -143,12 +143,6 @@ class Roo::Google < Roo::Base
     end
   end
 
-  # *DEPRECATED*: Use Roo::Google#set instead
-  def set_value(row,col,value,sheet=nil)
-    warn "[DEPRECATION] `set_value` is deprecated.  Please use `set` instead."
-    set(row,col,value,sheet)
-  end
-
   # returns the first non-empty row in a sheet
   def first_row(sheet=nil)
     sheet ||= @default_sheet
