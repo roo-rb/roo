@@ -372,31 +372,30 @@ class Roo::Excelx < Roo::Base
   end
 
   def read_cell_from_xml(sheet, cell_xml)
-    c = cell_xml
-    s_attribute = c['s'].to_i   # should be here
+    s_attribute = cell_xml['s'].to_i   # should be here
     # c: <c r="A5" s="2">
     # <v>22606</v>
     # </c>, format: , tmp_type: float
     value_type =
-        case c['t']
-          when 's'
-            :shared
-          when 'b'
-            :boolean
-          # 2011-02-25 BEGIN
-          when 'str'
-            :string
-          # 2011-02-25 END
-          # 2011-09-15 BEGIN
-          when 'inlineStr'
-            :inlinestr
-          # 2011-09-15 END
-          else
-            format = attribute2format(s_attribute)
-            Format.to_type(format)
-        end
+      case cell_xml['t']
+      when 's'
+        :shared
+      when 'b'
+        :boolean
+      # 2011-02-25 BEGIN
+      when 'str'
+        :string
+      # 2011-02-25 END
+      # 2011-09-15 BEGIN
+      when 'inlineStr'
+        :inlinestr
+      # 2011-09-15 END
+      else
+        format = attribute2format(s_attribute)
+        Format.to_type(format)
+      end
     formula = nil
-    c.children.each do |cell|
+    cell_xml.children.each do |cell|
       case cell.name
         when 'is'
           cell.children.each do |is|
@@ -405,7 +404,7 @@ class Roo::Excelx < Roo::Base
               value_type = :string
               v = inlinestr_content
               excelx_type = :string
-              y, x = self.class.split_coordinate(c['r'])
+              y, x = self.class.split_coordinate(cell_xml['r'])
               excelx_value = inlinestr_content #cell.content
               set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
             end
@@ -446,7 +445,7 @@ class Roo::Excelx < Roo::Base
               value_type = :float
               cell.content
             end
-          y, x = self.class.split_coordinate(c['r'])
+          y, x = self.class.split_coordinate(cell_xml['r'])
           set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
       end
     end
@@ -529,14 +528,14 @@ Datei xl/comments1.xml
     validate_sheet!(sheet)
     n = self.sheets.index(sheet)
     if rels_doc = @rels_doc[n]
-      rels = Hash[rels_doc.xpath("/Relationships/Relationship").map do |r|
-        [r.attribute('Id').text, r]
+      rels = Hash[rels_doc.xpath("/Relationships/Relationship").map do |rel|
+        [rel.attribute('Id').text, rel]
       end]
-      @sheet_doc[n].xpath("/worksheet/hyperlinks/hyperlink").each do |h|
-        if h.attribute('id') && rel_element = rels[h.attribute('id').text]
-          row,col = self.class.split_coordinate(h.attributes['ref'].to_s)
+      @sheet_doc[n].xpath("/worksheet/hyperlinks/hyperlink").each do |hyperlink|
+        if hyperlink.attribute('id') && rel_element = rels[hyperlink.attribute('id').text]
+          key = self.class.split_coordinate(hyperlink.attributes['ref'].to_s)
           @hyperlink[sheet] ||= {}
-          @hyperlink[sheet][[row,col]] = rel_element.attribute('Target').text
+          @hyperlink[sheet][key] = rel_element.attribute('Target').text
         end
       end
     end
