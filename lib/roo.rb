@@ -1,11 +1,4 @@
 module Roo
-  def self.const_missing(const_name)
-    case const_name
-    else
-      super
-    end
-  end
-
   autoload :Spreadsheet,  'roo/spreadsheet'
   autoload :Base,         'roo/base'
 
