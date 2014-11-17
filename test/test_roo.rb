@@ -893,8 +893,6 @@ Sheet 3:
         csv_output = File.join(tempdir,'link.csv')
         assert oo.to_csv(csv_output)
         assert File.exists?(csv_output)
-        puts "OUTPUTTTT"
-        puts open(csv_output).read
         assert_equal "", `diff --strip-trailing-cr #{TESTDIR}/link.csv #{csv_output}`
         # --strip-trailing-cr is needed because the test-file use 0A and
         # the test on an windows box generates 0D 0A as line endings

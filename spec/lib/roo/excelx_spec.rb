@@ -29,7 +29,7 @@ describe Roo::Excelx do
         }
 
         it 'returns a link with the number as a string value' do
-          expect(subject).to be_a(Spreadsheet::Link)
+          expect(subject).to be_a(Roo::Link)
           expect(subject).to eq("8675309.0")
         end
       end

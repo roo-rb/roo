@@ -1,10 +1,9 @@
 PATH
   remote: .
   specs:
-    roo (1.13.2)
+    roo (2.0.0)
       nokogiri
       rubyzip
-      spreadsheet (> 0.6.4)
 
 GEM
   remote: http://rubygems.org/
@@ -25,7 +24,6 @@ GEM
     rspec-expectations (2.14.4)
       diff-lcs (>= 1.1.3, < 2.0)
     rspec-mocks (2.14.4)
-    ruby-ole (1.2.11.6)
     rubyzip (1.1.0)
     safe_yaml (0.9.4)
     shoulda (3.0.1)
@@ -33,8 +31,6 @@ GEM
       shoulda-matchers (~> 1.0.0)
     shoulda-context (1.0.0)
     shoulda-matchers (1.0.0)
-    spreadsheet (0.8.2)
-      ruby-ole (>= 1.0)
     vcr (2.5.0)
     webmock (1.13.0)
       addressable (>= 2.2.7)

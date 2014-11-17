@@ -1,6 +1,6 @@
 require 'date'
 require 'nokogiri'
-require 'spreadsheet'
+require 'roo/link'
 
 class Roo::Excelx < Roo::Base
   module Format
@@ -129,14 +129,17 @@ class Roo::Excelx < Roo::Base
   def cell(row, col, sheet=nil)
     sheet ||= @default_sheet
     read_cells(sheet)
-    row,col = normalize(row,col)
-    if celltype(row,col,sheet) == :date
-      yyyy,mm,dd = @cell[sheet][[row,col]].split('-')
+    row,col = key = normalize(row,col)
+    case celltype(row,col,sheet)
+    when :date
+      yyyy,mm,dd = @cell[sheet][key].split('-')
       Date.new(yyyy.to_i,mm.to_i,dd.to_i)
-    elsif celltype(row,col,sheet) == :datetime
-      create_datetime_from( @cell[sheet][[row,col]] )
+    when :datetime
+      create_datetime_from(@cell[sheet][key])
+    when :link
+      Roo::Link.new(@hyperlink[sheet][key], @cell[sheet][key].to_s)
     else
-      @cell[sheet][[row,col]]
+      @cell[sheet][key]
     end
   end
 
@@ -203,9 +206,13 @@ class Roo::Excelx < Roo::Base
   def celltype(row,col,sheet=nil)
     sheet ||= @default_sheet
     read_cells(sheet)
+    read_hyperlinks(sheet) unless @hyperlinks_read[sheet]
+
     key = normalize(row,col)
     if @formula[sheet][key]
       :formula
+    elsif @hyperlink[sheet] && @hyperlink[sheet][key]
+      :link
     else
       @cell_type[sheet][key]
     end
@@ -362,7 +369,6 @@ class Roo::Excelx < Roo::Base
         v
       end
 
-    @cell[sheet][key] = Spreadsheet::Link.new(@hyperlink[sheet][key], @cell[sheet][key].to_s) if hyperlink?(y,x+i)
     @excelx_type[sheet] ||= {}
     @excelx_type[sheet][key] = excelx_type
     @excelx_value[sheet] ||= {}
