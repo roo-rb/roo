@@ -619,8 +619,8 @@ class Roo::Base
   def set_headers(hash={})
     # try to find header row with all values or give an error
     # then create new hash by indexing strings and keeping integers for header array
-    @headers = row_with(hash.values,true)
-    @headers = Hash[hash.keys.zip(@headers.map {|x| header_index(x)})]
+    @header_line = row_with(hash.values,true)
+    @headers = Hash[hash.keys.zip(row(@header_line).map {|x| header_index(x)})]
   end
 
   def header_index(query)
