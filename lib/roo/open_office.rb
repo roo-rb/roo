@@ -59,13 +59,13 @@ class Roo::OpenOffice < Roo::Base
   def method_missing(m,*args)
     read_labels
     # is method name a label name
-	  if @label.has_key?(m.to_s)
+    if @label.has_key?(m.to_s)
       row,col = label(m.to_s)
-		  cell(row,col)
-	  else
-		  # call super for methods like #a1
-		  super
-	  end
+      cell(row,col)
+    else
+      # call super for methods like #a1
+      super
+    end
   end
 
   # Returns the content of a spreadsheet-cell.
@@ -211,15 +211,6 @@ class Roo::OpenOffice < Roo::Base
     return nil unless @comment[sheet]
     @comment[sheet][[row,col]]
   end
-
-  # true, if there is a comment
-  def comment?(row,col,sheet=nil)
-    sheet ||= @default_sheet
-    read_cells(sheet)
-    row,col = normalize(row,col)
-    comment(row,col) != nil
-  end
-
 
   # returns each comment in the selected sheet as an array of elements
   # [row, col, comment]
@@ -368,13 +359,7 @@ class Roo::OpenOffice < Roo::Base
                     v = str.content
                   end
                 end
-              when '', nil
-                #
-              when 'date'
-                #
-              when 'percentage'
-                #
-              when 'float'
+              when '', nil, 'date', 'percentage', 'float'
                 #
               when 'boolean'
                 v = attr(cell,'boolean-value').to_s

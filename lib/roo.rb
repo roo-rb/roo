@@ -9,7 +9,7 @@ module Roo
   autoload :Spreadsheet,  'roo/spreadsheet'
   autoload :Base,         'roo/base'
 
-  autoload :OpenOffice,   'roo/openoffice'
+  autoload :OpenOffice,   'roo/open_office'
   autoload :LibreOffice,  'roo/libre_office'
   autoload :Excel,        'roo/excel'
   autoload :Excelx,       'roo/excelx'
