@@ -203,11 +203,11 @@ class Roo::Excelx < Roo::Base
   def celltype(row,col,sheet=nil)
     sheet ||= @default_sheet
     read_cells(sheet)
-    row,col = normalize(row,col)
-    if @formula[sheet][[row,col]]
+    key = normalize(row,col)
+    if @formula[sheet][key]
       :formula
     else
-      @cell_type[sheet][[row,col]]
+      @cell_type[sheet][key]
     end
   end
 

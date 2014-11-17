@@ -2,15 +2,17 @@
 
 require 'tmpdir'
 require 'stringio'
+require 'nokogiri'
 
-begin
-  require 'zip/zipfilesystem'
-  Roo::ZipFile = Zip::ZipFile
-rescue LoadError
-  # For rubyzip >= 1.0.0
-  require 'zip/filesystem'
-  Roo::ZipFile = Zip::File
-end
+Roo::ZipFile =
+  begin
+    require 'zip/zipfilesystem'
+    Zip::ZipFile
+  rescue LoadError
+    # For rubyzip >= 1.0.0
+    require 'zip/filesystem'
+    Zip::File
+  end
 
 # Base class for all other types of spreadsheets
 class Roo::Base
@@ -276,7 +278,7 @@ class Roo::Base
   # column numbers are 1,2,3,... like in the spreadsheet
   def column(columnnumber,sheet=nil)
     if columnnumber.class == String
-      columnnumber = Roo::Excel.letter_to_number(columnnumber)
+      columnnumber = self.class.letter_to_number(columnnumber)
     end
     sheet ||= @default_sheet
     read_cells(sheet)
@@ -499,22 +501,15 @@ class Roo::Base
   end
 
   def file_type_check(filename, ext, name, warning_level, packed=nil)
-    new_expression = {
-      '.ods' => 'Roo::OpenOffice.new',
-      '.xls' => 'Roo::Excel.new',
-      '.xlsx' => 'Roo::Excelx.new',
-      '.csv' => 'Roo::CSV.new',
-      '.xml' => 'Roo::Excel2003XML.new',
-    }
     if packed == :zip
-	    # lalala.ods.zip => lalala.ods
-	    # hier wird KEIN unzip gemacht, sondern nur der Name der Datei
-	    # getestet, falls es eine gepackte Datei ist.
-	    filename = File.basename(filename,File.extname(filename))
+      # lalala.ods.zip => lalala.ods
+      # hier wird KEIN unzip gemacht, sondern nur der Name der Datei
+      # getestet, falls es eine gepackte Datei ist.
+      filename = File.basename(filename,File.extname(filename))
     end
     case ext
     when '.ods', '.xls', '.xlsx', '.csv', '.xml'
-      correct_class = "use #{new_expression[ext]} to handle #{ext} spreadsheet files. This has #{File.extname(filename).downcase}"
+      correct_class = "use #{Roo::CLASS_FOR_EXTENSION[ext]}.new to handle #{ext} spreadsheet files. This has #{File.extname(filename).downcase}"
     else
       raise "unknown file type: #{ext}"
     end

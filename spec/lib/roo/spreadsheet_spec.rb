@@ -3,19 +3,19 @@ require 'spec_helper'
 describe Roo::Spreadsheet do
   describe '.open' do
     context 'when the file name includes a space' do
-      let(:filename) { 'great scott.xls' }
+      let(:filename) { 'great scott.xlsx' }
 
       it 'loads the proper type' do
-        expect(Roo::Excel).to receive(:new).with(filename, {})
+        expect(Roo::Excelx).to receive(:new).with(filename, {})
         Roo::Spreadsheet.open(filename)
       end
     end
 
     context 'when the file extension is uppercase' do
-      let(:filename) { 'file.XLS' }
+      let(:filename) { 'file.XLSX' }
 
       it 'loads the proper type' do
-        expect(Roo::Excel).to receive(:new).with(filename, {})
+        expect(Roo::Excelx).to receive(:new).with(filename, {})
         Roo::Spreadsheet.open(filename)
       end
     end
@@ -53,32 +53,23 @@ describe Roo::Spreadsheet do
       end
     end
 
-    context "with spaces in the filename" do
-      let(:filename) { 'path with spaces.xls'}
-
-      it 'loads the proper type' do
-        expect(Roo::Excel).to receive(:new).with(filename, {})
-        Roo::Spreadsheet.open(filename)
-      end
-    end
-
     context 'with a file extension option' do
       let(:filename) { 'file.xls' }
 
-      context "xls" do
-        let(:options) { { extension: "xls" } }
+      context "xlsx" do
+        let(:options) { { extension: "xlsx" } }
 
         it 'loads with xls extension options' do
-          expect(Roo::Excel).to receive(:new).with(filename, options)
+          expect(Roo::Excelx).to receive(:new).with(filename, options)
           Roo::Spreadsheet.open(filename, options)
         end
       end
 
-      context ".xls" do
-        let(:options) { { extension: ".xls" } }
+      context ".xlsx" do
+        let(:options) { { extension: ".xlsx" } }
 
         it 'loads with .xls extension options' do
-          expect(Roo::Excel).to receive(:new).with(filename, options)
+          expect(Roo::Excelx).to receive(:new).with(filename, options)
           Roo::Spreadsheet.open(filename, options)
         end
       end
