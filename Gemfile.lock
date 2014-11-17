@@ -10,7 +10,6 @@ GEM
   remote: http://rubygems.org/
   specs:
     addressable (2.3.5)
-    coderay (1.0.9)
     crack (0.4.1)
       safe_yaml (~> 0.9.0)
     diff-lcs (1.2.5)
@@ -23,7 +22,6 @@ GEM
     httpauth (0.2.0)
     jwt (0.1.8)
       multi_json (>= 1.5)
-    method_source (0.8.2)
     multi_json (1.7.3)
     multi_xml (0.5.3)
     multipart-post (1.2.0)
@@ -37,12 +35,6 @@ GEM
       multi_json (~> 1.0)
       multi_xml (~> 0.5)
       rack (~> 1.2)
-    pry (0.9.12.2)
-      coderay (~> 1.0.5)
-      method_source (~> 0.8)
-      slop (~> 3.4)
-    pry-nav (0.2.3)
-      pry (~> 0.9.10)
     rack (1.5.2)
     rake (10.3.2)
     rspec (2.14.1)
@@ -61,7 +53,6 @@ GEM
       shoulda-matchers (~> 1.0.0)
     shoulda-context (1.0.0)
     shoulda-matchers (1.0.0)
-    slop (3.4.6)
     spreadsheet (0.8.2)
       ruby-ole (>= 1.0)
     vcr (2.5.0)
@@ -76,8 +67,6 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.7)
   google_drive
-  pry
-  pry-nav
   rake (~> 10.0)
   roo!
   rspec (>= 2.14)
