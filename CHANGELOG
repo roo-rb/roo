@@ -4,7 +4,10 @@
   * Extend Roo::Spreadsheet.open to accept Tempfiles and other arguments responding to #path. Note they require an :extension option to be declared, as the tempfile mangles the extension. #84.
 
 * bugfixes
-  * Fix that paths with spaces in them would fail with URI::InvalidURIError. #121.
+  * Fix that paths with spaces in them would fail with
+    URI::InvalidURIError. #121.
+  # Fix that #parse-ing with a hash of columns not in the document
+    would fail mysteriously. #129
 
 == 1.13.2 2013-12-23
 

@@ -490,6 +490,7 @@ class Roo::Base
         raise "Couldn't find header row."
       end
     end
+    raise "Couldn't find header row."
   end
 
   protected
