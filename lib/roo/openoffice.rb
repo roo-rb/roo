@@ -483,7 +483,3 @@ class Roo::OpenOffice < Roo::Base
     end
   end
 end # class
-
-# LibreOffice is just an alias for Roo::OpenOffice class
-class Roo::LibreOffice < Roo::OpenOffice
-end

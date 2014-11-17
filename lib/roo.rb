@@ -10,7 +10,7 @@ module Roo
   autoload :Base,         'roo/base'
 
   autoload :OpenOffice,   'roo/openoffice'
-  autoload :LibreOffice,  'roo/openoffice'
+  autoload :LibreOffice,  'roo/libre_office'
   autoload :Excel,        'roo/excel'
   autoload :Excelx,       'roo/excelx'
   autoload :Excel2003XML, 'roo/excel2003xml'
