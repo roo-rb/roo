@@ -18,7 +18,7 @@ Roo::ZipFile =
 class Roo::Base
   include Enumerable
 
-  TEMP_PREFIX = "oo_"
+  TEMP_PREFIX = "roo_"
   LETTERS = ('A'..'Z').to_a
 
   attr_reader :default_sheet, :headers
