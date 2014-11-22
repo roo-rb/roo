@@ -21,7 +21,7 @@ class Roo::Base
   TEMP_PREFIX = "roo_"
   LETTERS = ('A'..'Z').to_a
 
-  attr_reader :default_sheet, :headers
+  attr_reader :headers
 
   # sets the line with attribute names (default: 1)
   attr_accessor :header_line
@@ -92,7 +92,10 @@ class Roo::Base
     @last_column = {}
 
     @header_line = 1
-    @default_sheet = self.sheets.first
+  end
+
+  def default_sheet
+    @default_sheet ||= self.sheets.first
   end
 
   # sets the working sheet in the document
@@ -116,7 +119,7 @@ class Roo::Base
 
   # returns the number of the first non-empty row
   def first_row(sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     @first_row[sheet] ||=
       begin
@@ -131,7 +134,7 @@ class Roo::Base
 
   # returns the number of the last non-empty row
   def last_row(sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     @last_row[sheet] ||=
       begin
@@ -146,7 +149,7 @@ class Roo::Base
 
   # returns the number of the first non-empty column
   def first_column(sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     @first_column[sheet] ||=
       begin
@@ -161,7 +164,7 @@ class Roo::Base
 
   # returns the number of the last non-empty column
   def last_column(sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     @last_column[sheet] ||=
       begin
@@ -178,7 +181,7 @@ class Roo::Base
   # you can add additional attributes with the prefix parameter like:
   # oo.to_yaml({"file"=>"flightdata_2007-06-26", "sheet" => "1"})
   def to_yaml(prefix={}, from_row=nil, from_column=nil, to_row=nil, to_column=nil,sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     return '' unless first_row # empty result if there is no first_row in a sheet
 
     from_row ||= first_row(sheet)
@@ -210,7 +213,7 @@ class Roo::Base
 
   # write the current spreadsheet to stdout or into a file
   def to_csv(filename=nil,sheet=nil,separator=',')
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     if filename
       File.open(filename,"w") do |file|
         write_csv_content(file,sheet,separator)
@@ -228,7 +231,7 @@ class Roo::Base
   def to_matrix(from_row=nil, from_column=nil, to_row=nil, to_column=nil,sheet=nil)
     require 'matrix'
 
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     return Matrix.empty unless first_row
 
     from_row ||= first_row(sheet)
@@ -267,7 +270,7 @@ class Roo::Base
   # returns all values in this row as an array
   # row numbers are 1,2,3,... like in the spreadsheet
   def row(rownumber,sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     first_column(sheet).upto(last_column(sheet)).map do |col|
       cell(rownumber,col,sheet)
@@ -280,7 +283,7 @@ class Roo::Base
     if columnnumber.class == String
       columnnumber = self.class.letter_to_number(columnnumber)
     end
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     first_row(sheet).upto(last_row(sheet)).map do |row|
       cell(row,columnnumber,sheet)
@@ -290,7 +293,7 @@ class Roo::Base
   # set a cell to a certain value
   # (this will not be saved back to the spreadsheet file!)
   def set(row,col,value,sheet=nil) #:nodoc:
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     row, col = normalize(row,col)
     cell_type =
@@ -307,14 +310,14 @@ class Roo::Base
 
   # reopens and read a spreadsheet document
   def reload
-    ds = @default_sheet
+    ds = default_sheet
     reinitialize
     self.default_sheet = ds
   end
 
   # true if cell is empty
   def empty?(row, col, sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
     contents = cell(row, col, sheet)
@@ -395,8 +398,8 @@ class Roo::Base
   # access different worksheets by calling spreadsheet.sheet(1)
   # or spreadsheet.sheet('SHEETNAME')
   def sheet(index,name=false)
-    @default_sheet = String === index ? index : self.sheets[index]
-    name ? [@default_sheet,self] : self
+    default_sheet = String === index ? index : self.sheets[index]
+    name ? [default_sheet,self] : self
   end
 
   # iterate through all worksheets of a document
@@ -438,7 +441,7 @@ class Roo::Base
       if options[:clean]
         options.delete(:clean)
         @cleaned ||= {}
-        @cleaned[@default_sheet] || clean_sheet(@default_sheet)
+        @cleaned[default_sheet] || clean_sheet(default_sheet)
       end
 
       if options[:header_search]
@@ -640,12 +643,12 @@ class Roo::Base
   end
 
   def set_value(row,col,value,sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     @cell[sheet][[row,col]] = value
   end
 
   def set_type(row,col,type,sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     @cell_type[sheet][[row,col]] = type
   end
 

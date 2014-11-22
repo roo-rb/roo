@@ -25,13 +25,13 @@ class Roo::CSV < Roo::Base
   end
 
   def cell(row, col, sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     @cell[normalize(row,col)]
   end
 
   def celltype(row, col, sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     @cell_type[normalize(row,col)]
   end
@@ -69,7 +69,7 @@ class Roo::CSV < Roo::Base
   end
 
   def read_cells(sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     return if @cells_read[sheet]
     @first_row[sheet] = 1
     @last_row[sheet] = 0

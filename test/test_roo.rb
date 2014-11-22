@@ -1003,18 +1003,18 @@ Sheet 3:
 
   def test_file_warning_warning
     if OPENOFFICE
-        assert_raises(Errno::ENOENT) {
-          Roo::OpenOffice.new(File.join(TESTDIR,"numbers1.xlsx"),
-          packed: false,
-          file_warning: :warning)
-        }
+      assert_raises(Errno::ENOENT) {
+        Roo::OpenOffice.new(File.join(TESTDIR,"numbers1.xlsx"),
+        packed: false,
+        file_warning: :warning)
+      }
     end
     if EXCELX
-        assert_raises(Errno::ENOENT) {
-          Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),
-          packed: false,
-          file_warning: :warning)
-        }
+      assert_nothing_raised {
+        Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),
+        packed: false,
+        file_warning: :warning)
+      }
     end
   end
 

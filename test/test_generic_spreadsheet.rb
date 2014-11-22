@@ -15,12 +15,12 @@ class TestBase < Minitest::Test
       end
 
       def cell(row, col, sheet=nil)
-        sheet ||= @default_sheet
+        sheet ||= default_sheet
         @cell[sheet][[row,col]]
       end
 
       def celltype(row, col, sheet=nil)
-        sheet ||= @default_sheet
+        sheet ||= default_sheet
         @cell_type[sheet][[row,col]]
       end
 

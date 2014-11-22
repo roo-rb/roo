@@ -67,7 +67,7 @@ class Roo::OpenOffice < Roo::Base
   # (1,1), (1,'A'), ('A',1), ('a',1) all refers to the
   # cell at the first line and first row.
   def cell(row, col, sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
     if celltype(row,col,sheet) == :date
@@ -81,7 +81,7 @@ class Roo::OpenOffice < Roo::Base
   # Returns nil if there is no formula.
   # The method #formula? checks if there is a formula.
   def formula(row,col,sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
     @formula[sheet][[row,col]]
@@ -91,7 +91,7 @@ class Roo::OpenOffice < Roo::Base
   # returns each formula in the selected sheet as an array of elements
   # [row, col, formula]
   def formulas(sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     if @formula[sheet]
       @formula[sheet].each.collect do |elem|
@@ -120,7 +120,7 @@ class Roo::OpenOffice < Roo::Base
 
   # Given a cell, return the cell's style
   def font(row, col, sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
     style_name = @style[sheet][[row,col]] || @style_defaults[sheet][col - 1] || 'Default'
@@ -136,7 +136,7 @@ class Roo::OpenOffice < Roo::Base
   # * :time
   # * :datetime
   def celltype(row,col,sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
     if @formula[sheet][[row,col]]
@@ -162,7 +162,7 @@ class Roo::OpenOffice < Roo::Base
   # shows the internal representation of all cells
   # mainly for debugging purposes
   def to_s(sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     @cell[sheet].inspect
   end
@@ -199,7 +199,7 @@ class Roo::OpenOffice < Roo::Base
   # returns the comment at (row/col)
   # nil if there is no comment
   def comment(row,col,sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
     return nil unless @comment[sheet]
@@ -209,7 +209,7 @@ class Roo::OpenOffice < Roo::Base
   # returns each comment in the selected sheet as an array of elements
   # [row, col, comment]
   def comments(sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_comments(sheet) unless @comments_read[sheet]
     if @comment[sheet]
       @comment[sheet].each.collect do |elem|
@@ -277,7 +277,7 @@ class Roo::OpenOffice < Roo::Base
   # some content <text:s text:c="3"/>
   #++
   def read_cells(sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     validate_sheet!(sheet)
     return if @cells_read[sheet]
 

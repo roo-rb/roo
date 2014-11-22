@@ -144,7 +144,7 @@ class Roo::Excelx < Roo::Base
     # is method name a label name
     read_labels
     if @label.has_key?(m.to_s)
-      sheet ||= @default_sheet
+      sheet ||= default_sheet
       read_cells(sheet)
       row,col = label(m.to_s)
       cell(row,col)
@@ -155,7 +155,7 @@ class Roo::Excelx < Roo::Base
   end
 
   def sheet_for(sheet)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     validate_sheet!(sheet)
     n = self.sheets.index(sheet)
 
@@ -167,7 +167,7 @@ class Roo::Excelx < Roo::Base
   # (1,1), (1,'A'), ('A',1), ('a',1) all refers to the
   # cell at the first line and first row.
   def cell(row, col, sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     sheet_object = sheet_for(sheet)
     read_cells(sheet)
     row,col = key = normalize(row,col)
@@ -188,7 +188,7 @@ class Roo::Excelx < Roo::Base
   # Returns nil if there is no formula.
   # The method #formula? checks if there is a formula.
   def formula(row,col,sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
     @formula[sheet][[row,col]] && @formula[sheet][[row,col]]
@@ -198,7 +198,7 @@ class Roo::Excelx < Roo::Base
     # returns each formula in the selected sheet as an array of elements
   # [row, col, formula]
   def formulas(sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     if @formula[sheet]
       @formula[sheet].map do |coord, formula|
@@ -227,7 +227,7 @@ class Roo::Excelx < Roo::Base
 
   # Given a cell, return the cell's style
   def font(row, col, sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
     style_definitions[@style[sheet][[row,col]].to_i]
@@ -242,7 +242,7 @@ class Roo::Excelx < Roo::Base
   # * :time
   # * :datetime
   def celltype(row,col,sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     sheet_object = sheet_for(sheet)
 
@@ -261,7 +261,7 @@ class Roo::Excelx < Roo::Base
   # * :string
   # Note: this is only available within the Excelx class
   def excelx_type(row,col,sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
     @excelx_type[sheet][[row,col]]
@@ -270,7 +270,7 @@ class Roo::Excelx < Roo::Base
   # returns the internal value of an excelx cell
   # Note: this is only available within the Excelx class
   def excelx_value(row,col,sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
     @excelx_value[sheet][[row,col]]
@@ -278,7 +278,7 @@ class Roo::Excelx < Roo::Base
 
   # returns the internal format of an excel cell
   def excelx_format(row,col,sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
     style_format(@style[sheet][[row,col]]).to_s
@@ -294,7 +294,7 @@ class Roo::Excelx < Roo::Base
   # shows the internal representation of all cells
   # for debugging purposes
   def to_s(sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     @cell[sheet].inspect
   end
@@ -315,7 +315,7 @@ class Roo::Excelx < Roo::Base
   # Returns an array which all labels. Each element is an array with
   # [labelname, [row,col,sheetname]]
   def labels
-    # sheet ||= @default_sheet
+    # sheet ||= default_sheet
     # read_cells(sheet)
     read_labels
     @label.map do |label|
@@ -491,7 +491,7 @@ class Roo::Excelx < Roo::Base
 
   # read all cells in the selected sheet
   def read_cells(sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     validate_sheet!(sheet)
     return if @cells_read[sheet]
 
