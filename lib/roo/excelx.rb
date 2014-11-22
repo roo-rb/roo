@@ -72,12 +72,7 @@ class Roo::Excelx < Roo::Base
 
     file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
     make_tmpdir do |tmpdir|
-      filename = download_uri(filename, tmpdir) if uri?(filename)
-      filename = unzip(filename, tmpdir) if packed == :zip
-      @filename = filename
-      unless File.file?(@filename)
-        raise IOError, "file #{@filename} does not exist"
-      end
+      @filename = local_filename(filename, tmpdir, packed)
       @comments_files = []
       @rels_files = []
       process_zipfile(tmpdir, @filename)

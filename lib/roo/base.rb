@@ -544,6 +544,15 @@ class Roo::Base
 
   private
 
+  def local_filename(filename, tmpdir, packed)
+    filename = download_uri(filename, tmpdir) if uri?(filename)
+    filename = unzip(filename, tmpdir) if packed == :zip
+    unless File.file?(filename)
+      raise IOError, "file #{filename} does not exist"
+    end
+    filename
+  end
+
   def file_type_warning_message(filename, ext)
     "use #{Roo::CLASS_FOR_EXTENSION.fetch(ext)}.new to handle #{ext} spreadsheet files. This has #{File.extname(filename).downcase}"
   rescue KeyError

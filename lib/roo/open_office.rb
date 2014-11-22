@@ -37,13 +37,8 @@ class Roo::OpenOffice < Roo::Base
 
     file_type_check(filename,'.ods','an Roo::OpenOffice', file_warning, packed)
     make_tmpdir(tmpdir_root) do |tmpdir|
-      filename = download_uri(filename, tmpdir) if uri?(filename)
-      filename = unzip(filename, tmpdir) if packed == :zip
+      @filename = local_filename(filename, tmpdir, packed)
       #TODO: @cells_read[:default] = false
-      @filename = filename
-      unless File.file?(@filename)
-        raise IOError, "file #{@filename} does not exist"
-      end
       self.class.extract_content(tmpdir, @filename)
       @doc = load_xml(File.join(tmpdir, "roo_content.xml"))
     end
