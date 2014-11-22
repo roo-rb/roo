@@ -562,7 +562,7 @@ class Roo::Base
   end
 
   def file_type_warning_message(filename, ext)
-    "use #{Roo::CLASS_FOR_EXTENSION.fetch(ext)}.new to handle #{ext} spreadsheet files. This has #{File.extname(filename).downcase}"
+    "use #{Roo::CLASS_FOR_EXTENSION.fetch(ext.sub('.', '').to_sym)}.new to handle #{ext} spreadsheet files. This has #{File.extname(filename).downcase}"
   rescue KeyError
     raise "unknown file type: #{ext}"
   end
