@@ -76,6 +76,12 @@ class Roo::Base
       end
       result
     end
+
+    def load_xml(path)
+      ::File.open(path, 'rb') do |file|
+        ::Nokogiri::XML(file)
+      end
+    end
   end
 
   def initialize(filename, options={}, file_warning=:error, tmpdir=nil)
@@ -499,9 +505,7 @@ class Roo::Base
   protected
 
   def load_xml(path)
-    ::File.open(path, 'rb') do |file|
-      ::Nokogiri::XML(file)
-    end
+    self.class.load_xml(path)
   end
 
   def file_type_check(filename, ext, name, warning_level, packed=nil)
