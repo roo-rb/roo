@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 require File.dirname(__FILE__) + '/test_helper'
 
-class TestBase < Test::Unit::TestCase
+class TestBase < Minitest::Test
 
   def setup
     @klass = Class.new(Roo::Base) do
@@ -119,7 +119,7 @@ class TestBase < Test::Unit::TestCase
 
   def test_setting_invalid_type_does_not_update_cell
     @oo.set(1,1,1)
-    assert_raise(ArgumentError){@oo.set(1,1, :invalid_type)}
+    assert_raises(ArgumentError){@oo.set(1,1, :invalid_type)}
     assert_equal 1, @oo.cell(1,1)
     assert_equal :float, @oo.celltype(1,1)
   end
@@ -276,6 +276,6 @@ protected
     ",,,,,,\n,,,,,,\n,,,,,,\n,,,,,,\n1961-11-21,,,,,,\n,,,,,,\n,,,,,,\n,,\"thisisc8\",,,,\"thisisg8\"\n,,,,,,\n,,,,,,\n,,,,,,\n41,42,43,44,45,,\n,,,,,,\n,,,,,,\n,,43,44,45,,\n,,\"dreiundvierzig\",\"vierundvierzig\",\"fuenfundvierzig\",,\n"
   end
   def expected_csv_with_semicolons
-    expected_csv.gsub /\,/, ';' 
+    expected_csv.gsub /\,/, ';'
   end
 end

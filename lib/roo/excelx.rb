@@ -663,7 +663,7 @@ Datei xl/comments1.xml
         # Default to 1900 (minus one day due to excel quirk) but use 1904 if
         # it's set in the Workbook's workbookPr
         # http://msdn.microsoft.com/en-us/library/ff530155(v=office.12).aspx
-        @workbook_doc.xpath("//workbookPr[date1904]").each do |workbookPr|
+        @workbook_doc.css("workbookPr[date1904]").each do |workbookPr|
           if workbookPr["date1904"] =~ /true|1/i
             return Date.new(1904,01,01)
           end

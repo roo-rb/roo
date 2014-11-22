@@ -17,9 +17,9 @@
 # with the wrong spreadsheet class
 #STDERR.reopen "/dev/null","w"
 
-require File.dirname(__FILE__) + '/test_helper'
+require 'test_helper'
 
-class TestRoo < Test::Unit::TestCase
+class TestRoo < Minitest::Test
 
   OPENOFFICE   = true   # do OpenOffice-Spreadsheet Tests? (.ods files)
   EXCELX       = true   # do Excelx Tests? (.xlsx files)
@@ -72,8 +72,8 @@ class TestRoo < Test::Unit::TestCase
     if CSV
       oo = Roo::CSV.new(File.join(TESTDIR,'numbers1.csv'))
       assert_equal ["default"], oo.sheets
-      assert_raise(RangeError) { oo.default_sheet = "no_sheet" }
-      assert_raise(TypeError)  { oo.default_sheet = [1,2,3] }
+      assert_raises(RangeError) { oo.default_sheet = "no_sheet" }
+      assert_raises(TypeError)  { oo.default_sheet = [1,2,3] }
       oo.sheets.each { |sh|
         oo.default_sheet = sh
         assert_equal sh, oo.default_sheet
@@ -84,8 +84,8 @@ class TestRoo < Test::Unit::TestCase
   def test_sheets
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       assert_equal ["Tabelle1","Name of Sheet 2","Sheet3","Sheet4","Sheet5"], oo.sheets
-      assert_raise(RangeError) { oo.default_sheet = "no_sheet" }
-      assert_raise(TypeError)  { oo.default_sheet = [1,2,3] }
+      assert_raises(RangeError) { oo.default_sheet = "no_sheet" }
+      assert_raises(TypeError)  { oo.default_sheet = [1,2,3] }
       oo.sheets.each { |sh|
         oo.default_sheet = sh
         assert_equal sh, oo.default_sheet
@@ -144,8 +144,8 @@ class TestRoo < Test::Unit::TestCase
       assert_equal "tata", oo.cell('A',6)
       assert_equal "tata", oo.cell(6,'a')
       assert_equal "tata", oo.cell('a',6)
-      assert_raise(ArgumentError) { assert_equal "tata", oo.cell('a','f') }
-      assert_raise(ArgumentError) { assert_equal "tata", oo.cell('f','a') }
+      assert_raises(ArgumentError) { assert_equal "tata", oo.cell('a','f') }
+      assert_raises(ArgumentError) { assert_equal "tata", oo.cell('f','a') }
       assert_equal "thisisc8", oo.cell(8,3)
       assert_equal "thisisc8", oo.cell(8,'C')
       assert_equal "thisisc8", oo.cell('C',8)
@@ -174,22 +174,22 @@ class TestRoo < Test::Unit::TestCase
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       oo.default_sheet = "Name of Sheet 2"
       assert_equal 'I am sheet 2', oo.cell('C',5)
-      assert_raise(RangeError) { oo.default_sheet = "non existing sheet name" }
-      assert_raise(RangeError) { oo.default_sheet = "non existing sheet name" }
-      assert_raise(RangeError) { oo.cell('C',5,"non existing sheet name")}
-      assert_raise(RangeError) { oo.celltype('C',5,"non existing sheet name")}
-      assert_raise(RangeError) { oo.empty?('C',5,"non existing sheet name")}
-      assert_raise(RangeError) { oo.formula?('C',5,"non existing sheet name")}
-      assert_raise(RangeError) { oo.formula('C',5,"non existing sheet name")}
-      assert_raise(RangeError) { oo.set('C',5,42,"non existing sheet name")}
-      assert_raise(RangeError) { oo.formulas("non existing sheet name")}
-      assert_raise(RangeError) { oo.to_yaml({},1,1,1,1,"non existing sheet name")}
+      assert_raises(RangeError) { oo.default_sheet = "non existing sheet name" }
+      assert_raises(RangeError) { oo.default_sheet = "non existing sheet name" }
+      assert_raises(RangeError) { oo.cell('C',5,"non existing sheet name")}
+      assert_raises(RangeError) { oo.celltype('C',5,"non existing sheet name")}
+      assert_raises(RangeError) { oo.empty?('C',5,"non existing sheet name")}
+      assert_raises(RangeError) { oo.formula?('C',5,"non existing sheet name")}
+      assert_raises(RangeError) { oo.formula('C',5,"non existing sheet name")}
+      assert_raises(RangeError) { oo.set('C',5,42,"non existing sheet name")}
+      assert_raises(RangeError) { oo.formulas("non existing sheet name")}
+      assert_raises(RangeError) { oo.to_yaml({},1,1,1,1,"non existing sheet name")}
     end
   end
 
   def test_argument_error
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      assert_nothing_raised(ArgumentError) {  oo.default_sheet = "Tabelle1" }
+      oo.default_sheet = "Tabelle1"
     end
   end
 
@@ -563,7 +563,7 @@ class TestRoo < Test::Unit::TestCase
     with_each_spreadsheet(:name=>'formula', :format=>[:openoffice, :excelx]) do |oo|
       oo.default_sheet = 'Sheet3' # is an empty sheet
       Dir.mktmpdir do |tempdir|
-        assert_nothing_raised() {  oo.to_csv(File.join(tempdir,"emptysheet.csv"))  }
+        oo.to_csv(File.join(tempdir,"emptysheet.csv"))
         assert_equal "", `cat #{File.join(tempdir,"emptysheet.csv")}`
       end
     end
@@ -604,7 +604,7 @@ class TestRoo < Test::Unit::TestCase
   def test_find_by_row_if_header_line_is_not_nil
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       oo.header_line = 2
-      assert_not_nil oo.header_line
+      refute_nil oo.header_line
       rec = oo.find 1
       assert rec
       assert_equal 5, rec[0]
@@ -814,12 +814,12 @@ class TestRoo < Test::Unit::TestCase
 
   def test_should_raise_file_not_found_error
     if OPENOFFICE
-      assert_raise(IOError) {
+      assert_raises(IOError) {
         Roo::OpenOffice.new(File.join('testnichtvorhanden','Bibelbund.ods'))
       }
     end
     if EXCELX
-      assert_raise(IOError) {
+      assert_raises(IOError) {
         Roo::Excelx.new(File.join('testnichtvorhanden','Bibelbund.xlsx'))
       }
     end
@@ -827,7 +827,6 @@ class TestRoo < Test::Unit::TestCase
 
   def test_bug_bbu
     with_each_spreadsheet(:name=>'bbu', :format=>[:openoffice, :excelx]) do |oo|
-      assert_nothing_raised() {
         assert_equal "File: bbu#{get_extension(oo)}
 Number of sheets: 3
 Sheets: 2007_12, Tabelle2, Tabelle3
@@ -840,7 +839,6 @@ Sheet 2:
   - empty -
 Sheet 3:
   - empty -", oo.info
-      }
 
       oo.default_sheet = oo.sheets[1] # empty sheet
       assert_nil oo.first_row
@@ -928,7 +926,7 @@ Sheet 3:
 
   def test_to_xml
     with_each_spreadsheet(:name=>'numbers1', :encoding => 'utf8') do |oo|
-      assert_nothing_raised {oo.to_xml}
+      oo.to_xml
       sheetname = oo.sheets.first
       doc = Nokogiri::XML(oo.to_xml)
       sheet_count = 0
@@ -1005,22 +1003,18 @@ Sheet 3:
 
   def test_file_warning_warning
     if OPENOFFICE
-      assert_nothing_raised(TypeError) {
         assert_raises(Errno::ENOENT) {
           Roo::OpenOffice.new(File.join(TESTDIR,"numbers1.xlsx"),
           packed: false,
           file_warning: :warning)
         }
-      }
     end
     if EXCELX
-      assert_nothing_raised(TypeError) {
         assert_raises(Errno::ENOENT) {
           Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),
           packed: false,
           file_warning: :warning)
         }
-      }
     end
   end
 
@@ -1032,18 +1026,14 @@ Sheet 3:
       # oder Abbruch die Datei geoffnet werden
 
       # xlsx
-      assert_nothing_raised {
         Roo::OpenOffice.new(File.join(TESTDIR,"type_openoffice.xlsx"),
           packed: false,
           file_warning: :ignore)
-      }
     end
     if EXCELX
-      assert_nothing_raised {
         Roo::Excelx.new(File.join(TESTDIR,"type_excelx.ods"),
           packed: false,
           file_warning: :ignore)
-      }
     end
   end
 
@@ -1059,7 +1049,7 @@ Sheet 3:
         assert_equal nil, oo.first_column(sheet), "first_column not nil in sheet #{sheet}"
         assert_equal nil, oo.last_column(sheet), "last_column not nil in sheet #{sheet}"
       }
-      assert_nothing_raised() { oo.to_xml }
+      oo.to_xml
     end
   end
 
@@ -1529,10 +1519,8 @@ where the expected result is
   def test_bug_formulas_empty_sheet
     with_each_spreadsheet(:name =>'emptysheets',
       :format=>[:openoffice,:excelx]) do |oo|
-      assert_nothing_raised(NoMethodError) {
         oo.default_sheet = oo.sheets.first
         oo.formulas
-      }
       assert_equal([], oo.formulas)
     end
   end
@@ -1543,10 +1531,8 @@ where the expected result is
   def test_bug_to_yaml_empty_sheet
     with_each_spreadsheet(:name =>'emptysheets',
       :format=>[:openoffice,:excelx]) do |oo|
-      assert_nothing_raised(NoMethodError) {
         oo.default_sheet = oo.sheets.first
         oo.to_yaml
-      }
       assert_equal('', oo.to_yaml)
     end
   end
@@ -1557,10 +1543,8 @@ where the expected result is
   def test_bug_to_matrix_empty_sheet
     with_each_spreadsheet(:name =>'emptysheets',
       :format=>[:openoffice,:excelx]) do |oo|
-      assert_nothing_raised(NoMethodError) {
         oo.default_sheet = oo.sheets.first
         oo.to_matrix
-      }
       assert_equal(Matrix.empty(0,0), oo.to_matrix)
     end
   end
@@ -1952,7 +1936,7 @@ where the expected result is
 
   def test_bug_numbered_sheet_names
     with_each_spreadsheet(:name=>'bug-numbered-sheet-names', :format=>:excelx) do |oo|
-      assert_nothing_raised() { oo.each_with_pagename { } }
+      oo.each_with_pagename { }
     end
   end
 

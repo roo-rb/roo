@@ -1,16 +1,17 @@
+require 'simplecov'
 # require deps
 require 'tmpdir'
 require 'fileutils'
-require 'test/unit'
+require 'minitest/autorun'
 require 'shoulda'
 require 'fileutils'
 require 'timeout'
 require 'logger'
 require 'date'
-require 'webmock/test_unit'
+require 'webmock/minitest'
 
 # require gem files
-require File.dirname(__FILE__) + '/../lib/roo'
+require 'roo'
 
 TESTDIR =  File.join(File.dirname(__FILE__), 'files')
 
