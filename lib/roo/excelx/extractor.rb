@@ -14,7 +14,7 @@ module Roo
     end
 
     def doc_exists?
-      File.exist?(@path)
+      @path && File.exist?(@path)
     end
   end
 end

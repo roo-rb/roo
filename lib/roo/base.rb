@@ -33,6 +33,7 @@ class Roo::Base
       y = number
       return y, x
     end
+    alias :ref_to_key :split_coordinate
 
     def split_coord(s)
       if s =~ /([a-zA-Z]+)([0-9]+)/

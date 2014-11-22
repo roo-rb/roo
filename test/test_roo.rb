@@ -1010,7 +1010,7 @@ Sheet 3:
       }
     end
     if EXCELX
-      assert_nothing_raised {
+      assert_raises(ArgumentError) {
         Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),
         packed: false,
         file_warning: :warning)

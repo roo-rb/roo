@@ -17,6 +17,13 @@ module Roo
       end
     end
 
+    def initialize(path)
+      super
+      if !doc_exists?
+        raise ArgumentError, 'missing required workbook file'
+      end
+    end
+
     def sheets
       doc.xpath("//sheet")
     end

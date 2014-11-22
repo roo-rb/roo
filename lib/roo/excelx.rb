@@ -7,6 +7,10 @@ class Roo::Excelx < Roo::Base
   autoload :SharedStrings, 'roo/excelx/shared_strings'
   autoload :Styles, 'roo/excelx/styles'
 
+  autoload :Relationships, 'roo/excelx/relationships'
+  autoload :Comments, 'roo/excelx/comments'
+  autoload :SheetDoc, 'roo/excelx/sheet_doc'
+
   module Format
     EXCEPTIONAL_FORMATS = {
       'h:mm am/pm' => :date,
@@ -130,21 +134,16 @@ class Roo::Excelx < Roo::Base
   end
 
   class Sheet
-    def initialize(name, rels_doc, sheet_doc, comments_doc, styles, shared_strings, workbook)
+    def initialize(name, rels_path, sheet_path, comments_path, styles, shared_strings, workbook)
       @name = name
-      @rels_doc = rels_doc
-      @sheet_doc = sheet_doc
-      @comments_doc = comments_doc
+      @rels = Relationships.new(rels_path)
+      @comments = Comments.new(comments_path)
       @styles = styles
-      @shared_strings = shared_strings
-      @workbook = workbook
+      @sheet = SheetDoc.new(sheet_path, @rels, @styles, shared_strings, workbook)
     end
 
     def cells
-      @cells ||= Hash[@sheet_doc.xpath("/worksheet/sheetData/row/c").map do |cell_xml|
-        key = ref_to_key(cell_xml['r'])
-        [key, cell_from_xml(cell_xml, hyperlinks[key])]
-      end]
+      @cells ||= @sheet.cells(@rels)
     end
 
     def present_cells
@@ -186,152 +185,14 @@ class Roo::Excelx < Roo::Base
       @styles.style_format(cells[key].style).to_s
     end
 
-    def comments
-      @comments ||=
-        if @comments_doc
-          Hash[@comments_doc.xpath("//comments/commentList/comment").map do |comment|
-            [ref_to_key(comment.attributes['ref'].to_s), comment.at_xpath('./text/r/t').text]
-          end]
-        else
-          {}
-        end
-    end
-
-    private
-
-=begin
-Datei xl/comments1.xml
-  <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-  <comments xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-    <authors>
-      <author />
-    </authors>
-    <commentList>
-      <comment ref="B4" authorId="0">
-        <text>
-          <r>
-            <rPr>
-              <sz val="10" />
-              <rFont val="Arial" />
-              <family val="2" />
-            </rPr>
-            <t>Kommentar fuer B4</t>
-          </r>
-        </text>
-      </comment>
-      <comment ref="B5" authorId="0">
-        <text>
-          <r>
-            <rPr>
-            <sz val="10" />
-            <rFont val="Arial" />
-            <family val="2" />
-          </rPr>
-          <t>Kommentar fuer B5</t>
-        </r>
-      </text>
-    </comment>
-  </commentList>
-  </comments>
-=end
-=begin
-    if @comments_doc[self.sheets.index(sheet)]
-      read_comments(sheet)
-    end
-=end
-
-    def cell_from_xml(cell_xml, hyperlink)
-      style = cell_xml['s'].to_i   # should be here
-      # c: <c r="A5" s="2">
-      # <v>22606</v>
-      # </c>, format: , tmp_type: float
-      value_type =
-        case cell_xml['t']
-        when 's'
-          :shared
-        when 'b'
-          :boolean
-        # 2011-02-25 BEGIN
-        when 'str'
-          :string
-        # 2011-02-25 END
-        # 2011-09-15 BEGIN
-        when 'inlineStr'
-          :inlinestr
-        # 2011-09-15 END
-        else
-          format = @styles.style_format(style)
-          Format.to_type(format)
-        end
-      formula = nil
-      cell_xml.children.each do |cell|
-        case cell.name
-        when 'is'
-          cell.children.each do |inline_str|
-            if inline_str.name == 't'
-              return Cell.new(inline_str.content,:string,formula,:string,inline_str.content,style, hyperlink, @workbook.base_date)
-            end
-          end
-        when 'f'
-          formula = cell.content
-        when 'v'
-          if [:time, :datetime].include?(value_type) && cell.content.to_f >= 1.0
-            value_type =
-              if (cell.content.to_f - cell.content.to_f.floor).abs > 0.000001
-                :datetime
-              else
-                :date
-              end
-          end
-          excelx_type = [:numeric_or_formula,format.to_s]
-          value =
-            case value_type
-            when :shared
-              value_type = :string
-              excelx_type = :string
-              @shared_strings[cell.content.to_i]
-            when :boolean
-              (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
-            when :date, :time, :datetime
-              cell.content
-            when :formula
-              cell.content.to_f
-            when :string
-              excelx_type = :string
-              cell.content
-            else
-              value_type = :float
-              cell.content
-            end
-          return Cell.new(value,value_type,formula,excelx_type,cell.content,style, hyperlink, @workbook.base_date)
-        end
-      end
-      nil
-    end
-
-    def ref_to_key(ref)
-      Roo::Base.split_coordinate(ref)
-    end
-
     def hyperlinks
-      @hyperlinks ||=
-        Hash[@sheet_doc.xpath("/worksheet/hyperlinks/hyperlink").map do |hyperlink|
-          if hyperlink.attribute('id') && relationship = relationships[hyperlink.attribute('id').text]
-            [ref_to_key(hyperlink.attributes['ref'].to_s), relationship.attribute('Target').text]
-          end
-        end.compact]
+      @hyperlinks ||= @sheet.hyperlinks(@rels)
     end
 
-    def relationships
-      @relationships ||=
-        if @rels_doc
-          Hash[@rels_doc.xpath("/Relationships/Relationship").map do |rel|
-            [rel.attribute('Id').text, rel]
-          end]
-        end
+    def comments
+      @comments.comments
     end
   end
-
 
   class << self
     def load_xml(path)
@@ -353,10 +214,12 @@ Datei xl/comments1.xml
     @rels_files = []
     process_zipfile(@tmpdir, @filename)
 
-    @sheet_doc = load_xmls(@sheet_files)
-    @comments_doc = load_xmls(@comments_files)
-    @rels_doc = load_xmls(@rels_files)
+    @sheet_names = workbook.sheets.map {|sheet| sheet['name'] }
     @sheets = []
+    @sheets_by_name = Hash[@sheet_names.map.with_index do |sheet_name, n|
+      @sheets[n] = Sheet.new(sheet_name, @rels_files[n], @sheet_files[n], @comments_files[n], styles, shared_strings, workbook)
+      [sheet_name, @sheets[n]]
+    end]
 
     super(filename, options)
   end
@@ -370,13 +233,14 @@ Datei xl/comments1.xml
     end
   end
 
+  def sheets
+    @sheet_names
+  end
+
   def sheet_for(sheet)
     sheet ||= default_sheet
     validate_sheet!(sheet)
-    n = self.sheets.index(sheet)
-
-    @sheets[n] ||=
-      Sheet.new(sheet, @rels_doc[n], @sheet_doc[n], @comments_doc[n], styles, shared_strings, workbook)
+    @sheets_by_name[sheet]
   end
 
   # Returns the content of a spreadsheet-cell.
@@ -495,13 +359,6 @@ Datei xl/comments1.xml
     sheet_for(sheet).excelx_format(key)
   end
 
-  # returns an array of sheet names in the spreadsheet
-  def sheets
-    workbook.sheets.map do |sheet|
-      sheet['name']
-    end
-  end
-
   def empty?(row,col,sheet=nil)
     sheet = sheet_for(sheet)
     key = normalize(row,col)
@@ -572,12 +429,6 @@ Datei xl/comments1.xml
   end
 
   private
-
-  def load_xmls(paths)
-    paths.compact.map do |item|
-      load_xml(item)
-    end
-  end
 
   # Extracts all needed files from the zip file
   def process_zipfile(tmpdir, zipfilename)
