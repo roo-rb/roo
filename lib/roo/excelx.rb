@@ -64,6 +64,36 @@ class Roo::Excelx < Roo::Base
     module_function :to_type
   end
 
+  class Sheet
+    def initialize(name, rels_doc, sheet_doc)
+      @name = name
+      @rels_doc = rels_doc
+      @sheet_doc = sheet_doc
+    end
+
+    def hyperlink(key)
+      @hyperlink ||=
+        Hash[@sheet_doc.xpath("/worksheet/hyperlinks/hyperlink").map do |hyperlink|
+          if hyperlink.attribute('id') && relationship = relationships[hyperlink.attribute('id').text]
+            key = Roo::Base.split_coordinate(hyperlink.attributes['ref'].to_s)
+            [key, relationship.attribute('Target').text]
+          end
+        end.compact]
+      @hyperlink[key]
+    end
+
+    private
+
+    def relationships
+      @relationships ||=
+        if @rels_doc
+          Hash[@rels_doc.xpath("/Relationships/Relationship").map do |rel|
+            [rel.attribute('Id').text, rel]
+          end]
+        end
+    end
+  end
+
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
   def initialize(filename, options = {})
@@ -88,8 +118,6 @@ class Roo::Excelx < Roo::Base
     @style = {}
     @comment = {}
     @comments_read = {}
-    @hyperlink = {}
-    @hyperlinks_read = {}
   end
 
   def method_missing(m,*args)
@@ -106,12 +134,21 @@ class Roo::Excelx < Roo::Base
     end
   end
 
+  def sheet_for(sheet)
+    sheet ||= @default_sheet
+    validate_sheet!(sheet)
+    n = self.sheets.index(sheet)
+
+    Sheet.new(sheet, @rels_doc[n], @sheet_doc[n])
+  end
+
   # Returns the content of a spreadsheet-cell.
   # (1,1) is the upper left corner.
   # (1,1), (1,'A'), ('A',1), ('a',1) all refers to the
   # cell at the first line and first row.
   def cell(row, col, sheet=nil)
     sheet ||= @default_sheet
+    sheet_object = sheet_for(sheet)
     read_cells(sheet)
     row,col = key = normalize(row,col)
     case celltype(row,col,sheet)
@@ -121,7 +158,7 @@ class Roo::Excelx < Roo::Base
     when :datetime
       create_datetime_from(@cell[sheet][key])
     when :link
-      Roo::Link.new(@hyperlink[sheet][key], @cell[sheet][key].to_s)
+      Roo::Link.new(sheet_object.hyperlink(key), @cell[sheet][key].to_s)
     else
       @cell[sheet][key]
     end
@@ -187,12 +224,12 @@ class Roo::Excelx < Roo::Base
   def celltype(row,col,sheet=nil)
     sheet ||= @default_sheet
     read_cells(sheet)
-    read_hyperlinks(sheet) unless @hyperlinks_read[sheet]
+    sheet_object = sheet_for(sheet)
 
     key = normalize(row,col)
     if @formula[sheet][key]
       :formula
-    elsif @hyperlink[sheet] && @hyperlink[sheet][key]
+    elsif sheet_object.hyperlink(key)
       :link
     else
       @cell_type[sheet][key]
@@ -277,10 +314,8 @@ class Roo::Excelx < Roo::Base
   # returns the hyperlink at (row/col)
   # nil if there is no hyperlink
   def hyperlink(row,col,sheet=nil)
-    sheet ||= @default_sheet
-    read_hyperlinks(sheet) unless @hyperlinks_read[sheet]
-    row,col = normalize(row,col)
-    @hyperlink[sheet] && @hyperlink[sheet][[row,col]]
+    key = normalize(row,col)
+    sheet_for(sheet).hyperlink(key)
   end
 
   # returns the comment at (row/col)
@@ -514,26 +549,6 @@ Datei xl/comments1.xml
       end
     end
     @comments_read[sheet] = true
-  end
-
-  # Reads all hyperlinks from a sheet
-  def read_hyperlinks(sheet=nil)
-    sheet ||= @default_sheet
-    validate_sheet!(sheet)
-    n = self.sheets.index(sheet)
-    if rels_doc = @rels_doc[n]
-      rels = Hash[rels_doc.xpath("/Relationships/Relationship").map do |rel|
-        [rel.attribute('Id').text, rel]
-      end]
-      @sheet_doc[n].xpath("/worksheet/hyperlinks/hyperlink").each do |hyperlink|
-        if hyperlink.attribute('id') && rel_element = rels[hyperlink.attribute('id').text]
-          key = self.class.split_coordinate(hyperlink.attributes['ref'].to_s)
-          @hyperlink[sheet] ||= {}
-          @hyperlink[sheet][key] = rel_element.attribute('Target').text
-        end
-      end
-    end
-    @hyperlinks_read[sheet] = true
   end
 
   def read_labels
