@@ -508,12 +508,6 @@ class Roo::Base
       # getestet, falls es eine gepackte Datei ist.
       filename = File.basename(filename,File.extname(filename))
     end
-    case ext
-    when '.ods', '.xls', '.xlsx', '.csv', '.xml'
-      correct_class = "use #{Roo::CLASS_FOR_EXTENSION[ext]}.new to handle #{ext} spreadsheet files. This has #{File.extname(filename).downcase}"
-    else
-      raise "unknown file type: #{ext}"
-    end
 
     if uri?(filename) && qs_begin = filename.rindex('?')
       filename = filename[0..qs_begin-1]
@@ -521,11 +515,11 @@ class Roo::Base
     if File.extname(filename).downcase != ext
       case warning_level
       when :error
-        warn correct_class
+        warn file_type_warning_message(filename, ext)
         raise TypeError, "#{filename} is not #{name} file"
       when :warning
         warn "are you sure, this is #{name} spreadsheet file?"
-        warn correct_class
+        warn file_type_warning_message(filename, ext)
       when :ignore
         # ignore
       else
@@ -549,6 +543,12 @@ class Roo::Base
   end
 
   private
+
+  def file_type_warning_message(filename, ext)
+    "use #{Roo::CLASS_FOR_EXTENSION.fetch(ext)}.new to handle #{ext} spreadsheet files. This has #{File.extname(filename).downcase}"
+  rescue KeyError
+    raise "unknown file type: #{ext}"
+  end
 
   def find_by_row(row_index)
     row_index += (header_line - 1) if @header_line
