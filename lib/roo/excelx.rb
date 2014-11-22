@@ -71,32 +71,21 @@ class Roo::Excelx < Roo::Base
     file_warning = options[:file_warning] || :error
 
     file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
-    make_tmpdir(options[:tmpdir_root]) do |tmpdir|
-      @filename = local_filename(filename, tmpdir, packed)
-      @comments_files = []
-      @rels_files = []
-      process_zipfile(tmpdir, @filename)
-      @workbook_doc = load_xml(File.join(tmpdir, "roo_workbook.xml")).remove_namespaces!
-      @shared_table = []
-      if File.exist?(File.join(tmpdir, 'roo_sharedStrings.xml'))
-        @sharedstring_doc = load_xml(File.join(tmpdir, 'roo_sharedStrings.xml')).remove_namespaces!
-        read_shared_strings(@sharedstring_doc)
-      end
-      @styles_table = []
-      @style_definitions = [] # TODO: ??? { |h,k| h[k] = {} }
-      if File.exist?(File.join(tmpdir, 'roo_styles.xml'))
-        @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml')).remove_namespaces!
-        read_styles(@styles_doc)
-      end
-      @sheet_doc = load_xmls(@sheet_files)
-      @comments_doc = load_xmls(@comments_files)
-      @rels_doc = load_xmls(@rels_files)
-    end
+
+    @tmpdir = make_tmpdir(filename.split('/').last, options[:tmpdir_root])
+    @filename = local_filename(filename, @tmpdir, packed)
+    @comments_files = []
+    @rels_files = []
+    process_zipfile(@tmpdir, @filename)
+    @sheet_doc = load_xmls(@sheet_files)
+    @comments_doc = load_xmls(@comments_files)
+    @rels_doc = load_xmls(@rels_files)
+
     super(filename, options)
     @formula = {}
     @excelx_type = {}
     @excelx_value = {}
-    @style = {} # TODO: ggf. wieder entfernen nur lokal benoetigt
+    @style = {}
     @comment = {}
     @comments_read = {}
     @hyperlink = {}
@@ -184,10 +173,7 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
-    style = @style[sheet][[row,col]]
-    style ||= 0
-    style = style.to_i
-    @style_definitions[style]
+    style_definitions[@style[sheet][[row,col]].to_i]
   end
 
   # returns the type of a cell:
@@ -238,13 +224,12 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
-    style = @style[sheet][[row,col]]
-    style_format(style).to_s
+    style_format(@style[sheet][[row,col]]).to_s
   end
 
   # returns an array of sheet names in the spreadsheet
   def sheets
-    @workbook_doc.xpath("//sheet").map do |sheet|
+    workbook_doc.xpath("//sheet").map do |sheet|
       sheet['name']
     end
   end
@@ -328,6 +313,14 @@ class Roo::Excelx < Roo::Base
   end
 
   private
+
+  def workbook_doc
+    @workbook_doc ||= load_xml(File.join(@tmpdir, "roo_workbook.xml"))
+  end
+
+  def load_xml(path)
+    super.remove_namespaces!
+  end
 
   def load_xmls(paths)
     paths.compact.map do |item|
@@ -428,7 +421,7 @@ class Roo::Excelx < Roo::Base
             when :shared
               value_type = :string
               excelx_type = :string
-              @shared_table[cell.content.to_i]
+              shared_strings[cell.content.to_i]
             when :boolean
               (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
             when :date
@@ -511,7 +504,7 @@ Datei xl/comments1.xml
     sheet ||= @default_sheet
     validate_sheet!(sheet)
     n = self.sheets.index(sheet)
-    return unless @comments_doc[n] #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    return unless @comments_doc[n]
     @comments_doc[n].xpath("//comments/commentList/comment").each do |comment|
       ref = comment.attributes['ref'].to_s
       row,col = self.class.split_coordinate(ref)
@@ -544,7 +537,7 @@ Datei xl/comments1.xml
   end
 
   def read_labels
-    @label ||= Hash[@workbook_doc.xpath("//definedName").map do |defined_name|
+    @label ||= Hash[workbook_doc.xpath("//definedName").map do |defined_name|
       # "Sheet1!$C$5"
       sheet, coordinates = defined_name.text.split('!$', 2)
       col,row = coordinates.split('$')
@@ -555,102 +548,122 @@ Datei xl/comments1.xml
   # Extracts all needed files from the zip file
   def process_zipfile(tmpdir, zipfilename)
     @sheet_files = []
-    Roo::ZipFile.open(zipfilename) {|zf|
-      zf.entries.each {|entry|
+    Roo::ZipFile.open(zipfilename) do |zipfile|
+      zipfile.entries.each do |entry|
         entry_name = entry.to_s.downcase
 
         path =
-          if entry_name.end_with?('workbook.xml')
+          case entry_name
+          when /workbook.xml$/
             "#{tmpdir}/roo_workbook.xml"
-          elsif entry_name.end_with?('sharedstrings.xml')
+          when /sharedstrings.xml$/
             "#{tmpdir}/roo_sharedStrings.xml"
-          elsif entry_name.end_with?('styles.xml')
+          when /styles.xml$/
             "#{tmpdir}/roo_styles.xml"
-          elsif entry_name =~ /sheet([0-9]+)?.xml$/
-            nr = $1
-            path = "#{tmpdir}/roo_sheet#{nr.to_i}"
-
+          when /sheet.xml$/
+            path = "#{tmpdir}/roo_sheet"
+            @sheet_files.unshift path
+            path
+          when /sheet([0-9]+).xml$/
             # Numbers 3.1 exports first sheet without sheet number. Such sheets
             # are always added to the beginning of the array which, naturally,
             # causes other sheets to be pushed to the next index which could
             # lead to sheet references getting overwritten, so we need to
             # handle that case specifically.
-            if nr
-              sheet_files_index = nr.to_i - 1
-              sheet_files_index += 1 if @sheet_files[sheet_files_index]
-              @sheet_files[sheet_files_index] = path
-            else
-              @sheet_files.unshift path
-              path
-            end
-          elsif entry_name =~ /comments([0-9]+).xml$/
+            nr = $1
+            sheet_files_index = nr.to_i - 1
+            sheet_files_index += 1 if @sheet_files[sheet_files_index]
+            @sheet_files[sheet_files_index] = "#{tmpdir}/roo_sheet#{nr.to_i}"
+          when /comments([0-9]+).xml$/
             nr = $1
             @comments_files[nr.to_i-1] = "#{tmpdir}/roo_comments#{nr}"
-          elsif entry_name =~ /sheet([0-9]+).xml.rels$/
+          when /sheet([0-9]+).xml.rels$/
             nr = $1
             @rels_files[nr.to_i-1] = "#{tmpdir}/roo_rels#{nr}"
           end
         if path
-          extract_file(zf, entry, path)
-        end
-      }
-    }
-  end
-
-  def extract_file(source_zip, entry, destination_path)
-    File.open(destination_path,'wb') {|f|
-      f << source_zip.read(entry)
-    }
-  end
-
-  # read the shared strings xml document
-  def read_shared_strings(doc)
-    doc.xpath("/sst/si").each do |si|
-      shared_table_entry = ''
-      si.children.each do |elem|
-        if elem.name == 'r' and elem.children
-          elem.children.each do |r_elem|
-            if r_elem.name == 't'
-              shared_table_entry << r_elem.content
-            end
-          end
-        end
-        if elem.name == 't'
-          shared_table_entry = elem.content
+          File.write(path, zipfile.read(entry), mode: 'wb')
         end
       end
-      @shared_table << shared_table_entry
     end
   end
 
-  # read the styles elements of an excelx document
-  def read_styles(doc)
-    @cellXfs = []
+  def shared_strings
+    @shared_strings ||=
+      if File.exist?(shared_strings_path)
+        # read the shared strings xml document
+        xml = load_xml(shared_strings_path)
+        xml.xpath("/sst/si").map do |si|
+          shared_string = ''
+          si.children.each do |elem|
+            case elem.name
+            when 'r'
+              elem.children.each do |r_elem|
+                if r_elem.name == 't'
+                  shared_string << r_elem.content
+                end
+              end
+            when 't'
+              shared_string = elem.content
+            end
+          end
+          shared_string
+        end
+      else
+        []
+      end
+  end
 
-    @numFmts = Hash[doc.xpath("//numFmt").map do |numFmt|
-      [numFmt['numFmtId'], numFmt['formatCode']]
+  def shared_strings_path
+    @shared_strings_path ||= File.join(@tmpdir, 'roo_sharedStrings.xml')
+  end
+
+  ##### STYLES
+  def style_definitions
+    @style_definitions ||= styles_doc.xpath("//cellXfs").flat_map do |xfs|
+      xfs.children.map do |xf|
+        fonts[xf['fontId'].to_i]
+      end
+    end
+  end
+
+  def num_fmt_ids
+    @num_fmt_ids ||= styles_doc.xpath("//cellXfs").flat_map do |xfs|
+      xfs.children.map do |xf|
+        xf['numFmtId']
+      end
+    end
+  end
+
+  def num_fmts
+    @num_fmts ||= Hash[styles_doc.xpath("//numFmt").map do |num_fmt|
+      [num_fmt['numFmtId'], num_fmt['formatCode']]
     end]
-    fonts = doc.xpath("//fonts/font").map do |font_el|
+  end
+
+  def fonts
+   @fonts ||= styles_doc.xpath("//fonts/font").map do |font_el|
       Font.new.tap do |font|
         font.bold = !font_el.xpath('./b').empty?
         font.italic = !font_el.xpath('./i').empty?
         font.underline = !font_el.xpath('./u').empty?
       end
     end
+  end
 
-    doc.xpath("//cellXfs").each do |xfs|
-      xfs.children.each do |xf|
-        @cellXfs << xf['numFmtId']
-        @style_definitions << fonts[xf['fontId'].to_i]
+  def styles_doc
+    @styles_doc ||=
+      if File.exist?(File.join(@tmpdir, 'roo_styles.xml'))
+        load_xml(File.join(@tmpdir, 'roo_styles.xml'))
       end
-    end
   end
 
   # convert internal excelx attribute to a format
   def style_format(style)
-    id = @cellXfs[style.to_i]
-    @numFmts[id] || Format::STANDARD_FORMATS[id.to_i]
+    id = num_fmt_ids[style.to_i]
+    num_fmts[id] || Format::STANDARD_FORMATS[id.to_i]
   end
+  ###### END STYLES
 
   def base_date
     @base_date ||=
@@ -658,7 +671,7 @@ Datei xl/comments1.xml
         # Default to 1900 (minus one day due to excel quirk) but use 1904 if
         # it's set in the Workbook's workbookPr
         # http://msdn.microsoft.com/en-us/library/ff530155(v=office.12).aspx
-        @workbook_doc.css("workbookPr[date1904]").each do |workbookPr|
+        workbook_doc.css("workbookPr[date1904]").each do |workbookPr|
           if workbookPr["date1904"] =~ /true|1/i
             return Date.new(1904,01,01)
           end

@@ -35,7 +35,7 @@ class Roo::OpenOffice < Roo::Base
     file_warning = options[:file_warning] || :error
 
     file_type_check(filename,'.ods','an Roo::OpenOffice', file_warning, packed)
-    make_tmpdir(options[:tmpdir_root]) do |tmpdir|
+    make_tmpdir(nil, options[:tmpdir_root]) do |tmpdir|
       @filename = local_filename(filename, tmpdir, packed)
       #TODO: @cells_read[:default] = false
       self.class.extract_content(tmpdir, @filename)
