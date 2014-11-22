@@ -605,10 +605,8 @@ class Roo::Base
     initialize(@filename)
   end
 
-  def make_tmpdir(tmp_root = nil)
-    Dir.mktmpdir(TEMP_PREFIX, tmp_root || ENV['ROO_TMP']) do |tmpdir|
-      yield tmpdir
-    end
+  def make_tmpdir(tmp_root = nil, &block)
+    Dir.mktmpdir(TEMP_PREFIX, tmp_root || ENV['ROO_TMP'], &block)
   end
 
   def clean_sheet(sheet)
