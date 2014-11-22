@@ -96,7 +96,7 @@ class Roo::Excelx < Roo::Base
     @formula = {}
     @excelx_type = {}
     @excelx_value = {}
-    @s_attribute = {} # TODO: ggf. wieder entfernen nur lokal benoetigt
+    @style = {} # TODO: ggf. wieder entfernen nur lokal benoetigt
     @comment = {}
     @comments_read = {}
     @hyperlink = {}
@@ -184,10 +184,10 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
-    s_attribute = @s_attribute[sheet][[row,col]]
-    s_attribute ||= 0
-    s_attribute = s_attribute.to_i
-    @style_definitions[s_attribute]
+    style = @style[sheet][[row,col]]
+    style ||= 0
+    style = style.to_i
+    @style_definitions[style]
   end
 
   # returns the type of a cell:
@@ -238,8 +238,8 @@ class Roo::Excelx < Roo::Base
     sheet ||= @default_sheet
     read_cells(sheet)
     row,col = normalize(row,col)
-    s = @s_attribute[sheet][[row,col]]
-    attribute2format(s).to_s
+    style = @style[sheet][[row,col]]
+    style_format(style).to_s
   end
 
   # returns an array of sheet names in the spreadsheet
@@ -339,7 +339,7 @@ class Roo::Excelx < Roo::Base
   def set_cell_values(sheet,x,y,i,v,value_type,formula,
       excelx_type=nil,
       excelx_value=nil,
-      s_attribute=nil)
+      style=nil)
     key = [y,x+i]
     @cell_type[sheet] ||= {}
     @cell_type[sheet][key] = value_type
@@ -368,12 +368,12 @@ class Roo::Excelx < Roo::Base
     @excelx_type[sheet][key] = excelx_type
     @excelx_value[sheet] ||= {}
     @excelx_value[sheet][key] = excelx_value
-    @s_attribute[sheet] ||= {}
-    @s_attribute[sheet][key] = s_attribute
+    @style[sheet] ||= {}
+    @style[sheet][key] = style
   end
 
   def read_cell_from_xml(sheet, cell_xml)
-    s_attribute = cell_xml['s'].to_i   # should be here
+    style = cell_xml['s'].to_i   # should be here
     # c: <c r="A5" s="2">
     # <v>22606</v>
     # </c>, format: , tmp_type: float
@@ -392,7 +392,7 @@ class Roo::Excelx < Roo::Base
         :inlinestr
       # 2011-09-15 END
       else
-        format = attribute2format(s_attribute)
+        format = style_format(style)
         Format.to_type(format)
       end
     formula = nil
@@ -407,7 +407,7 @@ class Roo::Excelx < Roo::Base
               excelx_type = :string
               y, x = self.class.split_coordinate(cell_xml['r'])
               excelx_value = inlinestr_content #cell.content
-              set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
+              set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,style)
             end
           end
         when 'f'
@@ -447,7 +447,7 @@ class Roo::Excelx < Roo::Base
               cell.content
             end
           y, x = self.class.split_coordinate(cell_xml['r'])
-          set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,s_attribute)
+          set_cell_values(sheet,x,y,0,v,value_type,formula,excelx_type,excelx_value,style)
       end
     end
   end
@@ -647,8 +647,8 @@ Datei xl/comments1.xml
   end
 
   # convert internal excelx attribute to a format
-  def attribute2format(s)
-    id = @cellXfs[s.to_i]
+  def style_format(style)
+    id = @cellXfs[style.to_i]
     @numFmts[id] || Format::STANDARD_FORMATS[id.to_i]
   end
 
