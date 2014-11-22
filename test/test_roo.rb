@@ -1104,12 +1104,12 @@ Sheet 3:
   def test_datetime
     with_each_spreadsheet(:name=>'datetime') do |oo|
       val = oo.cell('c',3)
-      assert_kind_of DateTime, val
       assert_equal :datetime, oo.celltype('c',3)
       assert_equal DateTime.new(1961,11,21,12,17,18), val
+      assert_kind_of DateTime, val
       val = oo.cell('a',1)
-      assert_kind_of Date, val
       assert_equal :date, oo.celltype('a',1)
+      assert_kind_of Date, val
       assert_equal Date.new(1961,11,21), val
       assert_equal Date.new(1961,11,21), oo.cell('a',1)
       assert_equal DateTime.new(1961,11,21,12,17,18), oo.cell('a',3)
