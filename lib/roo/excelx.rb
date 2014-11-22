@@ -71,7 +71,7 @@ class Roo::Excelx < Roo::Base
     file_warning = options[:file_warning] || :error
 
     file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
-    make_tmpdir do |tmpdir|
+    make_tmpdir(options[:tmpdir_root]) do |tmpdir|
       @filename = local_filename(filename, tmpdir, packed)
       @comments_files = []
       @rels_files = []
