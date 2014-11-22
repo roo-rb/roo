@@ -34,14 +34,14 @@ describe Roo::CSV do
 
       it 'returns the csv options' do
         csv = Roo::CSV.new(path, csv_options: options)
-        csv.csv_options.should == options
+        expect(csv.csv_options).to eq(options)
       end
     end
 
     context 'when created without the csv_options option' do
       it 'returns a hash' do
         csv = Roo::CSV.new(path)
-        csv.csv_options.should == {}
+        expect(csv.csv_options).to eq({})
       end
     end
   end

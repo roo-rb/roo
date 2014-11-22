@@ -44,7 +44,7 @@ describe Roo::Excelx::Format do
       '#0_);[Red]\(0\)' => :float
     }.each do |format, type|
       it "translates #{format} to #{type}" do
-        Roo::Excelx::Format.to_type(format).should == type
+        expect(Roo::Excelx::Format.to_type(format)).to eq(type)
       end
     end
   end

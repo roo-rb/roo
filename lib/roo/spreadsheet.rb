@@ -1,26 +1,30 @@
+require 'pry'
 module Roo
   class Spreadsheet
     class << self
       def open(path, options = {})
-        path = path.respond_to?(:path) ? path.path : path
+        path      = path.respond_to?(:path) ? path.path : path
         extension = extension_for(path, options)
 
         begin
-          const_get(
-            Roo::CLASS_FOR_EXTENSION.fetch(extension.downcase)
-          ).new(path, options)
+          Roo::CLASS_FOR_EXTENSION.fetch(extension).new(path, options)
         rescue KeyError
           raise ArgumentError,
-            "Can't detect the type of #{path} - please use the :extension option to declare its type."
+                "Can't detect the type of #{path} - please use the :extension option to declare its type."
         end
       end
 
       def extension_for(path, options)
-        if options[:extension]
+        case (extension = options.delete(:extension))
+        when ::Symbol
           options[:file_warning] = :ignore
-          ".#{options.delete(:extension)}".gsub(/[.]+/, ".")
+          extension
+        when ::String
+          options[:file_warning] = :ignore
+          extension.tr('.', '').downcase.to_sym
         else
-          File.extname((path =~ URI::regexp) ? URI.parse(URI.encode(path)).path : path)
+          res = ::File.extname((path =~ ::URI.regexp) ? ::URI.parse(::URI.encode(path)).path : path)
+          res.tr('.', '').downcase.to_sym
         end
       end
     end

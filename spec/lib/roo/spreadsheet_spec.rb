@@ -26,7 +26,7 @@ describe Roo::Spreadsheet do
 
       it 'loads the proper type' do
         expect(Roo::CSV).to receive(:new).with(filename, file_warning: :ignore).and_call_original
-        expect(Roo::Spreadsheet.open(tempfile, extension: 'csv')).to be_a(Roo::CSV)
+        expect(Roo::Spreadsheet.open(tempfile, extension: :csv)).to be_a(Roo::CSV)
       end
     end
 
@@ -55,6 +55,15 @@ describe Roo::Spreadsheet do
 
     context 'with a file extension option' do
       let(:filename) { 'file.xls' }
+
+      context ":xlsx" do
+        let(:options) { { extension: :xlsx } }
+
+        it 'loads with xls extension options' do
+          expect(Roo::Excelx).to receive(:new).with(filename, options)
+          Roo::Spreadsheet.open(filename, options)
+        end
+      end
 
       context "xlsx" do
         let(:options) { { extension: "xlsx" } }

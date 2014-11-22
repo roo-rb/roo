@@ -1,8 +1,16 @@
 module Roo
+  autoload :Spreadsheet,  'roo/spreadsheet'
+  autoload :Base,         'roo/base'
+
+  autoload :OpenOffice,   'roo/open_office'
+  autoload :LibreOffice,  'roo/libre_office'
+  autoload :Excelx,       'roo/excelx'
+  autoload :CSV,          'roo/csv'
+
   CLASS_FOR_EXTENSION = {
-    '.ods' => 'Roo::OpenOffice',
-    '.xlsx' => 'Roo::Excelx',
-    '.csv' => 'Roo::CSV'
+    ods: Roo::OpenOffice,
+    xlsx: Roo::Excelx,
+    csv: Roo::CSV
   }
 
   def self.const_missing(const_name)
@@ -17,12 +25,4 @@ module Roo
       super
     end
   end
-
-  autoload :Spreadsheet,  'roo/spreadsheet'
-  autoload :Base,         'roo/base'
-
-  autoload :OpenOffice,   'roo/open_office'
-  autoload :LibreOffice,  'roo/libre_office'
-  autoload :Excelx,       'roo/excelx'
-  autoload :CSV,          'roo/csv'
 end

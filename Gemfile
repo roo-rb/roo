@@ -6,7 +6,7 @@ group :test do
   # additional testing libs
   gem 'webmock'
   gem 'shoulda'
-  gem 'rspec', '>= 2.14'
+  gem 'rspec', '>= 3.0.0'
   gem 'vcr'
   gem 'simplecov', '>= 0.9.0', :require => false
   gem 'coveralls', :require => false
@@ -20,5 +20,4 @@ group :local_development do
   gem 'guard-rubocop', require: false
   gem 'guard-reek', github: 'pericles/guard-reek', require: false
   gem 'pry'
-  gem 'appraisal'
 end
