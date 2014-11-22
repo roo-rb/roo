@@ -65,24 +65,46 @@ class Roo::Excelx < Roo::Base
   end
 
   class Sheet
-    def initialize(name, rels_doc, sheet_doc)
+    def initialize(name, rels_doc, sheet_doc, comments_doc)
       @name = name
       @rels_doc = rels_doc
       @sheet_doc = sheet_doc
+      @comments_doc = comments_doc
+    end
+
+    def comment(key)
+      comments[key]
+    end
+
+    def comments
+      @comments ||=
+        if @comments_doc
+          Hash[@comments_doc.xpath("//comments/commentList/comment").map do |comment|
+            [ref_to_key(comment), comment.at_xpath('./text/r/t').text ]
+          end]
+        else
+          {}
+        end
     end
 
     def hyperlink(key)
-      @hyperlink ||=
-        Hash[@sheet_doc.xpath("/worksheet/hyperlinks/hyperlink").map do |hyperlink|
-          if hyperlink.attribute('id') && relationship = relationships[hyperlink.attribute('id').text]
-            key = Roo::Base.split_coordinate(hyperlink.attributes['ref'].to_s)
-            [key, relationship.attribute('Target').text]
-          end
-        end.compact]
-      @hyperlink[key]
+      hyperlinks[key]
     end
 
     private
+
+    def ref_to_key(element)
+      Roo::Base.split_coordinate(element.attributes['ref'].to_s)
+    end
+
+    def hyperlinks
+      @hyperlinks ||=
+        Hash[@sheet_doc.xpath("/worksheet/hyperlinks/hyperlink").map do |hyperlink|
+          if hyperlink.attribute('id') && relationship = relationships[hyperlink.attribute('id').text]
+            [ref_to_key(hyperlink), relationship.attribute('Target').text]
+          end
+        end.compact]
+    end
 
     def relationships
       @relationships ||=
@@ -116,8 +138,6 @@ class Roo::Excelx < Roo::Base
     @excelx_type = {}
     @excelx_value = {}
     @style = {}
-    @comment = {}
-    @comments_read = {}
   end
 
   def method_missing(m,*args)
@@ -139,7 +159,7 @@ class Roo::Excelx < Roo::Base
     validate_sheet!(sheet)
     n = self.sheets.index(sheet)
 
-    Sheet.new(sheet, @rels_doc[n], @sheet_doc[n])
+    Sheet.new(sheet, @rels_doc[n], @sheet_doc[n], @comments_doc[n])
   end
 
   # Returns the content of a spreadsheet-cell.
@@ -321,11 +341,8 @@ class Roo::Excelx < Roo::Base
   # returns the comment at (row/col)
   # nil if there is no comment
   def comment(row,col,sheet=nil)
-    sheet ||= @default_sheet
-    #read_cells(sheet)
-    read_comments(sheet) unless @comments_read[sheet]
-    row,col = normalize(row,col)
-    @comment[sheet] && @comment[sheet][[row,col]]
+    key = normalize(row,col)
+    sheet_for(sheet).comment(key)
   end
 
   # true, if there is a comment
@@ -333,17 +350,9 @@ class Roo::Excelx < Roo::Base
     comment(row,col,sheet) != nil
   end
 
-  # returns each comment in the selected sheet as an array of elements
-  # [row, col, comment]
   def comments(sheet=nil)
-    sheet ||= @default_sheet
-    read_comments(sheet) unless @comments_read[sheet]
-    if @comment[sheet]
-      @comment[sheet].each.collect do |elem|
-        [elem[0][0],elem[0][1],elem[1]]
-      end
-    else
-      []
+    sheet_for(sheet).comments.map do |(x, y), comment|
+      [x, y, comment]
     end
   end
 
@@ -532,23 +541,6 @@ Datei xl/comments1.xml
     end
 =end
     #end comments
-  end
-
-  # Reads all comments from a sheet
-  def read_comments(sheet=nil)
-    sheet ||= @default_sheet
-    validate_sheet!(sheet)
-    n = self.sheets.index(sheet)
-    return unless @comments_doc[n]
-    @comments_doc[n].xpath("//comments/commentList/comment").each do |comment|
-      ref = comment.attributes['ref'].to_s
-      row,col = self.class.split_coordinate(ref)
-      comment.xpath('./text/r/t').each do |text|
-        @comment[sheet] ||= {}
-        @comment[sheet][[row,col]] = text.text
-      end
-    end
-    @comments_read[sheet] = true
   end
 
   def read_labels
