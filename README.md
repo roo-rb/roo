@@ -1,4 +1,4 @@
-# README
+# Roo [![Build Status](https://travis-ci.org/roo-rb/roo.svg)](https://travis-ci.org/roo-rb/roo)[![Code Climate](https://codeclimate.com/github/roo-rb/roo/badges/gpa.svg)](https://codeclimate.com/github/roo-rb/roo)
 
 Roo implements read access for all spreadsheet types and read/write access for
 Google spreadsheets. It can handle
