@@ -1,4 +1,3 @@
-require 'pry'
 module Roo
   class Spreadsheet
     class << self
