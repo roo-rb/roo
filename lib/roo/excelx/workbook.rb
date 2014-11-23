@@ -46,7 +46,7 @@ module Roo
           # it's set in the Workbook's workbookPr
           # http://msdn.microsoft.com/en-us/library/ff530155(v=office.12).aspx
           result = Date.new(1899,12,30) # default
-          doc.xpath("//workbookPr[date1904]").each do |workbookPr|
+          doc.css("workbookPr[date1904]").each do |workbookPr|
             if workbookPr["date1904"] =~ /true|1/i
               result = Date.new(1904,01,01)
               break
