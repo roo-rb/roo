@@ -39,7 +39,7 @@ class Roo::OpenOffice < Roo::Base
       @filename = local_filename(filename, tmpdir, packed)
       #TODO: @cells_read[:default] = false
       self.class.extract_content(tmpdir, @filename)
-      @doc = load_xml(File.join(tmpdir, "roo_content.xml"))
+      @doc = ::Roo::Utils.load_xml(File.join(tmpdir, "roo_content.xml"))
     end
     super(filename, options)
     @formula = Hash.new
@@ -176,7 +176,7 @@ class Roo::OpenOffice < Roo::Base
     end
     if @label.has_key? labelname
       return @label[labelname][1].to_i,
-        self.class.letter_to_number(@label[labelname][2]),
+        ::Roo::Utils.letter_to_number(@label[labelname][2]),
         @label[labelname][0]
     else
       return nil,nil,nil
@@ -190,7 +190,7 @@ class Roo::OpenOffice < Roo::Base
     @label.map do |label|
       [ label[0], # name
         [ label[1][1].to_i, # row
-          self.class.letter_to_number(label[1][2]), # column
+          ::Roo::Utils.letter_to_number(label[1][2]), # column
           label[1][0], # sheet
         ] ]
     end

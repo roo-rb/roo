@@ -194,12 +194,6 @@ class Roo::Excelx < Roo::Base
     end
   end
 
-  class << self
-    def load_xml(path)
-      super.remove_namespaces!
-    end
-  end
-
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
   def initialize(filename, options = {})
@@ -260,8 +254,8 @@ class Roo::Excelx < Roo::Base
   # returns all values in this column as an array
   # column numbers are 1,2,3,... like in the spreadsheet
   def column(column_number,sheet=nil)
-    if column_number.class == String
-      column_number = self.class.letter_to_number(column_number)
+    if column_number.is_a?(::String)
+      column_number = ::Roo::Utils.letter_to_number(column_number)
     end
     sheet_for(sheet).column(column_number)
   end

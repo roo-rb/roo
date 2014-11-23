@@ -9,7 +9,7 @@ module Roo
         @name = name
         @sheet = sheet
         @row = row.to_i
-        @col = Roo::Base.letter_to_number(col)
+        @col = ::Roo::Utils.letter_to_number(col)
       end
 
       def key

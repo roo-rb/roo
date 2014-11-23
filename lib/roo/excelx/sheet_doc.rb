@@ -13,7 +13,7 @@ module Roo
     def cells(relationships)
       @cells ||=
         Hash[doc.xpath("/worksheet/sheetData/row/c").map do |cell_xml|
-          key = Roo::Base.ref_to_key(cell_xml['r'])
+          key = ::Roo::Utils.ref_to_key(cell_xml['r'])
           [key, cell_from_xml(cell_xml, hyperlinks(relationships)[key])]
         end]
     end
@@ -22,7 +22,7 @@ module Roo
       @hyperlinks ||=
         Hash[doc.xpath("/worksheet/hyperlinks/hyperlink").map do |hyperlink|
           if hyperlink.attribute('id') && relationship = relationships[hyperlink.attribute('id').text]
-            [Roo::Base.ref_to_key(hyperlink.attributes['ref'].to_s), relationship.attribute('Target').text]
+            [::Roo::Utils.ref_to_key(hyperlink.attributes['ref'].to_s), relationship.attribute('Target').text]
           end
         end.compact]
     end

@@ -6,7 +6,7 @@ module Roo
       @comments ||=
         if doc_exists?
           Hash[doc.xpath("//comments/commentList/comment").map do |comment|
-            [Roo::Base.ref_to_key(comment.attributes['ref'].to_s), comment.at_xpath('./text/r/t').text]
+            [::Roo::Utils.ref_to_key(comment.attributes['ref'].to_s), comment.at_xpath('./text/r/t').text]
           end]
         else
           {}

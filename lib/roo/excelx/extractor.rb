@@ -9,7 +9,7 @@ module Roo
     def doc
       @doc ||=
         if doc_exists?
-          Roo::Excelx.load_xml(@path)
+          ::Roo::Utils.load_xml(@path).remove_namespaces!
         end
     end
 
