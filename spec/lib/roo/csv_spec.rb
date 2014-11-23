@@ -11,11 +11,11 @@ describe Roo::CSV do
   end
 
   describe '#parse' do
-    subject {
+    subject do
       csv.parse(options)
-    }
+    end
     context 'with headers: true' do
-      let(:options) { {headers: true} }
+      let(:options) { { headers: true } }
 
       it "doesn't blow up" do
         expect { subject }.to_not raise_error
@@ -25,12 +25,12 @@ describe Roo::CSV do
 
   describe '#csv_options' do
     context 'when created with the csv_options option' do
-      let(:options) {
+      let(:options) do
         {
           col_sep: '\t',
           quote_char: "'"
         }
-      }
+      end
 
       it 'returns the csv options' do
         csv = Roo::CSV.new(path, csv_options: options)

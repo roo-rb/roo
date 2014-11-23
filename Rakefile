@@ -1,4 +1,4 @@
-require "bundler/gem_tasks"
+require 'bundler/gem_tasks'
 
 require 'rake/testtask'
 require 'rspec/core/rake_task'
@@ -17,6 +17,7 @@ RSpec::Core::RakeTask.new(:spec)
 # Coveralls
 Coveralls::RakeTask.new
 
-task test_with_coveralls: [:test, :spec, 'coveralls:push']
+default_task = [:test, :spec]
+default_task << 'coveralls:push' if ENV['TRAVIS']
 
-task default: [:test, :spec]
+task default: default_task

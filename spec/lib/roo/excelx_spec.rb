@@ -1,10 +1,9 @@
 require 'spec_helper'
 
 describe Roo::Excelx do
-  subject(:xlsx) {
+  subject(:xlsx) do
     Roo::Excelx.new(path)
-  }
-
+  end
 
   describe '.new' do
     let(:path) { 'test/files/numeric-link.xlsx' }
@@ -27,13 +26,13 @@ describe Roo::Excelx do
       context 'with numeric contents' do
         let(:path) { 'test/files/numeric-link.xlsx' }
 
-        subject {
+        subject do
           xlsx.cell('A', 1)
-        }
+        end
 
         it 'returns a link with the number as a string value' do
           expect(subject).to be_a(Roo::Link)
-          expect(subject).to eq("8675309.0")
+          expect(subject).to eq('8675309.0')
         end
       end
     end
@@ -45,12 +44,12 @@ describe Roo::Excelx do
     context 'with a columns hash' do
       context 'when not present in the sheet' do
         it 'does not raise' do
-          expect {
+          expect do
             xlsx.sheet(0).parse(
-              this: "This",
-              that: "That"
+              this: 'This',
+              that: 'That'
             )
-          }.to raise_error("Couldn't find header row.")
+          end.to raise_error("Couldn't find header row.")
         end
       end
     end

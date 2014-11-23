@@ -8,4 +8,5 @@ rvm:
 matrix:
   allow_failures:
     - rvm: ruby-head
+    - rvm: jruby-19mode
 bundler_args: --without local_development

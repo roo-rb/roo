@@ -43,7 +43,7 @@ describe Roo::Spreadsheet do
 
     context 'for a csv file' do
       let(:filename) { 'file.csv' }
-      let(:options) { {csv_options: {col_sep: '"'}} }
+      let(:options) { { csv_options: { col_sep: '"' } } }
 
       context 'with csv_options' do
         it 'passes the csv_options through' do
@@ -56,7 +56,7 @@ describe Roo::Spreadsheet do
     context 'with a file extension option' do
       let(:filename) { 'file.xls' }
 
-      context ":xlsx" do
+      context ':xlsx' do
         let(:options) { { extension: :xlsx } }
 
         it 'loads with xls extension options' do
@@ -65,8 +65,8 @@ describe Roo::Spreadsheet do
         end
       end
 
-      context "xlsx" do
-        let(:options) { { extension: "xlsx" } }
+      context 'xlsx' do
+        let(:options) { { extension: 'xlsx' } }
 
         it 'loads with xls extension options' do
           expect(Roo::Excelx).to receive(:new).with(filename, options)
@@ -74,8 +74,8 @@ describe Roo::Spreadsheet do
         end
       end
 
-      context ".xlsx" do
-        let(:options) { { extension: ".xlsx" } }
+      context '.xlsx' do
+        let(:options) { { extension: '.xlsx' } }
 
         it 'loads with .xls extension options' do
           expect(Roo::Excelx).to receive(:new).with(filename, options)
