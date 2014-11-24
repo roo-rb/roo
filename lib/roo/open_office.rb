@@ -4,12 +4,6 @@ require 'cgi'
 
 class Roo::OpenOffice < Roo::Base
   class << self
-    def extract_content(tmpdir, filename)
-      Roo::ZipFile.open(filename) do |zip|
-        process_zipfile(tmpdir, zip)
-      end
-    end
-
     def process_zipfile(tmpdir, zip, path='')
       if zip.file.file? path
         if path == "content.xml"
@@ -33,11 +27,11 @@ class Roo::OpenOffice < Roo::Base
     file_warning = options[:file_warning] || :error
 
     file_type_check(filename,'.ods','an Roo::OpenOffice', file_warning, packed)
-    make_tmpdir(nil, options[:tmpdir_root]) do |tmpdir|
-      @filename = local_filename(filename, tmpdir, packed)
-      #TODO: @cells_read[:default] = false
-      self.class.extract_content(tmpdir, @filename)
-      @doc = ::Roo::Utils.load_xml(File.join(tmpdir, "roo_content.xml"))
+    @tmpdir = make_tmpdir(filename.split('/').last, options[:tmpdir_root])
+    @filename = local_filename(filename, @tmpdir, packed)
+    #TODO: @cells_read[:default] = false
+    Roo::ZipFile.open(@filename) do |zip|
+      self.class.process_zipfile(@tmpdir, zip)
     end
     super(filename, options)
     @formula = Hash.new
@@ -145,7 +139,7 @@ class Roo::OpenOffice < Roo::Base
   end
 
   def sheets
-    @doc.xpath("//*[local-name()='table']").map do |sheet|
+    doc.xpath("//*[local-name()='table']").map do |sheet|
       sheet.attributes["name"].value
     end
   end
@@ -220,9 +214,13 @@ class Roo::OpenOffice < Roo::Base
 
   private
 
+  def doc
+    @doc ||= ::Roo::Utils.load_xml(File.join(@tmpdir, "roo_content.xml"))
+  end
+
   # read the version of the OO-Version
   def oo_version
-    @doc.xpath("//*[local-name()='document-content']").each do |office|
+    doc.xpath("//*[local-name()='document-content']").each do |office|
       @officeversion = attr(office,'version')
     end
   end
@@ -280,7 +278,7 @@ class Roo::OpenOffice < Roo::Base
     return if @cells_read[sheet]
 
     sheet_found = false
-    @doc.xpath("//*[local-name()='table']").each do |ws|
+    doc.xpath("//*[local-name()='table']").each do |ws|
       if sheet == attr(ws,'name')
         sheet_found = true
         col = 1
@@ -375,7 +373,7 @@ class Roo::OpenOffice < Roo::Base
         end
       end
     end
-    @doc.xpath("//*[local-name()='automatic-styles']").each do |style|
+    doc.xpath("//*[local-name()='automatic-styles']").each do |style|
       read_styles(style)
     end
     if !sheet_found
@@ -392,7 +390,7 @@ class Roo::OpenOffice < Roo::Base
   end
 
   def read_labels
-    @label ||= Hash[@doc.xpath("//table:named-range").map do |ne|
+    @label ||= Hash[doc.xpath("//table:named-range").map do |ne|
       #-
       # $Sheet1.$C$5
       #+
@@ -459,4 +457,4 @@ class Roo::OpenOffice < Roo::Base
       node.attributes[attr_name].value
     end
   end
-end # class
+end
