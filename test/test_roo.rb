@@ -1003,7 +1003,7 @@ Sheet 3:
 
   def test_file_warning_warning
     if OPENOFFICE
-      assert_raises(Errno::ENOENT) {
+      assert_raises(ArgumentError) {
         Roo::OpenOffice.new(File.join(TESTDIR,"numbers1.xlsx"),
         packed: false,
         file_warning: :warning)

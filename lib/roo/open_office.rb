@@ -3,23 +3,6 @@ require 'nokogiri'
 require 'cgi'
 
 class Roo::OpenOffice < Roo::Base
-  class << self
-    def process_zipfile(tmpdir, zip, path='')
-      if zip.file.file? path
-        if path == "content.xml"
-          File.write(File.join(tmpdir, 'roo_content.xml'), zip.read(path), mode: 'wb')
-        end
-      else
-        unless path.empty?
-          path += '/'
-        end
-        zip.dir.foreach(path) do |filename|
-          process_zipfile(tmpdir, zip, path+filename)
-        end
-      end
-    end
-  end
-
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
   def initialize(filename, options={})
@@ -30,8 +13,12 @@ class Roo::OpenOffice < Roo::Base
     @tmpdir = make_tmpdir(filename.split('/').last, options[:tmpdir_root])
     @filename = local_filename(filename, @tmpdir, packed)
     #TODO: @cells_read[:default] = false
-    Roo::ZipFile.open(@filename) do |zip|
-      self.class.process_zipfile(@tmpdir, zip)
+    Roo::ZipFile.open(@filename) do |zip_file|
+      if content_entry = zip_file.glob("content.xml").first
+        content_entry.extract(File.join(@tmpdir, 'roo_content.xml'))
+      else
+        raise ArgumentError, 'file missing required content.xml'
+      end
     end
     super(filename, options)
     @formula = Hash.new
