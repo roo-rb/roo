@@ -1,23 +1,8 @@
+require 'roo/font'
 require 'roo/excelx/extractor'
 
 module Roo
   class Excelx::Styles < Excelx::Extractor
-    class Font
-      attr_accessor :bold, :italic, :underline
-
-      def bold?
-        @bold == true
-      end
-
-      def italic?
-        @italic == true
-      end
-
-      def underline?
-        @underline == true
-      end
-    end
-
     # convert internal excelx attribute to a format
     def style_format(style)
       id = num_fmt_ids[style.to_i]

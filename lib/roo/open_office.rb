@@ -2,6 +2,7 @@ require 'date'
 require 'nokogiri'
 require 'cgi'
 require 'zip/filesystem'
+require 'roo/font'
 
 class Roo::OpenOffice < Roo::Base
   # initialization and opening of a spreadsheet file
@@ -79,22 +80,6 @@ class Roo::OpenOffice < Roo::Base
       end
     else
       []
-    end
-  end
-
-  class Font
-    attr_accessor :bold, :italic, :underline
-
-    def bold?
-      @bold == 'bold'
-    end
-
-    def italic?
-      @italic == 'italic'
-    end
-
-    def underline?
-      @underline != nil
     end
   end
 
@@ -391,7 +376,7 @@ class Roo::OpenOffice < Roo::Base
   end
 
   def read_styles(style_elements)
-    @style_definitions['Default'] = Roo::OpenOffice::Font.new
+    @style_definitions['Default'] = Roo::Font.new
     style_elements.each do |style|
       next unless style.name == 'style'
       style_name = attr(style,'name')
