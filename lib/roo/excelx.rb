@@ -427,42 +427,38 @@ class Roo::Excelx < Roo::Base
   # Extracts all needed files from the zip file
   def process_zipfile(tmpdir, zipfilename)
     @sheet_files = []
-    Roo::ZipFile.open(zipfilename) do |zipfile|
-      zipfile.entries.each do |entry|
-        entry_name = entry.to_s.downcase
-
-        path =
-          case entry_name
-          when /workbook.xml$/
-            "#{tmpdir}/roo_workbook.xml"
-          when /sharedstrings.xml$/
-            "#{tmpdir}/roo_sharedStrings.xml"
-          when /styles.xml$/
-            "#{tmpdir}/roo_styles.xml"
-          when /sheet.xml$/
-            path = "#{tmpdir}/roo_sheet"
-            @sheet_files.unshift path
-            path
-          when /sheet([0-9]+).xml$/
-            # Numbers 3.1 exports first sheet without sheet number. Such sheets
-            # are always added to the beginning of the array which, naturally,
-            # causes other sheets to be pushed to the next index which could
-            # lead to sheet references getting overwritten, so we need to
-            # handle that case specifically.
-            nr = $1
-            sheet_files_index = nr.to_i - 1
-            sheet_files_index += 1 if @sheet_files[sheet_files_index]
-            @sheet_files[sheet_files_index] = "#{tmpdir}/roo_sheet#{nr.to_i}"
-          when /comments([0-9]+).xml$/
-            nr = $1
-            @comments_files[nr.to_i-1] = "#{tmpdir}/roo_comments#{nr}"
-          when /sheet([0-9]+).xml.rels$/
-            nr = $1
-            @rels_files[nr.to_i-1] = "#{tmpdir}/roo_rels#{nr}"
-          end
-        if path
-          File.write(path, zipfile.read(entry), mode: 'wb')
+    Roo::ZipFile.foreach(zipfilename) do |entry|
+      path =
+        case entry.name.downcase
+        when /workbook.xml$/
+          "#{tmpdir}/roo_workbook.xml"
+        when /sharedstrings.xml$/
+          "#{tmpdir}/roo_sharedStrings.xml"
+        when /styles.xml$/
+          "#{tmpdir}/roo_styles.xml"
+        when /sheet.xml$/
+          path = "#{tmpdir}/roo_sheet"
+          @sheet_files.unshift path
+          path
+        when /sheet([0-9]+).xml$/
+          # Numbers 3.1 exports first sheet without sheet number. Such sheets
+          # are always added to the beginning of the array which, naturally,
+          # causes other sheets to be pushed to the next index which could
+          # lead to sheet references getting overwritten, so we need to
+          # handle that case specifically.
+          nr = $1
+          sheet_files_index = nr.to_i - 1
+          sheet_files_index += 1 if @sheet_files[sheet_files_index]
+          @sheet_files[sheet_files_index] = "#{tmpdir}/roo_sheet#{nr.to_i}"
+        when /comments([0-9]+).xml$/
+          nr = $1
+          @comments_files[nr.to_i-1] = "#{tmpdir}/roo_comments#{nr}"
+        when /sheet([0-9]+).xml.rels$/
+          nr = $1
+          @rels_files[nr.to_i-1] = "#{tmpdir}/roo_rels#{nr}"
         end
+      if path
+        entry.extract(path)
       end
     end
   end
