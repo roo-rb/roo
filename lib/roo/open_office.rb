@@ -1,6 +1,7 @@
 require 'date'
 require 'nokogiri'
 require 'cgi'
+require 'zip/filesystem'
 
 class Roo::OpenOffice < Roo::Base
   # initialization and opening of a spreadsheet file
@@ -13,7 +14,7 @@ class Roo::OpenOffice < Roo::Base
     @tmpdir = make_tmpdir(filename.split('/').last, options[:tmpdir_root])
     @filename = local_filename(filename, @tmpdir, packed)
     #TODO: @cells_read[:default] = false
-    Roo::ZipFile.open(@filename) do |zip_file|
+    Zip::File.open(@filename) do |zip_file|
       if content_entry = zip_file.glob("content.xml").first
         content_entry.extract(File.join(@tmpdir, 'roo_content.xml'))
       else

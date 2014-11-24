@@ -3,6 +3,7 @@
 * enhancements
   * Extend Roo::Spreadsheet.open to accept Tempfiles and other arguments responding to #path. Note they require an :extension option to be declared, as the tempfile mangles the extension. #84.
   * Remove deprecated code.
+  * Remove the Roo::ZipFile abstraction. Roo now depends on rubyzip 1.0.0+
   * Extract Roo::Excel and Roo::Excel2003XML to roo-xls
   * Extract Roo::Google to roo-google
   * Accept the tmpdir_root option in Roo::Excelx

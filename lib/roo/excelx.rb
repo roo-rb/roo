@@ -1,6 +1,7 @@
 require 'date'
 require 'nokogiri'
 require 'roo/link'
+require 'zip/filesystem'
 
 class Roo::Excelx < Roo::Base
   autoload :Workbook, 'roo/excelx/workbook'
@@ -427,7 +428,7 @@ class Roo::Excelx < Roo::Base
   # Extracts all needed files from the zip file
   def process_zipfile(tmpdir, zipfilename)
     @sheet_files = []
-    Roo::ZipFile.foreach(zipfilename) do |entry|
+    Zip::File.foreach(zipfilename) do |entry|
       path =
         case entry.name.downcase
         when /workbook.xml$/

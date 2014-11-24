@@ -3,7 +3,6 @@
 require 'tmpdir'
 require 'stringio'
 require 'nokogiri'
-require 'roo/zip_file'
 require 'roo/utils'
 
 # Base class for all other types of spreadsheets
@@ -634,7 +633,9 @@ class Roo::Base
   end
 
   def unzip(filename, tmpdir)
-    Roo::ZipFile.open(filename) do |zip|
+    require 'zip/filesystem'
+
+    Zip::File.open(filename) do |zip|
       process_zipfile_packed(zip, tmpdir)
     end
   end
