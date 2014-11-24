@@ -13,9 +13,7 @@ class Roo::OpenOffice < Roo::Base
     def process_zipfile(tmpdir, zip, path='')
       if zip.file.file? path
         if path == "content.xml"
-          open(File.join(tmpdir, 'roo_content.xml'),'wb') {|f|
-            f << zip.read(path)
-          }
+          File.write(File.join(tmpdir, 'roo_content.xml'), zip.read(path), mode: 'wb')
         end
       else
         unless path.empty?
