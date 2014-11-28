@@ -3,6 +3,9 @@ require 'nokogiri'
 require 'cgi'
 require 'zip/filesystem'
 require 'roo/font'
+require 'base64'
+require 'digest'
+require 'openssl'
 
 class Roo::OpenOffice < Roo::Base
   # initialization and opening of a spreadsheet file
@@ -17,7 +20,69 @@ class Roo::OpenOffice < Roo::Base
     #TODO: @cells_read[:default] = false
     Zip::File.open(@filename) do |zip_file|
       if content_entry = zip_file.glob("content.xml").first
-        content_entry.extract(File.join(@tmpdir, 'roo_content.xml'))
+        roo_content_xml_path = File.join(@tmpdir, 'roo_content.xml')
+        content_entry.extract(roo_content_xml_path)
+        if manifest_entry = zip_file.glob("META-INF/manifest.xml").first
+          manifest_entry.extract(File.join(@tmpdir, 'roo_manifest.xml'))
+          # Check if content.xml is encrypted
+          manifest = ::Roo::Utils.load_xml(File.join(@tmpdir, "roo_manifest.xml"))
+          encryption_data = manifest.xpath("//manifest:file-entry[@manifest:full-path='content.xml']/manifest:encryption-data").first
+          if !encryption_data.nil?
+            
+            # Zip::File is not smart enough to extract an encrypted stream, so we do it manually
+            content_bytes = IO.binread(@filename, content_entry.compressed_size, content_entry.local_header_offset + content_entry.calculate_local_header_size)
+            
+            password = options[:password]
+            if !password.nil?
+              algorithm_node = encryption_data.xpath("manifest:algorithm").first
+              key_derivation_node = encryption_data.xpath("manifest:key-derivation").first
+              start_key_generation_node = encryption_data.xpath("manifest:start-key-generation").first
+              if !algorithm_node.nil? && !key_derivation_node.nil? && !start_key_generation_node.nil?
+                algorithm = algorithm_node['manifest:algorithm-name']
+                iv = Base64.decode64(algorithm_node['manifest:initialisation-vector'])
+                key_derivation_name = key_derivation_node['manifest:key-derivation-name']
+                key_size = key_derivation_node['manifest:key-size'].to_i
+                iteration_count = key_derivation_node['manifest:iteration-count'].to_i
+                salt = Base64.decode64(key_derivation_node['manifest:salt'])
+                key_generation_name = start_key_generation_node['manifest:start-key-generation-name']
+                key_generation_size = start_key_generation_node['manifest:key-size'].to_i
+                hashed_password = password
+                key = nil
+                
+                if key_generation_name.eql? "http://www.w3.org/2000/09/xmldsig#sha256"
+                  hashed_password = Digest::SHA256.digest(password)
+                end
+                
+                if algorithm.eql? "http://www.w3.org/2001/04/xmlenc#aes256-cbc"
+                  cipher = OpenSSL::Cipher.new('AES-256-CBC')
+                  
+                  if key_derivation_name.eql? "PBKDF2"
+                    key = OpenSSL::PKCS5.pbkdf2_hmac_sha1(hashed_password, salt, iteration_count, cipher.key_len)
+                  end
+                  
+                  cipher.decrypt
+                  cipher.padding = 0
+                  cipher.key = key
+                  cipher.iv = iv
+                  begin
+                    decrypted = cipher.update(content_bytes) + cipher.final
+                    IO.binwrite(roo_content_xml_path, Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(decrypted))
+                  rescue StandardError
+                    raise ArgumentError, 'Invalid password or other data error'
+                  end
+                else
+                  raise ArgumentError, 'Unknown algorithm ' + algorithm
+                end
+              else
+                raise ArgumentError, 'manifest.xml missing encryption-data elements'
+              end
+            else
+              raise ArgumentError, 'file is encrypted but password was not supplied'
+            end
+          end
+        else
+          raise ArgumentError, 'file missing required META-INF/manifest.xml'
+        end
       else
         raise ArgumentError, 'file missing required content.xml'
       end

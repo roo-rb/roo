@@ -1954,5 +1954,15 @@ where the expected result is
     xlsx.default_sheet = xlsx.sheets.last
     assert_equal 'Sheet 2', xlsx.cell('b',2)
   end
+  
+  def test_openoffice_encryption
+    if OPENOFFICE
+      assert_raises(ArgumentError) { Roo::LibreOffice.new(File.join(TESTDIR, "encrypted-letmein.ods")) }
+      assert_raises(ArgumentError) { Roo::LibreOffice.new(File.join(TESTDIR, "encrypted-letmein.ods"), :password => "badpassword") }
+      oo = Roo::LibreOffice.new(File.join(TESTDIR, "encrypted-letmein.ods"), :password => "letmein")
+      oo.default_sheet = oo.sheets.first
+      assert_equal "Hello World", oo.cell('a',1)
+    end
+  end
 
 end # class
