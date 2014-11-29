@@ -12,9 +12,6 @@ require 'time'
 #
 
 class Roo::CSV < Roo::Base
-  def initialize(filename, options = {})
-    super
-  end
 
   attr_reader :filename
 
@@ -68,7 +65,7 @@ class Roo::CSV < Roo::Base
     end
   end
 
-  def read_cells(sheet=nil)
+  def read_cells(sheet = default_sheet)
     sheet ||= default_sheet
     return if @cells_read[sheet]
     @first_row[sheet] = 1

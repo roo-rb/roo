@@ -245,8 +245,7 @@ class Roo::OpenOffice < Roo::Base
   # the following construct means '4 blanks'
   # some content <text:s text:c="3"/>
   #++
-  def read_cells(sheet=nil)
-    sheet ||= default_sheet
+  def read_cells(sheet = default_sheet)
     validate_sheet!(sheet)
     return if @cells_read[sheet]
 

@@ -283,15 +283,9 @@ class Roo::Excelx < Roo::Base
 
   # set a cell to a certain value
   # (this will not be saved back to the spreadsheet file!)
-  def set(row,col,value,sheet=nil) #:nodoc:
+  def set(row,col,value, sheet = nil) #:nodoc:
     key = normalize(row,col)
-    cell_type =
-      case value
-      when Fixnum then :float
-      when String, Float then :string
-      else
-        raise ArgumentError, "Type for #{value} not set"
-      end
+    cell_type = cell_type_by_value(value)
     sheet_for(sheet).cells[key] = Cell.new(value, cell_type, nil, cell_type, value, nil, nil, nil)
   end
 
