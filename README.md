@@ -17,6 +17,7 @@ handling capabilities to roo.
 require 'roo'
 
 s = Roo::OpenOffice.new("myspreadsheet.ods")      # loads an OpenOffice Spreadsheet
+s = Roo::OpenOffice.new("myspreadsheet.ods", :password => "password") # loads an encrypted OpenOffice Spreadsheet
 s = Roo::Excelx.new("myspreadsheet.xlsx")         # loads an Excel Spreadsheet for Excel .xlsx files
 s = Roo::CSV.new("mycsv.csv")                     # loads a CSV file
 

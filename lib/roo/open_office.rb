@@ -22,62 +22,150 @@ class Roo::OpenOffice < Roo::Base
       if content_entry = zip_file.glob("content.xml").first
         roo_content_xml_path = File.join(@tmpdir, 'roo_content.xml')
         content_entry.extract(roo_content_xml_path)
+        
+        # Check if content.xml is encrypted by extracting manifest.xml
+        # and searching for an manifest:encryption-data element
+        
         if manifest_entry = zip_file.glob("META-INF/manifest.xml").first
-          manifest_entry.extract(File.join(@tmpdir, 'roo_manifest.xml'))
-          # Check if content.xml is encrypted
-          manifest = ::Roo::Utils.load_xml(File.join(@tmpdir, "roo_manifest.xml"))
-          encryption_data = manifest.xpath("//manifest:file-entry[@manifest:full-path='content.xml']/manifest:encryption-data").first
+          roo_manifest_xml_path = File.join(@tmpdir, "roo_manifest.xml")
+          manifest_entry.extract(roo_manifest_xml_path)
+          manifest = ::Roo::Utils.load_xml(roo_manifest_xml_path)
+          
+          # XPath search for manifest:encryption-data only for the content.xml
+          # file
+          
+          encryption_data = manifest.xpath(
+            "//manifest:file-entry[@manifest:full-path='content.xml']"\
+            "/manifest:encryption-data"
+          ).first
+          
+          # If XPath returns a node, then we know content.xml is encrypted
+          
           if !encryption_data.nil?
             
-            # Zip::File is not smart enough to extract an encrypted stream, so we do it manually
-            content_bytes = IO.binread(@filename, content_entry.compressed_size, content_entry.local_header_offset + content_entry.calculate_local_header_size)
+            # Since we know it's encrypted, we check for the password option
+            # and if it doesn't exist, raise an argument error
             
             password = options[:password]
             if !password.nil?
+              
+              # Extract various expected attributes from the manifest that
+              # describe the encryption
+              
               algorithm_node = encryption_data.xpath("manifest:algorithm").first
-              key_derivation_node = encryption_data.xpath("manifest:key-derivation").first
-              start_key_generation_node = encryption_data.xpath("manifest:start-key-generation").first
-              if !algorithm_node.nil? && !key_derivation_node.nil? && !start_key_generation_node.nil?
+              key_derivation_node =
+                  encryption_data.xpath("manifest:key-derivation").first
+              start_key_generation_node =
+                  encryption_data.xpath("manifest:start-key-generation").first
+              
+              # If we have all the expected elements, then we can perform
+              # the decryption.
+              
+              if !algorithm_node.nil? && !key_derivation_node.nil? &&
+                  !start_key_generation_node.nil?
+                
+                # The algorithm is a URI describing the algorithm used
                 algorithm = algorithm_node['manifest:algorithm-name']
-                iv = Base64.decode64(algorithm_node['manifest:initialisation-vector'])
-                key_derivation_name = key_derivation_node['manifest:key-derivation-name']
+                
+                # The initialization vector is base-64 encoded
+                iv = Base64.decode64(
+                  algorithm_node['manifest:initialisation-vector']
+                )
+                key_derivation_name =
+                    key_derivation_node['manifest:key-derivation-name']
                 key_size = key_derivation_node['manifest:key-size'].to_i
-                iteration_count = key_derivation_node['manifest:iteration-count'].to_i
+                iteration_count =
+                    key_derivation_node['manifest:iteration-count'].to_i
                 salt = Base64.decode64(key_derivation_node['manifest:salt'])
-                key_generation_name = start_key_generation_node['manifest:start-key-generation-name']
-                key_generation_size = start_key_generation_node['manifest:key-size'].to_i
+                
+                # The key is hashed with an algorithm represented by this URI
+                key_generation_name =
+                    start_key_generation_node[
+                      'manifest:start-key-generation-name'
+                    ]
+                key_generation_size =
+                    start_key_generation_node['manifest:key-size'].to_i
+                
                 hashed_password = password
                 key = nil
                 
-                if key_generation_name.eql? "http://www.w3.org/2000/09/xmldsig#sha256"
+                if key_generation_name.eql?(
+                  "http://www.w3.org/2000/09/xmldsig#sha256"
+                )
                   hashed_password = Digest::SHA256.digest(password)
+                else
+                  raise ArgumentError, 'Unknown key generation algorithm ' +
+                      key_generation_name
                 end
                 
                 if algorithm.eql? "http://www.w3.org/2001/04/xmlenc#aes256-cbc"
                   cipher = OpenSSL::Cipher.new('AES-256-CBC')
                   
                   if key_derivation_name.eql? "PBKDF2"
-                    key = OpenSSL::PKCS5.pbkdf2_hmac_sha1(hashed_password, salt, iteration_count, cipher.key_len)
+                    key = OpenSSL::PKCS5.pbkdf2_hmac_sha1(
+                      hashed_password,
+                      salt,
+                      iteration_count,
+                      cipher.key_len
+                    )
+                  else
+                    raise ArgumentError, 'Unknown key derivation name ' +
+                        key_derivation_name
                   end
                   
                   cipher.decrypt
                   cipher.padding = 0
                   cipher.key = key
                   cipher.iv = iv
+                  decrypted = ""
                   begin
-                    decrypted = cipher.update(content_bytes) + cipher.final
-                    IO.binwrite(roo_content_xml_path, Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(decrypted))
-                  rescue StandardError
-                    raise ArgumentError, 'Invalid password or other data error'
+                    # Zip::Entry.extract writes a 0-length file when trying
+                    # to extract an encrypted stream, so we read the
+                    # raw bytes based on the offset and lengths
+                    File.open(@filename, "rb") do |zipfile|
+                      zipfile.seek(
+                        content_entry.local_header_offset +
+                          content_entry.calculate_local_header_size
+                      )
+                      total_to_read = content_entry.compressed_size
+                      puts total_to_read
+                      block_size = 4096
+                      if block_size > total_to_read
+                        block_size = total_to_read
+                      end
+                      while buffer = zipfile.read(block_size)
+                        decrypted += cipher.update(buffer)
+                        total_to_read -= buffer.length
+                        if total_to_read == 0
+                          break
+                        end
+                        if block_size > total_to_read
+                          block_size = total_to_read
+                        end
+                      end
+                    end
+                    decrypted += cipher.final
+                    
+                    # Finally, inflate the decrypted stream and overwrite
+                    # content.xml
+                    IO.binwrite(
+                      roo_content_xml_path,
+                      Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(decrypted)
+                    )
+                  rescue StandardError => error
+                    raise ArgumentError,
+                        'Invalid password or other data error: ' + error.to_s
                   end
                 else
                   raise ArgumentError, 'Unknown algorithm ' + algorithm
                 end
               else
-                raise ArgumentError, 'manifest.xml missing encryption-data elements'
+                raise ArgumentError,
+                    'manifest.xml missing encryption-data elements'
               end
             else
-              raise ArgumentError, 'file is encrypted but password was not supplied'
+              raise ArgumentError,
+                  'file is encrypted but password was not supplied'
             end
           end
         else
