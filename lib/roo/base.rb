@@ -10,6 +10,8 @@ class Roo::Base
   include Enumerable
 
   TEMP_PREFIX = 'roo_'
+  MAX_ROW_COL = 999_999.freeze
+  MIN_ROW_COL = 0.freeze
 
   attr_reader :headers
 
@@ -50,73 +52,50 @@ class Roo::Base
   end
 
   # first non-empty column as a letter
-  def first_column_as_letter(sheet = nil)
+  def first_column_as_letter(sheet = default_sheet)
     ::Roo::Utils.number_to_letter(first_column(sheet))
   end
 
   # last non-empty column as a letter
-  def last_column_as_letter(sheet = nil)
+  def last_column_as_letter(sheet = default_sheet)
     ::Roo::Utils.number_to_letter(last_column(sheet))
   end
 
-  # returns the number of the first non-empty row
-  def first_row(sheet = nil)
-    sheet ||= default_sheet
-    read_cells(sheet)
-    @first_row[sheet] ||=
-      begin
-        impossible_value = 999_999 # more than a spreadsheet can hold
-        result = impossible_value
-        @cell[sheet].each_pair do|key, value|
-          result = [result, key.first.to_i].min if value
-        end if @cell[sheet]
-        result unless result == impossible_value
-      end
+  # Set first/last row/column for sheet
+  def first_last_row_col_for_sheet(sheet)
+    @first_last_row_cols ||= {}
+    @first_last_row_cols[sheet] ||= begin
+      result = collect_last_row_col_for_sheet(sheet)
+      {
+        first_row: result[:first_row] == MAX_ROW_COL ? nil : result[:first_row],
+        first_column: result[:first_column] == MAX_ROW_COL ? nil : result[:first_column],
+        last_row: result[:last_row] == MIN_ROW_COL ? nil : result[:last_row],
+        last_column: result[:last_column] == MIN_ROW_COL ? nil : result[:last_column]
+      }
+    end
   end
 
-  # returns the number of the last non-empty row
-  def last_row(sheet = nil)
-    sheet ||= default_sheet
-    read_cells(sheet)
-    @last_row[sheet] ||=
-      begin
-        impossible_value = 0
-        result = impossible_value
-        @cell[sheet].each_pair do|key, value|
-          result = [result, key.first.to_i].max if value
-        end if @cell[sheet]
-        result unless result == impossible_value
-      end
+  # Collect first/last row/column from sheet
+  def collect_last_row_col_for_sheet(sheet)
+    first_row = first_column = MAX_ROW_COL
+    last_row = last_column = MIN_ROW_COL
+    @cell[sheet].each_pair do|key, value|
+      next unless value
+      first_row = [first_row, key.first.to_i].min
+      last_row = [last_row, key.first.to_i].max
+      first_column = [first_column, key.last.to_i].min
+      last_column = [last_column, key.last.to_i].max
+    end if @cell[sheet]
+    {first_row: first_row, first_column: first_column, last_row: last_row, last_column: last_column}
   end
 
-  # returns the number of the first non-empty column
-  def first_column(sheet = nil)
-    sheet ||= default_sheet
-    read_cells(sheet)
-    @first_column[sheet] ||=
-      begin
-        impossible_value = 999_999 # more than a spreadsheet can hold
-        result = impossible_value
-        @cell[sheet].each_pair do|key, value|
-          result = [result, key.last.to_i].min if value
-        end if @cell[sheet]
-        result unless result == impossible_value
-      end
-  end
-
-  # returns the number of the last non-empty column
-  def last_column(sheet = nil)
-    sheet ||= default_sheet
-    read_cells(sheet)
-    @last_column[sheet] ||=
-      begin
-        impossible_value = 0
-        result = impossible_value
-        @cell[sheet].each_pair do|key, value|
-          result = [result, key.last.to_i].max if value
-        end if @cell[sheet]
-        result unless result == impossible_value
-      end
+  %w(first_row last_row first_column last_column).each do |key|
+    class_eval <<-EOS, __FILE__, __LINE__ + 1
+      def #{key}(sheet = default_sheet)                                   # def first_row(sheet = default_sheet)
+        read_cells(sheet)                                                 #   read_cells(sheet)
+        @#{key}[sheet] ||= first_last_row_col_for_sheet(sheet)[:#{key}]   #   @first_row[sheet] ||= first_last_row_col_for_sheet(sheet)[:first_row]
+      end                                                                 # end
+    EOS
   end
 
   # returns a rectangular area (default: all cells) as yaml-output
