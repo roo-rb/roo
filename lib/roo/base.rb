@@ -101,8 +101,7 @@ class Roo::Base
   # returns a rectangular area (default: all cells) as yaml-output
   # you can add additional attributes with the prefix parameter like:
   # oo.to_yaml({"file"=>"flightdata_2007-06-26", "sheet" => "1"})
-  def to_yaml(prefix = {}, from_row = nil, from_column = nil, to_row = nil, to_column = nil, sheet = nil)
-    sheet ||= default_sheet
+  def to_yaml(prefix = {}, from_row = nil, from_column = nil, to_row = nil, to_column = nil, sheet = default_sheet)
     return '' unless first_row # empty result if there is no first_row in a sheet
 
     from_row ||= first_row(sheet)
@@ -133,26 +132,24 @@ class Roo::Base
   end
 
   # write the current spreadsheet to stdout or into a file
-  def to_csv(filename = nil, sheet = nil, separator = ',')
-    sheet ||= default_sheet
+  def to_csv(filename = nil, sheet = default_sheet, separator = ',')
     if filename
       File.open(filename, 'w') do |file|
         write_csv_content(file, sheet, separator)
       end
-      return true
+      true
     else
-      sio = StringIO.new
+      sio = ::StringIO.new
       write_csv_content(sio, sheet, separator)
       sio.rewind
-      return sio.read
+      sio.read
     end
   end
 
   # returns a matrix object from the whole sheet or a rectangular area of a sheet
-  def to_matrix(from_row = nil, from_column = nil, to_row = nil, to_column = nil, sheet = nil)
+  def to_matrix(from_row = nil, from_column = nil, to_row = nil, to_column = nil, sheet = default_sheet)
     require 'matrix'
 
-    sheet ||= default_sheet
     return Matrix.empty unless first_row
 
     from_row ||= first_row(sheet)
@@ -190,43 +187,42 @@ class Roo::Base
 
   # returns all values in this row as an array
   # row numbers are 1,2,3,... like in the spreadsheet
-  def row(rownumber, sheet = nil)
-    sheet ||= default_sheet
+  def row(row_number, sheet = default_sheet)
     read_cells(sheet)
     first_column(sheet).upto(last_column(sheet)).map do |col|
-      cell(rownumber, col, sheet)
+      cell(row_number, col, sheet)
     end
   end
 
   # returns all values in this column as an array
   # column numbers are 1,2,3,... like in the spreadsheet
-  def column(columnnumber, sheet = nil)
-    if columnnumber.class == String
-      columnnumber = ::Roo::Utils.letter_to_number(columnnumber)
+  def column(column_number, sheet = default_sheet)
+    if column_number.is_a?(::String)
+      column_number = ::Roo::Utils.letter_to_number(column_number)
     end
-    sheet ||= default_sheet
     read_cells(sheet)
     first_row(sheet).upto(last_row(sheet)).map do |row|
-      cell(row, columnnumber, sheet)
+      cell(row, column_number, sheet)
     end
   end
 
   # set a cell to a certain value
   # (this will not be saved back to the spreadsheet file!)
-  def set(row, col, value, sheet = nil) #:nodoc:
-    sheet ||= default_sheet
+  def set(row, col, value, sheet = default_sheet) #:nodoc:
     read_cells(sheet)
     row, col = normalize(row, col)
-    cell_type =
-      case value
-      when Fixnum then :float
-      when String, Float then :string
-      else
-        fail ArgumentError, "Type for #{value} not set"
-      end
-
+    cell_type = cell_type_by_value(value)
     set_value(row, col, value, sheet)
-    set_type(row, col, cell_type, sheet)
+    set_type(row, col, cell_type , sheet)
+  end
+
+  def cell_type_by_value(value)
+    case value
+    when Fixnum then :float
+    when String, Float then :string
+    else
+      raise ArgumentError, "Type for #{value} not set"
+    end
   end
 
   # reopens and read a spreadsheet document
@@ -237,8 +233,7 @@ class Roo::Base
   end
 
   # true if cell is empty
-  def empty?(row, col, sheet = nil)
-    sheet ||= default_sheet
+  def empty?(row, col, sheet = default_sheet)
     read_cells(sheet)
     row, col = normalize(row, col)
     contents = cell(row, col, sheet)
@@ -330,6 +325,26 @@ class Roo::Base
     end
   end
 
+
+  def clean_sheet_if_need(options)
+    return unless options[:clean]
+    options.delete(:clean)
+    @cleaned ||= {}
+    clean_sheet(default_sheet) unless @cleaned[default_sheet]
+  end
+
+  def search_or_set_header(options)
+    if options[:header_search]
+      @headers = nil
+      @header_line = row_with(options[:header_search])
+    elsif [:first_row, true].include?(options[:headers])
+      @headers = []
+      row(first_row).each_with_index { |x, i| @headers << [x, i + 1] }
+    else
+      set_headers(options)
+    end
+  end
+
   # by passing in headers as options, this method returns
   # specific columns from your header assignment
   # for example:
@@ -358,22 +373,8 @@ class Roo::Base
         yield row(line)
       end
     else
-      if options[:clean]
-        options.delete(:clean)
-        @cleaned ||= {}
-        @cleaned[default_sheet] || clean_sheet(default_sheet)
-      end
-
-      if options[:header_search]
-        @headers = nil
-        @header_line = row_with(options[:header_search])
-      elsif [:first_row, true].include?(options[:headers])
-        @headers = []
-        row(first_row).each_with_index { |x, i| @headers << [x, i + 1] }
-      else
-        set_headers(options)
-      end
-
+      clean_sheet_if_need(options)
+      search_or_set_header(options)
       headers = @headers ||
                 Hash[(first_column..last_column).map do |col|
                   [cell(@header_line, col), col]
@@ -387,10 +388,9 @@ class Roo::Base
 
   def parse(options = {})
     ary = []
-    if block_given?
-      each(options) { |row| ary << yield(row) }
-    else
-      each(options) { |row| ary << row }
+    each(options) do |row|
+      yield(row) if block_given?
+      ary << row
     end
     ary
   end
@@ -533,7 +533,7 @@ class Roo::Base
   def clean_sheet(sheet)
     read_cells(sheet)
     @cell[sheet].each_pair do |coord, value|
-      if value.is_a(::String)
+      if value.is_a?(::String)
         @cell[sheet][coord] = sanitize_value(value)
       end
     end
@@ -555,13 +555,11 @@ class Roo::Base
     row(@header_line).index(query) + first_column
   end
 
-  def set_value(row, col, value, sheet = nil)
-    sheet ||= default_sheet
+  def set_value(row, col, value, sheet = default_sheet)
     @cell[sheet][[row, col]] = value
   end
 
-  def set_type(row, col, type, sheet = nil)
-    sheet ||= default_sheet
+  def set_type(row, col, type, sheet = default_sheet)
     @cell_type[sheet][[row, col]] = type
   end
 

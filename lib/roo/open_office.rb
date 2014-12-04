@@ -3,9 +3,6 @@ require 'nokogiri'
 require 'cgi'
 require 'zip/filesystem'
 require 'roo/font'
-require 'base64'
-require 'digest'
-require 'openssl'
 
 class Roo::OpenOffice < Roo::Base
   # initialization and opening of a spreadsheet file
@@ -40,7 +37,7 @@ class Roo::OpenOffice < Roo::Base
     @comment = Hash.new
     @comments_read = Hash.new
   end
-  
+
   # If the ODS file has an encryption-data element, then try to decrypt.
   # If successful, the temporary content.xml will be overwritten with
   # decrypted contents.
@@ -466,8 +463,7 @@ class Roo::OpenOffice < Roo::Base
   # the following construct means '4 blanks'
   # some content <text:s text:c="3"/>
   #++
-  def read_cells(sheet=nil)
-    sheet ||= default_sheet
+  def read_cells(sheet = default_sheet)
     validate_sheet!(sheet)
     return if @cells_read[sheet]
 
