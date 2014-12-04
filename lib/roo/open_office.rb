@@ -149,9 +149,6 @@ class Roo::OpenOffice < Roo::Base
       )
       
       begin
-        # Zip::Entry.extract writes a 0-length file when trying
-        # to extract an encrypted stream, so we read the
-        # raw bytes based on the offset and lengths
         decrypted = decrypt(content_entry, cipher)
         
         # Finally, inflate the decrypted stream and overwrite
