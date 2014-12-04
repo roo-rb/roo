@@ -19,7 +19,7 @@ class Roo::OpenOffice < Roo::Base
       if content_entry = zip_file.glob("content.xml").first
         roo_content_xml_path = File.join(@tmpdir, 'roo_content.xml')
         content_entry.extract(roo_content_xml_path)
-        decryptIfNecessary(
+        decrypt_if_necessary(
           zip_file,
           content_entry,
           roo_content_xml_path,
@@ -41,7 +41,11 @@ class Roo::OpenOffice < Roo::Base
   # If the ODS file has an encryption-data element, then try to decrypt.
   # If successful, the temporary content.xml will be overwritten with
   # decrypted contents.
-  def decryptIfNecessary(zip_file, content_entry, roo_content_xml_path, options)
+  def decrypt_if_necessary(
+    zip_file,
+    content_entry,
+    roo_content_xml_path, options
+  )
     # Check if content.xml is encrypted by extracting manifest.xml
     # and searching for a manifest:encryption-data element
     
@@ -67,7 +71,7 @@ class Roo::OpenOffice < Roo::Base
         
         password = options[:password]
         if !password.nil?
-          performDecryption(
+          perform_decryption(
             encryption_data,
             password,
             content_entry,
@@ -84,7 +88,7 @@ class Roo::OpenOffice < Roo::Base
   end
   
   # Process the ODS encryption manifest and perform the decryption
-  def performDecryption(
+  def perform_decryption(
     encryption_data,
     password,
     content_entry,
@@ -139,7 +143,7 @@ class Roo::OpenOffice < Roo::Base
             key_generation_name
       end
       
-      cipher = getCipher(
+      cipher = find_cipher(
         algorithm,
         key_derivation_name,
         hashed_password,
@@ -168,7 +172,7 @@ class Roo::OpenOffice < Roo::Base
   end
   
   # Create a cipher based on an ODS algorithm URI from manifest.xml
-  def getCipher(
+  def find_cipher(
     algorithm,
     key_derivation_name,
     hashed_password,
@@ -176,11 +180,12 @@ class Roo::OpenOffice < Roo::Base
     iteration_count,
     iv
   )
+    cipher = nil
     if algorithm.eql? "http://www.w3.org/2001/04/xmlenc#aes256-cbc"
       cipher = OpenSSL::Cipher.new('AES-256-CBC')
       cipher.decrypt
       cipher.padding = 0
-      cipher.key = getCipherKey(
+      cipher.key = find_cipher_key(
         cipher,
         key_derivation_name,
         hashed_password,
@@ -191,11 +196,11 @@ class Roo::OpenOffice < Roo::Base
     else
       raise ArgumentError, 'Unknown algorithm ' + algorithm
     end
-    return cipher
+    cipher
   end
   
-  # Create a cipher key based on an ODS algorithm URI from manifest.xml
-  def getCipherKey(
+  # Create a cipher key based on an ODS algorithm string from manifest.xml
+  def find_cipher_key(
     cipher,
     key_derivation_name,
     hashed_password,
@@ -213,7 +218,7 @@ class Roo::OpenOffice < Roo::Base
       raise ArgumentError, 'Unknown key derivation name ' +
           key_derivation_name
     end
-    return key
+    key
   end
   
   # Block decrypt raw bytes from the zip file based on the cipher
@@ -243,7 +248,7 @@ class Roo::OpenOffice < Roo::Base
         end
       end
     end
-    return decrypted + cipher.final
+    decrypted + cipher.final
   end
 
   def method_missing(m,*args)
