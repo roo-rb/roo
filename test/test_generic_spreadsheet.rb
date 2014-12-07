@@ -121,7 +121,7 @@ class TestBase < Minitest::Test
   end
 
   def test_to_csv_with_separator
-    assert_equal expected_csv_with_semicolons,@oo.to_csv(nil, nil, ';')
+    assert_equal expected_csv_with_semicolons,@oo.to_csv(nil, ';')
   end
 protected
   def setup_test_sheet(workbook=nil)

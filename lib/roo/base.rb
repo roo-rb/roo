@@ -132,7 +132,7 @@ class Roo::Base
   end
 
   # write the current spreadsheet to stdout or into a file
-  def to_csv(filename = nil, sheet = default_sheet, separator = ',')
+  def to_csv(filename = nil, separator = ',', sheet = default_sheet)
     if filename
       File.open(filename, 'w') do |file|
         write_csv_content(file, sheet, separator)
