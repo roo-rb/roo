@@ -314,7 +314,7 @@ class Roo::Base
   # access different worksheets by calling spreadsheet.sheet(1)
   # or spreadsheet.sheet('SHEETNAME')
   def sheet(index, name = false)
-    default_sheet = String === index ? index : sheets[index]
+    self.default_sheet = String === index ? index : sheets[index]
     name ? [default_sheet, self] : self
   end
 
