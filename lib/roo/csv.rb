@@ -12,9 +12,6 @@ require 'time'
 #
 
 class Roo::CSV < Roo::Base
-  def initialize(filename, options = {})
-    super
-  end
 
   attr_reader :filename
 
@@ -25,13 +22,13 @@ class Roo::CSV < Roo::Base
   end
 
   def cell(row, col, sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     @cell[normalize(row,col)]
   end
 
   def celltype(row, col, sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     @cell_type[normalize(row,col)]
   end
@@ -60,16 +57,16 @@ class Roo::CSV < Roo::Base
   def each_row(options, &block)
     if uri?(filename)
       make_tmpdir do |tmpdir|
-        filename = download_uri(filename, tmpdir)
-        CSV.foreach(filename, options, &block)
+        tmp_filename = download_uri(filename, tmpdir)
+        CSV.foreach(tmp_filename, options, &block)
       end
     else
       CSV.foreach(filename, options, &block)
     end
   end
 
-  def read_cells(sheet=nil)
-    sheet ||= @default_sheet
+  def read_cells(sheet = default_sheet)
+    sheet ||= default_sheet
     return if @cells_read[sheet]
     @first_row[sheet] = 1
     @last_row[sheet] = 0
