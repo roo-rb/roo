@@ -403,7 +403,15 @@ class Roo::Base
       # makes sure headers is the first part of wildcard search for priority
       # ex. if UPC and SKU exist for UPC*SKU search, UPC takes the cake
       headers = query.map do |q|
-        q.map { |i| row.grep(/#{i}/i)[0] }.compact[0]
+        q.map do |i|
+          #if header has brackets in it for ex: date(yyyy-mm-dd), 
+          #can add other special characterss to this list.
+          if i.include?('(')
+            row.grep(i)[0]
+          else
+            row.grep(/#{i}/i)[0]
+          end
+        end.compact[0]
       end.compact
 
       if headers.length == query.length

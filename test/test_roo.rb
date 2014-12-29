@@ -295,6 +295,15 @@ class TestRoo < Minitest::Test
     end
   end
 
+  def test_header_with_brackets_excelx
+    with_each_spreadsheet(:name => 'advanced_header', :format => :openoffice) do |oo|
+      parsed_head = oo.parse(:headers => true)
+      assert_equal "Date(yyyy-mm-dd)", oo.cell('A',1)
+      assert_equal parsed_head[0].keys, ["Date(yyyy-mm-dd)"]
+      assert_equal parsed_head[0].values, ["Date(yyyy-mm-dd)"]
+    end
+  end
+
   def test_formula_excelx
     with_each_spreadsheet(:name=>'formula', :format=>:excelx) do |oo|
       assert_equal 1, oo.cell('A',1)
