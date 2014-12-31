@@ -2,9 +2,6 @@
 
 Roo implements read access for all spreadsheet types and read/write access for
 Google spreadsheets. It can handle
-* OpenOffice
-* Excel
-* Google spreadsheets
 * Excelx
 * OpenOffice / LibreOffice
 * CSV
