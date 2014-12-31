@@ -1,32 +1,29 @@
 module Roo
   class Spreadsheet
     class << self
-      def open(file, options = {})
-        file = File === file ? file.path : file
+      def open(path, options = {})
+        path      = path.respond_to?(:path) ? path.path : path
+        extension = extension_for(path, options)
 
-        extension =
-          if options[:extension]
-            options[:file_warning] = :ignore
-            ".#{options[:extension]}"
-          else
-            File.extname(file)
-          end
+        begin
+          Roo::CLASS_FOR_EXTENSION.fetch(extension).new(path, options)
+        rescue KeyError
+          raise ArgumentError,
+                "Can't detect the type of #{path} - please use the :extension option to declare its type."
+        end
+      end
 
-        case extension.downcase
-        when '.xls'
-          Roo::Excel.new(file, options)
-        when '.xlsx'
-          Roo::Excelx.new(file, options)
-        when '.ods'
-          Roo::OpenOffice.new(file, options)
-        when '.xml'
-          Roo::Excel2003XML.new(file, options)
-        when ''
-          Roo::Google.new(file, options)
-        when '.csv'
-          Roo::CSV.new(file, options)
+      def extension_for(path, options)
+        case (extension = options.delete(:extension))
+        when ::Symbol
+          options[:file_warning] = :ignore
+          extension
+        when ::String
+          options[:file_warning] = :ignore
+          extension.tr('.', '').downcase.to_sym
         else
-          raise ArgumentError, "Don't know how to open file #{file}"
+          res = ::File.extname((path =~ ::URI.regexp) ? ::URI.parse(::URI.encode(path)).path : path)
+          res.tr('.', '').downcase.to_sym
         end
       end
     end

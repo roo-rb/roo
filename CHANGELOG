@@ -1,3 +1,47 @@
+== unreleased
+
+* enhancements
+  * Extend Roo::Spreadsheet.open to accept Tempfiles and other arguments responding to #path. Note they require an :extension option to be declared, as the tempfile mangles the extension. #84.
+  * Remove deprecated code.
+  * Remove the Roo::ZipFile abstraction. Roo now depends on rubyzip 1.0.0+
+  * Extract Roo::Excel and Roo::Excel2003XML to roo-xls
+  * Extract Roo::Google to roo-google
+  * Accept the tmpdir_root option in Roo::Excelx
+  * Change the tmpdir prefix from oo_ to roo_
+  * In Excelx, load styles, shared strings and the workbook lazily. Leave the tmpdir open so that reading may take place after initialize. The OS will be responsible for cleaning it up.
+  * In OpenOffice / LibreOffice, load the content xml lazily. Leave the tmpdir open so that reading may take place after initialize. The OS will be responsible for cleaning it up.
+  * Lazily initialize @default_sheet, to avoid reading the sheets earlier than necessary. Use the #default_sheet accessor instead.
+
+* bugfixes
+  * Fix that paths with spaces in them would fail with
+    URI::InvalidURIError. #121.
+  # Fix that #parse-ing with a hash of columns not in the document
+    would fail mysteriously. #129
+  * Fix that Roo::Excelx#celltype would not return :link when appropriate.
+
+== 1.13.2 2013-12-23
+
+* bugfixes
+  * Fix that Excelx link-cells would blow up if the value wasn't a string. Due to the way Spreadsheet::Link is implemented the link text must be treated as a string. #92
+
+== 1.13.1 2013-12-23
+
+* bugfixes
+  * Fix that Excelx creation could blow up due to nil rels files. #90
+
+== 1.13.0 2013-12-05
+
+* enhancements
+  * Support extracting link data from Excel and Excelx spreadsheets,
+    via Excel#read_cell(_content) and Excelx#hyperlink(?). #47
+  * Support setting the Excel Spreadsheet mode via the :mode option. #88
+  * Support Spreadsheet.open with a declared :extension that includes a leading '.'. #73
+  * Enable file type detection for URI's with parameters / anchors. #51
+
+* bugfixes
+  * Fix that CSV#each_row could overwrite the filename when run against a uri. #77
+  * Fix that #to_matrix wasn't respecting the sheet argument. #87
+
 == 1.12.2 2013-09-11
 
 * 1 enhancement
