@@ -7,14 +7,20 @@ module Roo
     end
 
     def to_a
-      @relationships ||=
-        if doc_exists?
-          Hash[doc.xpath("/Relationships/Relationship").map do |rel|
-            [rel.attribute('Id').text, rel]
-          end]
-        else
-          []
-        end
+      @relationships ||= extract_relationships
     end
+
+    private
+
+    def extract_relationships
+      if doc_exists?
+        Hash[doc.xpath("/Relationships/Relationship").map do |rel|
+          [rel.attribute('Id').text, rel]
+        end]
+      else
+        []
+      end
+    end
+
   end
 end
