@@ -111,4 +111,12 @@ xls.parse(:clean => true)
 # thousands and thousands of blank lines. i got fed up after watching my computer
 # nearly catch fire for 4 hours for a spreadsheet with only 200 ACTUAL lines
 # - located in lib/roo/worksheet.rb
+
+# if you want to load and stream .xlsx rows
+
+s = Roo::Excelx.new("./test_data/test_small.xlsx")
+s.each_row_streaming do |row|
+    puts row.inspect # Array of Excelx::Cell objects
+end
+
 ```

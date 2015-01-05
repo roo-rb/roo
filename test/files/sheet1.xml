@@ -1,0 +1,109 @@
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">
+<dimension ref="A1:B11"/>
+<sheetViews>
+<sheetView tabSelected="1" workbookViewId="0">
+<selection activeCell="B6" sqref="B6"/>
+</sheetView>
+</sheetViews>
+<sheetFormatPr baseColWidth="10" defaultRowHeight="15" x14ac:dyDescent="0"/>
+<cols>
+<col min="1" max="1" width="69.1640625" customWidth="1"/>
+<col min="2" max="2" width="20.33203125" customWidth="1"/>
+</cols>
+<sheetData>
+<row r="1" spans="1:2">
+  <c r="A1" t="s">
+    <v>0</v>
+  </c>
+  <c r="B1" t="s">
+    <v>2</v>
+  </c>
+</row>
+<row r="2" spans="1:2">
+  <c r="A2" t="s">
+    
+  <v>4</v></c>
+  <c r="B2" t="s">
+    
+  <v>5</v></c>
+</row>
+<row r="3" spans="1:2">
+  <c r="A3" t="s">
+    
+  <v>4</v></c>
+  <c r="B3" t="s">
+    
+  <v>6</v></c>
+</row>
+<row r="4" spans="1:2">
+  <c r="A4" t="s">
+    
+  <v>7</v></c>
+  <c r="B4" t="s">
+    
+  <v>8</v></c>
+</row>
+<row r="5" spans="1:2">
+  <c r="A5" t="s">
+    
+  <v>7</v></c>
+  <c r="B5" t="s">
+    
+  <v>9</v></c>
+</row>
+<row r="6" spans="1:2">
+  <c r="A6" t="s">
+    
+  <v>10</v></c>
+  <c r="B6" t="s">
+    
+  <v>11</v></c>
+</row>
+<row r="7" spans="1:2">
+  <c r="A7" t="s">
+    
+  <v>10</v></c>
+  <c r="B7" t="s">
+    
+  <v>12</v></c>
+</row>
+<row r="8" spans="1:2">
+  <c r="A8" t="s">
+    
+  <v>13</v></c>
+  <c r="B8" t="s">
+    
+  <v>14</v></c>
+</row>
+<row r="9" spans="1:2">
+  <c r="A9" t="s">
+    
+  <v>13</v></c>
+  <c r="B9" t="s">
+    
+  <v>15</v></c>
+</row>
+<row r="10" spans="1:2">
+  <c r="A10" t="s">
+    
+  <v>16</v></c>
+  <c r="B10" t="s">
+    
+  <v>17</v></c>
+</row>
+<row r="11" spans="1:2">
+  <c r="A11" t="s">
+    
+  <v>16</v></c>
+  <c r="B11" t="s">
+    
+  <v>18</v></c>
+</row>
+</sheetData>
+<pageMargins left="0.75" right="0.75" top="1" bottom="1" header="0.5" footer="0.5"/>
+<extLst>
+<ext xmlns:mx="http://schemas.microsoft.com/office/mac/excel/2008/main" uri="{64002731-A6B0-56B0-2670-7721B7C09600}">
+<mx:PLV Mode="0" OnePage="0" WScale="0"/>
+</ext>
+</extLst>
+</worksheet>

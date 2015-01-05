@@ -3,7 +3,7 @@ module Roo
     attr_reader :href
     alias :url :href
 
-    def initialize href='', text=href
+    def initialize(href='', text=href)
       super(text)
       @href = href
     end

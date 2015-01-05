@@ -54,9 +54,27 @@ module Roo
       result
     end
 
+    # Compute upper bound for cells in a given cell range.
+    def self.num_cells_in_range(str)
+      cells = str.split(':')
+      return 1 if cells.count == 1
+      raise ArgumentError.new("invalid range string: #{str}. Supported range format 'A1:B2'") if cells.count != 2
+      x1, y1 = split_coordinate(cells[0])
+      x2, y2 = split_coordinate(cells[1])
+      (x2 - (x1 - 1)) * (y2 - (y1 - 1))
+    end
+
     def load_xml(path)
       ::File.open(path, 'rb') do |file|
         ::Nokogiri::XML(file)
+      end
+    end
+
+    # Yield each element of a given type ('row', 'c', etc.) to caller
+    def each_element(path, elements)
+      Nokogiri::XML::Reader(::File.open(path, 'rb'), nil, nil, Nokogiri::XML::ParseOptions::NOBLANKS).each do |node|
+        next unless node.node_type == Nokogiri::XML::Reader::TYPE_ELEMENT && Array(elements).include?(node.name)
+        yield Nokogiri::XML(node.outer_xml).root if block_given?
       end
     end
   end

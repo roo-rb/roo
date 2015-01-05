@@ -18,10 +18,6 @@ class Roo::Base
   # sets the line with attribute names (default: 1)
   attr_accessor :header_line
 
-  class << self
-
-  end
-
   def initialize(filename, options = {}, _file_warning = :error, _tmpdir = nil)
     @filename = filename
     @options = options

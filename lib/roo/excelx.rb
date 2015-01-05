@@ -1,6 +1,7 @@
 require 'date'
 require 'nokogiri'
 require 'roo/link'
+require 'roo/utils'
 require 'zip/filesystem'
 
 class Roo::Excelx < Roo::Base
@@ -74,9 +75,9 @@ class Roo::Excelx < Roo::Base
   end
 
   class Cell
-    attr_reader :type, :formula, :value, :excelx_type, :excelx_value, :style, :hyperlink
+    attr_reader :type, :formula, :value, :excelx_type, :excelx_value, :style, :hyperlink, :coordinate
 
-    def initialize(value, type, formula, excelx_type, excelx_value, style, hyperlink, base_date)
+    def initialize(value, type, formula, excelx_type, excelx_value, style, hyperlink, base_date, coordinate)
       @type = type
       @formula = formula
       @base_date = base_date if [:date, :datetime].include?(@type)
@@ -84,9 +85,8 @@ class Roo::Excelx < Roo::Base
       @excelx_value = excelx_value
       @style = style
       @value = type_cast_value(value)
-      if hyperlink
-        @value = Roo::Link.new(hyperlink, @value.to_s)
-      end
+      @value = Roo::Link.new(hyperlink, @value.to_s) if hyperlink
+      @coordinate = coordinate
     end
 
     def type
@@ -96,6 +96,14 @@ class Roo::Excelx < Roo::Base
         :link
       else
         @type
+      end
+    end
+
+    class Coordinate
+      attr_accessor :row, :column
+
+      def initialize(row, column)
+        @row, @column = row, column
       end
     end
 
@@ -151,6 +159,18 @@ class Roo::Excelx < Roo::Base
       @present_cells ||= cells.select {|key, cell| cell && cell.value }
     end
 
+    # Yield each row as array of Excelx::Cell objects
+    # accepts options max_rows (int) (offset by 1 for header)
+    # and pad_cells (boolean)
+    def each_row(options = {}, &block)
+      row_count = 0
+      @sheet.each_row_streaming do |row|
+        break if options[:max_rows] && row_count == options[:max_rows] + 1
+        block.call(cells_for_row_element(row, options)) if block_given?
+        row_count += 1
+      end
+    end
+
     def row(row_number)
       first_column.upto(last_column).map do |col|
         cells[[row_number,col]]
@@ -193,13 +213,45 @@ class Roo::Excelx < Roo::Base
     def comments
       @comments.comments
     end
+
+    def dimensions
+      @sheet.dimensions
+    end
+
+    private
+
+    # Take an xml row and return an array of Excelx::Cell objects
+    # optionally pad array to header width(assumed 1st row).
+    # takes option pad_cells (boolean) defaults false
+    def cells_for_row_element(row_element, options = {})
+      return [] unless row_element
+      cell_col = 0
+      cells = []
+      @sheet.each_cell(row_element) do |cell|
+        cells.concat(pad_cells(cell, cell_col)) if options[:pad_cells]
+        cells << cell
+        cell_col = cell.coordinate.column
+      end
+      cells
+    end
+
+    def pad_cells(cell, last_column)
+      pad = []
+      (cell.coordinate.column - 1 - last_column).times { pad << nil }
+      pad
+    end
   end
+
+  ExceedsMaxError = Class.new(StandardError)
 
   # initialization and opening of a spreadsheet file
   # values for packed: :zip
+  # optional cell_max (int) parameter for early aborting attempts to parse
+  # enormous documents.
   def initialize(filename, options = {})
     packed = options[:packed]
-    file_warning = options[:file_warning] || :error
+    file_warning = options.fetch(:file_warning, :error)
+    cell_max = options.delete(:cell_max)
 
     file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
 
@@ -209,14 +261,19 @@ class Roo::Excelx < Roo::Base
     @rels_files = []
     process_zipfile(@tmpdir, @filename)
 
-    @sheet_names = workbook.sheets.map {|sheet| sheet['name'] }
+    @sheet_names = workbook.sheets.map { |sheet| sheet['name'] }
     @sheets = []
     @sheets_by_name = Hash[@sheet_names.map.with_index do |sheet_name, n|
       @sheets[n] = Sheet.new(sheet_name, @rels_files[n], @sheet_files[n], @comments_files[n], styles, shared_strings, workbook)
       [sheet_name, @sheets[n]]
     end]
 
-    super(filename, options)
+    if cell_max
+      cell_count = ::Roo::Utils.num_cells_in_range(sheet_for(options.delete(:sheet)).dimensions)
+      raise ExceedsMaxError.new("Excel file exceeds cell maximum: #{cell_count} > #{cell_max}") if cell_count > cell_max
+    end
+
+    super
   end
 
   def method_missing(method,*args)
@@ -286,7 +343,7 @@ class Roo::Excelx < Roo::Base
   def set(row,col,value, sheet = nil) #:nodoc:
     key = normalize(row,col)
     cell_type = cell_type_by_value(value)
-    sheet_for(sheet).cells[key] = Cell.new(value, cell_type, nil, cell_type, value, nil, nil, nil)
+    sheet_for(sheet).cells[key] = Cell.new(value, cell_type, nil, cell_type, value, nil, nil, nil, Cell::Coordinate.new(row, col))
   end
 
 
@@ -297,12 +354,18 @@ class Roo::Excelx < Roo::Base
     key = normalize(row,col)
     sheet_for(sheet).cells[key].formula
   end
-  alias_method :formula?, :formula
 
-    # returns each formula in the selected sheet as an array of elements
-  # [row, col, formula]
+  # Predicate methods really should return a boolean
+  # value. Hopefully no one was relying on the fact that this
+  # previously returned either nil/formula
+  def formula?(*args)
+    !!formula(*args)
+  end
+
+  # returns each formula in the selected sheet as an array of tuples in following format
+  # [[row, col, formula], [row, col, formula],...]
   def formulas(sheet=nil)
-    sheet_for(sheet).cells.select {|key, cell| cell.formula }.map do |(x, y), cell|
+    sheet_for(sheet).cells.select {|_, cell| cell.formula }.map do |(x, y), cell|
       [x, y, cell.formula]
     end
   end
@@ -354,7 +417,6 @@ class Roo::Excelx < Roo::Base
     cell = sheet.cells[key]
     !cell || !cell.value || (cell.type == :string && cell.value.empty?) \
       || (row < sheet.first_row || row > sheet.last_row || col < sheet.first_column || col > sheet.last_column)
-
   end
 
   # shows the internal representation of all cells
@@ -389,7 +451,7 @@ class Roo::Excelx < Roo::Base
   end
 
   def hyperlink?(row,col,sheet=nil)
-    hyperlink(row, col, sheet) != nil
+    !!hyperlink(row, col, sheet)
   end
 
   # returns the hyperlink at (row/col)
@@ -408,13 +470,19 @@ class Roo::Excelx < Roo::Base
 
   # true, if there is a comment
   def comment?(row,col,sheet=nil)
-    comment(row,col,sheet) != nil
+    !!comment(row,col,sheet)
   end
 
   def comments(sheet=nil)
     sheet_for(sheet).comments.map do |(x, y), comment|
       [x, y, comment]
     end
+  end
+
+  # Yield an array of Excelx::Cell
+  # Takes options for sheet, pad_cells, and max_rows
+  def each_row_streaming(options={})
+    sheet_for(options.delete(:sheet)).each_row(options) { |row| yield row }
   end
 
   private
@@ -433,7 +501,7 @@ class Roo::Excelx < Roo::Base
           "#{tmpdir}/roo_styles.xml"
         when /sheet.xml$/
           path = "#{tmpdir}/roo_sheet"
-          @sheet_files.unshift path
+          @sheet_files.unshift(path)
           path
         when /sheet([0-9]+).xml$/
           # Numbers 3.1 exports first sheet without sheet number. Such sheets

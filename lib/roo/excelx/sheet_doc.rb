@@ -11,20 +11,33 @@ module Roo
     end
 
     def cells(relationships)
-      @cells ||=
-        Hash[doc.xpath("/worksheet/sheetData/row/c").map do |cell_xml|
-          key = ::Roo::Utils.ref_to_key(cell_xml['r'])
-          [key, cell_from_xml(cell_xml, hyperlinks(relationships)[key])]
-        end]
+      @cells ||= extract_cells(relationships)
     end
 
     def hyperlinks(relationships)
-      @hyperlinks ||=
-        Hash[doc.xpath("/worksheet/hyperlinks/hyperlink").map do |hyperlink|
-          if hyperlink.attribute('id') && relationship = relationships[hyperlink.attribute('id').text]
-            [::Roo::Utils.ref_to_key(hyperlink.attributes['ref'].to_s), relationship.attribute('Target').text]
-          end
-        end.compact]
+      @hyperlinks ||= extract_hyperlinks(relationships)
+    end
+
+    # Get the dimensions for the sheet.
+    # This is the upper bound of cells that might
+    # be parsed. (the document may be sparse so cell count is only upper bound)
+    def dimensions
+      @dimensions ||= extract_dimensions
+    end
+
+    # Yield each row xml element to caller
+    def each_row_streaming(&block)
+      Roo::Utils.each_element(@path, 'row', &block)
+    end
+
+    # Yield each cell as Excelx::Cell to caller for given
+    # row xml
+    def each_cell(row_xml)
+      return [] unless row_xml
+      row_xml.children.each do |cell_element|
+        key = ::Roo::Utils.ref_to_key(cell_element['r'])
+        yield cell_from_xml(cell_element, hyperlinks(@relationships)[key])
+      end
     end
 
     private
@@ -53,12 +66,13 @@ module Roo
           Excelx::Format.to_type(format)
         end
       formula = nil
+      row, column = ::Roo::Utils.split_coordinate(cell_xml['r'])
       cell_xml.children.each do |cell|
         case cell.name
         when 'is'
           cell.children.each do |inline_str|
             if inline_str.name == 't'
-              return Excelx::Cell.new(inline_str.content,:string,formula,:string,inline_str.content,style, hyperlink, @workbook.base_date)
+              return Excelx::Cell.new(inline_str.content,:string,formula,:string,inline_str.content,style, hyperlink, @workbook.base_date, Excelx::Cell::Coordinate.new(row, column))
             end
           end
         when 'f'
@@ -92,10 +106,29 @@ module Roo
               value_type = :float
               cell.content
             end
-          return Excelx::Cell.new(value,value_type,formula,excelx_type,cell.content,style, hyperlink, @workbook.base_date)
+          return Excelx::Cell.new(value,value_type,formula,excelx_type,cell.content,style, hyperlink, @workbook.base_date, Excelx::Cell::Coordinate.new(row, column))
         end
       end
-      nil
+      Excelx::Cell.new(nil, nil, nil, nil, nil, nil, nil, nil, Excelx::Cell::Coordinate.new(row, column))
+    end
+
+    def extract_hyperlinks(relationships)
+      Hash[doc.xpath("/worksheet/hyperlinks/hyperlink").map do |hyperlink|
+        if hyperlink.attribute('id') && relationship = relationships[hyperlink.attribute('id').text]
+          [::Roo::Utils.ref_to_key(hyperlink.attributes['ref'].to_s), relationship.attribute('Target').text]
+        end
+      end.compact]
+    end
+
+    def extract_cells(relationships)
+      Hash[doc.xpath("/worksheet/sheetData/row/c").map do |cell_xml|
+        key = ::Roo::Utils.ref_to_key(cell_xml['r'])
+        [key, cell_from_xml(cell_xml, hyperlinks(relationships)[key])]
+      end]
+    end
+
+    def extract_dimensions
+      doc.xpath("/worksheet/dimension").map { |dim| dim.attributes["ref"].value }.first
     end
 
 =begin

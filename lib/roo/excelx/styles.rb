@@ -10,37 +10,53 @@ module Roo
     end
 
     def definitions
-      @definitions ||= doc.xpath("//cellXfs").flat_map do |xfs|
+      @definitions ||= extract_definitions
+    end
+
+    private
+
+    def num_fmt_ids
+      @num_fmt_ids ||= extract_num_fmt_ids
+    end
+
+    def num_fmts
+      @num_fmts ||= extract_num_fmts
+    end
+
+    def fonts
+     @fonts ||= extract_fonts
+    end
+
+    def extract_definitions
+      doc.xpath("//cellXfs").flat_map do |xfs|
         xfs.children.map do |xf|
           fonts[xf['fontId'].to_i]
         end
       end
     end
 
-    private
-
-    def num_fmt_ids
-      @num_fmt_ids ||= doc.xpath("//cellXfs").flat_map do |xfs|
-        xfs.children.map do |xf|
-          xf['numFmtId']
-        end
-      end
-    end
-
-    def num_fmts
-      @num_fmts ||= Hash[doc.xpath("//numFmt").map do |num_fmt|
-        [num_fmt['numFmtId'], num_fmt['formatCode']]
-      end]
-    end
-
-    def fonts
-     @fonts ||= doc.xpath("//fonts/font").map do |font_el|
+    def extract_fonts
+      doc.xpath("//fonts/font").map do |font_el|
         Font.new.tap do |font|
           font.bold = !font_el.xpath('./b').empty?
           font.italic = !font_el.xpath('./i').empty?
           font.underline = !font_el.xpath('./u').empty?
         end
       end
+    end
+
+    def extract_num_fmt_ids
+      doc.xpath("//cellXfs").flat_map do |xfs|
+        xfs.children.map do |xf|
+          xf['numFmtId']
+        end
+      end
+    end
+
+    def extract_num_fmts
+      Hash[doc.xpath("//numFmt").map do |num_fmt|
+        [num_fmt['numFmtId'], num_fmt['formatCode']]
+      end]
     end
   end
 end
