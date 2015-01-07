@@ -128,7 +128,9 @@ module Roo
     end
 
     def extract_dimensions
-      doc.xpath("/worksheet/dimension").map { |dim| dim.attributes["ref"].value }.first
+      Roo::Utils.each_element(@path, 'dimension') do |dimension|
+        return dimension.attributes["ref"].value
+      end
     end
 
 =begin
