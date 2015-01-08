@@ -48,7 +48,7 @@ describe Roo::Excelx do
 
         it 'returns a link with the number as a string value' do
           expect(subject).to be_a(Roo::Link)
-          expect(subject).to eq('8675309.0')
+          expect(subject).to eq('8675309')
         end
       end
     end
@@ -99,7 +99,7 @@ describe Roo::Excelx do
     let(:path) { 'test/files/numbers1.xlsx' }
 
     it 'returns the expected result' do
-      expect(subject.row(1, "Sheet5")).to eq [1.0, 5.0, 5.0, nil, nil]
+      expect(subject.row(1, "Sheet5")).to eq [1, 5, 5, nil, nil]
     end
   end
 
@@ -107,7 +107,7 @@ describe Roo::Excelx do
     let(:path) { 'test/files/numbers1.xlsx' }
 
     it 'returns the expected result' do
-      expect(subject.column(1, "Sheet5")).to eq [1.0, 2.0, 3.0, Date.new(2007,11,21), 42.0, "ABC"]
+      expect(subject.column(1, "Sheet5")).to eq [1, 2, 3, Date.new(2007,11,21), 42, "ABC"]
     end
   end
 
@@ -205,7 +205,7 @@ describe Roo::Excelx do
 
     it 'returns the expected result' do
       expect(subject.celltype(1, 1, "Sheet4")).to eq :date
-      expect(subject.celltype(1, 2, "Sheet4")).to eq :float
+      expect(subject.celltype(1, 2, "Sheet4")).to eq :string
       expect(subject.celltype(6, 2, "Sheet5")).to eq :string
       expect(subject.celltype(1000, 2000, "Sheet5")).to eq nil
     end
@@ -339,16 +339,16 @@ describe Roo::Excelx do
           [nil, nil, nil, nil, nil],
           [nil, nil, nil, nil, nil],
           ["Date", "Start time", "End time", "Pause", "Sum", "Comment", nil, nil],
-          [Date.new(2007, 5, 7), 9.25, 10.25, 0.0, 1.0, "Task 1"],
-          [Date.new(2007, 5, 7), 10.75, 12.50, 0.0, 1.75, "Task 1"],
-          [Date.new(2007, 5, 7), 18.0, 19.0, 0.0, 1.0, "Task 2"],
-          [Date.new(2007, 5, 8), 9.25, 10.25, 0.0, 1.0, "Task 2"],
-          [Date.new(2007, 5, 8), 14.5, 15.5, 0.0, 1.0, "Task 3"],
-          [Date.new(2007, 5, 8), 8.75, 9.25, 0.0, 0.5, "Task 3"],
-          [Date.new(2007, 5, 14), 21.75, 22.25, 0.0, 0.5, "Task 3"],
-          [Date.new(2007, 5, 14), 22.5, 23.0, 0.0, 0.5, "Task 3"],
-          [Date.new(2007, 5, 15), 11.75, 12.75, 0.0, 1.0, "Task 3"],
-          [Date.new(2007, 5, 7), 10.75, 10.75, 0.0, 0.0, "Task 1"],
+          [Date.new(2007, 5, 7), 9.25, 10.25, 0, 1, "Task 1"],
+          [Date.new(2007, 5, 7), 10.75, 12.50, 0, 1.75, "Task 1"],
+          [Date.new(2007, 5, 7), 18.0, 19.0, 0, 1, "Task 2"],
+          [Date.new(2007, 5, 8), 9.25, 10.25, 0, 1, "Task 2"],
+          [Date.new(2007, 5, 8), 14.5, 15.5, 0, 1, "Task 3"],
+          [Date.new(2007, 5, 8), 8.75, 9.25, 0, 0.5, "Task 3"],
+          [Date.new(2007, 5, 14), 21.75, 22.25, 0, 0.5, "Task 3"],
+          [Date.new(2007, 5, 14), 22.5, 23.0, 0, 0.5, "Task 3"],
+          [Date.new(2007, 5, 15), 11.75, 12.75, 0, 1, "Task 3"],
+          [Date.new(2007, 5, 7), 10.75, 10.75, 0, 0, "Task 1"],
           [nil]
       ]
     end

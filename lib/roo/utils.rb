@@ -1,7 +1,10 @@
 module Roo
   module Utils
     extend self
+
     LETTERS = ('A'..'Z').to_a
+    CODEPOINT_OFFSET = 'A'.ord - 1
+
     def split_coordinate(str)
       letter, number = split_coord(str)
       x              = letter_to_number(letter)
@@ -24,38 +27,23 @@ module Roo
     # convert a number to something like 'AB' (1 => 'A', 2 => 'B', ...)
     def number_to_letter(n)
       letters = ''
-      if n > 26
-        while n % 26 == 0 && n != 0
-          letters << 'Z'
-          n = ((n - 26) / 26).to_i
-        end
-        while n > 0
-          num     = n % 26
-          letters = LETTERS[num - 1] + letters
-          n       = (n / 26).to_i
-        end
-      else
-        letters = LETTERS[n - 1]
+      while n > 0
+        index = (n - 1) % 26
+        letters.prepend(LETTERS[index])
+        n = (n - index - 1) / 26
       end
       letters
     end
 
     # convert letters like 'AB' to a number ('A' => 1, 'B' => 2, ...)
     def letter_to_number(letters)
-      result = 0
-      while letters && letters.length > 0
-        character = letters[0, 1].upcase
-        num       = LETTERS.index(character)
-        fail ArgumentError, "invalid column character '#{letters[0, 1]}'" if num.nil?
-        num     += 1
-        result  = result * 26 + num
-        letters = letters[1..-1]
+      letters.upcase.each_codepoint.reduce(0) do |result, codepoint|
+        26 * result + codepoint - CODEPOINT_OFFSET
       end
-      result
     end
 
     # Compute upper bound for cells in a given cell range.
-    def self.num_cells_in_range(str)
+    def num_cells_in_range(str)
       cells = str.split(':')
       return 1 if cells.count == 1
       raise ArgumentError.new("invalid range string: #{str}. Supported range format 'A1:B2'") if cells.count != 2
