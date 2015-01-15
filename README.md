@@ -41,7 +41,7 @@ s.cell(1,'A',s.sheets[0])                   # same cell
 # almost all methods have an optional argument 'sheet'.
 # If this parameter is omitted, the default_sheet will be used.
 
-s.info                                      # prints infos about the spreadsheet file
+s.info                                      # Returns basic info about the spreadsheet file
 
 s.first_row                                 # the number of the first row
 s.last_row                                  # the number of the last row
