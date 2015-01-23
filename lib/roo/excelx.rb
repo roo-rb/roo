@@ -3,6 +3,7 @@ require 'nokogiri'
 require 'roo/link'
 require 'roo/utils'
 require 'zip/filesystem'
+require 'rexml/document'
 
 class Roo::Excelx < Roo::Base
   autoload :Workbook, 'roo/excelx/workbook'
@@ -260,6 +261,9 @@ class Roo::Excelx < Roo::Base
     @comments_files = []
     @rels_files = []
     process_zipfile(@tmpdir, @filename)
+    @sheet_files_rid.each do |i,rid|
+      @sheet_files[i.to_i] = @sheet_files_rid_rels[rid]
+    end
 
     @sheet_names = workbook.sheets.map { |sheet| sheet['name'] }
     @sheets = []
@@ -490,11 +494,25 @@ class Roo::Excelx < Roo::Base
   # Extracts all needed files from the zip file
   def process_zipfile(tmpdir, zipfilename)
     @sheet_files = []
+    @sheet_files_rid = {}
+    @sheet_files_rid_rels = {}
     Zip::File.foreach(zipfilename) do |entry|
       path =
         case entry.name.downcase
         when /workbook.xml$/
+          doc = REXML::Document.new(entry.get_input_stream.read.force_encoding("UTF-8"))
+          doc.elements.each('//sheets/sheet') do |element|
+            @sheet_files_rid[element.attributes['sheetId'].to_i - 1] = element.attributes['r:id']
+          end
           "#{tmpdir}/roo_workbook.xml"
+        when /workbook.xml.rels$/
+          doc = REXML::Document.new(entry.get_input_stream.read.force_encoding("UTF-8"))
+          doc.elements.each('//Relationships/Relationship') do |element|
+            if md = element.attributes['Target'].match(/worksheets\/sheet(\d+).xml/)
+              @sheet_files_rid_rels[element.attributes['Id']] = "#{tmpdir}/roo_sheet#{md[1]}"
+            end
+          end
+          nil
         when /sharedstrings.xml$/
           "#{tmpdir}/roo_sharedStrings.xml"
         when /styles.xml$/
