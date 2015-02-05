@@ -121,10 +121,26 @@ module Roo
     end
 
     def extract_cells(relationships)
-      Hash[doc.xpath("/worksheet/sheetData/row/c").map do |cell_xml|
+      # Extract merged cells
+      merges = {}
+      doc.xpath("/worksheet/mergeCells/mergeCell").each do |mergecell_xml|
+        tl, br = mergecell_xml['ref'].split(/:/).map {|ref| ::Roo::Utils.ref_to_key(ref)}
+        for row in tl[0]..br[0] do
+          for col in tl[1]..br[1] do
+            next if row == tl[0] and col == tl[1]
+            merges[[row,col]] = tl
+          end
+        end
+      end
+      extracted_cells = Hash[doc.xpath("/worksheet/sheetData/row/c").map do |cell_xml|
         key = ::Roo::Utils.ref_to_key(cell_xml['r'])
         [key, cell_from_xml(cell_xml, hyperlinks(relationships)[key])]
       end]
+      # Fix up merged cells
+      merges.each do |dst, src|
+        extracted_cells[dst] = extracted_cells[src]
+      end
+      extracted_cells
     end
 
     def extract_dimensions
