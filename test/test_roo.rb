@@ -1983,5 +1983,40 @@ where the expected result is
     end
   end
 
+  def test_noexpand_merged_range
+    return unless EXCELX
+    xlsx  = Roo::Excelx.new(File.join(TESTDIR, "merged_ranges.xlsx"))
+    for row in 4..6 do
+      if row == 4
+        assert_equal 'vertical1', xlsx.cell('a',row)
+      else
+        assert_nil xlsx.cell('a',row)
+      end
+    end
+    for row in 4..10 do
+      if row == 4
+        assert_equal 'vertical2', xlsx.cell('e',row)
+      else
+        assert_nil xlsx.cell('e',row)
+      end
+    end
+    for col in 'b'..'d' do
+      if col == 'b'
+        assert_equal 'horizontal', xlsx.cell(col,4)
+      else
+        assert_nil xlsx.cell(col,4)
+      end
+    end
+    for row in 7..10
+      for col in 'b'..'d' do
+        if row == 7 && col == 'b'
+          assert_equal 'block', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
+      end
+    end
+  end
+
 
 end # class
