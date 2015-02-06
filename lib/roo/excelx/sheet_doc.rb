@@ -121,29 +121,31 @@ module Roo
       end.compact]
     end
 
-    def extract_cells(relationships)
-      if @options[:expand_merged_cells]
-        # Extract merged cells
-        merges = {}
-        doc.xpath("/worksheet/mergeCells/mergeCell").each do |mergecell_xml|
-          tl, br = mergecell_xml['ref'].split(/:/).map {|ref| ::Roo::Utils.ref_to_key(ref)}
-          for row in tl[0]..br[0] do
-            for col in tl[1]..br[1] do
-              next if row == tl[0] and col == tl[1]
-              merges[[row,col]] = tl
-            end
+    def expand_merged_ranges(cells)
+      # Extract merged ranges from xml
+      merges = {}
+      doc.xpath("/worksheet/mergeCells/mergeCell").each do |mergecell_xml|
+        tl, br = mergecell_xml['ref'].split(/:/).map {|ref| ::Roo::Utils.ref_to_key(ref)}
+        for row in tl[0]..br[0] do
+          for col in tl[1]..br[1] do
+            next if row == tl[0] && col == tl[1]
+            merges[[row,col]] = tl
           end
         end
       end
+      # Duplicate value into all cells in merged range
+      merges.each do |dst, src|
+        cells[dst] = cells[src]
+      end
+    end
+
+    def extract_cells(relationships)
       extracted_cells = Hash[doc.xpath("/worksheet/sheetData/row/c").map do |cell_xml|
         key = ::Roo::Utils.ref_to_key(cell_xml['r'])
         [key, cell_from_xml(cell_xml, hyperlinks(relationships)[key])]
       end]
-      if @options[:expand_merged_cells]
-        # Fix up merged cells
-        merges.each do |dst, src|
-          extracted_cells[dst] = extracted_cells[src]
-        end
+      if @options[:expand_merged_ranges]
+        expand_merged_ranges(extracted_cells)
       end
       extracted_cells
     end
