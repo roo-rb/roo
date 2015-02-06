@@ -1967,18 +1967,40 @@ where the expected result is
   def test_expand_merged_range
     return unless EXCELX
     xlsx  = Roo::Excelx.new(File.join(TESTDIR, "merged_ranges.xlsx"), {:expand_merged_ranges => true})
-    for row in 4..6 do
-      assert_equal 'vertical1', xlsx.cell('a',row)
+    for row in 3..7 do
+      for col in 'a'..'b'
+        if row > 3 && row < 7 && col == 'a'
+          assert_equal 'vertical1', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
+      end
     end
-    for row in 4..10 do
-      assert_equal 'vertical2', xlsx.cell('e',row)
+    for row in 3..11 do
+      for col in 'f'..'h'
+        if row > 3 && row < 11 && col == 'g'
+          assert_equal 'vertical2', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
+      end
     end
-    for col in 'b'..'d' do
-      assert_equal 'horizontal', xlsx.cell(col,4)
+    for row in 3..5 do
+      for col in 'b'..'f'
+        if row == 4 && col > 'b' && col < 'f'
+          assert_equal 'horizontal', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
+      end
     end
-    for row in 7..10
-      for col in 'b'..'d' do
-        assert_equal 'block', xlsx.cell(col,row)
+    for row in 8..13 do
+      for col in 'a'..'e'
+        if row > 8 && row < 13 && col > 'a' && col < 'e'
+          assert_equal 'block', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
       end
     end
   end
@@ -1986,30 +2008,36 @@ where the expected result is
   def test_noexpand_merged_range
     return unless EXCELX
     xlsx  = Roo::Excelx.new(File.join(TESTDIR, "merged_ranges.xlsx"))
-    for row in 4..6 do
-      if row == 4
-        assert_equal 'vertical1', xlsx.cell('a',row)
-      else
-        assert_nil xlsx.cell('a',row)
+    for row in 3..7 do
+      for col in 'a'..'b'
+        if row == 4 && col == 'a'
+          assert_equal 'vertical1', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
       end
     end
-    for row in 4..10 do
-      if row == 4
-        assert_equal 'vertical2', xlsx.cell('e',row)
-      else
-        assert_nil xlsx.cell('e',row)
+    for row in 3..11 do
+      for col in 'f'..'h'
+        if row == 4 && col == 'g'
+          assert_equal 'vertical2', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
       end
     end
-    for col in 'b'..'d' do
-      if col == 'b'
-        assert_equal 'horizontal', xlsx.cell(col,4)
-      else
-        assert_nil xlsx.cell(col,4)
+    for row in 3..5 do
+      for col in 'b'..'f'
+        if row == 4 && col == 'c'
+          assert_equal 'horizontal', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
       end
     end
-    for row in 7..10
-      for col in 'b'..'d' do
-        if row == 7 && col == 'b'
+    for row in 8..13 do
+      for col in 'a'..'e'
+        if row == 9 && col == 'b'
           assert_equal 'block', xlsx.cell(col,row)
         else
           assert_nil xlsx.cell(col,row)
