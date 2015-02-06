@@ -253,7 +253,7 @@ class Roo::Excelx < Roo::Base
     file_warning = options.fetch(:file_warning, :error)
     cell_max = options.delete(:cell_max)
     sheet_options = {}
-    sheet_options[:expand_merged_cells] = (options[:expand_merged_cells] || false)
+    sheet_options[:expand_merged_ranges] = (options[:expand_merged_ranges] || false)
 
     file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
 

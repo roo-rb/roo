@@ -1964,4 +1964,24 @@ where the expected result is
     assert_equal 'Sheet 2', xlsx.cell('b',2)
   end
 
+  def test_expand_merged_range
+    return unless EXCELX
+    xlsx  = Roo::Excelx.new(File.join(TESTDIR, "merged_ranges.xlsx"), {:expand_merged_ranges => true})
+    for row in 4..6 do
+      assert_equal 'vertical1', xlsx.cell('a',row)
+    end
+    for row in 4..10 do
+      assert_equal 'vertical2', xlsx.cell('e',row)
+    end
+    for col in 'b'..'d' do
+      assert_equal 'horizontal', xlsx.cell(col,4)
+    end
+    for row in 7..10
+      for col in 'b'..'d' do
+        assert_equal 'block', xlsx.cell(col,row)
+      end
+    end
+  end
+
+
 end # class
