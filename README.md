@@ -91,16 +91,14 @@ xls.each(:id => 'UPC',:qty => 'ATS') {|hash| arr << hash}
 
 # NOTE: .parse does the same as .each, except it returns an array (similar to each vs. map)
 
-# not sure exactly what a column will be named? try a wildcard search with the character *
-# regex characters are allowed ('^price\s')
-# case insensitive
+# not sure exactly what a column will be named? try a wildcard search with a regex
 
-xls.parse(:id => 'UPC*SKU',:qty => 'ATS*\sATP\s*QTY$')
+xls.parse(:id => /UPC|SKU/,:qty => /ATS*\sATP\s*QTY\z/)
 
 # if you need to locate the header row and assign the header names themselves,
 # use the :header_search option
 
-xls.parse(:header_search => ['UPC*SKU','ATS*\sATP\s*QTY$'])
+xls.parse(:header_search => [/UPC*SKU/,/ATS*\sATP\s*QTY\z/])
 #=> each element will appear in this fashion:
 #=> {"UPC" => 123456789012, "STYLE" => "987B0", "COLOR" => "blue", "QTY" => 78}
 
