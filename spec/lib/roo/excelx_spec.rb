@@ -48,8 +48,15 @@ describe Roo::Excelx do
 
         it 'returns a link with the number as a string value' do
           expect(subject).to be_a(Roo::Link)
-          expect(subject).to eq('8675309.0')
+          expect(subject).to eq('8675309')
         end
+      end
+    end
+
+    context 'for a non-existent cell' do
+      let(:path) { 'test/files/numeric-link.xlsx' }
+      it 'return nil' do
+        expect(xlsx.cell('AAA', 999)).to eq nil
       end
     end
   end
@@ -92,7 +99,7 @@ describe Roo::Excelx do
     let(:path) { 'test/files/numbers1.xlsx' }
 
     it 'returns the expected result' do
-      expect(subject.row(1, "Sheet5")).to eq [1.0, 5.0, 5.0, nil, nil]
+      expect(subject.row(1, "Sheet5")).to eq [1, 5, 5, nil, nil]
     end
   end
 
@@ -100,7 +107,7 @@ describe Roo::Excelx do
     let(:path) { 'test/files/numbers1.xlsx' }
 
     it 'returns the expected result' do
-      expect(subject.column(1, "Sheet5")).to eq [1.0, 2.0, 3.0, Date.new(2007,11,21), 42.0, "ABC"]
+      expect(subject.column(1, "Sheet5")).to eq [1, 2, 3, Date.new(2007,11,21), 42, "ABC"]
     end
   end
 
@@ -156,6 +163,7 @@ describe Roo::Excelx do
     it 'returns the expected result' do
       expect(subject.formula(1, 1, "Sheet1")).to eq nil
       expect(subject.formula(7, 2, "Sheet1")).to eq "SUM($A$1:B6)"
+      expect(subject.formula(1000, 2000, "Sheet1")).to eq nil
     end
   end
 
@@ -165,6 +173,7 @@ describe Roo::Excelx do
     it 'returns the expected result' do
       expect(subject.formula?(1, 1, "Sheet1")).to eq false
       expect(subject.formula?(7, 2, "Sheet1")).to eq true
+      expect(subject.formula?(1000, 2000, "Sheet1")).to eq false
     end
   end
 
@@ -187,6 +196,7 @@ describe Roo::Excelx do
       expect(subject.font(7, 1).bold?).to eq false
       expect(subject.font(7, 1).italic?).to eq true
       expect(subject.font(7, 1).underline?).to eq true
+      expect(subject.font(1000, 2000)).to eq nil
     end
   end
 
@@ -195,8 +205,9 @@ describe Roo::Excelx do
 
     it 'returns the expected result' do
       expect(subject.celltype(1, 1, "Sheet4")).to eq :date
-      expect(subject.celltype(1, 2, "Sheet4")).to eq :float
+      expect(subject.celltype(1, 2, "Sheet4")).to eq :string
       expect(subject.celltype(6, 2, "Sheet5")).to eq :string
+      expect(subject.celltype(1000, 2000, "Sheet5")).to eq nil
     end
   end
 
@@ -206,6 +217,7 @@ describe Roo::Excelx do
     it 'returns the expected result' do
       expect(subject.excelx_type(1, 1, "Sheet5")).to eq [:numeric_or_formula, "General"]
       expect(subject.excelx_type(6, 2, "Sheet5")).to eq :string
+      expect(subject.excelx_type(1000, 2000, "Sheet5")).to eq nil
     end
   end
 
@@ -217,6 +229,7 @@ describe Roo::Excelx do
       # way to get these rather than hardcoding.
       expect(subject.excelx_value(1, 1, "Sheet5")).to eq "1"
       expect(subject.excelx_value(6, 2, "Sheet5")).to eq "16"
+      expect(subject.excelx_value(6000, 2000, "Sheet5")).to eq nil
     end
   end
 
@@ -226,8 +239,9 @@ describe Roo::Excelx do
     it 'returns the expected result' do
       # These are the index of the style for a given document
       # might be more reliable way to get this info.
-      expect(subject.excelx_value(1, 1)).to eq "0"
-      expect(subject.excelx_value(5, 1)).to eq "4"
+      expect(subject.excelx_format(1, 1)).to eq "General"
+      expect(subject.excelx_format(2, 2)).to eq "0.00"
+      expect(subject.excelx_format(5000, 1000)).to eq nil
     end
   end
 
@@ -325,16 +339,16 @@ describe Roo::Excelx do
           [nil, nil, nil, nil, nil],
           [nil, nil, nil, nil, nil],
           ["Date", "Start time", "End time", "Pause", "Sum", "Comment", nil, nil],
-          [Date.new(2007, 5, 7), 9.25, 10.25, 0.0, 1.0, "Task 1"],
-          [Date.new(2007, 5, 7), 10.75, 12.50, 0.0, 1.75, "Task 1"],
-          [Date.new(2007, 5, 7), 18.0, 19.0, 0.0, 1.0, "Task 2"],
-          [Date.new(2007, 5, 8), 9.25, 10.25, 0.0, 1.0, "Task 2"],
-          [Date.new(2007, 5, 8), 14.5, 15.5, 0.0, 1.0, "Task 3"],
-          [Date.new(2007, 5, 8), 8.75, 9.25, 0.0, 0.5, "Task 3"],
-          [Date.new(2007, 5, 14), 21.75, 22.25, 0.0, 0.5, "Task 3"],
-          [Date.new(2007, 5, 14), 22.5, 23.0, 0.0, 0.5, "Task 3"],
-          [Date.new(2007, 5, 15), 11.75, 12.75, 0.0, 1.0, "Task 3"],
-          [Date.new(2007, 5, 7), 10.75, 10.75, 0.0, 0.0, "Task 1"],
+          [Date.new(2007, 5, 7), 9.25, 10.25, 0, 1, "Task 1"],
+          [Date.new(2007, 5, 7), 10.75, 12.50, 0, 1.75, "Task 1"],
+          [Date.new(2007, 5, 7), 18.0, 19.0, 0, 1, "Task 2"],
+          [Date.new(2007, 5, 8), 9.25, 10.25, 0, 1, "Task 2"],
+          [Date.new(2007, 5, 8), 14.5, 15.5, 0, 1, "Task 3"],
+          [Date.new(2007, 5, 8), 8.75, 9.25, 0, 0.5, "Task 3"],
+          [Date.new(2007, 5, 14), 21.75, 22.25, 0, 0.5, "Task 3"],
+          [Date.new(2007, 5, 14), 22.5, 23.0, 0, 0.5, "Task 3"],
+          [Date.new(2007, 5, 15), 11.75, 12.75, 0, 1, "Task 3"],
+          [Date.new(2007, 5, 7), 10.75, 10.75, 0, 0, "Task 1"],
           [nil]
       ]
     end
