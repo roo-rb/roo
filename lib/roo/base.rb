@@ -361,7 +361,7 @@ class Roo::Base
   # * is the wildcard character
 
   # you can also pass in a :clean => true option to strip the sheet of
-  # odd unicode characters and white spaces around columns
+  # control characters and white spaces around columns
 
   def each(options = {})
     if options.empty?
@@ -524,15 +524,13 @@ class Roo::Base
   def clean_sheet(sheet)
     read_cells(sheet)
     @cell[sheet].each_pair do |coord, value|
-      if value.is_a?(::String)
-        @cell[sheet][coord] = sanitize_value(value)
-      end
+      @cell[sheet][coord] = sanitize_value(value) if value.is_a?(::String)
     end
     @cleaned[sheet] = true
   end
 
   def sanitize_value(v)
-    v.unpack('U*').select { |b| b < 127 }.pack('U*').strip
+    v.gsub(/[[:cntrl:]]|^[\p{Space}]+|[\p{Space}]+$/, '')
   end
 
   def set_headers(hash = {})
