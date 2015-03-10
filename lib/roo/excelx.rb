@@ -510,7 +510,7 @@ class Roo::Excelx < Roo::Base
           # lead to sheet references getting overwritten, so we need to
           # handle that case specifically.
           nr = $1
-          sheet_files_index = nr.to_i - 1
+          sheet_files_index = nr.to_i > 0 ? nr.to_i - 1 : 0
           sheet_files_index += 1 if @sheet_files[sheet_files_index]
           @sheet_files[sheet_files_index] = "#{tmpdir}/roo_sheet#{nr.to_i}"
         when /comments([0-9]+).xml$/
