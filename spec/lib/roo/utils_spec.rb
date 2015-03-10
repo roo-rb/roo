@@ -3,7 +3,7 @@ require 'spec_helper'
 RSpec.describe ::Roo::Utils do
   subject { described_class }
   context '#number_to_letter' do
-    ::Roo::Utils::LETTERS.each_with_index do |l, i|
+    ('A'..'Z').to_a.each_with_index do |l, i|
       it "should return '#{l}' when passed #{i+1}" do
         expect(described_class.number_to_letter(i+1)).to eq(l)
       end
@@ -11,7 +11,7 @@ RSpec.describe ::Roo::Utils do
 
     {
       27 => 'AA', 26*2 => 'AZ', 26*3 => 'BZ', 26**2 + 26 => 'ZZ', 26**2 + 27 => 'AAA',
-      26**3 + 26**2 + 26 => 'ZZZ', 1.0 => 'A'
+      26**3 + 26**2 + 26 => 'ZZZ', 1.0 => 'A', 676 => 'YZ', 677 => 'ZA'
     }.each do |key, value|
       it "should return '#{value}' when passed #{key}" do
         expect(described_class.number_to_letter(key)).to eq(value)
