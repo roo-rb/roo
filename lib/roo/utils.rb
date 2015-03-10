@@ -2,11 +2,16 @@ module Roo
   module Utils
     extend self
     LETTERS = ('A'..'Z').to_a
+
     def split_coordinate(str)
-      letter, number = split_coord(str)
-      x              = letter_to_number(letter)
-      y              = number
-      [y, x]
+      @split_coordinate ||= {}
+
+      @split_coordinate[str] ||= begin
+        letter, number = split_coord(str)
+        x = letter_to_number(letter)
+        y = number
+        [y, x]
+      end
     end
 
     alias_method :ref_to_key, :split_coordinate
@@ -40,7 +45,7 @@ module Roo
       letters
     end
 
-    # convert letters like 'AB' to a number ('A' => 1, 'B' => 2, ...)
+    #convert letters like 'AB' to a number ('A' => 1, 'B' => 2, ...)
     def letter_to_number(letters)
       result = 0
       while letters && letters.length > 0
