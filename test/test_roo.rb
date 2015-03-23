@@ -1645,6 +1645,7 @@ where the expected result is
   end
 
   def test_bug_pfand_from_windows_phone_xlsx
+    return if defined? JRUBY_VERSION
     with_each_spreadsheet(:name=>'Pfand_from_windows_phone', :format=>:excelx) do |oo|
 	    oo.default_sheet = oo.sheets.first
 	    assert_equal ['Blatt1','Blatt2','Blatt3'], oo.sheets
