@@ -1974,4 +1974,87 @@ where the expected result is
     end
   end
 
+  def test_expand_merged_range
+    return unless EXCELX
+    xlsx  = Roo::Excelx.new(File.join(TESTDIR, "merged_ranges.xlsx"), {:expand_merged_ranges => true})
+    for row in 3..7 do
+      for col in 'a'..'b'
+        if row > 3 && row < 7 && col == 'a'
+          assert_equal 'vertical1', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
+      end
+    end
+    for row in 3..11 do
+      for col in 'f'..'h'
+        if row > 3 && row < 11 && col == 'g'
+          assert_equal 'vertical2', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
+      end
+    end
+    for row in 3..5 do
+      for col in 'b'..'f'
+        if row == 4 && col > 'b' && col < 'f'
+          assert_equal 'horizontal', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
+      end
+    end
+    for row in 8..13 do
+      for col in 'a'..'e'
+        if row > 8 && row < 13 && col > 'a' && col < 'e'
+          assert_equal 'block', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
+      end
+    end
+  end
+
+  def test_noexpand_merged_range
+    return unless EXCELX
+    xlsx  = Roo::Excelx.new(File.join(TESTDIR, "merged_ranges.xlsx"))
+    for row in 3..7 do
+      for col in 'a'..'b'
+        if row == 4 && col == 'a'
+          assert_equal 'vertical1', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
+      end
+    end
+    for row in 3..11 do
+      for col in 'f'..'h'
+        if row == 4 && col == 'g'
+          assert_equal 'vertical2', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
+      end
+    end
+    for row in 3..5 do
+      for col in 'b'..'f'
+        if row == 4 && col == 'c'
+          assert_equal 'horizontal', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
+      end
+    end
+    for row in 8..13 do
+      for col in 'a'..'e'
+        if row == 9 && col == 'b'
+          assert_equal 'block', xlsx.cell(col,row)
+        else
+          assert_nil xlsx.cell(col,row)
+        end
+      end
+    end
+  end
+
+
 end # class
