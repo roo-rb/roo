@@ -1,11 +1,10 @@
 module Roo
-  autoload :Spreadsheet,  'roo/spreadsheet'
-  autoload :Base,         'roo/base'
-
-  autoload :OpenOffice,   'roo/open_office'
-  autoload :LibreOffice,  'roo/libre_office'
-  autoload :Excelx,       'roo/excelx'
-  autoload :CSV,          'roo/csv'
+  require 'roo/spreadsheet'
+  require 'roo/base'
+  require 'roo/open_office'
+  require 'roo/libre_office'
+  require 'roo/excelx'
+  require 'roo/csv'
 
   CLASS_FOR_EXTENSION = {
     ods: Roo::OpenOffice,
