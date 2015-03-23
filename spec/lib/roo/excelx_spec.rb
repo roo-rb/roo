@@ -71,6 +71,20 @@ describe Roo::Excelx do
     end
   end
 
+  describe '#parse_with_clean_option' do
+    let(:path) { 'test/files/parse_with_clean_option.xlsx' }
+    let(:options) { {clean: true} }
+
+    context 'with clean: true' do
+
+      it 'does not raise' do
+        expect do
+          xlsx.parse(options)
+        end.not_to raise_error
+      end
+    end
+  end
+
   describe '#sheets' do
     let(:path) { 'test/files/numbers1.xlsx' }
 

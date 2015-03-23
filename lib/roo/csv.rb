@@ -107,4 +107,14 @@ class Roo::CSV < Roo::Base
       @last_column[sheet] -= 1
     end
   end
+
+  def clean_sheet(sheet)
+    read_cells(sheet)
+
+    @cell.each_pair do |coord, value|
+      @cell[coord] = sanitize_value(value) if value.is_a?(::String)
+    end
+
+    @cleaned[sheet] = true
+  end
 end
