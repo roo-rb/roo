@@ -91,6 +91,14 @@ describe Roo::Excelx do
     it 'returns the expected result' do
       expect(subject.sheets).to eq ["Tabelle1", "Name of Sheet 2", "Sheet3", "Sheet4", "Sheet5"]
     end
+
+    describe 'only showing visible sheets' do
+      let(:path) { 'test/files/hidden_sheets.xlsx' }
+
+      it 'returns the expected result' do
+        expect(Roo::Excelx.new(path, only_visible_sheets: true).sheets).to eq ["VisibleSheet1"]
+      end
+    end
   end
 
   describe '#sheet_for' do

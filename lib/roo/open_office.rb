@@ -11,6 +11,7 @@ class Roo::OpenOffice < Roo::Base
     packed = options[:packed]
     file_warning = options[:file_warning] || :error
 
+    @only_visible_sheets = options[:only_visible_sheets]
     file_type_check(filename,'.ods','an Roo::OpenOffice', file_warning, packed)
     @tmpdir = make_tmpdir(filename.split('/').last, options[:tmpdir_root])
     @filename = local_filename(filename, @tmpdir, packed)
@@ -33,7 +34,8 @@ class Roo::OpenOffice < Roo::Base
     @formula = Hash.new
     @style = Hash.new
     @style_defaults = Hash.new { |h,k| h[k] = [] }
-    @style_definitions = Hash.new
+    @table_display = Hash.new { |h,k| h[k] = true }
+    @font_style_definitions = Hash.new
     @comment = Hash.new
     @comments_read = Hash.new
   end
@@ -309,7 +311,7 @@ class Roo::OpenOffice < Roo::Base
     read_cells(sheet)
     row,col = normalize(row,col)
     style_name = @style[sheet][[row,col]] || @style_defaults[sheet][col - 1] || 'Default'
-    @style_definitions[style_name]
+    @font_style_definitions[style_name]
   end
 
   # returns the type of a cell:
@@ -332,9 +334,16 @@ class Roo::OpenOffice < Roo::Base
   end
 
   def sheets
-    doc.xpath("//*[local-name()='table']").map do |sheet|
-      sheet.attributes["name"].value
+    unless @table_display.any?
+      doc.xpath("//*[local-name()='automatic-styles']").each do |style|
+        read_table_styles(style)
+      end
     end
+    doc.xpath("//*[local-name()='table']").map do |sheet|
+      if !@only_visible_sheets || @table_display[attr(sheet,'style-name')]
+        sheet.attributes["name"].value
+      end
+    end.compact
   end
 
   # version of the Roo::OpenOffice document
@@ -595,7 +604,7 @@ class Roo::OpenOffice < Roo::Base
   end
 
   def read_styles(style_elements)
-    @style_definitions['Default'] = Roo::Font.new
+    @font_style_definitions['Default'] = Roo::Font.new
     style_elements.each do |style|
       next unless style.name == 'style'
       style_name = attr(style,'name')
@@ -604,7 +613,19 @@ class Roo::OpenOffice < Roo::Base
         font.bold = attr(properties,'font-weight')
         font.italic = attr(properties,'font-style')
         font.underline = attr(properties,'text-underline-style')
-        @style_definitions[style_name] = font
+        @font_style_definitions[style_name] = font
+      end
+    end
+  end
+
+  def read_table_styles(styles)
+    styles.children.each do |style|
+      next unless style.name == 'style'
+      style_name = attr(style,'name')
+      style.children.each do |properties|
+        display = attr(properties,'display')
+        next unless display
+        @table_display[style_name] = (display == 'true')
       end
     end
   end
