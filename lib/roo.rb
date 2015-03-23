@@ -1,7 +1,7 @@
-module Roo
-  autoload :Spreadsheet,  'roo/spreadsheet'
-  autoload :Base,         'roo/base'
+require 'roo/spreadsheet'
+require 'roo/base'
 
+module Roo
   autoload :OpenOffice,   'roo/open_office'
   autoload :LibreOffice,  'roo/libre_office'
   autoload :Excelx,       'roo/excelx'
