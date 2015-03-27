@@ -85,6 +85,21 @@ describe Roo::Excelx do
     end
   end
 
+  describe '#parse_unicode_with_clean_option' do
+    let(:path) { 'test/files/parse_clean_with_unicode.xlsx' }
+    let(:options) { {clean: true, name: 'Name'} }
+
+    context 'with clean: true' do
+
+      it 'returns a non empty string' do
+        expect(xlsx.parse(options).last[:name]).to eql('凯')
+      end
+    end
+  end
+
+
+
+
   describe '#sheets' do
     let(:path) { 'test/files/numbers1.xlsx' }
 

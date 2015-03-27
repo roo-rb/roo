@@ -76,6 +76,7 @@ class Roo::Excelx < Roo::Base
 
   class Cell
     attr_reader :type, :formula, :value, :excelx_type, :excelx_value, :style, :hyperlink, :coordinate
+    attr_writer :value
 
     def initialize(value, type, formula, excelx_type, excelx_value, style, hyperlink, base_date, coordinate)
       @type = type
@@ -489,7 +490,9 @@ class Roo::Excelx < Roo::Base
 
   def clean_sheet(sheet)
     @sheets_by_name[sheet].cells.each_pair do |coord, value|
-      @sheets_by_name[sheet].cells[coord] = sanitize_value(value) if value.is_a?(::String)
+      next unless value.value.is_a?(::String)
+
+      @sheets_by_name[sheet].cells[coord].value = sanitize_value(value.value)
     end
 
     @cleaned[sheet] = true
