@@ -1,12 +1,16 @@
 module Roo
   module Utils
     extend self
-    LETTERS = ('A'..'Z').to_a
+
     def split_coordinate(str)
-      letter, number = split_coord(str)
-      x              = letter_to_number(letter)
-      y              = number
-      [y, x]
+      @split_coordinate ||= {}
+
+      @split_coordinate[str] ||= begin
+        letter, number = split_coord(str)
+        x = letter_to_number(letter)
+        y = number
+        [y, x]
+      end
     end
 
     alias_method :ref_to_key, :split_coordinate
@@ -22,36 +26,29 @@ module Roo
     end
 
     # convert a number to something like 'AB' (1 => 'A', 2 => 'B', ...)
-    def number_to_letter(n)
-      letters = ''
-      if n > 26
-        while n % 26 == 0 && n != 0
-          letters << 'Z'
-          n = ((n - 26) / 26).to_i
-        end
-        while n > 0
-          num     = n % 26
-          letters = LETTERS[num - 1] + letters
-          n       = (n / 26).to_i
-        end
-      else
-        letters = LETTERS[n - 1]
+    def number_to_letter(num)
+      results = []
+      num = num.to_i
+
+      while (num > 0)
+        mod = (num - 1) % 26
+        results = [(65 + mod).chr] + results
+        num = ((num - mod) / 26)
       end
-      letters
+
+      results.join
     end
 
-    # convert letters like 'AB' to a number ('A' => 1, 'B' => 2, ...)
     def letter_to_number(letters)
-      result = 0
-      while letters && letters.length > 0
-        character = letters[0, 1].upcase
-        num       = LETTERS.index(character)
-        fail ArgumentError, "invalid column character '#{letters[0, 1]}'" if num.nil?
-        num     += 1
-        result  = result * 26 + num
-        letters = letters[1..-1]
+      @letter_to_number ||= {}
+      @letter_to_number[letters] ||= begin
+         result = 0
+
+         # :bytes method returns an enumerator in 1.9.3 and an array in 2.0+
+         letters.bytes.to_a.map{|b| b > 96 ? b - 96: b - 64 }.reverse.each_with_index{ |num, i| result += num * 26 ** i }
+
+         result
       end
-      result
     end
 
     # Compute upper bound for cells in a given cell range.

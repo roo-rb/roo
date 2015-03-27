@@ -487,6 +487,14 @@ class Roo::Excelx < Roo::Base
 
   private
 
+  def clean_sheet(sheet)
+    @sheets_by_name[sheet].cells.each_pair do |coord, value|
+      @sheets_by_name[sheet].cells[coord] = sanitize_value(value) if value.is_a?(::String)
+    end
+
+    @cleaned[sheet] = true
+  end
+
   # Extracts all needed files from the zip file
   def process_zipfile(tmpdir, zipfilename)
     @sheet_files = []
