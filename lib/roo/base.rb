@@ -160,9 +160,13 @@ class Roo::Base
     end)
   end
 
-  # call to_s method defined on subclasses
-  def inspect
-    to_s
+  def inspect(debug = false)
+    if debug
+      # call to_s method defined on subclasses
+      to_s
+    else
+      "<##{ self.class }:#{ self.object_id.to_s(8) } #{ self.instance_variables.join(' ') }>"
+    end
   end
 
   # find a row either by row number or a condition
