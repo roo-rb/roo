@@ -40,219 +40,6 @@ class Roo::OpenOffice < Roo::Base
     @comments_read = Hash.new
   end
 
-  # If the ODS file has an encryption-data element, then try to decrypt.
-  # If successful, the temporary content.xml will be overwritten with
-  # decrypted contents.
-  def decrypt_if_necessary(
-    zip_file,
-    content_entry,
-    roo_content_xml_path, options
-  )
-    # Check if content.xml is encrypted by extracting manifest.xml
-    # and searching for a manifest:encryption-data element
-    
-    if manifest_entry = zip_file.glob("META-INF/manifest.xml").first
-      roo_manifest_xml_path = File.join(@tmpdir, "roo_manifest.xml")
-      manifest_entry.extract(roo_manifest_xml_path)
-      manifest = ::Roo::Utils.load_xml(roo_manifest_xml_path)
-      
-      # XPath search for manifest:encryption-data only for the content.xml
-      # file
-      
-      encryption_data = manifest.xpath(
-        "//manifest:file-entry[@manifest:full-path='content.xml']"\
-        "/manifest:encryption-data"
-      ).first
-      
-      # If XPath returns a node, then we know content.xml is encrypted
-      
-      if !encryption_data.nil?
-        
-        # Since we know it's encrypted, we check for the password option
-        # and if it doesn't exist, raise an argument error
-        
-        password = options[:password]
-        if !password.nil?
-          perform_decryption(
-            encryption_data,
-            password,
-            content_entry,
-            roo_content_xml_path
-          )
-        else
-          raise ArgumentError,
-              'file is encrypted but password was not supplied'
-        end
-      end
-    else
-      raise ArgumentError, 'file missing required META-INF/manifest.xml'
-    end
-  end
-  
-  # Process the ODS encryption manifest and perform the decryption
-  def perform_decryption(
-    encryption_data,
-    password,
-    content_entry,
-    roo_content_xml_path
-  )
-    # Extract various expected attributes from the manifest that
-    # describe the encryption
-    
-    algorithm_node = encryption_data.xpath("manifest:algorithm").first
-    key_derivation_node =
-        encryption_data.xpath("manifest:key-derivation").first
-    start_key_generation_node =
-        encryption_data.xpath("manifest:start-key-generation").first
-    
-    # If we have all the expected elements, then we can perform
-    # the decryption.
-    
-    if !algorithm_node.nil? && !key_derivation_node.nil? &&
-        !start_key_generation_node.nil?
-      
-      # The algorithm is a URI describing the algorithm used
-      algorithm = algorithm_node['manifest:algorithm-name']
-      
-      # The initialization vector is base-64 encoded
-      iv = Base64.decode64(
-        algorithm_node['manifest:initialisation-vector']
-      )
-      key_derivation_name =
-          key_derivation_node['manifest:key-derivation-name']
-      key_size = key_derivation_node['manifest:key-size'].to_i
-      iteration_count =
-          key_derivation_node['manifest:iteration-count'].to_i
-      salt = Base64.decode64(key_derivation_node['manifest:salt'])
-      
-      # The key is hashed with an algorithm represented by this URI
-      key_generation_name =
-          start_key_generation_node[
-            'manifest:start-key-generation-name'
-          ]
-      key_generation_size =
-          start_key_generation_node['manifest:key-size'].to_i
-      
-      hashed_password = password
-      key = nil
-      
-      if key_generation_name.eql?(
-        "http://www.w3.org/2000/09/xmldsig#sha256"
-      )
-        hashed_password = Digest::SHA256.digest(password)
-      else
-        raise ArgumentError, 'Unknown key generation algorithm ' +
-            key_generation_name
-      end
-      
-      cipher = find_cipher(
-        algorithm,
-        key_derivation_name,
-        hashed_password,
-        salt,
-        iteration_count,
-        iv
-      )
-      
-      begin
-        decrypted = decrypt(content_entry, cipher)
-        
-        # Finally, inflate the decrypted stream and overwrite
-        # content.xml
-        IO.binwrite(
-          roo_content_xml_path,
-          Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(decrypted)
-        )
-      rescue StandardError => error
-        raise ArgumentError,
-            'Invalid password or other data error: ' + error.to_s
-      end
-    else
-      raise ArgumentError,
-          'manifest.xml missing encryption-data elements'
-    end
-  end
-  
-  # Create a cipher based on an ODS algorithm URI from manifest.xml
-  def find_cipher(
-    algorithm,
-    key_derivation_name,
-    hashed_password,
-    salt,
-    iteration_count,
-    iv
-  )
-    cipher = nil
-    if algorithm.eql? "http://www.w3.org/2001/04/xmlenc#aes256-cbc"
-      cipher = OpenSSL::Cipher.new('AES-256-CBC')
-      cipher.decrypt
-      cipher.padding = 0
-      cipher.key = find_cipher_key(
-        cipher,
-        key_derivation_name,
-        hashed_password,
-        salt,
-        iteration_count
-      )
-      cipher.iv = iv
-    else
-      raise ArgumentError, 'Unknown algorithm ' + algorithm
-    end
-    cipher
-  end
-  
-  # Create a cipher key based on an ODS algorithm string from manifest.xml
-  def find_cipher_key(
-    cipher,
-    key_derivation_name,
-    hashed_password,
-    salt,
-    iteration_count
-  )
-    if key_derivation_name.eql? "PBKDF2"
-      key = OpenSSL::PKCS5.pbkdf2_hmac_sha1(
-        hashed_password,
-        salt,
-        iteration_count,
-        cipher.key_len
-      )
-    else
-      raise ArgumentError, 'Unknown key derivation name ' +
-          key_derivation_name
-    end
-    key
-  end
-  
-  # Block decrypt raw bytes from the zip file based on the cipher
-  def decrypt(content_entry, cipher)
-    # Zip::Entry.extract writes a 0-length file when trying
-    # to extract an encrypted stream, so we read the
-    # raw bytes based on the offset and lengths
-    decrypted = ""
-    File.open(@filename, "rb") do |zipfile|
-      zipfile.seek(
-        content_entry.local_header_offset +
-          content_entry.calculate_local_header_size
-      )
-      total_to_read = content_entry.compressed_size
-      block_size = 4096
-      if block_size > total_to_read
-        block_size = total_to_read
-      end
-      while buffer = zipfile.read(block_size)
-        decrypted += cipher.update(buffer)
-        total_to_read -= buffer.length
-        if total_to_read == 0
-          break
-        end
-        if block_size > total_to_read
-          block_size = total_to_read
-        end
-      end
-    end
-    decrypted + cipher.final
-  end
-
   def method_missing(m,*args)
     read_labels
     # is method name a label name
@@ -415,6 +202,218 @@ class Roo::OpenOffice < Roo::Base
   end
 
   private
+
+  # If the ODS file has an encryption-data element, then try to decrypt.
+  # If successful, the temporary content.xml will be overwritten with
+  # decrypted contents.
+  def decrypt_if_necessary(
+    zip_file,
+    content_entry,
+    roo_content_xml_path, options
+  )
+    # Check if content.xml is encrypted by extracting manifest.xml
+    # and searching for a manifest:encryption-data element
+
+    if manifest_entry = zip_file.glob("META-INF/manifest.xml").first
+      roo_manifest_xml_path = File.join(@tmpdir, "roo_manifest.xml")
+      manifest_entry.extract(roo_manifest_xml_path)
+      manifest = ::Roo::Utils.load_xml(roo_manifest_xml_path)
+
+      # XPath search for manifest:encryption-data only for the content.xml
+      # file
+
+      encryption_data = manifest.xpath(
+        "//manifest:file-entry[@manifest:full-path='content.xml']"\
+        "/manifest:encryption-data"
+      ).first
+
+      # If XPath returns a node, then we know content.xml is encrypted
+
+      if !encryption_data.nil?
+
+        # Since we know it's encrypted, we check for the password option
+        # and if it doesn't exist, raise an argument error
+
+        password = options[:password]
+        if !password.nil?
+          perform_decryption(
+            encryption_data,
+            password,
+            content_entry,
+            roo_content_xml_path
+          )
+        else
+          raise ArgumentError,
+            'file is encrypted but password was not supplied'
+        end
+      end
+    else
+      raise ArgumentError, 'file missing required META-INF/manifest.xml'
+    end
+  end
+
+  # Process the ODS encryption manifest and perform the decryption
+  def perform_decryption(
+    encryption_data,
+    password,
+    content_entry,
+    roo_content_xml_path
+  )
+    # Extract various expected attributes from the manifest that
+    # describe the encryption
+
+    algorithm_node = encryption_data.xpath("manifest:algorithm").first
+    key_derivation_node =
+      encryption_data.xpath("manifest:key-derivation").first
+    start_key_generation_node =
+      encryption_data.xpath("manifest:start-key-generation").first
+
+    # If we have all the expected elements, then we can perform
+    # the decryption.
+
+    if !algorithm_node.nil? && !key_derivation_node.nil? &&
+        !start_key_generation_node.nil?
+
+      # The algorithm is a URI describing the algorithm used
+      algorithm = algorithm_node['manifest:algorithm-name']
+
+      # The initialization vector is base-64 encoded
+      iv = Base64.decode64(
+        algorithm_node['manifest:initialisation-vector']
+      )
+      key_derivation_name =
+        key_derivation_node['manifest:key-derivation-name']
+      key_size = key_derivation_node['manifest:key-size'].to_i
+      iteration_count =
+        key_derivation_node['manifest:iteration-count'].to_i
+      salt = Base64.decode64(key_derivation_node['manifest:salt'])
+
+      # The key is hashed with an algorithm represented by this URI
+      key_generation_name =
+        start_key_generation_node[
+          'manifest:start-key-generation-name'
+      ]
+        key_generation_size =
+          start_key_generation_node['manifest:key-size'].to_i
+
+        hashed_password = password
+        key = nil
+
+        if key_generation_name.eql?(
+        "http://www.w3.org/2000/09/xmldsig#sha256"
+      )
+        hashed_password = Digest::SHA256.digest(password)
+      else
+        raise ArgumentError, 'Unknown key generation algorithm ' +
+          key_generation_name
+      end
+
+        cipher = find_cipher(
+          algorithm,
+          key_derivation_name,
+          hashed_password,
+          salt,
+          iteration_count,
+          iv
+        )
+
+        begin
+          decrypted = decrypt(content_entry, cipher)
+
+          # Finally, inflate the decrypted stream and overwrite
+          # content.xml
+          IO.binwrite(
+            roo_content_xml_path,
+            Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(decrypted)
+          )
+        rescue StandardError => error
+          raise ArgumentError,
+            'Invalid password or other data error: ' + error.to_s
+        end
+    else
+      raise ArgumentError,
+        'manifest.xml missing encryption-data elements'
+    end
+  end
+
+  # Create a cipher based on an ODS algorithm URI from manifest.xml
+  def find_cipher(
+    algorithm,
+    key_derivation_name,
+    hashed_password,
+    salt,
+    iteration_count,
+    iv
+  )
+    cipher = nil
+    if algorithm.eql? "http://www.w3.org/2001/04/xmlenc#aes256-cbc"
+      cipher = OpenSSL::Cipher.new('AES-256-CBC')
+      cipher.decrypt
+      cipher.padding = 0
+      cipher.key = find_cipher_key(
+        cipher,
+        key_derivation_name,
+        hashed_password,
+        salt,
+        iteration_count
+      )
+      cipher.iv = iv
+    else
+      raise ArgumentError, 'Unknown algorithm ' + algorithm
+    end
+    cipher
+  end
+
+  # Create a cipher key based on an ODS algorithm string from manifest.xml
+  def find_cipher_key(
+    cipher,
+    key_derivation_name,
+    hashed_password,
+    salt,
+    iteration_count
+  )
+    if key_derivation_name.eql? "PBKDF2"
+      key = OpenSSL::PKCS5.pbkdf2_hmac_sha1(
+        hashed_password,
+        salt,
+        iteration_count,
+        cipher.key_len
+      )
+    else
+      raise ArgumentError, 'Unknown key derivation name ' +
+        key_derivation_name
+    end
+    key
+  end
+
+  # Block decrypt raw bytes from the zip file based on the cipher
+  def decrypt(content_entry, cipher)
+    # Zip::Entry.extract writes a 0-length file when trying
+    # to extract an encrypted stream, so we read the
+    # raw bytes based on the offset and lengths
+    decrypted = ""
+    File.open(@filename, "rb") do |zipfile|
+      zipfile.seek(
+        content_entry.local_header_offset +
+        content_entry.calculate_local_header_size
+      )
+      total_to_read = content_entry.compressed_size
+
+      block_size = 4096
+      block_size = total_to_read if block_size > total_to_read
+
+      while buffer = zipfile.read(block_size)
+        decrypted += cipher.update(buffer)
+        total_to_read -= buffer.length
+
+        break if total_to_read == 0
+
+        block_size = total_to_read  if block_size > total_to_read
+      end
+    end
+
+    decrypted + cipher.final
+  end
 
   def doc
     @doc ||= ::Roo::Utils.load_xml(File.join(@tmpdir, "roo_content.xml"))
