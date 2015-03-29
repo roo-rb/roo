@@ -325,24 +325,11 @@ class Roo::Base
     end
   end
 
-
   def clean_sheet_if_need(options)
     return unless options[:clean]
     options.delete(:clean)
     @cleaned ||= {}
     clean_sheet(default_sheet) unless @cleaned[default_sheet]
-  end
-
-  def search_or_set_header(options)
-    if options[:header_search]
-      @headers = nil
-      @header_line = row_with(options[:header_search])
-    elsif [:first_row, true].include?(options[:headers])
-      @headers = []
-      row(first_row).each_with_index { |x, i| @headers << [x, i + 1] }
-    else
-      set_headers(options)
-    end
   end
 
   # by passing in headers as options, this method returns
@@ -455,6 +442,18 @@ class Roo::Base
   end
 
   private
+
+  def search_or_set_header(options)
+    if options[:header_search]
+      @headers = nil
+      @header_line = row_with(options[:header_search])
+    elsif [:first_row, true].include?(options[:headers])
+      @headers = []
+      row(first_row).each_with_index { |x, i| @headers << [x, i + 1] }
+    else
+      set_headers(options)
+    end
+  end
 
   def local_filename(filename, tmpdir, packed)
     filename = download_uri(filename, tmpdir) if uri?(filename)
@@ -704,8 +703,6 @@ class Roo::Base
       end || ''
     end
   end
-
-  private
 
   # converts an integer value to a time string like '02:05:06'
   def integer_to_timestring(content)
