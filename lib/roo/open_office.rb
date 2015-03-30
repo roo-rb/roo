@@ -76,7 +76,13 @@ class Roo::OpenOffice < Roo::Base
     row,col = normalize(row,col)
     @formula[sheet][[row,col]]
   end
-  alias_method :formula?, :formula
+
+  # Predicate methods really should return a boolean
+  # value. Hopefully no one was relying on the fact that this
+  # previously returned either nil/formula
+  def formula?(*args)
+    !!formula(*args)
+  end
 
   # returns each formula in the selected sheet as an array of elements
   # [row, col, formula]
