@@ -935,6 +935,7 @@ Sheet 3:
 
   def test_to_xml
     with_each_spreadsheet(:name=>'numbers1', :encoding => 'utf8') do |oo|
+      skip if defined? JRUBY_VERSION
       oo.to_xml
       sheetname = oo.sheets.first
       doc = Nokogiri::XML(oo.to_xml)
