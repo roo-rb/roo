@@ -45,14 +45,14 @@ module Roo
          result = 0
 
          # :bytes method returns an enumerator in 1.9.3 and an array in 2.0+
-         letters.bytes.to_a.map{|b| b > 96 ? b - 96: b - 64 }.reverse.each_with_index{ |num, i| result += num * 26 ** i }
+         letters.bytes.to_a.map{|b| b > 96 ? b - 96 : b - 64 }.reverse.each_with_index{ |num, i| result += num * 26 ** i }
 
          result
       end
     end
 
     # Compute upper bound for cells in a given cell range.
-    def self.num_cells_in_range(str)
+    def num_cells_in_range(str)
       cells = str.split(':')
       return 1 if cells.count == 1
       raise ArgumentError.new("invalid range string: #{str}. Supported range format 'A1:B2'") if cells.count != 2

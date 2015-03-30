@@ -52,6 +52,13 @@ describe Roo::Excelx do
         end
       end
     end
+
+    context 'for a non-existent cell' do
+      let(:path) { 'test/files/numeric-link.xlsx' }
+      it 'return nil' do
+        expect(xlsx.cell('AAA', 999)).to eq nil
+      end
+    end
   end
 
   describe '#parse' do
@@ -193,6 +200,7 @@ describe Roo::Excelx do
     it 'returns the expected result' do
       expect(subject.formula(1, 1, "Sheet1")).to eq nil
       expect(subject.formula(7, 2, "Sheet1")).to eq "SUM($A$1:B6)"
+      expect(subject.formula(1000, 2000, "Sheet1")).to eq nil
     end
   end
 
@@ -202,6 +210,7 @@ describe Roo::Excelx do
     it 'returns the expected result' do
       expect(subject.formula?(1, 1, "Sheet1")).to eq false
       expect(subject.formula?(7, 2, "Sheet1")).to eq true
+      expect(subject.formula?(1000, 2000, "Sheet1")).to eq false
     end
   end
 
@@ -224,6 +233,7 @@ describe Roo::Excelx do
       expect(subject.font(7, 1).bold?).to eq false
       expect(subject.font(7, 1).italic?).to eq true
       expect(subject.font(7, 1).underline?).to eq true
+      expect(subject.font(1000, 2000)).to eq nil
     end
   end
 
@@ -234,6 +244,7 @@ describe Roo::Excelx do
       expect(subject.celltype(1, 1, "Sheet4")).to eq :date
       expect(subject.celltype(1, 2, "Sheet4")).to eq :float
       expect(subject.celltype(6, 2, "Sheet5")).to eq :string
+      expect(subject.celltype(1000, 2000, "Sheet5")).to eq nil
     end
   end
 
@@ -243,6 +254,7 @@ describe Roo::Excelx do
     it 'returns the expected result' do
       expect(subject.excelx_type(1, 1, "Sheet5")).to eq [:numeric_or_formula, "General"]
       expect(subject.excelx_type(6, 2, "Sheet5")).to eq :string
+      expect(subject.excelx_type(1000, 2000, "Sheet5")).to eq nil
     end
   end
 
@@ -254,6 +266,7 @@ describe Roo::Excelx do
       # way to get these rather than hardcoding.
       expect(subject.excelx_value(1, 1, "Sheet5")).to eq "1"
       expect(subject.excelx_value(6, 2, "Sheet5")).to eq "16"
+      expect(subject.excelx_value(6000, 2000, "Sheet5")).to eq nil
     end
   end
 
@@ -263,8 +276,9 @@ describe Roo::Excelx do
     it 'returns the expected result' do
       # These are the index of the style for a given document
       # might be more reliable way to get this info.
-      expect(subject.excelx_value(1, 1)).to eq "0"
-      expect(subject.excelx_value(5, 1)).to eq "4"
+      expect(subject.excelx_format(1, 1)).to eq "General"
+      expect(subject.excelx_format(2, 2)).to eq "0.00"
+      expect(subject.excelx_format(5000, 1000)).to eq nil
     end
   end
 
