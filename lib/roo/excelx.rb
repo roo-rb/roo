@@ -186,25 +186,26 @@ class Roo::Excelx < Roo::Base
 
     # returns the number of the first non-empty row
     def first_row
-      @first_row ||= present_cells.keys.map {|row, col| row }.min
+      @first_row ||= present_cells.keys.map {|row, _| row }.min
     end
 
     def last_row
-      @last_row ||= present_cells.keys.map {|row, col| row }.max
+      @last_row ||= present_cells.keys.map {|row, _| row }.max
     end
 
     # returns the number of the first non-empty column
-    def first_column(sheet=nil)
-      @first_column ||= present_cells.keys.map {|row, col| col }.min
+    def first_column
+      @first_column ||= present_cells.keys.map {|_, col| col }.min
     end
 
     # returns the number of the last non-empty column
-    def last_column(sheet=nil)
-      @last_column ||= present_cells.keys.map {|row, col| col }.max
+    def last_column
+      @last_column ||= present_cells.keys.map {|_, col| col }.max
     end
 
     def excelx_format(key)
-      @styles.style_format(cells[key].style).to_s
+      cell = cells[key]
+      @styles.style_format(cell.style).to_s if cell
     end
 
     def hyperlinks
@@ -285,7 +286,7 @@ class Roo::Excelx < Roo::Base
 
   def method_missing(method,*args)
     if label = workbook.defined_names[method.to_s]
-      sheet_for(label.sheet).cells[label.key].value
+      safe_send(sheet_for(label.sheet).cells[label.key], :value)
     else
       # call super for methods like #a1
       super
@@ -308,8 +309,7 @@ class Roo::Excelx < Roo::Base
   # cell at the first line and first row.
   def cell(row, col, sheet=nil)
     key = normalize(row,col)
-    cell = sheet_for(sheet).cells[key]
-    cell.value if cell
+    safe_send(sheet_for(sheet).cells[key], :value)
   end
 
   def row(rownumber,sheet=nil)
@@ -359,7 +359,7 @@ class Roo::Excelx < Roo::Base
   # The method #formula? checks if there is a formula.
   def formula(row,col,sheet=nil)
     key = normalize(row,col)
-    sheet_for(sheet).cells[key].formula
+    safe_send(sheet_for(sheet).cells[key], :formula)
   end
 
   # Predicate methods really should return a boolean
@@ -380,7 +380,8 @@ class Roo::Excelx < Roo::Base
   # Given a cell, return the cell's style
   def font(row, col, sheet=nil)
     key = normalize(row,col)
-    styles.definitions[sheet_for(sheet).cells[key].style]
+    definition_index = safe_send(sheet_for(sheet).cells[key], :style)
+    styles.definitions[definition_index] if definition_index
   end
 
   # returns the type of a cell:
@@ -393,7 +394,7 @@ class Roo::Excelx < Roo::Base
   # * :datetime
   def celltype(row,col,sheet=nil)
     key = normalize(row, col)
-    sheet_for(sheet).cells[key].type
+    safe_send(sheet_for(sheet).cells[key], :type)
   end
 
   # returns the internal type of an excel cell
@@ -402,14 +403,14 @@ class Roo::Excelx < Roo::Base
   # Note: this is only available within the Excelx class
   def excelx_type(row,col,sheet=nil)
     key = normalize(row,col)
-    sheet_for(sheet).cells[key].excelx_type
+    safe_send(sheet_for(sheet).cells[key], :excelx_type)
   end
 
   # returns the internal value of an excelx cell
   # Note: this is only available within the Excelx class
   def excelx_value(row,col,sheet=nil)
     key = normalize(row,col)
-    sheet_for(sheet).cells[key].excelx_value
+    safe_send(sheet_for(sheet).cells[key], :excelx_value)
   end
 
   # returns the internal format of an excel cell
@@ -553,5 +554,9 @@ class Roo::Excelx < Roo::Base
 
   def workbook
     @workbook ||= Workbook.new(File.join(@tmpdir, "roo_workbook.xml"))
+  end
+
+  def safe_send(object, method, *args)
+    object.send(method, *args) if object && object.respond_to?(method)
   end
 end

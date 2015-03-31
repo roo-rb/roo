@@ -44,6 +44,8 @@ module Roo
     private
 
     def cell_from_xml(cell_xml, hyperlink)
+      # This is error prone, to_i will silently turn a nil into a 0
+      # and it works by coincidence that Format[0] is general
       style = cell_xml['s'].to_i   # should be here
       # c: <c r="A5" s="2">
       # <v>22606</v>
@@ -151,7 +153,9 @@ module Roo
     end
 
     def extract_dimensions
-      doc.xpath("/worksheet/dimension").map { |dim| dim.attributes["ref"].value }.first
+      Roo::Utils.each_element(@path, 'dimension') do |dimension|
+        return dimension.attributes["ref"].value
+      end
     end
 
 =begin

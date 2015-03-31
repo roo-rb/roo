@@ -2,10 +2,11 @@ require 'spec_helper'
 
 RSpec.describe ::Roo::Utils do
   subject { described_class }
+
   context '#number_to_letter' do
-    ('A'..'Z').to_a.each_with_index do |l, i|
-      it "should return '#{l}' when passed #{i+1}" do
-        expect(described_class.number_to_letter(i+1)).to eq(l)
+    ('A'..'Z').to_a.each_with_index do |letter, index|
+      it "should return '#{ letter }' when passed #{ index + 1 }" do
+        expect(described_class.number_to_letter(index + 1)).to eq(letter)
       end
     end
 
