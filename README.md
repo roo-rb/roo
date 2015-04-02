@@ -20,179 +20,211 @@ Install as a gem
 
 Or add it to your Gemfile
 
-    gem 'roo', '2.0.0-beta'
-
+```ruby
+gem 'roo', '2.0.0-beta'
+```
 ## Usage
 
 Opening a spreadsheet
 
-    require 'roo'
+```ruby
+require 'roo'
 
-    xlsx = Roo::Spreadsheet.open('./new_prices.xlsx')
-    xlsx = Roo::Excelx("./new_prices.xlsx")
+xlsx = Roo::Spreadsheet.open('./new_prices.xlsx')
+xlsx = Roo::Excelx("./new_prices.xlsx")
 
-    # Use the extension option if the extension is ambiguous.
-    xlsx = Roo::Spreadsheet.open('./rails_temp_upload', extension: :xlsx)
+# Use the extension option if the extension is ambiguous.
+xlsx = Roo::Spreadsheet.open('./rails_temp_upload', extension: :xlsx)
 
-    xlsx.info
-    # => Returns basic info about the spreadsheet file
+xlsx.info
+# => Returns basic info about the spreadsheet file
+```
 
 ``Roo::Spreadsheet.open`` can accept both paths and ``File`` instances.
 
 ### Working with sheets
 
-    ods.sheets
-    # => ['Info', 'Sheet 2', 'Sheet 3']   # an Array of sheet names in the workbook
+```ruby
+ods.sheets
+# => ['Info', 'Sheet 2', 'Sheet 3']   # an Array of sheet names in the workbook
 
-    ods.sheet('Info').row(1)
-    ods.sheet(0).row(1)
+ods.sheet('Info').row(1)
+ods.sheet(0).row(1)
 
-    # Set the last sheet as the default sheet.
-    ods.default_sheet = ods.sheets.last
-    ods.default_sheet = s.sheets[3]
-    ods.default_sheet = 'Sheet 3'
+# Set the last sheet as the default sheet.
+ods.default_sheet = ods.sheets.last
+ods.default_sheet = s.sheets[3]
+ods.default_sheet = 'Sheet 3'
 
-    # Iterate through each sheet
-    ods.each_with_pagename do |name, sheet|
-      p sheet.row(1)
-    end
+# Iterate through each sheet
+ods.each_with_pagename do |name, sheet|
+  p sheet.row(1)
+end
+```
 
 ### Accessing rows and columns
 
 Roo uses Excel's numbering for rows, columns and cells, so `1` is the first index, not `0` as it is in an ``Array``
 
-    sheet.row(1)
-    # returns the first row of the spreadsheet.
+```ruby
+sheet.row(1)
+# returns the first row of the spreadsheet.
 
-    sheet.column(1)
-    # returns the first column of the spreadsheet.
+sheet.column(1)
+# returns the first column of the spreadsheet.
+```
 
 Almost all methods have an optional argument `sheet`. If this parameter is omitted, the default_sheet will be used.
 
-    sheet.first_row(sheet.sheets[0])
-    # => 1             # the number of the first row
-    sheet.last_row
-    # => 42            # the number of the last row
-    sheet.first_column
-    # => 1             # the number of the first column
-    sheet.last_column
-    # => 10            # the number of the last column
-
+```ruby
+sheet.first_row(sheet.sheets[0])
+# => 1             # the number of the first row
+sheet.last_row
+# => 42            # the number of the last row
+sheet.first_column
+# => 1             # the number of the first column
+sheet.last_column
+# => 10            # the number of the last column
+```
 
 #### Accessing cells
 
 You can access the top-left cell in the following ways
 
-    s.cell(1,1)
-    s.cell('A',1)
-    s.cell(1,'A')
-    s.a1
+```ruby
+s.cell(1,1)
+s.cell('A',1)
+s.cell(1,'A')
+s.a1
 
-    # Access the second sheet's top-left cell.
-    s.cell(1,'A',s.sheets[1])
+# Access the second sheet's top-left cell.
+s.cell(1,'A',s.sheets[1])
+```
 
 #### Querying a spreadsheet
 Use ``each`` with a ``block`` to iterate over each row.
 
 If each is given a hash with the names of some columns, then each will generate a hash with the columns supplied for each row.
 
-    sheet.each(id: 'ID', name: 'FULL_NAME') do |hash|
-      puts hash.inspect
-      # => { id: 1, name: 'John Smith' }
-    end
+```ruby
+sheet.each(id: 'ID', name: 'FULL_NAME') do |hash|
+  puts hash.inspect
+  # => { id: 1, name: 'John Smith' }
+end
+```
 
 Use ``sheet.parse`` to return an array of rows. Column names can be a ``String`` or a ``Regexp``.
 
-    sheet.parse(:id => /UPC|SKU/,:qty => /ATS*\sATP\s*QTY\z/)
-    # => [{:upc => 727880013358, :qty => 12}, ...]
+```ruby
+sheet.parse(:id => /UPC|SKU/,:qty => /ATS*\sATP\s*QTY\z/)
+# => [{:upc => 727880013358, :qty => 12}, ...]
+```
 
 Use the ``:header_search`` option to locate the header row and assign the header names.
 
-    sheet.parse(header_search: [/UPC*SKU/,/ATS*\sATP\s*QTY\z/])
+```ruby
+sheet.parse(header_search: [/UPC*SKU/,/ATS*\sATP\s*QTY\z/])
+```
 
 Use the ``:clean`` option to strip out control characters and surrounding white space.
 
-    sheet.parse(:clean => true)
+```ruby
+sheet.parse(:clean => true)
+```
 
 ### Exporting spreadsheets
 Roo has the ability to export sheets using the following formats. It
 will only export the ``default_sheet``.
 
-    sheet.to_csv
-    sheet.to_matrix
-    sheet.to_xml
-    sheet.to_yaml
-
+```ruby
+sheet.to_csv
+sheet.to_matrix
+sheet.to_xml
+sheet.to_yaml
+```
 
 ### Excel (xlsx) Support
 
 Stream rows from an Excelx spreadsheet.
 
-    xlsx = Roo::Excelx.new("./test_data/test_small.xlsx")
-    xlsx.each_row_streaming do |row|
-      puts row.inspect # Array of Excelx::Cell objects
-    end
+```ruby
+xlsx = Roo::Excelx.new("./test_data/test_small.xlsx")
+xlsx.each_row_streaming do |row|
+  puts row.inspect # Array of Excelx::Cell objects
+end
+```
 
 Iterate over each row
 
-    xlsx.each_row do |row|
-      ...
-    end
+```ruby
+xlsx.each_row do |row|
+  ...
+end
+```
 
 ``Roo::Excelx`` also provides these helpful methods.
 
-    xlsx.excelx_type(3, 'C')
-    # => :numeric_or_formula
+```ruby
+xlsx.excelx_type(3, 'C')
+# => :numeric_or_formula
 
-    xlsx.cell(3, 'C')
-    # => 600000383.0
+xlsx.cell(3, 'C')
+# => 600000383.0
 
-    xlsx.excelx_value(row,col)
-    # => '0600000383'
-
+xlsx.excelx_value(row,col)
+# => '0600000383'
+```
 
 ``Roo::Excelx`` can access celltype, comments, font information, formulas, hyperlinks and labels.
 
-    xlsx.comment(1,1, ods.sheets[-1])
-    xlsx.font(1,1).bold?
-    xlsx.formula('A', 2)
-
+```ruby
+xlsx.comment(1,1, ods.sheets[-1])
+xlsx.font(1,1).bold?
+xlsx.formula('A', 2)
+```
 
 ### OpenOffice / LibreOffice Support
 
 Roo::OpenOffice supports for encrypted OpenOffice spreadsheets.
 
-    # Load an encrypted OpenOffice Spreadsheet
-    ods = Roo::OpenOffice.new("myspreadsheet.ods", :password => "password")
+```ruby
+# Load an encrypted OpenOffice Spreadsheet
+ods = Roo::OpenOffice.new("myspreadsheet.ods", :password => "password")
+```
 
 ``Roo::OpenOffice`` can access celltype, comments, font information, formulas and labels.
 
-    ods.celltype
-    # => :percentage
+```ruby
+ods.celltype
+# => :percentage
 
-    ods.comment(1,1, ods.sheets[-1])
+ods.comment(1,1, ods.sheets[-1])
 
-    ods.font(1,1).italic?
-    # => false
+ods.font(1,1).italic?
+# => false
 
-    ods.formula('A', 2)
+ods.formula('A', 2)
+```
 
 ### CSV Support
 
-    # Load a CSV file
-    s = Roo::CSV.new("mycsv.csv")
+```ruby
+# Load a CSV file
+s = Roo::CSV.new("mycsv.csv")
+```
 
 Because Roo uses the [standard CSV library](), and you can use options available to that library to parse csv files. You can pass options using the ``csv_options`` key.
 
 For instance, you can load tab-delimited files (``.tsv``), and you can use a particular encoding when opening the file.
 
 
-    # Load a tab-delimited csv
-    s = Roo::CSV.new("mytsv.tsv", csv_options: {col_sep: "\t"})
+```ruby
+# Load a tab-delimited csv
+s = Roo::CSV.new("mytsv.tsv", csv_options: {col_sep: "\t"})
 
-    # Load a csv with an explicit encoding
-    s = Roo::CSV.new("mycsv.csv", csv_options: {encoding: Encoding::ISO_8859_1})
-
+# Load a csv with an explicit encoding
+s = Roo::CSV.new("mycsv.csv", csv_options: {encoding: Encoding::ISO_8859_1})
+```
 
 ## Upgrading from Roo 1.13.x
 If you use ``.xls`` or Google spreadsheets, you will need to install ``roo-xls`` or ``roo-google`` to continue using that functionality.
