@@ -17,8 +17,8 @@ Gem::Specification.new do |spec|
   spec.files.reject! { |fn| fn.include?('test/files') }
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'nokogiri', '~> 1.5'
-  spec.add_dependency 'rubyzip', '~> 1.1', '>= 1.1.7'
+  spec.add_dependency 'nokogiri', '~> 1'
+  spec.add_dependency 'rubyzip', '~> 1.1', '< 2.0.0'
 
   spec.add_development_dependency 'rake', '~> 10.1'
   spec.add_development_dependency 'minitest', '~> 5.4', '>= 5.4.3'
