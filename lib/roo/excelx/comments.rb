@@ -12,7 +12,8 @@ module Roo
     def extract_comments
       if doc_exists?
         Hash[doc.xpath("//comments/commentList/comment").map do |comment|
-          [::Roo::Utils.ref_to_key(comment.attributes['ref'].to_s), comment.at_xpath('./text/r/t').text]
+          value = (comment.at_xpath('./text/r/t') || comment.at_xpath('./text/t')).text
+          [::Roo::Utils.ref_to_key(comment.attributes['ref'].to_s), value]
         end]
       else
         {}
