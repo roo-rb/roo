@@ -505,42 +505,122 @@ class Roo::Excelx < Roo::Base
     @cleaned[sheet] = true
   end
 
+  # Internal: extracts the worksheet_ids from the workbook.xml file. xlsx
+  #           documents require a workbook.xml file, so a if the file is missing
+  #           it is not a valid xlsx file. In these cases, an ArgumentError is
+  #           raised.
+  #
+  # wb - a Zip::Entry for the workbook.xml file.
+  # path - A String for Zip::Entry's destination path.
+  #
+  # Examples
+  #
+  #   extract_worksheet_ids(<Zip::Entry>, 'tmpdir/roo_workbook.xml')
+  #   # => ["rId1", "rId2", "rId3"]
+  #
+  # Returns an Array of Strings.
+  def extract_worksheet_ids(entries, path)
+      wb = entries.find { |e| e.name[/workbook.xml$/] }
+      fail ArgumentError 'missing required workbook file' if wb.nil?
+
+      wb.extract(path)
+      workbook_doc = Roo::Utils.load_xml(path).remove_namespaces!
+      workbook_doc.xpath('//sheet').map{ |s| s.attributes['id'].value }
+  end
+
+  # Internal
+  #
+  # wb_rels - A Zip::Entry for the workbook.xml.rels file.
+  # path - A String for the Zip::Entry's destination path.
+  #
+  # Examples
+  #
+  #   extract_worksheets(<Zip::Entry>, 'tmpdir/roo_workbook.xml.rels')
+  #   # => {
+  #         "rId1"=>"worksheets/sheet1.xml",
+  #         "rId2"=>"worksheets/sheet2.xml",
+  #         "rId3"=>"worksheets/sheet3.xml"
+  #        }
+  #
+  # Returns a Hash.
+  def extract_worksheet_rels(entries, path)
+    wb_rels = entries.find { |e| e.name[/workbook.xml.rels$/] }
+    fail ArgumentError 'missing required workbook file' if wb_rels.nil?
+
+    wb_rels.extract(path)
+    rels_doc = Roo::Utils.load_xml(path).remove_namespaces!
+    worksheet_type ='http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet'
+
+    relationships = rels_doc.xpath('//Relationship').select do |relationship|
+      relationship.attributes['Type'].value == worksheet_type
+    end
+
+    relationships.inject({}) do |hash, relationship|
+      attributes = relationship.attributes
+      id = attributes['Id'];
+      hash[id.value] = attributes['Target'].value
+      hash
+    end
+  end
+
+  def extract_sheets_in_order(entries, sheet_ids, sheets, tmpdir)
+    sheet_ids.each_with_index do |id, i|
+      name = sheets[id]
+      entry = entries.find { |entry| entry.name =~ /#{name}$/ }
+      path = "#{tmpdir}/roo_sheet#{i + 1}"
+      @sheet_files << path
+      entry.extract(path)
+    end
+  end
+
   # Extracts all needed files from the zip file
   def process_zipfile(tmpdir, zipfilename)
     @sheet_files = []
-    Zip::File.foreach(zipfilename) do |entry|
+    entries = Zip::File.open(zipfilename).to_a.sort_by(&:name)
+
+    # NOTE: When Google or Numbers 3.1 exports to xlsx, the worksheet filenames
+    #       are not in order. With Numbers 3.1, the first sheet is always
+    #       sheet.xml, not sheet1.xml. With Google, the order of the worksheets is
+    #       independent of a worksheet's filename (i.e. sheet6.xml can be the
+    #       first worksheet).
+    #
+    #       workbook.xml lists the correct order of worksheets and
+    #       workbook.xml.rels lists the filenames for those worksheets.
+    #
+    #       workbook.xml:
+    #         <sheet state="visible" name="IS" sheetId="1" r:id="rId3"/>
+    #         <sheet state="visible" name="BS" sheetId="2" r:id="rId4"/>
+    #       workbook.xml.rel:
+    #         <Relationship Id="rId4" Target="worksheets/sheet5.xml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"/>
+    #         <Relationship Id="rId3" Target="worksheets/sheet4.xml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"/>
+    sheet_ids = extract_worksheet_ids(entries, "#{tmpdir}/roo_workbook.xml")
+    sheets = extract_worksheet_rels(entries, "#{tmpdir}/roo_workbook.xml.rels")
+    extract_sheets_in_order(entries, sheet_ids, sheets, tmpdir)
+
+    entries.each do |entry|
       path =
-        case entry.name.downcase
-        when /workbook.xml$/
-          "#{tmpdir}/roo_workbook.xml"
-        when /sharedstrings.xml$/
-          "#{tmpdir}/roo_sharedStrings.xml"
-        when /styles.xml$/
-          "#{tmpdir}/roo_styles.xml"
-        when /sheet.xml$/
-          path = "#{tmpdir}/roo_sheet"
-          @sheet_files.unshift(path)
-          path
-        when /sheet([0-9]+).xml$/
-          # Numbers 3.1 exports first sheet without sheet number. Such sheets
-          # are always added to the beginning of the array which, naturally,
-          # causes other sheets to be pushed to the next index which could
-          # lead to sheet references getting overwritten, so we need to
-          # handle that case specifically.
-          nr = $1
-          sheet_files_index = nr.to_i - 1
-          sheet_files_index += 1 if @sheet_files[sheet_files_index]
-          @sheet_files[sheet_files_index] = "#{tmpdir}/roo_sheet#{nr.to_i}"
-        when /comments([0-9]+).xml$/
-          nr = $1
-          @comments_files[nr.to_i-1] = "#{tmpdir}/roo_comments#{nr}"
-        when /sheet([0-9]+).xml.rels$/
-          nr = $1
-          @rels_files[nr.to_i-1] = "#{tmpdir}/roo_rels#{nr}"
-        end
-      if path
-        entry.extract(path)
+      case entry.name.downcase
+      when /sharedstrings.xml$/
+        "#{tmpdir}/roo_sharedStrings.xml"
+      when /styles.xml$/
+        "#{tmpdir}/roo_styles.xml"
+      when /comments([0-9]+).xml$/
+        # FIXME: Most of the time, The order of the comment files are the same
+        #       the sheet order, i.e. sheet1.xml's comments are in comments1.xml.
+        #       In some situations, this isn't true. The true location of a
+        #       sheet's comment file is in the sheet1.xml.rels file. SEE
+        #       ECMA-376 12.3.3 in "Ecma Office Open XML Part 1".
+        nr = Regexp.last_match[1].to_i
+        @comments_files[nr - 1] = "#{tmpdir}/roo_comments#{nr}"
+      when /sheet([0-9]+).xml.rels$/
+        # FIXME: Roo seems to use sheet[\d].xml.rels for hyperlinks only, but
+        #        it also stores the location for sharedStrings, comments,
+        #        drawings, etc.
+        nr = Regexp.last_match[1].to_i
+        @rels_files[nr - 1] = "#{tmpdir}/roo_rels#{nr}"
       end
+
+      entry.extract(path) if path
     end
   end
 
