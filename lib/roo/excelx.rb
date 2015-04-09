@@ -519,7 +519,8 @@ class Roo::Excelx < Roo::Base
   #   # => ["rId1", "rId2", "rId3"]
   #
   # Returns an Array of Strings.
-  def extract_worksheet_ids(wb, path)
+  def extract_worksheet_ids(entries, path)
+      wb = entries.find { |e| e.name[/workbook.xml$/] }
       fail ArgumentError 'missing required workbook file' if wb.nil?
 
       wb.extract(path)
@@ -542,7 +543,8 @@ class Roo::Excelx < Roo::Base
   #        }
   #
   # Returns a Hash.
-  def extract_worksheets(wb_rels, path)
+  def extract_worksheet_rels(entries, path)
+    wb_rels = entries.find { |e| e.name[/workbook.xml.rels$/] }
     fail ArgumentError 'missing required workbook file' if wb_rels.nil?
 
     wb_rels.extract(path)
@@ -558,6 +560,16 @@ class Roo::Excelx < Roo::Base
       id = attributes['Id'];
       hash[id.value] = attributes['Target'].value
       hash
+    end
+  end
+
+  def extract_sheets_in_order(entries, sheet_ids, sheets, tmpdir)
+    sheet_ids.each_with_index do |id, i|
+      name = sheets[id]
+      entry = entries.find { |entry| entry.name =~ /#{name}$/ }
+      path = "#{tmpdir}/roo_sheet#{i + 1}"
+      @sheet_files << path
+      entry.extract(path)
     end
   end
 
@@ -581,19 +593,9 @@ class Roo::Excelx < Roo::Base
     #       workbook.xml.rel:
     #         <Relationship Id="rId4" Target="worksheets/sheet5.xml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"/>
     #         <Relationship Id="rId3" Target="worksheets/sheet4.xml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"/>
-    wb = entries.find{ |e| e.name[/workbook.xml$/] }
-    wb_rels = entries.find{ |e| e.name[/workbook.xml.rels$/] }
-
-    sheet_ids = extract_worksheet_ids(wb, "#{tmpdir}/roo_workbook.xml")
-    sheets = extract_worksheets(wb_rels, "#{tmpdir}/roo_workbook.xml.rels")
-
-    sheet_ids.each_with_index do |id, i|
-      name = sheets[id]
-      entry = entries.find { |entry| entry.name =~ /#{name}$/ }
-      path = "#{tmpdir}/roo_sheet#{i + 1}"
-      @sheet_files << path
-      entry.extract(path)
-    end
+    sheet_ids = extract_worksheet_ids(entries, "#{tmpdir}/roo_workbook.xml")
+    sheets = extract_worksheet_rels(entries, "#{tmpdir}/roo_workbook.xml.rels")
+    extract_sheets_in_order(entries, sheet_ids, sheets, tmpdir)
 
     entries.each do |entry|
       path =
@@ -608,20 +610,17 @@ class Roo::Excelx < Roo::Base
         #       In some situations, this isn't true. The true location of a
         #       sheet's comment file is in the sheet1.xml.rels file. SEE
         #       ECMA-376 12.3.3 in "Ecma Office Open XML Part 1".
-        nr = $1
-        @comments_files[nr.to_i-1] = "#{tmpdir}/roo_comments#{nr}"
-        # I suspect these files need to be ordered appropriately, too
+        nr = Regexp.last_match[1].to_i
+        @comments_files[nr - 1] = "#{tmpdir}/roo_comments#{nr}"
       when /sheet([0-9]+).xml.rels$/
         # FIXME: Roo seems to use sheet[\d].xml.rels for hyperlinks only, but
         #        it also stores the location for sharedStrings, comments,
         #        drawings, etc.
-        nr = $1
-        @rels_files[nr.to_i-1] = "#{tmpdir}/roo_rels#{nr}"
+        nr = Regexp.last_match[1].to_i
+        @rels_files[nr - 1] = "#{tmpdir}/roo_rels#{nr}"
       end
 
-      if path
-        entry.extract(path)
-      end
+      entry.extract(path) if path
     end
   end
 
