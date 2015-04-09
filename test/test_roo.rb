@@ -1688,6 +1688,11 @@ where the expected result is
       oo.default_sheet = oo.sheets[1]
       assert_equal [], oo.comments, "comments error in class #{oo.class}"
     end
+
+    with_each_spreadsheet(:name=>'comments-google', :format=>[:excelx]) do |oo|
+      oo.default_sheet = oo.sheets.first
+      assert_equal [[1, 1, "this is a comment\n\t-Steven Daniels"]], oo.comments(oo.sheets.first), "comments error in class #{oo.class}"
+    end
   end
 
   ## PREVIOUSLY SKIPPED
@@ -1965,7 +1970,7 @@ where the expected result is
     xlsx.default_sheet = xlsx.sheets.last
     assert_equal 'Sheet 2', xlsx.cell('b',2)
   end
-  
+
   def test_openoffice_encryption
     if OPENOFFICE
       assert_raises(ArgumentError) { Roo::LibreOffice.new(File.join(TESTDIR, "encrypted-letmein.ods")) }
