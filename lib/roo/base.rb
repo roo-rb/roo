@@ -320,13 +320,6 @@ class Roo::Base
     end
   end
 
-  def clean_sheet_if_need(options)
-    return unless options[:clean]
-    options.delete(:clean)
-    @cleaned ||= {}
-    clean_sheet(default_sheet) unless @cleaned[default_sheet]
-  end
-
   # by passing in headers as options, this method returns
   # specific columns from your header assignment
   # for example:
@@ -437,6 +430,13 @@ class Roo::Base
   end
 
   private
+
+  def clean_sheet_if_need(options)
+    return unless options[:clean]
+    options.delete(:clean)
+    @cleaned ||= {}
+    clean_sheet(default_sheet) unless @cleaned[default_sheet]
+  end
 
   def search_or_set_header(options)
     if options[:header_search]
