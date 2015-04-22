@@ -229,7 +229,7 @@ s = Roo::CSV.new("mycsv.csv", csv_options: {encoding: Encoding::ISO_8859_1})
 ## Upgrading from Roo 1.13.x
 If you use ``.xls`` or Google spreadsheets, you will need to install ``roo-xls`` or ``roo-google`` to continue using that functionality.
 
-Roo's public methods have stayed relatively consistent between 1.13.x and 2.0.0, but please check the [Changelog](https://github.com/roo-rb/roo/blob/master/CHANGELOG) to better understand the changes made since 1.13.x.
+Roo's public methods have stayed relatively consistent between 1.13.x and 2.0.0, but please check the [Changelog](https://github.com/roo-rb/roo/blob/master/CHANGELOG.md) to better understand the changes made since 1.13.x.
 
 
 
