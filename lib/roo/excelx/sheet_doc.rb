@@ -43,7 +43,7 @@ module Roo
 
     private
 
-    def cell_from_xml(cell_xml, hyperlink)
+    def cell_from_xml(cell_xml, hyperlink, coordinate=nil)
       # This is error prone, to_i will silently turn a nil into a 0
       # and it works by coincidence that Format[0] is general
       style = cell_xml['s'].to_i   # should be here
@@ -69,7 +69,7 @@ module Roo
           Excelx::Format.to_type(format)
         end
       formula = nil
-      row, column = ::Roo::Utils.split_coordinate(cell_xml['r'])
+      row, column = coordinate || ::Roo::Utils.split_coordinate(cell_xml['r'])
       cell_xml.children.each do |cell|
         case cell.name
         when 'is'
@@ -141,14 +141,43 @@ module Roo
       end
     end
 
+    def references_exist?
+      doc.xpath("/worksheet/sheetData/row/c")[0]['r'].present?
+    end
+
     def extract_cells(relationships)
-      extracted_cells = Hash[doc.xpath("/worksheet/sheetData/row/c").map do |cell_xml|
-        key = ::Roo::Utils.ref_to_key(cell_xml['r'])
-        [key, cell_from_xml(cell_xml, hyperlinks(relationships)[key])]
-      end]
+      if references_exist?
+        extracted_cells = extract_cells_from_reference(relationships)
+      else
+        extracted_cells = extract_cells_from_order(relationships)
+      end
+
       if @options[:expand_merged_ranges]
         expand_merged_ranges(extracted_cells)
       end
+      extracted_cells
+    end
+
+    def extract_cells_from_reference(relationships)
+      Hash[doc.xpath("/worksheet/sheetData/row/c").map do |cell_xml|
+             key = ::Roo::Utils.ref_to_key(cell_xml['r'])
+             [key, cell_from_xml(cell_xml, hyperlinks(relationships)[key])]
+           end]
+
+    end
+
+    def extract_cells_from_order(relationships)
+      rows = doc.xpath("/worksheet/sheetData/row").each_with_index.map do |row_xml, row_index|
+        Hash[row_xml.xpath('c').each_with_index.map do |cell_xml, cell_index|
+               key = [row_index+1, cell_index+1]
+               [key, cell_from_xml(cell_xml, hyperlinks(relationships)[key], key)]
+             end]
+      end
+      extracted_cells = Hash.new
+      for i in 0..rows.length-1 do
+        extracted_cells = extracted_cells.merge(rows[i]) unless rows[i].nil?
+      end
+
       extracted_cells
     end
 
