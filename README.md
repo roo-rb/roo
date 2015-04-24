@@ -21,7 +21,7 @@ Install as a gem
 Or add it to your Gemfile
 
 ```ruby
-gem 'roo', '2.0.0beta1'
+gem 'roo', '~> 2.0.0'
 ```
 ## Usage
 
