@@ -1,4 +1,4 @@
-## [2.0.0beta1] [unreleased]
+## [2.0.0]
 ### Added
 - Added optional support for hidden sheets in Excelx and LibreOffice files [#177](https://github.com/roo-rb/roo/pull/177)
 - Roo::OpenOffice can be used to open encrypted workbooks. [#157](https://github.com/roo-rb/roo/pull/157)
