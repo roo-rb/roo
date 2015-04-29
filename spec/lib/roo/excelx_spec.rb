@@ -36,6 +36,15 @@ describe Roo::Excelx do
         expect(Roo::Excelx.new(path, cell_max: 100)).to be_a(Roo::Excelx)
       end
     end
+    
+    context 'file path is a Pathname' do
+      let(:path) { Pathname.new('test/files/file_item_error.xlsx') }
+
+      it 'creates an instance' do
+        expect(subject).to be_a(Roo::Excelx)
+      end
+    end
+    
   end
 
   describe '#cell' do
