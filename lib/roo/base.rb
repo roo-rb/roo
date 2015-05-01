@@ -32,6 +32,9 @@ class Roo::Base
     @last_column = {}
 
     @header_line = 1
+  rescue => e # clean up any temp files, but only if an error was raised
+    close
+    raise e
   end
 
   def close

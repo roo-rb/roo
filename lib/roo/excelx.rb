@@ -288,6 +288,9 @@ class Roo::Excelx < Roo::Base
     end
 
     super
+  rescue => e # clean up any temp files, but only if an error was raised
+    close
+    raise e
   end
 
   def method_missing(method,*args)

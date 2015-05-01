@@ -64,7 +64,7 @@ class TestRoo < Minitest::Test
         yield Roo::Spreadsheet.open(File.join(TESTDIR,
           fixture_filename(options[:name], format)))
       rescue => e
-        raise e, "#{e.message} for #{format}", e.backtrace
+        raise e, "#{e.message} for #{format}", e.backtrace unless options[:ignore_errors]
       end
     end
   end
@@ -2078,5 +2078,11 @@ where the expected result is
       oo.close
       assert !File.exists?(tempdir), "Expected #{tempdir} to be cleaned up, but it still exists"
     end
+  end
+
+  def test_cleanup_on_error
+    old_temp_files = Dir.open(Dir.tmpdir).to_a
+    with_each_spreadsheet(:name=>'non_existent_file', :ignore_errors=>true) do |oo|; end
+    assert_equal Dir.open(Dir.tmpdir).to_a, old_temp_files
   end
 end # class

@@ -38,6 +38,9 @@ class Roo::OpenOffice < Roo::Base
     @font_style_definitions = Hash.new
     @comment = Hash.new
     @comments_read = Hash.new
+  rescue => e # clean up any temp files, but only if an error was raised
+    close
+    raise e
   end
 
   def method_missing(m,*args)
