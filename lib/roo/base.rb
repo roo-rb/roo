@@ -429,6 +429,10 @@ class Roo::Base
     "#{arr[0]},#{arr[1]}"
   end
 
+  def is_stream?(filename_or_stream)
+    filename_or_stream.respond_to?(:seek)
+  end
+
   private
 
   def clean_sheet_if_need(options)
@@ -451,6 +455,7 @@ class Roo::Base
   end
 
   def local_filename(filename, tmpdir, packed)
+    return if is_stream?(filename)
     filename = download_uri(filename, tmpdir) if uri?(filename)
     filename = unzip(filename, tmpdir) if packed == :zip
     unless File.file?(filename)

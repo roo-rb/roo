@@ -18,6 +18,7 @@
 #STDERR.reopen "/dev/null","w"
 
 require 'test_helper'
+require 'stringio'
 
 class TestRoo < Minitest::Test
 
@@ -2063,5 +2064,11 @@ where the expected result is
     end
   end
 
-
+  def test_open_stream
+    return unless EXCELX
+    file_contents = File.read File.join(TESTDIR, fixture_filename(:numbers1, :excelx))
+    stream = StringIO.new(file_contents)
+    xlsx = Roo::Excelx.new(stream)
+    assert_equal ["Tabelle1","Name of Sheet 2","Sheet3","Sheet4","Sheet5"], xlsx.sheets
+  end
 end # class
