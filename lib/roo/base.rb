@@ -34,6 +34,11 @@ class Roo::Base
     @header_line = 1
   end
 
+  def close
+    @tmpdirs.nil? or @tmpdirs.each { |dir| FileUtils.remove_entry dir }
+    nil
+  end
+
   def default_sheet
     @default_sheet ||= sheets.first
   end
@@ -435,6 +440,10 @@ class Roo::Base
 
   private
 
+  def track_tmpdir! tmpdir
+    (@tmpdirs ||= []) << tmpdir
+  end
+
   def clean_sheet_if_need(options)
     return unless options[:clean]
     options.delete(:clean)
@@ -521,7 +530,9 @@ class Roo::Base
     else
       TEMP_PREFIX
     end
-    Dir.mktmpdir(prefix, root || ENV['ROO_TMP'], &block)
+    Dir.mktmpdir(prefix, root || ENV['ROO_TMP'], &block).tap do |result|
+      block_given? or track_tmpdir! result
+    end
   end
 
   def clean_sheet(sheet)

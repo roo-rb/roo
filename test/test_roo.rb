@@ -2071,4 +2071,12 @@ where the expected result is
     xlsx = Roo::Excelx.new(stream)
     assert_equal ["Tabelle1","Name of Sheet 2","Sheet3","Sheet4","Sheet5"], xlsx.sheets
   end
+
+  def test_close
+    with_each_spreadsheet(:name=>'numbers1') do |oo|
+      next unless tempdir = oo.instance_variable_get('@tmpdir')
+      oo.close
+      assert !File.exists?(tempdir), "Expected #{tempdir} to be cleaned up, but it still exists"
+    end
+  end
 end # class
