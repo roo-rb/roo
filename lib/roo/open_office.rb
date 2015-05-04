@@ -13,7 +13,7 @@ class Roo::OpenOffice < Roo::Base
 
     @only_visible_sheets = options[:only_visible_sheets]
     file_type_check(filename,'.ods','an Roo::OpenOffice', file_warning, packed)
-    @tmpdir = make_tmpdir(filename.split('/').last, options[:tmpdir_root])
+    @tmpdir = make_tmpdir(File.basename(filename), options[:tmpdir_root])
     @filename = local_filename(filename, @tmpdir, packed)
     #TODO: @cells_read[:default] = false
     Zip::File.open(@filename) do |zip_file|

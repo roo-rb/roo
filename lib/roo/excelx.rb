@@ -259,7 +259,7 @@ class Roo::Excelx < Roo::Base
 
     file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
 
-    @tmpdir = make_tmpdir(filename.split('/').last, options[:tmpdir_root])
+    @tmpdir = make_tmpdir(File.basename(filename), options[:tmpdir_root])
     @filename = local_filename(filename, @tmpdir, packed)
     @comments_files = []
     @rels_files = []
