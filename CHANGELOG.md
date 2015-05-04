@@ -1,3 +1,8 @@
+## [Unreleased] - Unreleased
+### Fixed
+- Fixed Changelog links and release data. [#204](https://github.com/roo-rb/roo/pull/204), [#206](https://github.com/roo-rb/roo/pull/206)
+- Allow Pathnames to be used when opening files. [#207](https://github.com/roo-rb/roo/pull/207)
+
 ## [2.0.0] - 2015-04-24
 ### Added
 - Added optional support for hidden sheets in Excelx and LibreOffice files [#177](https://github.com/roo-rb/roo/pull/177)
