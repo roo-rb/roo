@@ -663,9 +663,9 @@ class Roo::Base
 
       case celltype(row, col, sheet)
       when :string
-        %("#{onecell.tr('"', '""')}") unless onecell.empty?
+        %("#{onecell.gsub('"', '""')}") unless onecell.empty?
       when :boolean
-        %("#{onecell.tr('"', '""').downcase}")
+        %("#{onecell.gsub('"', '""').downcase}")
       when :float, :percentage
         if onecell == onecell.to_i
           onecell.to_i.to_s
@@ -675,7 +675,7 @@ class Roo::Base
       when :formula
         case onecell
         when String
-          %("#{onecell.tr('"', '""')}") unless onecell.empty?
+          %("#{onecell.gsub('"', '""')}") unless onecell.empty?
         when Float
           if onecell == onecell.to_i
             onecell.to_i.to_s
@@ -692,7 +692,7 @@ class Roo::Base
       when :time
         integer_to_timestring(onecell)
       when :link
-        %("#{onecell.url.tr('"', '""')}")
+        %("#{onecell.url.gsub('"', '""')}")
       else
         fail "unhandled celltype #{celltype(row, col, sheet)}"
       end || ''
