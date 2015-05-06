@@ -36,7 +36,7 @@ describe Roo::Excelx do
         expect(Roo::Excelx.new(path, cell_max: 100)).to be_a(Roo::Excelx)
       end
     end
-    
+
     context 'file path is a Pathname' do
       let(:path) { Pathname.new('test/files/file_item_error.xlsx') }
 
@@ -44,7 +44,7 @@ describe Roo::Excelx do
         expect(subject).to be_a(Roo::Excelx)
       end
     end
-    
+
   end
 
   describe '#cell' do
@@ -417,6 +417,33 @@ describe Roo::Excelx do
         end
         # Expect this to get incremented one time more than max (because of the increment at the end of the block)
         # but it should not be near expected_rows.size
+        expect(index).to eq 4
+      end
+    end
+
+    context 'with offset option' do
+      let(:offset) { 3 }
+
+      it 'returns the expected result' do
+        index = 0
+        subject.each_row_streaming(offset: offset) do |row|
+          expect(row.map(&:value)).to eq expected_rows[index + offset]
+          index += 1
+        end
+        expect(index).to eq 11
+      end
+    end
+
+    context 'with offset and max_rows options' do
+      let(:offset) { 3 }
+      let(:max_rows) { 3 }
+
+      it 'returns the expected result' do
+        index = 0
+        subject.each_row_streaming(offset: offset, max_rows: max_rows) do |row|
+          expect(row.map(&:value)).to eq expected_rows[index + offset]
+          index += 1
+        end
         expect(index).to eq 4
       end
     end

@@ -161,13 +161,16 @@ class Roo::Excelx < Roo::Base
     end
 
     # Yield each row as array of Excelx::Cell objects
-    # accepts options max_rows (int) (offset by 1 for header)
-    # and pad_cells (boolean)
+    # accepts options max_rows (int) (offset by 1 for header),
+    # pad_cells (boolean) and offset (int)
     def each_row(options = {}, &block)
       row_count = 0
+      options[:offset] ||= 0
       @sheet.each_row_streaming do |row|
-        break if options[:max_rows] && row_count == options[:max_rows] + 1
-        block.call(cells_for_row_element(row, options)) if block_given?
+        break if options[:max_rows] && row_count == options[:max_rows] + options[:offset] + 1
+        if block_given? && !(options[:offset] && row_count < options[:offset])
+          block.call(cells_for_row_element(row, options))
+        end
         row_count += 1
       end
     end
