@@ -1,4 +1,7 @@
 ## [Unreleased] - Unreleased
+### Added
+- Offset option for excelx #each_row. [#214](https://github.com/roo-rb/roo/pull/214)
+
 ### Fixed
 - Fixed Changelog links and release data. [#204](https://github.com/roo-rb/roo/pull/204), [#206](https://github.com/roo-rb/roo/pull/206)
 - Allow Pathnames to be used when opening files. [#207](https://github.com/roo-rb/roo/pull/207)
