@@ -9,7 +9,7 @@ require 'roo/utils'
 class Roo::Base
   include Enumerable
 
-  TEMP_PREFIX = 'roo_'
+  TEMP_PREFIX = 'roo_'.freeze
   MAX_ROW_COL = 999_999.freeze
   MIN_ROW_COL = 0.freeze
 
@@ -32,6 +32,15 @@ class Roo::Base
     @last_column = {}
 
     @header_line = 1
+  rescue => e # clean up any temp files, but only if an error was raised
+    close
+    raise e
+  end
+
+  def close
+    return nil unless @tmpdirs
+    @tmpdirs.each { |dir| ::FileUtils.remove_entry(dir) }
+    nil
   end
 
   def default_sheet
@@ -429,7 +438,15 @@ class Roo::Base
     "#{arr[0]},#{arr[1]}"
   end
 
+  def is_stream?(filename_or_stream)
+    filename_or_stream.respond_to?(:seek)
+  end
+
   private
+
+  def track_tmpdir!(tmpdir)
+    (@tmpdirs ||= []) << tmpdir
+  end
 
   def clean_sheet_if_need(options)
     return unless options[:clean]
@@ -451,6 +468,7 @@ class Roo::Base
   end
 
   def local_filename(filename, tmpdir, packed)
+    return if is_stream?(filename)
     filename = download_uri(filename, tmpdir) if uri?(filename)
     filename = unzip(filename, tmpdir) if packed == :zip
     unless File.file?(filename)
@@ -516,7 +534,9 @@ class Roo::Base
     else
       TEMP_PREFIX
     end
-    Dir.mktmpdir(prefix, root || ENV['ROO_TMP'], &block)
+    ::Dir.mktmpdir(prefix, root || ENV['ROO_TMP'], &block).tap do |result|
+      block_given? || track_tmpdir!(result)
+    end
   end
 
   def clean_sheet(sheet)

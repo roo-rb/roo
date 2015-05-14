@@ -18,6 +18,7 @@
 #STDERR.reopen "/dev/null","w"
 
 require 'test_helper'
+require 'stringio'
 
 class TestRoo < Minitest::Test
 
@@ -63,7 +64,7 @@ class TestRoo < Minitest::Test
         yield Roo::Spreadsheet.open(File.join(TESTDIR,
           fixture_filename(options[:name], format)))
       rescue => e
-        raise e, "#{e.message} for #{format}", e.backtrace
+        raise e, "#{e.message} for #{format}", e.backtrace unless options[:ignore_errors]
       end
     end
   end
@@ -2063,5 +2064,25 @@ where the expected result is
     end
   end
 
+  def test_open_stream
+    return unless EXCELX
+    file_contents = File.read File.join(TESTDIR, fixture_filename(:numbers1, :excelx))
+    stream = StringIO.new(file_contents)
+    xlsx = Roo::Excelx.new(stream)
+    assert_equal ["Tabelle1","Name of Sheet 2","Sheet3","Sheet4","Sheet5"], xlsx.sheets
+  end
 
+  def test_close
+    with_each_spreadsheet(:name=>'numbers1') do |oo|
+      next unless (tempdir = oo.instance_variable_get('@tmpdir'))
+      oo.close
+      assert !File.exists?(tempdir), "Expected #{tempdir} to be cleaned up, but it still exists"
+    end
+  end
+
+  def test_cleanup_on_error
+    old_temp_files = Dir.open(Dir.tmpdir).to_a
+    with_each_spreadsheet(:name=>'non_existent_file', :ignore_errors=>true) do |oo|; end
+    assert_equal Dir.open(Dir.tmpdir).to_a, old_temp_files
+  end
 end # class

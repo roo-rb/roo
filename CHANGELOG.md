@@ -1,4 +1,12 @@
-## [2.0.0beta1] [unreleased]
+## [Unreleased] - Unreleased
+### Added
+- Offset option for excelx #each_row. [#214](https://github.com/roo-rb/roo/pull/214)
+
+### Fixed
+- Fixed Changelog links and release data. [#204](https://github.com/roo-rb/roo/pull/204), [#206](https://github.com/roo-rb/roo/pull/206)
+- Allow Pathnames to be used when opening files. [#207](https://github.com/roo-rb/roo/pull/207)
+
+## [2.0.0] - 2015-04-24
 ### Added
 - Added optional support for hidden sheets in Excelx and LibreOffice files [#177](https://github.com/roo-rb/roo/pull/177)
 - Roo::OpenOffice can be used to open encrypted workbooks. [#157](https://github.com/roo-rb/roo/pull/157)

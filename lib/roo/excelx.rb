@@ -161,13 +161,16 @@ class Roo::Excelx < Roo::Base
     end
 
     # Yield each row as array of Excelx::Cell objects
-    # accepts options max_rows (int) (offset by 1 for header)
-    # and pad_cells (boolean)
+    # accepts options max_rows (int) (offset by 1 for header),
+    # pad_cells (boolean) and offset (int)
     def each_row(options = {}, &block)
       row_count = 0
+      options[:offset] ||= 0
       @sheet.each_row_streaming do |row|
-        break if options[:max_rows] && row_count == options[:max_rows] + 1
-        block.call(cells_for_row_element(row, options)) if block_given?
+        break if options[:max_rows] && row_count == options[:max_rows] + options[:offset] + 1
+        if block_given? && !(options[:offset] && row_count < options[:offset])
+          block.call(cells_for_row_element(row, options))
+        end
         row_count += 1
       end
     end
@@ -250,20 +253,23 @@ class Roo::Excelx < Roo::Base
   # values for packed: :zip
   # optional cell_max (int) parameter for early aborting attempts to parse
   # enormous documents.
-  def initialize(filename, options = {})
+  def initialize(filename_or_stream, options = {})
     packed = options[:packed]
     file_warning = options.fetch(:file_warning, :error)
     cell_max = options.delete(:cell_max)
     sheet_options = {}
     sheet_options[:expand_merged_ranges] = (options[:expand_merged_ranges] || false)
 
-    file_type_check(filename,'.xlsx','an Excel-xlsx', file_warning, packed)
+    unless is_stream?(filename_or_stream)
+      file_type_check(filename_or_stream,'.xlsx','an Excel-xlsx', file_warning, packed)
+      basename = File.basename(filename_or_stream)
+    end
 
-    @tmpdir = make_tmpdir(filename.split('/').last, options[:tmpdir_root])
-    @filename = local_filename(filename, @tmpdir, packed)
+    @tmpdir = make_tmpdir(basename, options[:tmpdir_root])
+    @filename = local_filename(filename_or_stream, @tmpdir, packed)
     @comments_files = []
     @rels_files = []
-    process_zipfile(@tmpdir, @filename)
+    process_zipfile(@filename || filename_or_stream)
 
     @sheet_names = workbook.sheets.map do |sheet|
       unless options[:only_visible_sheets] && sheet['state'] == 'hidden'
@@ -282,6 +288,9 @@ class Roo::Excelx < Roo::Base
     end
 
     super
+  rescue => e # clean up any temp files, but only if an error was raised
+    close
+    raise e
   end
 
   def method_missing(method,*args)
@@ -574,10 +583,26 @@ class Roo::Excelx < Roo::Base
   end
 
   # Extracts all needed files from the zip file
-  def process_zipfile(tmpdir, zipfilename)
+  def process_zipfile(zipfilename_or_stream)
     @sheet_files = []
-    entries = Zip::File.open(zipfilename).to_a.sort_by(&:name)
 
+    unless is_stream?(zipfilename_or_stream)
+      process_zipfile_entries Zip::File.open(zipfilename_or_stream).to_a.sort_by(&:name)
+    else
+      stream = Zip::InputStream.open zipfilename_or_stream
+      begin
+        entries = []
+        while entry = stream.get_next_entry
+          entries << entry
+        end
+        process_zipfile_entries entries
+      ensure
+        stream.close
+      end
+    end
+  end
+
+  def process_zipfile_entries entries
     # NOTE: When Google or Numbers 3.1 exports to xlsx, the worksheet filenames
     #       are not in order. With Numbers 3.1, the first sheet is always
     #       sheet.xml, not sheet1.xml. With Google, the order of the worksheets is
@@ -593,17 +618,17 @@ class Roo::Excelx < Roo::Base
     #       workbook.xml.rel:
     #         <Relationship Id="rId4" Target="worksheets/sheet5.xml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"/>
     #         <Relationship Id="rId3" Target="worksheets/sheet4.xml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"/>
-    sheet_ids = extract_worksheet_ids(entries, "#{tmpdir}/roo_workbook.xml")
-    sheets = extract_worksheet_rels(entries, "#{tmpdir}/roo_workbook.xml.rels")
-    extract_sheets_in_order(entries, sheet_ids, sheets, tmpdir)
+    sheet_ids = extract_worksheet_ids(entries, "#{@tmpdir}/roo_workbook.xml")
+    sheets = extract_worksheet_rels(entries, "#{@tmpdir}/roo_workbook.xml.rels")
+    extract_sheets_in_order(entries, sheet_ids, sheets, @tmpdir)
 
     entries.each do |entry|
       path =
       case entry.name.downcase
       when /sharedstrings.xml$/
-        "#{tmpdir}/roo_sharedStrings.xml"
+        "#{@tmpdir}/roo_sharedStrings.xml"
       when /styles.xml$/
-        "#{tmpdir}/roo_styles.xml"
+        "#{@tmpdir}/roo_styles.xml"
       when /comments([0-9]+).xml$/
         # FIXME: Most of the time, The order of the comment files are the same
         #       the sheet order, i.e. sheet1.xml's comments are in comments1.xml.
@@ -611,13 +636,13 @@ class Roo::Excelx < Roo::Base
         #       sheet's comment file is in the sheet1.xml.rels file. SEE
         #       ECMA-376 12.3.3 in "Ecma Office Open XML Part 1".
         nr = Regexp.last_match[1].to_i
-        @comments_files[nr - 1] = "#{tmpdir}/roo_comments#{nr}"
+        @comments_files[nr - 1] = "#{@tmpdir}/roo_comments#{nr}"
       when /sheet([0-9]+).xml.rels$/
         # FIXME: Roo seems to use sheet[\d].xml.rels for hyperlinks only, but
         #        it also stores the location for sharedStrings, comments,
         #        drawings, etc.
         nr = Regexp.last_match[1].to_i
-        @rels_files[nr - 1] = "#{tmpdir}/roo_rels#{nr}"
+        @rels_files[nr - 1] = "#{@tmpdir}/roo_rels#{nr}"
       end
 
       entry.extract(path) if path

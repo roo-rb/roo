@@ -13,7 +13,7 @@ class Roo::OpenOffice < Roo::Base
 
     @only_visible_sheets = options[:only_visible_sheets]
     file_type_check(filename,'.ods','an Roo::OpenOffice', file_warning, packed)
-    @tmpdir = make_tmpdir(filename.split('/').last, options[:tmpdir_root])
+    @tmpdir = make_tmpdir(File.basename(filename), options[:tmpdir_root])
     @filename = local_filename(filename, @tmpdir, packed)
     #TODO: @cells_read[:default] = false
     Zip::File.open(@filename) do |zip_file|
@@ -38,6 +38,9 @@ class Roo::OpenOffice < Roo::Base
     @font_style_definitions = Hash.new
     @comment = Hash.new
     @comments_read = Hash.new
+  rescue => e # clean up any temp files, but only if an error was raised
+    close
+    raise e
   end
 
   def method_missing(m,*args)
