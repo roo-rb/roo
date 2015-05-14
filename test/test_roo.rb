@@ -2074,7 +2074,7 @@ where the expected result is
 
   def test_close
     with_each_spreadsheet(:name=>'numbers1') do |oo|
-      next unless tempdir = oo.instance_variable_get('@tmpdir')
+      next unless (tempdir = oo.instance_variable_get('@tmpdir'))
       oo.close
       assert !File.exists?(tempdir), "Expected #{tempdir} to be cleaned up, but it still exists"
     end

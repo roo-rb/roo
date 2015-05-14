@@ -9,7 +9,7 @@ require 'roo/utils'
 class Roo::Base
   include Enumerable
 
-  TEMP_PREFIX = 'roo_'
+  TEMP_PREFIX = 'roo_'.freeze
   MAX_ROW_COL = 999_999.freeze
   MIN_ROW_COL = 0.freeze
 
@@ -38,7 +38,8 @@ class Roo::Base
   end
 
   def close
-    @tmpdirs.nil? or @tmpdirs.each { |dir| FileUtils.remove_entry dir }
+    return nil unless @tmpdirs
+    @tmpdirs.each { |dir| ::FileUtils.remove_entry(dir) }
     nil
   end
 
@@ -443,7 +444,7 @@ class Roo::Base
 
   private
 
-  def track_tmpdir! tmpdir
+  def track_tmpdir!(tmpdir)
     (@tmpdirs ||= []) << tmpdir
   end
 
@@ -533,8 +534,8 @@ class Roo::Base
     else
       TEMP_PREFIX
     end
-    Dir.mktmpdir(prefix, root || ENV['ROO_TMP'], &block).tap do |result|
-      block_given? or track_tmpdir! result
+    ::Dir.mktmpdir(prefix, root || ENV['ROO_TMP'], &block).tap do |result|
+      block_given? || track_tmpdir!(result)
     end
   end
 
