@@ -1,4 +1,3 @@
-require 'date'
 require 'nokogiri'
 require 'roo/link'
 require 'roo/utils'
@@ -8,6 +7,8 @@ class Roo::Excelx < Roo::Base
   autoload :Workbook, 'roo/excelx/workbook'
   autoload :SharedStrings, 'roo/excelx/shared_strings'
   autoload :Styles, 'roo/excelx/styles'
+  autoload :Cell, 'roo/excelx/cell'
+  autoload :Sheet, 'roo/excelx/sheet'
 
   autoload :Relationships, 'roo/excelx/relationships'
   autoload :Comments, 'roo/excelx/comments'
@@ -72,179 +73,6 @@ class Roo::Excelx < Roo::Base
     end
 
     module_function :to_type
-  end
-
-  class Cell
-    attr_reader :type, :formula, :value, :excelx_type, :excelx_value, :style, :hyperlink, :coordinate
-    attr_writer :value
-
-    def initialize(value, type, formula, excelx_type, excelx_value, style, hyperlink, base_date, coordinate)
-      @type = type
-      @formula = formula
-      @base_date = base_date if [:date, :datetime].include?(@type)
-      @excelx_type = excelx_type
-      @excelx_value = excelx_value
-      @style = style
-      @value = type_cast_value(value)
-      @value = Roo::Link.new(hyperlink, @value.to_s) if hyperlink
-      @coordinate = coordinate
-    end
-
-    def type
-      if @formula
-        :formula
-      elsif @value.is_a?(Roo::Link)
-        :link
-      else
-        @type
-      end
-    end
-
-    class Coordinate
-      attr_accessor :row, :column
-
-      def initialize(row, column)
-        @row, @column = row, column
-      end
-    end
-
-    private
-
-    def type_cast_value(value)
-      case @type
-      when :float, :percentage
-        value.to_f
-      when :date
-        yyyy,mm,dd = (@base_date+value.to_i).strftime("%Y-%m-%d").split('-')
-        Date.new(yyyy.to_i,mm.to_i,dd.to_i)
-      when :datetime
-        create_datetime_from((@base_date+value.to_f.round(6)).strftime("%Y-%m-%d %H:%M:%S.%N"))
-      when :time
-        value.to_f*(24*60*60)
-      when :string
-        value
-      else
-        value
-      end
-    end
-
-    def create_datetime_from(datetime_string)
-      date_part,time_part = round_time_from(datetime_string).split(' ')
-      yyyy,mm,dd = date_part.split('-')
-      hh,mi,ss = time_part.split(':')
-      DateTime.civil(yyyy.to_i,mm.to_i,dd.to_i,hh.to_i,mi.to_i,ss.to_i)
-    end
-
-    def round_time_from(datetime_string)
-      date_part,time_part = datetime_string.split(' ')
-      yyyy,mm,dd = date_part.split('-')
-      hh,mi,ss = time_part.split(':')
-      Time.new(yyyy.to_i, mm.to_i, dd.to_i, hh.to_i, mi.to_i, ss.to_r).round(0).strftime("%Y-%m-%d %H:%M:%S")
-    end
-  end
-
-  class Sheet
-    def initialize(name, rels_path, sheet_path, comments_path, styles, shared_strings, workbook, options = {})
-      @name = name
-      @rels = Relationships.new(rels_path)
-      @comments = Comments.new(comments_path)
-      @styles = styles
-      @sheet = SheetDoc.new(sheet_path, @rels, @styles, shared_strings, workbook, options)
-    end
-
-    def cells
-      @cells ||= @sheet.cells(@rels)
-    end
-
-    def present_cells
-      @present_cells ||= cells.select {|key, cell| cell && cell.value }
-    end
-
-    # Yield each row as array of Excelx::Cell objects
-    # accepts options max_rows (int) (offset by 1 for header),
-    # pad_cells (boolean) and offset (int)
-    def each_row(options = {}, &block)
-      row_count = 0
-      options[:offset] ||= 0
-      @sheet.each_row_streaming do |row|
-        break if options[:max_rows] && row_count == options[:max_rows] + options[:offset] + 1
-        if block_given? && !(options[:offset] && row_count < options[:offset])
-          block.call(cells_for_row_element(row, options))
-        end
-        row_count += 1
-      end
-    end
-
-    def row(row_number)
-      first_column.upto(last_column).map do |col|
-        cells[[row_number,col]]
-      end.map {|cell| cell && cell.value }
-    end
-
-    def column(col_number)
-      first_row.upto(last_row).map do |row|
-        cells[[row,col_number]]
-      end.map {|cell| cell && cell.value }
-    end
-
-    # returns the number of the first non-empty row
-    def first_row
-      @first_row ||= present_cells.keys.map {|row, _| row }.min
-    end
-
-    def last_row
-      @last_row ||= present_cells.keys.map {|row, _| row }.max
-    end
-
-    # returns the number of the first non-empty column
-    def first_column
-      @first_column ||= present_cells.keys.map {|_, col| col }.min
-    end
-
-    # returns the number of the last non-empty column
-    def last_column
-      @last_column ||= present_cells.keys.map {|_, col| col }.max
-    end
-
-    def excelx_format(key)
-      cell = cells[key]
-      @styles.style_format(cell.style).to_s if cell
-    end
-
-    def hyperlinks
-      @hyperlinks ||= @sheet.hyperlinks(@rels)
-    end
-
-    def comments
-      @comments.comments
-    end
-
-    def dimensions
-      @sheet.dimensions
-    end
-
-    private
-
-    # Take an xml row and return an array of Excelx::Cell objects
-    # optionally pad array to header width(assumed 1st row).
-    # takes option pad_cells (boolean) defaults false
-    def cells_for_row_element(row_element, options = {})
-      return [] unless row_element
-      cell_col = 0
-      cells = []
-      @sheet.each_cell(row_element) do |cell|
-        cells.concat(pad_cells(cell, cell_col)) if options[:pad_cells]
-        cells << cell
-        cell_col = cell.coordinate.column
-      end
-      cells
-    end
-
-    def pad_cells(cell, last_column)
-      pad = []
-      (cell.coordinate.column - 1 - last_column).times { pad << nil }
-      pad
-    end
   end
 
   ExceedsMaxError = Class.new(StandardError)
