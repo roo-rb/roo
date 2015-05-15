@@ -43,10 +43,9 @@ module Roo
         when :float, :percentage
           value.to_f
         when :date
-          yyyy, mm, dd = (@base_date + value.to_i).strftime('%Y-%m-%d').split('-')
-          Date.new(yyyy.to_i, mm.to_i, dd.to_i)
+          create_date(@base_date + value.to_i)
         when :datetime
-          create_datetime_from((@base_date + value.to_f.round(6)).strftime('%Y-%m-%d %H:%M:%S.%N'))
+          create_datetime(@base_date + value.to_f.round(6))
         when :time
           value.to_f * 86_400
         when :string
@@ -56,19 +55,23 @@ module Roo
         end
       end
 
-      def create_datetime_from(datetime_string)
-        date_part, time_part = round_time_from(datetime_string).split(' ')
-        yyyy, mm, dd = date_part.split('-')
-        hh, mi, ss = time_part.split(':')
-        DateTime.civil(yyyy.to_i, mm.to_i, dd.to_i, hh.to_i, mi.to_i, ss.to_i)
+      def create_date(date)
+        yyyy, mm, dd = date.strftime('%Y-%m-%d').split('-')
+
+        Date.new(yyyy.to_i, mm.to_i, dd.to_i)
       end
 
-      def round_time_from(datetime_string)
-        date_part, time_part = datetime_string.split(' ')
-        yyyy, mm, dd = date_part.split('-')
-        hh, mi, ss = time_part.split(':')
+      def create_datetime(date)
+        datetime_string = date.strftime('%Y-%m-%d %H:%M:%S.%N')
+        t = round_datetime(datetime_string)
 
-        Time.new(yyyy.to_i, mm.to_i, dd.to_i, hh.to_i, mi.to_i, ss.to_r).round(0).strftime('%Y-%m-%d %H:%M:%S')
+        DateTime.civil(t.year, t.month, t.day, t.hour, t.min, t.sec)
+      end
+
+      def round_datetime(datetime_string)
+        /(?<yyyy>\d+)-(?<mm>\d+)-(?<dd>\d+) (?<hh>\d+):(?<mi>\d+):(?<ss>\d+.\d+)/ =~ datetime_string
+
+        Time.new(yyyy.to_i, mm.to_i, dd.to_i, hh.to_i, mi.to_i, ss.to_r).round(0)
       end
     end
   end
