@@ -19,9 +19,10 @@ module Roo
       end
 
       def type
-        if @formula
+        case
+        when @formula
           :formula
-        elsif @value.is_a?(Roo::Link)
+        when @value.is_a?(Roo::Link)
           :link
         else
           @type
@@ -48,8 +49,6 @@ module Roo
           create_datetime(@base_date + value.to_f.round(6))
         when :time
           value.to_f * 86_400
-        when :string
-          value
         else
           value
         end

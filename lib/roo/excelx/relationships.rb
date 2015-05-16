@@ -14,13 +14,11 @@ module Roo
       private
 
       def extract_relationships
-        if doc_exists?
-          Hash[doc.xpath('/Relationships/Relationship').map do |rel|
-            [rel.attribute('Id').text, rel]
-          end]
-        else
-          []
-        end
+        return [] unless doc_exists?
+
+        Hash[doc.xpath('/Relationships/Relationship').map do |rel|
+          [rel.attribute('Id').text, rel]
+        end]
       end
     end
   end
