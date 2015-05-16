@@ -1,10 +1,15 @@
 ## [Unreleased] - Unreleased
 ### Added
+- Added Roo::Base#close to delete any temp directories[#211](https://github.com/roo-rb/roo/pull/211)
 - Offset option for excelx #each_row. [#214](https://github.com/roo-rb/roo/pull/214)
+- Allow Roo::Excelx to open streams [#209](https://github.com/roo-rb/roo/pull/209)
 
 ### Fixed
 - Fixed Changelog links and release data. [#204](https://github.com/roo-rb/roo/pull/204), [#206](https://github.com/roo-rb/roo/pull/206)
 - Allow Pathnames to be used when opening files. [#207](https://github.com/roo-rb/roo/pull/207)
+
+### Removed
+- Removed the scripts folder. [#213](https://github.com/roo-rb/roo/pull/213)
 
 ## [2.0.0] - 2015-04-24
 ### Added
