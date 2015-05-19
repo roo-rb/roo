@@ -52,7 +52,9 @@ class Roo::Excelx < Roo::Base
 
     def to_type(format)
       format = format.to_s.downcase
-      if type = EXCEPTIONAL_FORMATS[format]
+      if format == 'general'
+        :string
+      elsif type = EXCEPTIONAL_FORMATS[format]
         type
       elsif format.include?('#')
         :float
