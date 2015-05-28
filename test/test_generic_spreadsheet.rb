@@ -81,7 +81,7 @@ class TestBase < Minitest::Test
   #TODO: inkonsequente Lieferung Fixnum/Float
   def test_rows
     assert_equal [41.0,42.0,43.0,44.0,45.0, nil, nil], @oo.row(12)
-    assert_equal [nil, nil, "dreiundvierzig", "vierundvierzig", "fuenfundvierzig", nil, nil], @oo.row(16)
+    assert_equal [nil, '"Hello world!"', "dreiundvierzig", "vierundvierzig", "fuenfundvierzig", nil, nil], @oo.row(16)
   end
 
   def test_empty_eh
@@ -148,6 +148,7 @@ protected
       [15,4] => 44.0,
       [15,5] => 45.0,
 
+      [16, 2] => '"Hello world!"',
       [16,3] => "dreiundvierzig",
       [16,4] => "vierundvierzig",
       [16,5] => "fuenfundvierzig"
@@ -171,9 +172,10 @@ protected
       [15,4] => :float,
       [15,5] => :float,
 
+      [16, 2] => :string,
       [16,3] => :string,
       [16,4] => :string,
-      [16,5] => :string,
+      [16,5] => :string
     }
   end
 
@@ -203,7 +205,24 @@ protected
   end
 
   def expected_csv
-    ",,,,,,\n,,,,,,\n,,,,,,\n,,,,,,\n1961-11-21,,,,,,\n,,,,,,\n,,,,,,\n,,\"thisisc8\",,,,\"thisisg8\"\n,,,,,,\n,,,,,,\n,,,,,,\n41,42,43,44,45,,\n,,,,,,\n,,,,,,\n,,43,44,45,,\n,,\"dreiundvierzig\",\"vierundvierzig\",\"fuenfundvierzig\",,\n"
+    <<EOS
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+1961-11-21,,,,,,
+,,,,,,
+,,,,,,
+,,"thisisc8",,,,"thisisg8"
+,,,,,,
+,,,,,,
+,,,,,,
+41,42,43,44,45,,
+,,,,,,
+,,,,,,
+,,43,44,45,,
+,"""Hello world!""","dreiundvierzig","vierundvierzig","fuenfundvierzig",,
+EOS
   end
   def expected_csv_with_semicolons
     expected_csv.gsub /\,/, ';'
