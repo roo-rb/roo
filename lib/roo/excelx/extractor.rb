@@ -1,20 +1,22 @@
 module Roo
-  class Excelx::Extractor
-    def initialize(path)
-      @path = path
-    end
+  class Excelx
+    class Extractor
+      def initialize(path)
+        @path = path
+      end
 
-    private
+      private
 
-    def doc
-      @doc ||=
+      def doc
+        @doc ||=
         if doc_exists?
           ::Roo::Utils.load_xml(@path).remove_namespaces!
         end
-    end
+      end
 
-    def doc_exists?
-      @path && File.exist?(@path)
+      def doc_exists?
+        @path && File.exist?(@path)
+      end
     end
   end
 end
