@@ -94,6 +94,12 @@ class TestBase < Minitest::Test
     assert @oo.instance_variable_get(:@cell).empty?
   end
 
+  def test_each
+    oo_each = @oo.each
+    assert_instance_of Enumerator, oo_each
+    assert_equal [nil, '"Hello world!"', 'dreiundvierzig', 'vierundvierzig', 'fuenfundvierzig', nil, nil], oo_each.to_a.last
+  end
+
   def test_to_yaml
     assert_equal "--- \n" + yaml_entry(5, 1, 'date', '1961-11-21'), @oo.to_yaml({}, 5, 1, 5, 1)
     assert_equal "--- \n" + yaml_entry(8, 3, 'string', 'thisisc8'), @oo.to_yaml({}, 8, 3, 8, 3)
