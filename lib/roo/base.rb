@@ -352,21 +352,25 @@ class Roo::Base
   # control characters and white spaces around columns
 
   def each(options = {})
-    if options.empty?
-      1.upto(last_row) do |line|
-        yield row(line)
+    if block_given?
+      if options.empty?
+        1.upto(last_row) do |line|
+          yield row(line)
+        end
+      else
+        clean_sheet_if_need(options)
+        search_or_set_header(options)
+        headers = @headers ||
+                  Hash[(first_column..last_column).map do |col|
+                    [cell(@header_line, col), col]
+                  end]
+
+        @header_line.upto(last_row) do |line|
+          yield(Hash[headers.map { |k, v| [k, cell(line, v)] }])
+        end
       end
     else
-      clean_sheet_if_need(options)
-      search_or_set_header(options)
-      headers = @headers ||
-                Hash[(first_column..last_column).map do |col|
-                  [cell(@header_line, col), col]
-                end]
-
-      @header_line.upto(last_row) do |line|
-        yield(Hash[headers.map { |k, v| [k, cell(line, v)] }])
-      end
+      to_enum(:each, options)
     end
   end
 
