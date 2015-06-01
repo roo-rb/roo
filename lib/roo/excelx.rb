@@ -112,7 +112,8 @@ module Roo
       end.compact
       @sheets = []
       @sheets_by_name = Hash[@sheet_names.map.with_index do |sheet_name, n|
-        @sheets[n] = Sheet.new(sheet_name, rels_files[n], sheet_files[n], comments_files[n], styles, shared_strings, workbook, sheet_options)
+        # @sheets[n] = Sheet.new(sheet_name, rels_files[n], sheet_files[n], comments_files[n], styles, shared_strings, workbook, sheet_options)
+        @sheets[n] = Sheet.new(sheet_name, @shared, n, sheet_options)
         [sheet_name, @sheets[n]]
       end]
 
