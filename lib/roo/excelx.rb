@@ -2,9 +2,13 @@ require 'nokogiri'
 require 'zip/filesystem'
 require 'roo/link'
 require 'roo/utils'
+require 'forwardable'
 
 module Roo
   class Excelx < Roo::Base
+    extend Forwardable
+
+    require 'roo/excelx/shared'
     require 'roo/excelx/workbook'
     require 'roo/excelx/shared_strings'
     require 'roo/excelx/styles'
@@ -13,7 +17,9 @@ module Roo
     require 'roo/excelx/relationships'
     require 'roo/excelx/comments'
     require 'roo/excelx/sheet_doc'
-    
+
+    delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files] => :@shared
+
     module Format
       EXCEPTIONAL_FORMATS = {
         'h:mm am/pm' => :date,
@@ -94,9 +100,9 @@ module Roo
       end
 
       @tmpdir = make_tmpdir(basename, options[:tmpdir_root])
+      @shared = Shared.new(@tmpdir)
       @filename = local_filename(filename_or_stream, @tmpdir, packed)
-      @comments_files = []
-      @rels_files = []
+
       process_zipfile(@filename || filename_or_stream)
 
       @sheet_names = workbook.sheets.map do |sheet|
@@ -106,7 +112,7 @@ module Roo
       end.compact
       @sheets = []
       @sheets_by_name = Hash[@sheet_names.map.with_index do |sheet_name, n|
-        @sheets[n] = Sheet.new(sheet_name, @rels_files[n], @sheet_files[n], @comments_files[n], styles, shared_strings, workbook, sheet_options)
+        @sheets[n] = Sheet.new(sheet_name, rels_files[n], sheet_files[n], comments_files[n], styles, shared_strings, workbook, sheet_options)
         [sheet_name, @sheets[n]]
       end]
 
@@ -399,6 +405,7 @@ module Roo
         name = sheets[id]
         entry = entries.find { |e| e.name =~ /#{name}$/ }
         path = "#{tmpdir}/roo_sheet#{i + 1}"
+        sheet_files << path
         @sheet_files << path
         entry.extract(path)
       end
@@ -458,29 +465,17 @@ module Roo
           #       sheet's comment file is in the sheet1.xml.rels file. SEE
           #       ECMA-376 12.3.3 in "Ecma Office Open XML Part 1".
           nr = Regexp.last_match[1].to_i
-          @comments_files[nr - 1] = "#{@tmpdir}/roo_comments#{nr}"
+          comments_files[nr - 1] = "#{@tmpdir}/roo_comments#{nr}"
         when /sheet([0-9]+).xml.rels$/
           # FIXME: Roo seems to use sheet[\d].xml.rels for hyperlinks only, but
           #        it also stores the location for sharedStrings, comments,
           #        drawings, etc.
           nr = Regexp.last_match[1].to_i
-          @rels_files[nr - 1] = "#{@tmpdir}/roo_rels#{nr}"
+          rels_files[nr - 1] = "#{@tmpdir}/roo_rels#{nr}"
         end
 
         entry.extract(path) if path
       end
-    end
-
-    def styles
-      @styles ||= Styles.new(File.join(@tmpdir, 'roo_styles.xml'))
-    end
-
-    def shared_strings
-      @shared_strings ||= SharedStrings.new(File.join(@tmpdir, 'roo_sharedStrings.xml'))
-    end
-
-    def workbook
-      @workbook ||= Workbook.new(File.join(@tmpdir, 'roo_workbook.xml'))
     end
 
     def safe_send(object, method, *args)
