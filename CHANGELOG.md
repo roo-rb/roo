@@ -1,10 +1,12 @@
-## [Unreleased] - Unreleased
+## [2.0.1] - 2015-06-01
 ### Added
+- Return an enumerator when calling '#each' without a block [#219](https://github.com/roo-rb/roo/pull/219)
 - Added Roo::Base#close to delete any temp directories[#211](https://github.com/roo-rb/roo/pull/211)
 - Offset option for excelx #each_row. [#214](https://github.com/roo-rb/roo/pull/214)
 - Allow Roo::Excelx to open streams [#209](https://github.com/roo-rb/roo/pull/209)
 
 ### Fixed
+- Use gsub instead of tr for double quote escaping [#212](https://github.com/roo-rb/roo/pull/212),  [#212-patch](https://github.com/roo-rb/roo/commit/fcc9a015868ebf9d42cbba5b6cfdaa58b81ecc01)
 - Fixed Changelog links and release data. [#204](https://github.com/roo-rb/roo/pull/204), [#206](https://github.com/roo-rb/roo/pull/206)
 - Allow Pathnames to be used when opening files. [#207](https://github.com/roo-rb/roo/pull/207)
 
