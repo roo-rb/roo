@@ -409,19 +409,13 @@ module Roo
       @sheet_files = []
 
       unless is_stream?(zipfilename_or_stream)
-        process_zipfile_entries Zip::File.open(zipfilename_or_stream).to_a.sort_by(&:name)
+        zip_file = Zip::File.open(zipfilename_or_stream)
       else
-        stream = Zip::InputStream.open zipfilename_or_stream
-        begin
-          entries = []
-          while (entry = stream.get_next_entry)
-            entries << entry
-          end
-          process_zipfile_entries entries
-        ensure
-          stream.close
-        end
+        zip_file = Zip::CentralDirectory.new
+        zip_file.read_from_stream zipfilename_or_stream
       end
+
+      process_zipfile_entries zip_file.to_a.sort_by(&:name)
     end
 
     def process_zipfile_entries(entries)
