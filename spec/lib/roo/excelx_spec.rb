@@ -447,5 +447,11 @@ describe Roo::Excelx do
         expect(index).to eq 4
       end
     end
+
+    context 'without block passed' do
+      it 'returns an enumerator' do
+        expect(subject.each_row_streaming).to be_a(Enumerator)
+      end
+    end
   end
 end
