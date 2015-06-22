@@ -22,7 +22,7 @@ module Roo
           options[:file_warning] = :ignore
           extension.tr('.', '').downcase.to_sym
         else
-          res = ::File.extname((path =~ ::URI.regexp) ? ::URI.parse(::URI.encode(path)).path : path)
+          res = ::File.extname((path =~ /\A#{::URI.regexp}\z/) ? ::URI.parse(::URI.encode(path)).path : path)
           res.tr('.', '').downcase.to_sym
         end
       end
