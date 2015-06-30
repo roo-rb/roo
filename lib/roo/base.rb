@@ -401,25 +401,26 @@ class Roo::Base
 
   protected
 
-  def file_type_check(filename, ext, name, warning_level, packed = nil)
+  def file_type_check(filename, exts, name, warning_level, packed = nil)
     if packed == :zip
-      # lalala.ods.zip => lalala.ods
-      # hier wird KEIN unzip gemacht, sondern nur der Name der Datei
-      # getestet, falls es eine gepackte Datei ist.
+      # spreadsheet.ods.zip => spreadsheet.ods
+      # Decompression is not performed here, only the 'zip' extension
+      # is removed from the file.
       filename = File.basename(filename, File.extname(filename))
     end
 
     if uri?(filename) && qs_begin = filename.rindex('?')
       filename = filename[0..qs_begin - 1]
     end
-    if File.extname(filename).downcase != ext
+    exts = Array(exts)
+    if !exts.include?(File.extname(filename).downcase)
       case warning_level
       when :error
-        warn file_type_warning_message(filename, ext)
+        warn file_type_warning_message(filename, exts)
         fail TypeError, "#{filename} is not #{name} file"
       when :warning
         warn "are you sure, this is #{name} spreadsheet file?"
-        warn file_type_warning_message(filename, ext)
+        warn file_type_warning_message(filename, exts)
       when :ignore
         # ignore
       else
@@ -481,10 +482,12 @@ class Roo::Base
     filename
   end
 
-  def file_type_warning_message(filename, ext)
-    "use #{Roo::CLASS_FOR_EXTENSION.fetch(ext.sub('.', '').to_sym)}.new to handle #{ext} spreadsheet files. This has #{File.extname(filename).downcase}"
+  def file_type_warning_message(filename, exts)
+    *rest, last_ext = exts
+    ext_list = rest.any? ? "#{rest.join(', ')} or #{last_ext}" : last_ext
+    "use #{Roo::CLASS_FOR_EXTENSION.fetch(last_ext.sub('.', '').to_sym)}.new to handle #{ext_list} spreadsheet files. This has #{File.extname(filename).downcase}"
   rescue KeyError
-    raise "unknown file type: #{ext}"
+    raise "unknown file types: #{ext_list}"
   end
 
   def find_by_row(row_index)

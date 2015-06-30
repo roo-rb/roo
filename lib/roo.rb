@@ -10,6 +10,7 @@ module Roo
   CLASS_FOR_EXTENSION = {
     ods: Roo::OpenOffice,
     xlsx: Roo::Excelx,
+    xlsm: Roo::Excelx,
     csv: Roo::CSV
   }
 
