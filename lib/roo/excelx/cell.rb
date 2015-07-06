@@ -41,7 +41,9 @@ module Roo
 
       def type_cast_value(value)
         case @type
-        when :float, :percentage
+        when :float
+          (@excelx_type[1].include?(".") || value.include?(".")) ? value.to_f : value.to_i 
+        when :percentage
           value.to_f
         when :date
           create_date(@base_date + value.to_i)

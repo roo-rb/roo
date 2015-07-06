@@ -58,7 +58,7 @@ describe Roo::Excelx do
 
         it 'returns a link with the number as a string value' do
           expect(subject).to be_a(Roo::Link)
-          expect(subject).to eq('8675309.0')
+          expect(subject).to eq('8675309')
         end
       end
     end
@@ -67,6 +67,15 @@ describe Roo::Excelx do
       let(:path) { 'test/files/numeric-link.xlsx' }
       it 'return nil' do
         expect(xlsx.cell('AAA', 999)).to eq nil
+      end
+      it 'return int' do
+        expect(xlsx.cell('A', 5)).to eq 1234
+      end
+      it 'return flote with one decimal' do
+        expect(xlsx.cell('A', 6)).to eq 1234.0
+      end
+      it 'return float' do
+        expect(xlsx.cell('A', 7)).to eq 1234.56
       end
     end
   end
