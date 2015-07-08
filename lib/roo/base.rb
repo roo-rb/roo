@@ -226,7 +226,7 @@ class Roo::Base
     when Fixnum then :float
     when String, Float then :string
     else
-      raise ArgumentError, "Type for #{value} not set"
+      fail ArgumentError, "Type for #{value} not set"
     end
   end
 
@@ -408,7 +408,7 @@ class Roo::Base
       filename = File.basename(filename, File.extname(filename))
     end
 
-    if uri?(filename) && qs_begin = filename.rindex('?')
+    if uri?(filename) && (qs_begin = filename.rindex('?'))
       filename = filename[0..qs_begin - 1]
     end
     exts = Array(exts)
@@ -536,11 +536,7 @@ class Roo::Base
   end
 
   def make_tmpdir(prefix = nil, root = nil, &block)
-    prefix = if prefix
-               TEMP_PREFIX + prefix
-             else
-               TEMP_PREFIX
-             end
+    prefix = "#{TEMP_PREFIX}#{prefix}"
 
     ::Dir.mktmpdir(prefix, root || ENV['ROO_TMP'], &block).tap do |result|
       block_given? || track_tmpdir!(result)
