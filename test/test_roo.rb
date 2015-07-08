@@ -1431,9 +1431,9 @@ Sheet 3:
 
   # Reihenfolge row,col,sheet analog zu #label
        assert_equal [
-  	      ['anton',[5,3,'Sheet1']],
-  	      ['berta',[4,2,'Sheet1']],
-  	      ['caesar',[7,2,'Sheet1']],
+         ['anton',[5,3,'Sheet1']],
+         ['berta',[4,2,'Sheet1']],
+         ['caesar',[7,2,'Sheet1']],
        ], oo.labels, "error with labels array in class #{oo.class}"
      end
    end
