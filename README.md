@@ -12,7 +12,7 @@ Roo implements read access for all common spreadsheet types. It can handle:
 
 In addition, the [roo-xls](https://github.com/roo-rb/roo-xls) and [roo-google](https://github.com/roo-rb/roo-google) gems exist to extend Roo to support reading classic Excel formats (i.e. `.xls` and ``Excel2003XML``) and read/write access for Google spreadsheets.
 
-# #Installation
+## Installation
 
 Install as a gem
 
@@ -102,7 +102,7 @@ s.cell(1,'A',s.sheets[1])
 ```
 
 #### Querying a spreadsheet
-Use ``each`` with a ``block`` to iterate over each row.
+Use ``each`` to iterate over each row.
 
 If each is given a hash with the names of some columns, then each will generate a hash with the columns supplied for each row.
 
