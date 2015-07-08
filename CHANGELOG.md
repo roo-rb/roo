@@ -464,7 +464,7 @@
 
 ## [0.2.4] - 2007-06-16
 ### Fixed
-- ID 11605	Two cols with same value: crash roo (openoffice version only)
+- ID 11605  Two cols with same value: crash roo (openoffice version only)
 
 ## [0.2.3] - 2007-06-02
 ### Changed / Added

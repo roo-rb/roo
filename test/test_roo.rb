@@ -167,11 +167,11 @@ class TestRoo < Minitest::Test
   end
 
   def test_libre_office
-	  if LIBREOFFICE
+    if LIBREOFFICE
       oo = Roo::LibreOffice.new(File.join(TESTDIR, "numbers1.ods"))
       oo.default_sheet = oo.sheets.first
       assert_equal 41, oo.cell('a',12)
-	  end
+    end
   end
 
   def test_sheetname
@@ -479,17 +479,17 @@ class TestRoo < Minitest::Test
   end
 
   def test_bug_quotes_excelx
-	  if LONG_RUN
+    if LONG_RUN
       with_each_spreadsheet(:name=>'Bibelbund', :format=>[:openoffice, :excelx]) do |oo|
         oo.default_sheet = oo.sheets.first
         assert_equal 'Einflüsse der neuen Theologie in "de gereformeerde Kerken van Nederland"',
-          oo.cell('a',76)
+        oo.cell('a',76)
         oo.to_csv("csv#{$$}")
         assert_equal 'Einflüsse der neuen Theologie in "de gereformeerde Kerken van Nederland"',
-          oo.cell('a',78)
+        oo.cell('a',78)
         File.delete_if_exist("csv#{$$}")
       end
-	  end
+    end
   end
 
   def test_bug_mehrere_datum
@@ -719,7 +719,7 @@ class TestRoo < Minitest::Test
 
   #TODO: temporaerer Test
   def test_seiten_als_date
-	  if LONG_RUN
+    if LONG_RUN
       with_each_spreadsheet(:name=>'Bibelbund', :format=>:excelx) do |oo|
         assert_equal 'Bericht aus dem Sekretariat', oo.cell(13,1)
         assert_equal '1981-4', oo.cell(13,'D')
@@ -728,7 +728,7 @@ class TestRoo < Minitest::Test
         assert_equal '428', oo.excelx_value(13,'E')
         assert_equal 428.0, oo.cell(13,'E')
       end
-	  end
+    end
   end
 
   def test_column
@@ -1387,9 +1387,9 @@ Sheet 3:
     with_each_spreadsheet(:name=>'named_cells', :format=>[:openoffice,:excelx,:libreoffice]) do |oo|
       # oo.default_sheet = oo.sheets.first
       assert_equal [
-	      ['anton',[5,3,'Sheet1']],
-	      ['berta',[4,2,'Sheet1']],
-	      ['caesar',[7,2,'Sheet1']],
+        ['anton',[5,3,'Sheet1']],
+        ['berta',[4,2,'Sheet1']],
+        ['caesar',[7,2,'Sheet1']],
       ], oo.labels, "error with labels array in class #{oo.class}"
     end
   end
@@ -1641,29 +1641,29 @@ where the expected result is
 =end
 
   def test_nil_rows_and_lines_csv
-	  # x_123
-	  if CSV
-		  oo = Roo::CSV.new(File.join(TESTDIR,'Bibelbund.csv'))
-		  oo.default_sheet = oo.sheets.first
-		  assert_equal 1, oo.first_row
-	  end
+    # x_123
+    if CSV
+      oo = Roo::CSV.new(File.join(TESTDIR,'Bibelbund.csv'))
+      oo.default_sheet = oo.sheets.first
+      assert_equal 1, oo.first_row
+    end
   end
 
   def test_bug_pfand_from_windows_phone_xlsx
     return if defined? JRUBY_VERSION
     with_each_spreadsheet(:name=>'Pfand_from_windows_phone', :format=>:excelx) do |oo|
-	    oo.default_sheet = oo.sheets.first
-	    assert_equal ['Blatt1','Blatt2','Blatt3'], oo.sheets
-	    assert_equal 'Summe', oo.cell('b',1)
+      oo.default_sheet = oo.sheets.first
+      assert_equal ['Blatt1','Blatt2','Blatt3'], oo.sheets
+      assert_equal 'Summe', oo.cell('b',1)
 
-	    assert_equal Date.new(2011,9,14), oo.cell('a',2)
-	    assert_equal :date, oo.celltype('a',2)
-	    assert_equal Date.new(2011,9,15), oo.cell('a',3)
-	    assert_equal :date, oo.celltype('a',3)
+      assert_equal Date.new(2011,9,14), oo.cell('a',2)
+      assert_equal :date, oo.celltype('a',2)
+      assert_equal Date.new(2011,9,15), oo.cell('a',3)
+      assert_equal :date, oo.celltype('a',3)
 
-	    assert_equal 3.81, oo.cell('b',2)
-	    assert_equal "SUM(C2:L2)", oo.formula('b',2)
-	    assert_equal 0.7, oo.cell('c',2)
+      assert_equal 3.81, oo.cell('b',2)
+      assert_equal "SUM(C2:L2)", oo.formula('b',2)
+      assert_equal 0.7, oo.cell('c',2)
     end # each
   end
 
