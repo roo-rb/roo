@@ -29,6 +29,7 @@ class TestRoo < Minitest::Test
 
   FORMATS = [
     :excelx,
+    :excelxm,
     :openoffice,
     :libreoffice
   ]
@@ -40,6 +41,8 @@ class TestRoo < Minitest::Test
     case format
     when :excelx
       "#{name}.xlsx"
+    when :excelxm
+      "#{name}.xlsm"
     when :openoffice, :libreoffice
       "#{name}.ods"
     else
