@@ -1,3 +1,14 @@
+## [Unreleased][unreleased]
+### Added
+- Added support for Excel 2007 `xlsm` files. [#232](https://github.com/roo-rb/roo/pull/232)
+- Roo::Excelx returns an enumerator when calling each_row_streaming without a block. [#224](https://github.com/roo-rb/roo/pull/224)
+- Returns an enumerator when calling `each` without a block. [#219](https://github.com/roo-rb/roo/pull/219)
+
+### Fixed
+- Removed tabs and windows CRLF. [#235](https://github.com/roo-rb/roo/pull/235), [#234](https://github.com/roo-rb/roo/pull/234)
+- Fixed Regexp to only check for valid URI's when opening a spreadsheet. [#229](https://github.com/roo-rb/roo/pull/228)
+- Open streams in Roo:Excelx correctly. [#222](https://github.com/roo-rb/roo/pull/222)
+
 ## [2.0.1] - 2015-06-01
 ### Added
 - Return an enumerator when calling '#each' without a block [#219](https://github.com/roo-rb/roo/pull/219)
