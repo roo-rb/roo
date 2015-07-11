@@ -45,10 +45,6 @@ def file_diff(fn1,fn2)
   result
 end
 
-def yaml_entry(row,col,type,value)
-  "cell_#{row}_#{col}: \n  row: #{row} \n  col: #{col} \n  celltype: #{type} \n  value: #{value} \n"
-end
-
 class File
   def File.delete_if_exist(filename)
     if File.exist?(filename)
