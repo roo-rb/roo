@@ -3,7 +3,7 @@
 
 guard :minitest, test_folders: ['test'] do
   watch(%r{^test/(.*)\/?test_(.*)\.rb$})
-  watch(%r{^lib/(.*/)?([^/]+)\.rb$})     { |m| "test/#{m[1]}test_#{m[2]}.rb" }
+  watch(%r{^lib/(.*/)?([^/]+)\.rb$})     { |m| "test/#{m[1].to_s.sub('roo/', '')}test_#{m[2]}.rb" }
   watch(%r{^test/test_helper\.rb$})      { 'test' }
 end
 
@@ -21,4 +21,3 @@ guard :rspec, cmd: 'bundle exec rspec' do
   watch('spec/spec_helper.rb')  { "spec" }
   watch(%r{^spec/support/(.+)\.rb$})                  { "spec" }
 end
-

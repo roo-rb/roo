@@ -683,47 +683,47 @@ class Roo::Base
 
   # The content of a cell in the csv output
   def cell_to_csv(row, col, sheet)
-    if empty?(row, col, sheet)
-      ''
-    else
-      onecell = cell(row, col, sheet)
+    return '' if empty?(row, col, sheet)
 
-      case celltype(row, col, sheet)
-      when :string
+    onecell = cell(row, col, sheet)
+
+    case celltype(row, col, sheet)
+    when :string
+      %("#{onecell.gsub('"', '""')}") unless onecell.empty?
+    when :boolean
+      # TODO: this only works for excelx
+      onecell = self.sheet_for(sheet).cells[[row, col]].formatted_value
+      %("#{onecell.gsub('"', '""').downcase}")
+    when :float, :percentage
+      if onecell == onecell.to_i
+        onecell.to_i.to_s
+      else
+        onecell.to_s
+      end
+    when :formula
+      case onecell
+      when String
         %("#{onecell.gsub('"', '""')}") unless onecell.empty?
-      when :boolean
-        %("#{onecell.gsub('"', '""').downcase}")
-      when :float, :percentage
+      when Float
         if onecell == onecell.to_i
           onecell.to_i.to_s
         else
           onecell.to_s
         end
-      when :formula
-        case onecell
-        when String
-          %("#{onecell.gsub('"', '""')}") unless onecell.empty?
-        when Float
-          if onecell == onecell.to_i
-            onecell.to_i.to_s
-          else
-            onecell.to_s
-          end
-        when DateTime
-          onecell.to_s
-        else
-          fail "unhandled onecell-class #{onecell.class}"
-        end
-      when :date, :datetime
+      when DateTime
         onecell.to_s
-      when :time
-        integer_to_timestring(onecell)
-      when :link
-        %("#{onecell.url.gsub('"', '""')}")
       else
-        fail "unhandled celltype #{celltype(row, col, sheet)}"
-      end || ''
-    end
+        fail "unhandled onecell-class #{onecell.class}"
+      end
+    when :date, :datetime
+      onecell.to_s
+    when :time
+      integer_to_timestring(onecell)
+    when :link
+      %("#{onecell.url.gsub('"', '""')}")
+    else
+      fail "unhandled celltype #{celltype(row, col, sheet)}"
+    end || ''
   end
 
   # converts an integer value to a time string like '02:05:06'
