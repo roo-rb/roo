@@ -1,4 +1,4 @@
-## [Unreleased][unreleased]
+## [2.1.0] - 2015-07-18
 ### Added
 - Added support for Excel 2007 `xlsm` files. [#232](https://github.com/roo-rb/roo/pull/232)
 - Roo::Excelx returns an enumerator when calling each_row_streaming without a block. [#224](https://github.com/roo-rb/roo/pull/224)
