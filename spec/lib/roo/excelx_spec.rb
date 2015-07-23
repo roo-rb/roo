@@ -454,4 +454,11 @@ describe Roo::Excelx do
       end
     end
   end
+
+  describe '_x000D_' do
+    let(:path) { 'test/files/x000D.xlsx' }
+    it 'does not contain _x000D_' do
+      expect(subject.cell(2, 9)).not_to include('_x000D_')
+    end
+  end
 end
