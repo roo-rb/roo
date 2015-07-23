@@ -1,3 +1,6 @@
+## [Unreleased] - Unreleased
+### Fixed invalid new lines with _x000D_ character[231](https://github.com/roo-rb/roo/pull/231)
+
 ## [2.1.0] - 2015-07-18
 ### Added
 - Added support for Excel 2007 `xlsm` files. [#232](https://github.com/roo-rb/roo/pull/232)
