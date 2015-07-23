@@ -21,7 +21,7 @@ Install as a gem
 Or add it to your Gemfile
 
 ```ruby
-gem 'roo', '~> 2.0.0'
+gem 'roo', '~> 2.1.0'
 ```
 ## Usage
 
@@ -143,7 +143,7 @@ sheet.to_xml
 sheet.to_yaml
 ```
 
-### Excel (xlsx) Support
+### Excel (xlsx and xlsm) Support
 
 Stream rows from an Excelx spreadsheet.
 
