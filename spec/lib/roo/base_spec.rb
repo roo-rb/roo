@@ -41,6 +41,8 @@ describe Roo::Base do
 
   let(:spreadsheet_data) do
     {
+      [3, 1] => 'Header',
+
       [5, 1] => Date.civil(1961, 11, 21),
 
       [8, 3] => 'thisisc8',
@@ -91,7 +93,7 @@ describe Roo::Base do
 
   describe '#first_row' do
     it 'should return the first row' do
-      expect(spreadsheet.first_row).to eq(5)
+      expect(spreadsheet.first_row).to eq(3)
     end
   end
 
@@ -129,6 +131,21 @@ describe Roo::Base do
     it 'should return the specified row' do
       expect(spreadsheet.row(12)).to eq([41.0, 42.0, 43.0, 44.0, 45.0, nil, nil])
       expect(spreadsheet.row(16)).to eq([nil, '"Hello world!"', 'forty-three', 'forty-four', 'forty-five', nil, nil])
+    end
+  end
+
+  describe '#row_with' do
+    context 'with a matching header row' do
+      it 'returns the row number' do
+        expect(spreadsheet.row_with([/Header/])). to eq 3
+      end
+    end
+
+    context 'without a matching header row' do
+      it 'raises an error' do
+        expect { spreadsheet.row_with([/Missing Header/]) }.to \
+          raise_error("Couldn't find header row.")
+      end
     end
   end
 
@@ -185,7 +202,7 @@ describe Roo::Base do
     <<EOS
 ,,,,,,
 ,,,,,,
-,,,,,,
+"Header",,,,,,
 ,,,,,,
 1961-11-21,,,,,,
 ,,,,,,
