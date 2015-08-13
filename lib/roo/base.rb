@@ -392,10 +392,10 @@ class Roo::Base
         @header_line = line_no
         return return_headers ? headers : line_no
       elsif line_no > 100
-        fail "Couldn't find header row."
+        raise Roo::HeaderRowNotFoundError
       end
     end
-    fail "Couldn't find header row."
+    raise Roo::HeaderRowNotFoundError
   end
 
   protected

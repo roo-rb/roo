@@ -82,7 +82,7 @@ describe Roo::Excelx do
               this: 'This',
               that: 'That'
             )
-          end.to raise_error("Couldn't find header row.")
+          end.to raise_error(Roo::HeaderRowNotFoundError)
         end
       end
     end
