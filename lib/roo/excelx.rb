@@ -17,6 +17,7 @@ module Roo
     require 'roo/excelx/relationships'
     require 'roo/excelx/comments'
     require 'roo/excelx/sheet_doc'
+    require 'roo/excelx/coordinate'
 
     delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files] => :@shared
 
@@ -102,7 +103,6 @@ module Roo
       @tmpdir = make_tmpdir(basename, options[:tmpdir_root])
       @shared = Shared.new(@tmpdir)
       @filename = local_filename(filename_or_stream, @tmpdir, packed)
-
       process_zipfile(@filename || filename_or_stream)
 
       @sheet_names = workbook.sheets.map do |sheet|
@@ -112,7 +112,6 @@ module Roo
       end.compact
       @sheets = []
       @sheets_by_name = Hash[@sheet_names.map.with_index do |sheet_name, n|
-        # @sheets[n] = Sheet.new(sheet_name, rels_files[n], sheet_files[n], comments_files[n], styles, shared_strings, workbook, sheet_options)
         @sheets[n] = Sheet.new(sheet_name, @shared, n, sheet_options)
         [sheet_name, @sheets[n]]
       end]
@@ -266,8 +265,8 @@ module Roo
       sheet = sheet_for(sheet)
       key = normalize(row, col)
       cell = sheet.cells[key]
-      !cell || !cell.value || (cell.type == :string && cell.value.empty?) \
-      || (row < sheet.first_row || row > sheet.last_row || col < sheet.first_column || col > sheet.last_column)
+      !cell || cell.empty? || (cell.type == :string && cell.value.empty?) ||
+        (row < sheet.first_row || row > sheet.last_row || col < sheet.first_column || col > sheet.last_column)
     end
 
     # shows the internal representation of all cells
@@ -476,6 +475,20 @@ module Roo
 
         entry.extract(path) if path
       end
+    end
+
+    # NOTE: To reduce memory, styles, shared_strings, workbook can be class
+    #       variables in a Shared module.
+    def styles
+      @styles ||= Styles.new(File.join(@tmpdir, 'roo_styles.xml'))
+    end
+
+    def shared_strings
+      @shared_strings ||= SharedStrings.new(File.join(@tmpdir, 'roo_sharedStrings.xml'))
+    end
+
+    def workbook
+      @workbook ||= Workbook.new(File.join(@tmpdir, 'roo_workbook.xml'))
     end
 
     def safe_send(object, method, *args)
