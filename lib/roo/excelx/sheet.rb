@@ -1,12 +1,17 @@
+require 'forwardable'
 module Roo
   class Excelx
     class Sheet
-      def initialize(name, rels_path, sheet_path, comments_path, styles, shared_strings, workbook, options = {})
+      extend Forwardable
+
+      delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files] => :@shared
+
+      def initialize(name, shared, sheet_index, options = {})
         @name = name
-        @rels = Relationships.new(rels_path)
-        @comments = Comments.new(comments_path)
-        @styles = styles
-        @sheet = SheetDoc.new(sheet_path, @rels, @styles, shared_strings, workbook, options)
+        @shared = shared
+        @rels = Relationships.new(rels_files[sheet_index])
+        @comments = Comments.new(comments_files[sheet_index])
+        @sheet = SheetDoc.new(sheet_files[sheet_index], @rels, shared, options)
       end
 
       def cells
@@ -65,7 +70,7 @@ module Roo
 
       def excelx_format(key)
         cell = cells[key]
-        @styles.style_format(cell.style).to_s if cell
+        styles.style_format(cell.style).to_s if cell
       end
 
       def hyperlinks

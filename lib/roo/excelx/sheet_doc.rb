@@ -1,15 +1,17 @@
+require 'forwardable'
 require 'roo/excelx/extractor'
 
 module Roo
   class Excelx
     class SheetDoc < Excelx::Extractor
-      def initialize(path, relationships, styles, shared_strings, workbook, options = {})
+      extend Forwardable
+      delegate [:styles, :workbook, :shared_strings, :base_date] => :@shared
+
+      def initialize(path, relationships, shared, options = {})
         super(path)
+        @shared = shared
         @options = options
         @relationships = relationships
-        @styles = styles
-        @shared_strings = shared_strings
-        @workbook = workbook
       end
 
       def cells(relationships)
@@ -62,7 +64,7 @@ module Roo
         when 'inlineStr'
           :inlinestr
         else
-          format = @styles.style_format(style)
+          format = styles.style_format(style)
           Excelx::Format.to_type(format)
         end
         formula = nil
@@ -72,7 +74,7 @@ module Roo
           when 'is'
             cell.children.each do |inline_str|
               if inline_str.name == 't'
-                return Excelx::Cell.new(inline_str.content, :string, formula, :string, inline_str.content, style, hyperlink, @workbook.base_date, Excelx::Cell::Coordinate.new(row, column))
+                return Excelx::Cell.new(inline_str.content, :string, formula, :string, inline_str.content, style, hyperlink, base_date, Excelx::Cell::Coordinate.new(row, column))
               end
             end
           when 'f'
@@ -92,7 +94,7 @@ module Roo
             when :shared
               value_type = :string
               excelx_type = :string
-              @shared_strings[cell.content.to_i]
+              shared_strings[cell.content.to_i]
             when :boolean
               (cell.content.to_i == 1 ? 'TRUE' : 'FALSE')
             when :date, :time, :datetime
@@ -106,7 +108,7 @@ module Roo
               value_type = :float
               cell.content
             end
-            return Excelx::Cell.new(value, value_type, formula, excelx_type, cell.content, style, hyperlink, @workbook.base_date, Excelx::Cell::Coordinate.new(row, column))
+            return Excelx::Cell.new(value, value_type, formula, excelx_type, cell.content, style, hyperlink, base_date, Excelx::Cell::Coordinate.new(row, column))
           end
         end
         Excelx::Cell.new(nil, nil, nil, nil, nil, nil, nil, nil, Excelx::Cell::Coordinate.new(row, column))
