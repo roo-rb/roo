@@ -1,3 +1,7 @@
+## [2.1.1] - 2015-08-02
+### Fixed invalid new lines with _x000D_ character[#231](https://github.com/roo-rb/roo/pull/231)
+### Fixed missing URI issue. [#245](https://github.com/roo-rb/roo/pull/245)
+
 ## [2.1.0] - 2015-07-18
 ### Added
 - Added support for Excel 2007 `xlsm` files. [#232](https://github.com/roo-rb/roo/pull/232)

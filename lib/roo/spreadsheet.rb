@@ -1,3 +1,5 @@
+require 'uri'
+
 module Roo
   class Spreadsheet
     class << self

@@ -1,15 +1,17 @@
+require 'forwardable'
 require 'roo/excelx/extractor'
 
 module Roo
   class Excelx
     class SheetDoc < Excelx::Extractor
-      def initialize(path, relationships, styles, shared_strings, workbook, options = {})
+      extend Forwardable
+      delegate [:styles, :workbook, :shared_strings, :base_date] => :@shared
+
+      def initialize(path, relationships, shared, options = {})
         super(path)
+        @shared = shared
         @options = options
         @relationships = relationships
-        @styles = styles
-        @shared_strings = shared_strings
-        @workbook = workbook
       end
 
       def cells(relationships)
@@ -81,7 +83,7 @@ module Roo
         # NOTE: This is error prone, to_i will silently turn a nil into a 0.
         #       This works by coincidence because Format[0] is General.
         style = cell_xml['s'].to_i
-        format = @styles.style_format(style)
+        format = styles.style_format(style)
         value_type = cell_value_type(cell_xml['t'], format)
         formula = nil
 
@@ -96,7 +98,7 @@ module Roo
           when 'f'
             formula = cell.content
           when 'v'
-            return create_cell_from_value(value_type, cell, formula, format, style, hyperlink, @workbook.base_date, coordinate)
+            return create_cell_from_value(value_type, cell, formula, format, style, hyperlink, base_date, coordinate)
           end
         end
       end
@@ -117,7 +119,7 @@ module Roo
         #       3. formula
         case value_type
         when :shared
-          value = @shared_strings[cell.content.to_i]
+          value = shared_strings[cell.content.to_i]
           Excelx::Cell.create_cell(:string, value, formula, style, hyperlink, coordinate)
         when :boolean, :string
           value = cell.content

@@ -91,7 +91,7 @@ class Roo::Base
       first_column = [first_column, key.last.to_i].min
       last_column = [last_column, key.last.to_i].max
     end if @cell[sheet]
-    {first_row: first_row, first_column: first_column, last_row: last_row, last_column: last_column}
+    { first_row: first_row, first_column: first_column, last_row: last_row, last_column: last_column }
   end
 
   %w(first_row last_row first_column last_column).each do |key|
@@ -117,22 +117,23 @@ class Roo::Base
     result = "--- \n"
     from_row.upto(to_row) do |row|
       from_column.upto(to_column) do |col|
-        unless empty?(row, col, sheet)
-          result << "cell_#{row}_#{col}: \n"
-          prefix.each do|k, v|
-            result << "  #{k}: #{v} \n"
-          end
-          result << "  row: #{row} \n"
-          result << "  col: #{col} \n"
-          result << "  celltype: #{celltype(row, col, sheet)} \n"
-          value = cell(row, col, sheet)
-          if celltype(row, col, sheet) == :time
-            value = integer_to_timestring(value)
-          end
-          result << "  value: #{value} \n"
+        next if empty?(row, col, sheet)
+
+        result << "cell_#{row}_#{col}: \n"
+        prefix.each do|k, v|
+          result << "  #{k}: #{v} \n"
         end
+        result << "  row: #{row} \n"
+        result << "  col: #{col} \n"
+        result << "  celltype: #{celltype(row, col, sheet)} \n"
+        value = cell(row, col, sheet)
+        if celltype(row, col, sheet) == :time
+          value = integer_to_timestring(value)
+        end
+        result << "  value: #{value} \n"
       end
     end
+
     result
   end
 
@@ -170,7 +171,7 @@ class Roo::Base
   end
 
   def inspect
-    "<##{ self.class }:#{ self.object_id.to_s(8) } #{ self.instance_variables.join(' ') }>"
+    "<##{self.class}:#{object_id.to_s(8)} #{instance_variables.join(' ')}>"
   end
 
   # find a row either by row number or a condition
@@ -217,7 +218,7 @@ class Roo::Base
     row, col = normalize(row, col)
     cell_type = cell_type_by_value(value)
     set_value(row, col, value, sheet)
-    set_type(row, col, cell_type , sheet)
+    set_type(row, col, cell_type, sheet)
   end
 
   def cell_type_by_value(value)
@@ -225,7 +226,7 @@ class Roo::Base
     when Fixnum then :float
     when String, Float then :string
     else
-      raise ArgumentError, "Type for #{value} not set"
+      fail ArgumentError, "Type for #{value} not set"
     end
   end
 
@@ -256,13 +257,13 @@ class Roo::Base
       sheets.each do|sheet|
         self.default_sheet = sheet
         result << 'Sheet ' + n.to_s + ":\n"
-        unless first_row
-          result << '  - empty -'
-        else
+        if first_row
           result << "  First row: #{first_row}\n"
           result << "  Last row: #{last_row}\n"
           result << "  First column: #{::Roo::Utils.number_to_letter(first_column)}\n"
           result << "  Last column: #{::Roo::Utils.number_to_letter(last_column)}"
+        else
+          result << '  - empty -'
         end
         result << "\n" if sheet != sheets.last
         n += 1
@@ -282,12 +283,12 @@ class Roo::Base
               # sonst gibt es Fehler bei leeren Blaettern
               first_row.upto(last_row) do |row|
                 first_column.upto(last_column) do |col|
-                  unless empty?(row, col)
-                    x.cell(cell(row, col),
+                  next if empty?(row, col)
+
+                  x.cell(cell(row, col),
                            row: row,
                            column: col,
                            type: celltype(row, col))
-                  end
                 end
               end
             end
@@ -318,7 +319,7 @@ class Roo::Base
   # access different worksheets by calling spreadsheet.sheet(1)
   # or spreadsheet.sheet('SHEETNAME')
   def sheet(index, name = false)
-    self.default_sheet = String === index ? index : sheets[index]
+    self.default_sheet = index.is_a?(::String) ? index : sheets[index]
     name ? [default_sheet, self] : self
   end
 
@@ -352,25 +353,23 @@ class Roo::Base
   # control characters and white spaces around columns
 
   def each(options = {})
-    if block_given?
-      if options.empty?
-        1.upto(last_row) do |line|
-          yield row(line)
-        end
-      else
-        clean_sheet_if_need(options)
-        search_or_set_header(options)
-        headers = @headers ||
-                  Hash[(first_column..last_column).map do |col|
-                    [cell(@header_line, col), col]
-                  end]
+    return to_enum(:each, options) unless block_given?
 
-        @header_line.upto(last_row) do |line|
-          yield(Hash[headers.map { |k, v| [k, cell(line, v)] }])
-        end
+    if options.empty?
+      1.upto(last_row) do |line|
+        yield row(line)
       end
     else
-      to_enum(:each, options)
+      clean_sheet_if_need(options)
+      search_or_set_header(options)
+      headers = @headers ||
+                Hash[(first_column..last_column).map do |col|
+                  [cell(@header_line, col), col]
+                end]
+
+      @header_line.upto(last_row) do |line|
+        yield(Hash[headers.map { |k, v| [k, cell(line, v)] }])
+      end
     end
   end
 
@@ -393,10 +392,10 @@ class Roo::Base
         @header_line = line_no
         return return_headers ? headers : line_no
       elsif line_no > 100
-        fail "Couldn't find header row."
+        raise Roo::HeaderRowNotFoundError
       end
     end
-    fail "Couldn't find header row."
+    raise Roo::HeaderRowNotFoundError
   end
 
   protected
@@ -409,23 +408,24 @@ class Roo::Base
       filename = File.basename(filename, File.extname(filename))
     end
 
-    if uri?(filename) && qs_begin = filename.rindex('?')
+    if uri?(filename) && (qs_begin = filename.rindex('?'))
       filename = filename[0..qs_begin - 1]
     end
     exts = Array(exts)
-    if !exts.include?(File.extname(filename).downcase)
-      case warning_level
-      when :error
-        warn file_type_warning_message(filename, exts)
-        fail TypeError, "#{filename} is not #{name} file"
-      when :warning
-        warn "are you sure, this is #{name} spreadsheet file?"
-        warn file_type_warning_message(filename, exts)
-      when :ignore
-        # ignore
-      else
-        fail "#{warning_level} illegal state of file_warning"
-      end
+
+    return if exts.include?(File.extname(filename).downcase)
+
+    case warning_level
+    when :error
+      warn file_type_warning_message(filename, exts)
+      fail TypeError, "#{filename} is not #{name} file"
+    when :warning
+      warn "are you sure, this is #{name} spreadsheet file?"
+      warn file_type_warning_message(filename, exts)
+    when :ignore
+      # ignore
+    else
+      fail "#{warning_level} illegal state of file_warning"
     end
   end
 
@@ -476,9 +476,9 @@ class Roo::Base
     return if is_stream?(filename)
     filename = download_uri(filename, tmpdir) if uri?(filename)
     filename = unzip(filename, tmpdir) if packed == :zip
-    unless File.file?(filename)
-      fail IOError, "file #{filename} does not exist"
-    end
+
+    fail IOError, "file #{filename} does not exist" unless File.file?(filename)
+
     filename
   end
 
@@ -536,11 +536,8 @@ class Roo::Base
   end
 
   def make_tmpdir(prefix = nil, root = nil, &block)
-    prefix = if prefix
-      TEMP_PREFIX + prefix
-    else
-      TEMP_PREFIX
-    end
+    prefix = "#{TEMP_PREFIX}#{prefix}"
+
     ::Dir.mktmpdir(prefix, root || ENV['ROO_TMP'], &block).tap do |result|
       block_given? || track_tmpdir!(result)
     end
@@ -588,9 +585,9 @@ class Roo::Base
         fail ArgumentError
       end
     end
-    if col.is_a?(::String)
-      col = ::Roo::Utils.letter_to_number(col)
-    end
+
+    col = ::Roo::Utils.letter_to_number(col) if col.is_a?(::String)
+
     [row, col]
   end
 
@@ -641,7 +638,7 @@ class Roo::Base
         fail RangeError, "sheet index #{sheet} not found"
       end
     when String
-      unless sheets.include? sheet
+      unless sheets.include?(sheet)
         fail RangeError, "sheet '#{sheet}' not found"
       end
     else
@@ -670,14 +667,14 @@ class Roo::Base
   # parameter is nil the output goes to STDOUT
   def write_csv_content(file = nil, sheet = nil, separator = ',')
     file ||= STDOUT
-    if first_row(sheet) # sheet is not empty
-      1.upto(last_row(sheet)) do |row|
-        1.upto(last_column(sheet)) do |col|
-          file.print(separator) if col > 1
-          file.print cell_to_csv(row, col, sheet)
-        end
-        file.print("\n")
-      end # sheet not empty
+    return unless first_row(sheet) # The sheet is empty
+
+    1.upto(last_row(sheet)) do |row|
+      1.upto(last_column(sheet)) do |col|
+        file.print(separator) if col > 1
+        file.print cell_to_csv(row, col, sheet)
+      end
+      file.print("\n")
     end
   end
 
@@ -729,9 +726,9 @@ class Roo::Base
   # converts an integer value to a time string like '02:05:06'
   def integer_to_timestring(content)
     h = (content / 3600.0).floor
-    content = content - h * 3600
+    content -= h * 3600
     m = (content / 60.0).floor
-    content = content - m * 60
+    content -= m * 60
     s = content
     sprintf('%02d:%02d:%02d', h, m, s)
   end

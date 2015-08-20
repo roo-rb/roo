@@ -86,7 +86,7 @@ describe Roo::Excelx do
               this: 'This',
               that: 'That'
             )
-          end.to raise_error("Couldn't find header row.")
+          end.to raise_error(Roo::HeaderRowNotFoundError)
         end
       end
     end
@@ -455,6 +455,13 @@ describe Roo::Excelx do
       it 'returns an enumerator' do
         expect(subject.each_row_streaming).to be_a(Enumerator)
       end
+    end
+  end
+
+  describe '_x000D_' do
+    let(:path) { 'test/files/x000D.xlsx' }
+    it 'does not contain _x000D_' do
+      expect(subject.cell(2, 9)).not_to include('_x000D_')
     end
   end
 end

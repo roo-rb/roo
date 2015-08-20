@@ -1,4 +1,5 @@
 require 'roo/constants'
+require 'roo/errors'
 require 'roo/spreadsheet'
 require 'roo/base'
 

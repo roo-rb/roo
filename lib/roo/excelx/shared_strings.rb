@@ -13,9 +13,19 @@ module Roo
 
       private
 
+      def fix_invalid_shared_strings(doc)
+        invalid = { '_x000D_'  => "\n" }
+        xml = doc.to_s
+
+        if xml[/#{invalid.keys.join('|')}/]
+          @doc = ::Nokogiri::XML(xml.gsub(/#{invalid.keys.join('|')}/, invalid))
+        end
+      end
+
       def extract_shared_strings
         return [] unless doc_exists?
 
+        fix_invalid_shared_strings(doc)
         # read the shared strings xml document
         doc.xpath('/sst/si').map do |si|
           shared_string = ''
