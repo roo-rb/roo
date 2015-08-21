@@ -1,3 +1,9 @@
+## [Unreleased] - Unreleased
+### Added
+- A missing Header Raises `Roo::HeaderRowNotFoundError`  [247](https://github.com/roo-rb/roo/pull/247)
+- Roo::Excelx::Shared class to pass shared data to Roo::Excelx sheets [220](https://github.com/roo-rb/roo/pull/220)
+- Proper Type support to Roo::Excelx [240](https://github.com/roo-rb/roo/pull/240)
+
 ## [2.1.1] - 2015-08-02
 ### Fixed invalid new lines with _x000D_ character[#231](https://github.com/roo-rb/roo/pull/231)
 ### Fixed missing URI issue. [#245](https://github.com/roo-rb/roo/pull/245)
