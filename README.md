@@ -151,6 +151,26 @@ xlsx.each_row_streaming do |row|
 end
 ```
 
+By default blank cells will be excluded from the array. To preserve, use the option pad_cells = true
+```ruby
+xlsx.each_row_streaming(pad_cells: true) do |row|
+  puts row.inspect # Array of Excelx::Cell objects
+end
+```
+
+To stream only a part of the rows, you can use ```max_rows``` and ```offset```options.
+```ruby
+xlsx.each_row_streaming(offset: 1) do |row| # Will exclude first (enventually header) row
+  puts row.inspect # Array of Excelx::Cell objects
+end
+```
+
+```ruby
+xlsx.each_row_streaming(max_rows: 3) do |row| # Will yield 4 rows (it's automatically majored by 1) after the setted offset.
+  puts row.inspect # Array of Excelx::Cell objects
+end
+```
+
 Iterate over each row
 
 ```ruby
