@@ -111,7 +111,7 @@ module Roo
       if cell_max
         cell_count = ::Roo::Utils.num_cells_in_range(sheet_for(options.delete(:sheet)).dimensions)
         if cell_count > cell_max
-          raise Roo::TooManyCellsError,
+          fail Roo::TooManyCellsError,
             "File has #{cell_count} cells; maximum allowed was #{cell_max}."
         end
       end
