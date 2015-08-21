@@ -151,7 +151,7 @@ xlsx.each_row_streaming do |row|
 end
 ```
 
-By default blank cells will be excluded from the array. To preserve, use the option pad_cells = true
+By default blank cells will be excluded from the array. To preserve, use the option pad_cells = true. (They will be set to nil in the array)
 ```ruby
 xlsx.each_row_streaming(pad_cells: true) do |row|
   puts row.inspect # Array of Excelx::Cell objects
