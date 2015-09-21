@@ -303,7 +303,7 @@ class Roo::Base
   def method_missing(m, *args)
     # #aa42 => #cell('aa',42)
     # #aa42('Sheet1')  => #cell('aa',42,'Sheet1')
-    if m =~ /^([a-z]+)(\d)$/
+    if m =~ /^([a-z]+)(\d+)$/
       col = ::Roo::Utils.letter_to_number(Regexp.last_match[1])
       row = Regexp.last_match[2].to_i
       if args.empty?
