@@ -11,16 +11,19 @@ describe Roo::OpenOffice do
     end
 
     context 'for float/integer values' do
-      it 'integer without point' do
-        expect(subject.cell(3,"A","Sheet4")).to eq(1234)
+      context 'integer without point' do
+        it { expect(subject.cell(3,"A","Sheet4")).to eq(1234) }
+        it { expect(subject.cell(3,"A","Sheet4")).to be_a(Fixnum) }
       end
 
-      it 'float with point' do
-        expect(subject.cell(3,"B","Sheet4")).to eq(1234.00)
+      context 'float with point' do 
+        it { expect(subject.cell(3,"B","Sheet4")).to eq(1234.00) }
+        it { expect(subject.cell(3,"B","Sheet4")).to be_a(Float) }
       end
 
-      it 'float with point' do
-        expect(subject.cell(3,"C","Sheet4")).to eq(1234.12)
+      context 'float with point' do
+        it { expect(subject.cell(3,"C","Sheet4")).to eq(1234.12) }
+        it { expect(subject.cell(3,"C","Sheet4")).to be_a(Float) }
       end
     end
 
