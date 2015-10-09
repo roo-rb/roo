@@ -249,9 +249,9 @@ class TestRoo < Minitest::Test
       assert_equal "1:string",oo.cell(2, 3)+":"+oo.celltype(2, 3).to_s
 
       # Cells values in row 3:
-      assert_equal "1.0:float",oo.cell(3, 1).to_s+":"+oo.celltype(3, 1).to_s
-      assert_equal "3.0:float",oo.cell(3, 2).to_s+":"+oo.celltype(3, 2).to_s
-      assert_equal "1.0:float",oo.cell(3, 3).to_s+":"+oo.celltype(3, 3).to_s
+      assert_equal "1:float",oo.cell(3, 1).to_s+":"+oo.celltype(3, 1).to_s
+      assert_equal "3:float",oo.cell(3, 2).to_s+":"+oo.celltype(3, 2).to_s
+      assert_equal "1:float",oo.cell(3, 3).to_s+":"+oo.celltype(3, 3).to_s
 
       # Cells values in row 4:
       assert_equal "A:string",oo.cell(4, 1)+":"+oo.celltype(4, 1).to_s

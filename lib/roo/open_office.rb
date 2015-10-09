@@ -410,7 +410,9 @@ module Roo
       @style[sheet] ||= {}
       @style[sheet][key] = style_name
       case @cell_type[sheet][key]
-      when :float, :percentage
+      when :float
+        @cell[sheet][key] = (table_cell.attributes['value'].to_s.include?(".") || table_cell.children.first.text.include?(".")) ? v.to_f : v.to_i 
+      when :percentage 
         @cell[sheet][key] = v.to_f
       when :string
         @cell[sheet][key] = str_v
