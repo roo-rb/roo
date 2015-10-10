@@ -6,4 +6,7 @@ module Roo
   # Raised when Roo cannot find a header row that matches the given column
   # name(s).
   class HeaderRowNotFoundError < Error; end
+
+  # Raised when a spreadsheet has too many cells.
+  class TooManyCellsError < Error; end
 end

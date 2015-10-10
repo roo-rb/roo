@@ -25,7 +25,8 @@ describe Roo::Excelx do
       let(:path) { 'test/files/only_one_sheet.xlsx' }
 
       it 'raises an appropriate error' do
-        expect { Roo::Excelx.new(path, cell_max: 1) }.to raise_error(Roo::Excelx::ExceedsMaxError)
+        expect { Roo::Excelx.new(path, cell_max: 1) }.to \
+          raise_error(Roo::TooManyCellsError)
       end
     end
 

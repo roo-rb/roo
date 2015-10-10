@@ -82,8 +82,6 @@ module Roo
       module_function :to_type
     end
 
-    ExceedsMaxError = Class.new(StandardError)
-
     # initialization and opening of a spreadsheet file
     # values for packed: :zip
     # optional cell_max (int) parameter for early aborting attempts to parse
@@ -118,7 +116,10 @@ module Roo
 
       if cell_max
         cell_count = ::Roo::Utils.num_cells_in_range(sheet_for(options.delete(:sheet)).dimensions)
-        raise ExceedsMaxError.new("Excel file exceeds cell maximum: #{cell_count} > #{cell_max}") if cell_count > cell_max
+        if cell_count > cell_max
+          fail Roo::TooManyCellsError,
+            "File has #{cell_count} cells; maximum allowed was #{cell_max}."
+        end
       end
 
       super
