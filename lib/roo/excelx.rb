@@ -132,7 +132,7 @@ module Roo
     def set(row, col, value, sheet = nil) #:nodoc:
       key = normalize(row, col)
       cell_type = cell_type_by_value(value)
-      sheet_for(sheet).cells[key] = Cell.new(value, cell_type, nil, cell_type, value, nil, nil, nil, Cell::Coordinate.new(row, col))
+      sheet_for(sheet).cells[key] = Cell.new(value, cell_type, nil, cell_type, value, nil, nil, nil, Coordinate.new(row, col))
     end
 
     # Returns the formula at (row,col).
