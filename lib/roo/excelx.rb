@@ -184,14 +184,14 @@ module Roo
     # Note: this is only available within the Excelx class
     def excelx_type(row, col, sheet = nil)
       key = normalize(row, col)
-      safe_send(sheet_for(sheet).cells[key], :excelx_type)
+      safe_send(sheet_for(sheet).cells[key], :cell_type)
     end
 
     # returns the internal value of an excelx cell
     # Note: this is only available within the Excelx class
     def excelx_value(row, col, sheet = nil)
       key = normalize(row, col)
-      safe_send(sheet_for(sheet).cells[key], :excelx_value)
+      safe_send(sheet_for(sheet).cells[key], :cell_value)
     end
 
     # returns the internal format of an excel cell
