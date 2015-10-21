@@ -18,70 +18,9 @@ module Roo
     require 'roo/excelx/comments'
     require 'roo/excelx/sheet_doc'
     require 'roo/excelx/coordinate'
+    require 'roo/excelx/format'
 
     delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files] => :@shared
-
-    module Format
-      EXCEPTIONAL_FORMATS = {
-        'h:mm am/pm' => :date,
-        'h:mm:ss am/pm' => :date
-      }
-
-      STANDARD_FORMATS = {
-        0 => 'General'.freeze,
-        1 => '0'.freeze,
-        2 => '0.00'.freeze,
-        3 => '#,##0'.freeze,
-        4 => '#,##0.00'.freeze,
-        9 => '0%'.freeze,
-        10 => '0.00%'.freeze,
-        11 => '0.00E+00'.freeze,
-        12 => '# ?/?'.freeze,
-        13 => '# ??/??'.freeze,
-        14 => 'mm-dd-yy'.freeze,
-        15 => 'd-mmm-yy'.freeze,
-        16 => 'd-mmm'.freeze,
-        17 => 'mmm-yy'.freeze,
-        18 => 'h:mm AM/PM'.freeze,
-        19 => 'h:mm:ss AM/PM'.freeze,
-        20 => 'h:mm'.freeze,
-        21 => 'h:mm:ss'.freeze,
-        22 => 'm/d/yy h:mm'.freeze,
-        37 => '#,##0 ;(#,##0)'.freeze,
-        38 => '#,##0 ;[Red](#,##0)'.freeze,
-        39 => '#,##0.00;(#,##0.00)'.freeze,
-        40 => '#,##0.00;[Red](#,##0.00)'.freeze,
-        45 => 'mm:ss'.freeze,
-        46 => '[h]:mm:ss'.freeze,
-        47 => 'mmss.0'.freeze,
-        48 => '##0.0E+0'.freeze,
-        49 => '@'.freeze
-      }
-
-      def to_type(format)
-        format = format.to_s.downcase
-        if (type = EXCEPTIONAL_FORMATS[format])
-          type
-        elsif format.include?('#')
-          :float
-        elsif !format.match(/d+(?![\]])/).nil? || format.include?('y')
-          if format.include?('h') || format.include?('s')
-            :datetime
-          else
-            :date
-          end
-        elsif format.include?('h') || format.include?('s')
-          :time
-        elsif format.include?('%')
-          :percentage
-        else
-          :float
-        end
-      end
-
-      module_function :to_type
-    end
-
     ExceedsMaxError = Class.new(StandardError)
 
     # initialization and opening of a spreadsheet file
@@ -193,7 +132,7 @@ module Roo
     def set(row, col, value, sheet = nil) #:nodoc:
       key = normalize(row, col)
       cell_type = cell_type_by_value(value)
-      sheet_for(sheet).cells[key] = Cell.new(value, cell_type, nil, cell_type, value, nil, nil, nil, Cell::Coordinate.new(row, col))
+      sheet_for(sheet).cells[key] = Cell.new(value, cell_type, nil, cell_type, value, nil, nil, nil, Coordinate.new(row, col))
     end
 
     # Returns the formula at (row,col).
@@ -245,14 +184,14 @@ module Roo
     # Note: this is only available within the Excelx class
     def excelx_type(row, col, sheet = nil)
       key = normalize(row, col)
-      safe_send(sheet_for(sheet).cells[key], :excelx_type)
+      safe_send(sheet_for(sheet).cells[key], :cell_type)
     end
 
     # returns the internal value of an excelx cell
     # Note: this is only available within the Excelx class
     def excelx_value(row, col, sheet = nil)
       key = normalize(row, col)
-      safe_send(sheet_for(sheet).cells[key], :excelx_value)
+      safe_send(sheet_for(sheet).cells[key], :cell_value)
     end
 
     # returns the internal format of an excel cell
