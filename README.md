@@ -151,22 +151,22 @@ xlsx.each_row_streaming do |row|
 end
 ```
 
-By default blank cells will be excluded from the array. To preserve, use the option pad_cells = true. (They will be set to nil in the array)
+By default blank cells will be excluded from the array. To keep them, use the option pad_cells = true. (They will be set to nil in the array)
 ```ruby
 xlsx.each_row_streaming(pad_cells: true) do |row|
   puts row.inspect # Array of Excelx::Cell objects
 end
 ```
 
-To stream only a part of the rows, you can use ```max_rows``` and ```offset```options.
+To stream only some of the rows, you can use the ```max_rows``` and ```offset```options.
 ```ruby
-xlsx.each_row_streaming(offset: 1) do |row| # Will exclude first (enventually header) row
+xlsx.each_row_streaming(offset: 1) do |row| # Will exclude first (inevitably header) row
   puts row.inspect # Array of Excelx::Cell objects
 end
 ```
 
 ```ruby
-xlsx.each_row_streaming(max_rows: 3) do |row| # Will yield 4 rows (it's automatically majored by 1) after the setted offset.
+xlsx.each_row_streaming(max_rows: 3) do |row| # Will yield 4 rows (it's automatically incremented by 1) after the supplied offset.
   puts row.inspect # Array of Excelx::Cell objects
 end
 ```
@@ -202,7 +202,7 @@ xlsx.formula('A', 2)
 
 ### OpenOffice / LibreOffice Support
 
-Roo::OpenOffice supports for encrypted OpenOffice spreadsheets.
+Roo::OpenOffice has support for encrypted OpenOffice spreadsheets.
 
 ```ruby
 # Load an encrypted OpenOffice Spreadsheet
@@ -230,7 +230,7 @@ ods.formula('A', 2)
 s = Roo::CSV.new("mycsv.csv")
 ```
 
-Because Roo uses the [standard CSV library](), and you can use options available to that library to parse csv files. You can pass options using the ``csv_options`` key.
+Because Roo uses the [standard CSV library](), you can use options available to that library to parse csv files. You can pass options using the ``csv_options`` key.
 
 For instance, you can load tab-delimited files (``.tsv``), and you can use a particular encoding when opening the file.
 
