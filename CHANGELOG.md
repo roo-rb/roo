@@ -1,8 +1,19 @@
-## [Unreleased] - Unreleased
+## [2.2.0] - 2015-10-31
 ### Added
-- A missing Header Raises `Roo::HeaderRowNotFoundError`  [247](https://github.com/roo-rb/roo/pull/247)
-- Roo::Excelx::Shared class to pass shared data to Roo::Excelx sheets [220](https://github.com/roo-rb/roo/pull/220)
-- Proper Type support to Roo::Excelx [240](https://github.com/roo-rb/roo/pull/240)
+- Added support for returning Integers values to Roo::OpenOffice [#258](https://github.com/roo-rb/roo/pull/258)
+- A missing Header Raises `Roo::HeaderRowNotFoundError`  [#247](https://github.com/roo-rb/roo/pull/247)
+- Roo::Excelx::Shared class to pass shared data to Roo::Excelx sheets [#220](https://github.com/roo-rb/roo/pull/220)
+- Proper Type support to Roo::Excelx [#240](https://github.com/roo-rb/roo/pull/240)
+- Added Roo::HeaderRowNotFoundError [#247](https://github.com/roo-rb/roo/pull/247)
+
+### Changed
+- Made spelling/grammar corrections in the README[260](https://github.com/roo-rb/roo/pull/260)
+- Moved Roo::Excelx::Format module [#259](https://github.com/roo-rb/roo/pull/259)
+- Updated README with details about `Roo::Excelx#each_with_streaming` method [#250](https://github.com/roo-rb/roo/pull/250)
+
+### Fixed
+- Fixed Base64 not found issue in Open Office [#267](https://github.com/roo-rb/roo/pull/267)
+- Fixed Regexp to allow method access to cells with multiple digits [#255](https://github.com/roo-rb/roo/pull/255), [#268](https://github.com/roo-rb/roo/pull/268)
 
 ## [2.1.1] - 2015-08-02
 ### Fixed invalid new lines with _x000D_ character[#231](https://github.com/roo-rb/roo/pull/231)
