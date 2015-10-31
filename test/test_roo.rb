@@ -1313,12 +1313,12 @@ Sheet 3:
       assert_equal 13, oo.d4 # cell(4,'D')
       assert_equal 14, oo.e4 # cell(4,'E')
       assert_equal 'ABC', oo.c6('Sheet5')
+      assert_equal 41, oo.a12
 
-      #assert_raises(ArgumentError) {
-      assert_raises(NoMethodError) {
+      assert_raises(NoMethodError) do
         # a42a is not a valid cell name, should raise ArgumentError
         assert_equal 9999, oo.a42a
-      }
+      end
     end
   end
 
