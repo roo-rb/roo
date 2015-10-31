@@ -4,10 +4,12 @@ require 'tmpdir'
 require 'stringio'
 require 'nokogiri'
 require 'roo/utils'
+require 'roo/file_utils'
 
 # Base class for all other types of spreadsheets
 class Roo::Base
   include Enumerable
+  include Roo::FileUtils
 
   TEMP_PREFIX = 'roo_'.freeze
   MAX_ROW_COL = 999_999.freeze
@@ -429,29 +431,28 @@ class Roo::Base
     end
   end
 
-  # konvertiert einen Key in der Form "12,45" (=row,column) in
-  # ein Array mit numerischen Werten ([12,45])
-  # Diese Methode ist eine temp. Loesung, um zu erforschen, ob der
-  # Zugriff mit numerischen Keys schneller ist.
+  # Public: Converts keys in the form "12,45" (=row,column) into an Array of
+  #         numeric values.
+  #
+  #         This method is a temporary solution to explore whether access with
+  #         numeric keys is faster.
+  # TODO: Deprecate
   def key_to_num(str)
     r, c = str.split(',')
     [r.to_i, c.to_i]
   end
-
   # see: key_to_num
+  # TODO: Deprecate
   def key_to_string(arr)
     "#{arr[0]},#{arr[1]}"
   end
 
+  # TODO: Deprecate.
   def is_stream?(filename_or_stream)
     filename_or_stream.respond_to?(:seek)
   end
 
   private
-
-  def track_tmpdir!(tmpdir)
-    (@tmpdirs ||= []) << tmpdir
-  end
 
   def clean_sheet_if_need(options)
     return unless options[:clean]
@@ -470,16 +471,6 @@ class Roo::Base
     else
       set_headers(options)
     end
-  end
-
-  def local_filename(filename, tmpdir, packed)
-    return if is_stream?(filename)
-    filename = download_uri(filename, tmpdir) if uri?(filename)
-    filename = unzip(filename, tmpdir) if packed == :zip
-
-    fail IOError, "file #{filename} does not exist" unless File.file?(filename)
-
-    filename
   end
 
   def file_type_warning_message(filename, exts)
@@ -535,14 +526,6 @@ class Roo::Base
     initialize(@filename)
   end
 
-  def make_tmpdir(prefix = nil, root = nil, &block)
-    prefix = "#{TEMP_PREFIX}#{prefix}"
-
-    ::Dir.mktmpdir(prefix, root || ENV['ROO_TMP'], &block).tap do |result|
-      block_given? || track_tmpdir!(result)
-    end
-  end
-
   def clean_sheet(sheet)
     read_cells(sheet)
     @cell[sheet].each_pair do |coord, value|
@@ -591,41 +574,12 @@ class Roo::Base
     [row, col]
   end
 
-  def uri?(filename)
-    filename.start_with?('http://', 'https://')
-  rescue
-    false
-  end
-
-  def download_uri(uri, tmpdir)
-    require 'open-uri'
-    tempfilename = File.join(tmpdir, File.basename(uri))
-    begin
-      File.open(tempfilename, 'wb') do |file|
-        open(uri, 'User-Agent' => "Ruby/#{RUBY_VERSION}") do |net|
-          file.write(net.read)
-        end
-      end
-    rescue OpenURI::HTTPError
-      raise "could not open #{uri}"
-    end
-    tempfilename
-  end
-
   def open_from_stream(stream, tmpdir)
     tempfilename = File.join(tmpdir, 'spreadsheet')
     File.open(tempfilename, 'wb') do |file|
       file.write(stream[7..-1])
     end
     File.join(tmpdir, 'spreadsheet')
-  end
-
-  def unzip(filename, tmpdir)
-    require 'zip/filesystem'
-
-    Zip::File.open(filename) do |zip|
-      process_zipfile_packed(zip, tmpdir)
-    end
   end
 
   # check if default_sheet was set and exists in sheets-array
@@ -643,23 +597,6 @@ class Roo::Base
       end
     else
       fail TypeError, "not a valid sheet type: #{sheet.inspect}"
-    end
-  end
-
-  def process_zipfile_packed(zip, tmpdir, path = '')
-    if zip.file.file? path
-      # extract and return filename
-      File.open(File.join(tmpdir, path), 'wb') do |file|
-        file.write(zip.read(path))
-      end
-      File.join(tmpdir, path)
-    else
-      ret = nil
-      path += '/' unless path.empty?
-      zip.dir.foreach(path) do |filename|
-        ret = process_zipfile_packed(zip, tmpdir, path + filename)
-      end
-      ret
     end
   end
 

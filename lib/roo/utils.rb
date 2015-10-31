@@ -61,6 +61,15 @@ module Roo
       (x2 - (x1 - 1)) * (y2 - (y1 - 1))
     end
 
+    # Public: Compute upper bound for cells in a given cell matrix.
+    def num_cells_in_matrix(matrix)
+      fail ArgumentError 'Invalid Matrix: matrix must be an array.' unless matrix.is_a? Array
+      fail ArgumentError "Invalid Matrix: #{matrix.inspect}." unless matrix.size == 2
+      x1, y1, x2, y2 = matrix.flatten
+
+      (x2 - (x1 - 1)) * (y2 - (y1 - 1))
+    end
+
     def load_xml(path)
       ::File.open(path, 'rb') do |file|
         ::Nokogiri::XML(file)
