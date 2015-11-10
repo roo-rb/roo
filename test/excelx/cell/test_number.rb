@@ -34,6 +34,12 @@ class TestRooExcelxCellNumber < Minitest::Test
     end
   end
 
+  def test_n_a_number
+    cell = Roo::Excelx::Cell::Number.new '#N/A', nil, ['General'], nil, nil, nil
+    assert_equal '#N/A', cell.value
+    assert_equal '#N/A', cell.formatted_value
+  end
+
   def test_formats
     [
       ['General', '1042'],

@@ -14,6 +14,8 @@ module Roo
         end
 
         def create_numeric(number)
+          return number if number == '#N/A'
+
           case @format
           when /%/
             Float(number)
@@ -25,6 +27,8 @@ module Roo
         end
 
         def formatted_value
+          return @cell_value if @cell_value == '#N/A'
+
           formatter = formats[@format]
           if formatter.is_a? Proc
             formatter.call(@cell_value)
