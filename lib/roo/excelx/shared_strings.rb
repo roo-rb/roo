@@ -109,17 +109,23 @@ module Roo
             elem.children.each do |rPr_elem|
               case rPr_elem.name
               when 'b'
+                # set formatting for Bold to true
                 xml_elems[:b] = true
               when 'i'
+                # set formatting for Italics to true
                 xml_elems[:i] = true
               when 'u'
+                # set formatting for Underline to true
                 xml_elems[:u] = true
               when 'vertAlign'
+                # See if the Vertical Alignment is subscript or superscript
                 case rPr_elem.xpath('@val').first.value
                 when 'subscript'
+                  # set formatting for Subscript to true and Superscript to false ... Can't have both
                   xml_elems[:sub] = true
                   xml_elems[:sup] = false
                 when 'superscript'
+                  # set formatting for Superscript to true and Subscript to false ... Can't have both
                   xml_elems[:sup] = true
                   xml_elems[:sub] = false
                 end
