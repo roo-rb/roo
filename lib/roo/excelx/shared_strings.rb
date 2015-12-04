@@ -11,6 +11,22 @@ module Roo
         @array ||= extract_shared_strings
       end
 
+      def to_html
+        @html ||= extract_html
+      end
+
+      # Use to_html or to_a for html returns
+      def use_html?(index)
+        ret_val = false
+        return false if to_a[index].nil?
+        return true if to_html[index].include?('<sub>')
+        return true if to_html[index].include?('<sup>')
+        return true if to_html[index].include?('<b>')
+        return true if to_html[index].include?('<i>')
+        return true if to_html[index].include?('<u>')
+        false
+      end
+
       private
 
       def fix_invalid_shared_strings(doc)
@@ -42,6 +58,93 @@ module Roo
           shared_string
         end
       end
-    end
-  end
-end
+
+      def extract_html
+        return [] unless doc_exists?
+        fix_invalid_shared_strings(doc)
+        # read the shared strings xml document
+        doc.xpath('/sst/si').map do |si|
+          html_string = '<html>'
+          si.children.each do |elem|
+            case elem.name
+            when 'r'
+              html_string << extract_html_r(elem)
+            when 't'
+              html_string << elem.content
+            end # case elem.name
+          end # si.children.each do |elem|
+          html_string << '</html>'
+        end # doc.xpath('/sst/si').map do |si|
+      end # def extract_html
+
+      # The goal of this function is to take the following XML code snippet and create a html tag
+      # r_elem ::: XML Element that is in sharedStrings.xml of excel_book.xlsx
+      # {code:xml}
+      # <r>
+      #   <rPr>
+      #      <i/>
+      #      <b/>
+      #      <u/>
+      #      <vertAlign val="subscript"/>
+      #      <vertAlign val="superscript"/>
+      #   </rPr>
+      #   <t>TEXT</t>
+      # </r>
+      # {code}
+      #
+      # Expected Output ::: "<html><sub|sup><b><i><u>TEXT</u></i></b></sub|/sup></html>"
+      def extract_html_r(r_elem)
+        str = ''
+        xml_elems = {
+          sub: false,
+          sup: false,
+          b:   false,
+          i:   false,
+          u:   false
+        }
+        b, i, u, sub, sup = false, false, false, false, false
+        r_elem.children.each do |elem|
+          case elem.name
+          when 'rPr'
+            elem.children.each do |rPr_elem|
+              case rPr_elem.name
+              when 'b'
+                xml_elems[:b] = true
+              when 'i'
+                xml_elems[:i] = true
+              when 'u'
+                xml_elems[:u] = true
+              when 'vertAlign'
+                case rPr_elem.xpath('@val').first.value
+                when 'subscript'
+                  xml_elems[:sub] = true
+                  xml_elems[:sup] = false
+                when 'superscript'
+                  xml_elems[:sup] = true
+                  xml_elems[:sub] = false
+                end
+              end
+            end
+          when 't'
+            str << create_html(elem.content, xml_elems)
+          end
+        end
+        str
+      end # extract_html_r
+
+      # This will return an html string
+      def create_html(text, formatting)
+        tmp_str = ''
+        formatting.each do |elem, val|
+          tmp_str << "<#{elem}>" if val
+        end
+        tmp_str << text
+        reverse_format = formatting.to_a.reverse.to_h
+        reverse_format.each do |elem, val|
+          tmp_str << "</#{elem}>" if val
+        end
+        tmp_str
+      end
+    end # class SharedStrings < Excelx::Extractor
+  end # class Excelx
+end # module Roo
