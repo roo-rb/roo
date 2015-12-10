@@ -2,6 +2,8 @@ module Roo
   class Excelx
     class Cell
       class Number < Cell::Base
+        ERROR_VALUES = %w(#N/A #REF! #NAME? #DIV/0! #NULL! #VALUE! #NUM!)
+
         attr_reader :value, :formula, :format, :cell_value, :link, :coordinate
 
         def initialize(value, formula, excelx_type, style, link, coordinate)
@@ -14,7 +16,7 @@ module Roo
         end
 
         def create_numeric(number)
-          return number if number == '#N/A'
+          return number if ERROR_VALUES.include?(number)
 
           case @format
           when /%/
@@ -27,7 +29,7 @@ module Roo
         end
 
         def formatted_value
-          return @cell_value if @cell_value == '#N/A'
+          return @cell_value if ERROR_VALUES.include?(@cell_value)
 
           formatter = formats[@format]
           if formatter.is_a? Proc
