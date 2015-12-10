@@ -1,3 +1,10 @@
+## [2.3.0] - 2015-12-10
+### Changed
+- Excelx::Cell::Number will return a String instead of an Integer or Float if the cell has an error like #DIV/0, etc. [#273](https://github.com/roo-rb/roo/pull/273)
+
+### Fixed
+- Excelx::Cell::Number now handles cell errors. [#273](https://github.com/roo-rb/roo/pull/273)
+
 ## [2.2.0] - 2015-10-31
 ### Added
 - Added support for returning Integers values to Roo::OpenOffice [#258](https://github.com/roo-rb/roo/pull/258)
