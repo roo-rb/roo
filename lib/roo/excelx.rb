@@ -6,7 +6,10 @@ require 'forwardable'
 
 module Roo
   class Excelx < Roo::Base
+    require 'set'
     extend Forwardable
+
+    ERROR_VALUES = %w(#N/A #REF! #NAME? #DIV/0! #NULL! #VALUE! #NUM!).to_set
 
     require 'roo/excelx/shared'
     require 'roo/excelx/workbook'

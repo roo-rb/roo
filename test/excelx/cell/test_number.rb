@@ -35,7 +35,7 @@ class TestRooExcelxCellNumber < Minitest::Test
   end
 
   def test_numbers_with_cell_errors
-    %w(#N/A #REF! #NAME? #DIV/0! #NULL! #VALUE! #NUM!).each do |error|
+    Excels::ERROR_VALUES.each do |error|
       cell = Roo::Excelx::Cell::Number.new error, nil, ['General'], nil, nil, nil
       assert_equal error, cell.value
       assert_equal error, cell.formatted_value

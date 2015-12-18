@@ -6,6 +6,18 @@ describe Roo::Excelx do
     Roo::Excelx.new(path)
   end
 
+  describe 'Constants' do
+    describe 'ERROR_VALUES' do
+      it 'returns all possible errorr values' do
+        expect(described_class::ERROR_VALUES).to eq(%w(#N/A #REF! #NAME? #DIV/0! #NULL! #VALUE! #NUM!).to_set)
+      end
+
+      it 'is a set' do
+        expect(described_class::ERROR_VALUES).to be_an_instance_of(Set)
+      end
+    end
+  end
+
   describe '.new' do
     let(:path) { 'test/files/numeric-link.xlsx' }
 
