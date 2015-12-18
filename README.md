@@ -189,6 +189,9 @@ xlsx.cell(3, 'C')
 # => 600000383.0
 
 xlsx.excelx_value(row,col)
+# => '600000383'
+
+xlsx.formatted_value(row,col)
 # => '0600000383'
 ```
 
