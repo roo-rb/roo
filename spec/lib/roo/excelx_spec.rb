@@ -295,6 +295,16 @@ describe Roo::Excelx do
     end
   end
 
+  describe '#formatted_value' do
+    context 'contains zero-padded numbers' do
+      let(:path) { 'test/files/zero-padded-number.xlsx' }
+
+      it 'returns a zero-padded number' do
+        expect(subject.formatted_value(4, 1)).to eq '05010'
+      end
+    end
+  end
+
   describe '#excelx_format' do
     let(:path) { 'test/files/style.xlsx' }
 

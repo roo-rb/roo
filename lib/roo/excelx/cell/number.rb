@@ -32,6 +32,8 @@ module Roo
           formatter = formats[@format]
           if formatter.is_a? Proc
             formatter.call(@cell_value)
+          elsif zero_padded_number?
+            "%0#{@format.size}d"% @cell_value
           else
             Kernel.format(formatter, @cell_value)
           end
@@ -77,6 +79,12 @@ module Roo
             '##0.0E+0' => '%.1E',
             '@' => proc { |number| number }
           }
+        end
+
+        private
+
+        def zero_padded_number?
+          @format[/0+/] == @format
         end
       end
     end
