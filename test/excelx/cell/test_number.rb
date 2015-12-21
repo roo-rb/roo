@@ -1,6 +1,4 @@
-require 'roo/excelx/cell/base'
-require 'roo/excelx/cell/number'
-require 'roo/link'
+require 'test_helper'
 
 class TestRooExcelxCellNumber < Minitest::Test
   def number
@@ -35,7 +33,7 @@ class TestRooExcelxCellNumber < Minitest::Test
   end
 
   def test_numbers_with_cell_errors
-    Excels::ERROR_VALUES.each do |error|
+    Roo::Excelx::ERROR_VALUES.each do |error|
       cell = Roo::Excelx::Cell::Number.new error, nil, ['General'], nil, nil, nil
       assert_equal error, cell.value
       assert_equal error, cell.formatted_value

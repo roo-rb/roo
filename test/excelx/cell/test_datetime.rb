@@ -1,7 +1,4 @@
-require 'date'
-require 'roo/excelx/cell/base'
-require 'roo/excelx/cell/datetime'
-require 'roo/link'
+require 'test_helper'
 
 class TestRooExcelxCellDateTime < Minitest::Test
   def test_cell_value_is_datetime
