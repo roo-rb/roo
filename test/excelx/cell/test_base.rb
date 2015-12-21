@@ -1,5 +1,4 @@
-require 'roo/excelx/cell/base'
-require 'roo/link'
+require 'test_helper'
 
 class TestRooExcelxCellBase < Minitest::Test
   def base

@@ -1,5 +1,4 @@
-require 'roo/excelx/cell/base'
-require 'roo/excelx/cell/empty'
+require 'test_helper'
 
 class TestRooExcelxCellEmpty < Minitest::Test
   def empty
