@@ -6,7 +6,10 @@ require 'forwardable'
 
 module Roo
   class Excelx < Roo::Base
+    require 'set'
     extend Forwardable
+
+    ERROR_VALUES = %w(#N/A #REF! #NAME? #DIV/0! #NULL! #VALUE! #NUM!).to_set
 
     require 'roo/excelx/shared'
     require 'roo/excelx/workbook'
@@ -192,6 +195,13 @@ module Roo
     def excelx_value(row, col, sheet = nil)
       key = normalize(row, col)
       safe_send(sheet_for(sheet).cells[key], :cell_value)
+    end
+
+    # returns the internal value of an excelx cell
+    # Note: this is only available within the Excelx class
+    def formatted_value(row, col, sheet = nil)
+      key = normalize(row, col)
+      safe_send(sheet_for(sheet).cells[key], :formatted_value)
     end
 
     # returns the internal format of an excel cell

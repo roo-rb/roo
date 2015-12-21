@@ -6,6 +6,18 @@ describe Roo::Excelx do
     Roo::Excelx.new(path)
   end
 
+  describe 'Constants' do
+    describe 'ERROR_VALUES' do
+      it 'returns all possible errorr values' do
+        expect(described_class::ERROR_VALUES).to eq(%w(#N/A #REF! #NAME? #DIV/0! #NULL! #VALUE! #NUM!).to_set)
+      end
+
+      it 'is a set' do
+        expect(described_class::ERROR_VALUES).to be_an_instance_of(Set)
+      end
+    end
+  end
+
   describe '.new' do
     let(:path) { 'test/files/numeric-link.xlsx' }
 
@@ -280,6 +292,16 @@ describe Roo::Excelx do
       # expect(subject.excelx_value(1, 1, "Sheet5")).to eq "1" # passes by accident
       # expect(subject.excelx_value(6, 2, "Sheet5")).to eq "16"
       # expect(subject.excelx_value(6000, 2000, "Sheet5")).to eq nil
+    end
+  end
+
+  describe '#formatted_value' do
+    context 'contains zero-padded numbers' do
+      let(:path) { 'test/files/zero-padded-number.xlsx' }
+
+      it 'returns a zero-padded number' do
+        expect(subject.formatted_value(4, 1)).to eq '05010'
+      end
     end
   end
 
