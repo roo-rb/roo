@@ -22,7 +22,10 @@ module Roo
           when /\.0/
             Float(number)
           else
-            number.include?('.') ? Float(number) : Integer(number)
+            begin
+              number.include?('.') ? Float(number) : Integer(number)
+            rescue
+            end
           end
         end
 
