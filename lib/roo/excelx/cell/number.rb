@@ -15,14 +15,13 @@ module Roo
 
         def create_numeric(number)
           return number if Excelx::ERROR_VALUES.include?(number)
-
           case @format
           when /%/
             Float(number)
           when /\.0/
             Float(number)
           else
-            number.include?('.') ? Float(number) : Integer(number)
+            (number.include?(".") || (/\A\d+E[-+]\d+\z/ =~ number)) ? Float(number) : Integer(number)
           end
         end
 
