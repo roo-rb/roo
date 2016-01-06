@@ -426,20 +426,6 @@ module Roo
       end
     end
 
-    # NOTE: To reduce memory, styles, shared_strings, workbook can be class
-    #       variables in a Shared module.
-    def styles
-      @styles ||= Styles.new(File.join(@tmpdir, 'roo_styles.xml'))
-    end
-
-    def shared_strings
-      @shared_strings ||= SharedStrings.new(File.join(@tmpdir, 'roo_sharedStrings.xml'))
-    end
-
-    def workbook
-      @workbook ||= Workbook.new(File.join(@tmpdir, 'roo_workbook.xml'))
-    end
-
     def safe_send(object, method, *args)
       object.send(method, *args) if object && object.respond_to?(method)
     end
