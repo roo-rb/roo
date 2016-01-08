@@ -1,3 +1,12 @@
+## [2.3.1] - 2015-01-08
+### Fixed
+- Properly parse sci-notation number like 1E-3 [#288](https://github.com/roo-rb/roo/pull/288)
+- Include all tests in default rake run [#283](https://github.com/roo-rb/roo/pull/283)
+- Fix zero-padded numbers for Excelx [#282](https://github.com/roo-rb/roo/pull/282)
+
+### Changed
+- Moved `ERROR_VALUES` from Excelx::Cell::Number ~> Excelx. [#280](https://github.com/roo-rb/roo/pull/280)
+
 ## [2.3.0] - 2015-12-10
 ### Changed
 - Excelx::Cell::Number will return a String instead of an Integer or Float if the cell has an error like #DIV/0, etc. [#273](https://github.com/roo-rb/roo/pull/273)
