@@ -285,7 +285,6 @@ module Roo
           algorithm_node['manifest:initialisation-vector']
         )
         key_derivation_name = key_derivation_node['manifest:key-derivation-name']
-        key_size            = key_derivation_node['manifest:key-size'].to_i
         iteration_count     = key_derivation_node['manifest:iteration-count'].to_i
         salt                = Base64.decode64(key_derivation_node['manifest:salt'])
 
@@ -294,10 +293,8 @@ module Roo
           start_key_generation_node[
             'manifest:start-key-generation-name'
           ]
-        key_generation_size = start_key_generation_node['manifest:key-size'].to_i
 
         hashed_password = password
-        key             = nil
 
         if key_generation_name == 'http://www.w3.org/2000/09/xmldsig#sha256'
 

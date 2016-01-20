@@ -11,7 +11,7 @@ require 'roo/excelx/cell/time'
 module Roo
   class Excelx
     class Cell
-      attr_reader :type, :formula, :value, :excelx_type, :excelx_value, :style, :hyperlink, :coordinate
+      attr_reader :formula, :value, :excelx_type, :excelx_value, :style, :hyperlink, :coordinate
       attr_writer :value
 
       # DEPRECATED: Please use Cell.create_cell instead.
