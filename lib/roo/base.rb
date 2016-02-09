@@ -327,11 +327,15 @@ class Roo::Base
               # sonst gibt es Fehler bei leeren Blaettern
               first_row.upto(last_row) do |row|
                 first_column.upto(last_column) do |col|
-                  unless empty?(row,col)
-                    x.cell(cell(row,col),
-                      :row =>row,
-                      :column => col,
-                      :type => celltype(row,col))
+                  unless empty?(row, col)
+                    attributes = { row: row, column: col, type: celltype(row, col) }
+
+                    font = font(row, col)
+                    if font
+                      attributes.merge!(bold: font.bold?, italic: font.italic?, underline: font.underline?)
+                    end
+
+                    x.cell(cell(row, col), attributes)
                   end
                 end
               end
