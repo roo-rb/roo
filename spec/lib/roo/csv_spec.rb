@@ -10,6 +10,13 @@ describe Roo::CSV do
     end
   end
 
+  describe '.new with stream' do
+    let(:csv) { Roo::CSV.new(File.read(path)) }
+    it 'creates an instance' do
+      expect(csv).to be_a(Roo::CSV)
+    end
+  end
+
   describe '#parse' do
     subject do
       csv.parse(options)
