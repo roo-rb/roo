@@ -138,6 +138,9 @@ class Roo::Base
   end
 
   #Immitate the to_yaml function to generate a valid json output
+  #As demonstrated by https://gist.github.com/spraints/2895311
+  #Using += seems to be a bit faster than <<
+
     def to_json(from_row = nil, from_column = nil, to_row = nil, to_column = nil, sheet = default_sheet)
       return '' unless first_row # empty result if there is no first_row in a sheet
       from_row ||= first_row(sheet)
@@ -150,12 +153,8 @@ class Roo::Base
         result << "{"
         #iterating over columns
         from_column.upto(to_column) do |col|
-          result << '"'
-          result << "#{headers[col-1]}"
-          result << '":"'
           value = cell(row, col, sheet)
-          result << " #{value} "
-          result << '", '
+          result << '"' << "#{headers[col-1]}" << '":"' << " #{value} " << '", '
         end
         result << "},"
       end
