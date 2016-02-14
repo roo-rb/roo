@@ -334,7 +334,10 @@ class Roo::Base
                     if font
                       attributes.merge!(bold: font.bold?, italic: font.italic?, underline: font.underline?)
                     end
-
+                    if respond_to?(:fill_style)
+                      fill_style = fill_style(row, col)
+                      attributes.merge!(cell_color: fill_style.background_color) if fill_style
+                    end
                     x.cell(cell(row, col), attributes)
                   end
                 end
