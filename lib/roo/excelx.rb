@@ -3,6 +3,8 @@ require 'nokogiri'
 require 'spreadsheet'
 
 class Roo::Excelx < Roo::Base
+  WHITE = 'FFFFFFFF'
+
   module Format
     EXCEPTIONAL_FORMATS = {
       'h:mm am/pm' => :date,
@@ -93,6 +95,7 @@ class Roo::Excelx < Roo::Base
         read_shared_strings(@sharedstring_doc)
       end
       @styles_table = []
+      @fill_style_definitions = []
       @style_definitions = Array.new # TODO: ??? { |h,k| h[k] = {} }
       if File.exist?(File.join(tmpdir, 'roo_styles.xml'))
         @styles_doc = load_xml(File.join(tmpdir, 'roo_styles.xml'))
@@ -185,6 +188,14 @@ class Roo::Excelx < Roo::Base
     end
   end
 
+  class FillStyle
+    attr_reader :background_color
+
+    def initialize(color)
+      @background_color = color
+    end
+  end
+
   # Given a cell, return the cell's style
   def font(row, col, sheet=nil)
     sheet ||= @default_sheet
@@ -194,6 +205,16 @@ class Roo::Excelx < Roo::Base
     s_attribute ||= 0
     s_attribute = s_attribute.to_i
     @style_definitions[s_attribute]
+  end
+
+  def fill_style(row, col, sheet=nil)
+    sheet ||= @default_sheet
+    read_cells(sheet)
+    row,col = normalize(row,col)
+    s_attribute = @s_attribute[sheet][[row,col]]
+    s_attribute ||= 0
+    s_attribute = s_attribute.to_i
+    @fill_style_definitions[s_attribute]
   end
 
   # returns the type of a cell:
@@ -649,11 +670,22 @@ Datei xl/comments1.xml
         font.underline = !font_el.xpath('./xmlns:u').empty?
       end
     end
+    fills = doc.xpath('//xmlns:fills/xmlns:fill').map do |fill_element|
+      color = if !fill_element.xpath('./xmlns:patternFill').empty? &&
+      !fill_element.xpath('./xmlns:patternFill/xmlns:fgColor').empty?
+
+        fill_element.xpath('./xmlns:patternFill/xmlns:fgColor').first['rgb']
+      else
+        WHITE
+      end
+      FillStyle.new(color)
+    end
 
     doc.xpath("//xmlns:cellXfs").each do |xfs|
       xfs.children.each do |xf|
         @cellXfs << xf['numFmtId']
         @style_definitions << fonts[xf['fontId'].to_i]
+        @fill_style_definitions << fills[xf['fillId'].to_i]
       end
     end
   end
