@@ -701,6 +701,8 @@ class Roo::Base
       case onecell
       when String
         %("#{onecell.gsub('"', '""')}") unless onecell.empty?
+      when Fixnum
+        onecell.to_s
       when Float
         if onecell == onecell.to_i
           onecell.to_i.to_s
