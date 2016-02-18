@@ -535,6 +535,16 @@ class Roo::Base
     initialize(@filename)
   end
 
+  def find_basename(filename)
+    if uri?(filename)
+      require 'uri'
+      uri = URI::parse filename
+      File.basename(uri.path)
+    elsif !is_stream?(filename)
+      File.basename(filename)
+    end
+  end
+
   def make_tmpdir(prefix = nil, root = nil, &block)
     prefix = "#{TEMP_PREFIX}#{prefix}"
 
@@ -599,7 +609,7 @@ class Roo::Base
 
   def download_uri(uri, tmpdir)
     require 'open-uri'
-    tempfilename = File.join(tmpdir, File.basename(uri))
+    tempfilename = File.join(tmpdir, find_basename(uri))
     begin
       File.open(tempfilename, 'wb') do |file|
         open(uri, 'User-Agent' => "Ruby/#{RUBY_VERSION}") do |net|

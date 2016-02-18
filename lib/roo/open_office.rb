@@ -19,7 +19,7 @@ module Roo
 
       @only_visible_sheets = options[:only_visible_sheets]
       file_type_check(filename, '.ods', 'an Roo::OpenOffice', file_warning, packed)
-      @tmpdir   = make_tmpdir(File.basename(filename), options[:tmpdir_root])
+      @tmpdir   = make_tmpdir(find_basename(filename), options[:tmpdir_root])
       @filename = local_filename(filename, @tmpdir, packed)
       # TODO: @cells_read[:default] = false
       open_oo_file(options)
