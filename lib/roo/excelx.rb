@@ -39,7 +39,7 @@ module Roo
 
       unless is_stream?(filename_or_stream)
         file_type_check(filename_or_stream, %w[.xlsx .xlsm], 'an Excel 2007', file_warning, packed)
-        basename = File.basename(filename_or_stream)
+        basename = find_basename(filename_or_stream)
       end
 
       @tmpdir = make_tmpdir(basename, options[:tmpdir_root])
