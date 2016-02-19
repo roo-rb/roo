@@ -1,4 +1,12 @@
-## [2.3.1] - 2015-01-08
+## [2.3.2] 2016-02-18
+### Fixed
+- Handle url with long query params (ex. S3 secure url) [302](https://github.com/roo-rb/roo/pull/302)
+- Allow streaming for Roo::CSV [297](https://github.com/roo-rb/roo/pull/297)
+- Export Fixnums to Added csv [295](https://github.com/roo-rb/roo/pull/295)
+- Removed various Ruby warnings [289](https://github.com/roo-rb/roo/pull/289)
+- Fix incorrect example result in Readme.md [293](https://github.com/roo-rb/roo/pull/293)
+
+## [2.3.1] - 2016-01-08
 ### Fixed
 - Properly parse sci-notation number like 1E-3 [#288](https://github.com/roo-rb/roo/pull/288)
 - Include all tests in default rake run [#283](https://github.com/roo-rb/roo/pull/283)
