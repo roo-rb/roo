@@ -17,14 +17,7 @@ module Roo
 
       # Use to_html or to_a for html returns
       def use_html?(index)
-        ret_val = false
-        return false if to_a[index].nil?
-        return true if to_html[index].include?('<sub>')
-        return true if to_html[index].include?('<sup>')
-        return true if to_html[index].include?('<b>')
-        return true if to_html[index].include?('<i>')
-        return true if to_html[index].include?('<u>')
-        false
+        to_html[index][/<([biu]|sup|sub)>/]
       end
 
       private
