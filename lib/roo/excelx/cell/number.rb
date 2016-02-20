@@ -14,20 +14,25 @@ module Roo
         end
 
         def create_numeric(number)
+          return number if Excelx::ERROR_VALUES.include?(number)
           case @format
           when /%/
             Float(number)
           when /\.0/
             Float(number)
           else
-            number.include?('.') ? Float(number) : Integer(number)
+            (number.include?('.') || (/\A\d+E[-+]\d+\z/i =~ number)) ? Float(number) : Integer(number)
           end
         end
 
         def formatted_value
+          return @cell_value if Excelx::ERROR_VALUES.include?(@cell_value)
+
           formatter = formats[@format]
           if formatter.is_a? Proc
             formatter.call(@cell_value)
+          elsif zero_padded_number?
+            "%0#{@format.size}d"% @cell_value
           else
             Kernel.format(formatter, @cell_value)
           end
@@ -73,6 +78,12 @@ module Roo
             '##0.0E+0' => '%.1E',
             '@' => proc { |number| number }
           }
+        end
+
+        private
+
+        def zero_padded_number?
+          @format[/0+/] == @format
         end
       end
     end

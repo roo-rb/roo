@@ -60,6 +60,8 @@ class Roo::CSV < Roo::Base
         tmp_filename = download_uri(filename, tmpdir)
         CSV.foreach(tmp_filename, options, &block)
       end
+    elsif is_stream?(filename_or_stream)
+      CSV.new(filename_or_stream, options).each(&block)
     else
       CSV.foreach(filename, options, &block)
     end
@@ -117,4 +119,6 @@ class Roo::CSV < Roo::Base
 
     @cleaned[sheet] = true
   end
+
+  alias_method :filename_or_stream, :filename
 end

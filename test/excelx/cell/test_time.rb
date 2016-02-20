@@ -1,7 +1,4 @@
-require 'roo/excelx/cell/base'
-require 'roo/excelx/cell/datetime'
-require 'roo/excelx/cell/time'
-require 'roo/link'
+require 'test_helper'
 
 class TestRooExcelxCellTime < Minitest::Test
   def time

@@ -1,6 +1,4 @@
-require 'roo/excelx/cell/base'
-require 'roo/excelx/cell/number'
-require 'roo/link'
+require 'test_helper'
 
 class TestRooExcelxCellNumber < Minitest::Test
   def number
@@ -17,6 +15,16 @@ class TestRooExcelxCellNumber < Minitest::Test
     assert_kind_of(Integer, cell.value)
   end
 
+  def test_scientific_notation
+    cell = Roo::Excelx::Cell::Number.new '1.2E-3', nil, ['0'], nil, nil, nil
+    assert_kind_of(Float, cell.value)
+  end
+
+  def test_simple_scientific_notation
+    cell = Roo::Excelx::Cell::Number.new '1E-3', nil, ['0'], nil, nil, nil
+    assert_kind_of(Float, cell.value)
+  end
+
   def test_percent
     cell = Roo::Excelx::Cell::Number.new '42.1', nil, ['0.00%'], nil, nil, nil
     assert_kind_of(Float, cell.value)
@@ -31,6 +39,14 @@ class TestRooExcelxCellNumber < Minitest::Test
     ].each do |style_format, result|
       cell = Roo::Excelx::Cell::Number.new '-1042', nil, [style_format], nil, nil, nil
       assert_equal result, cell.formatted_value, "Style=#{style_format}"
+    end
+  end
+
+  def test_numbers_with_cell_errors
+    Roo::Excelx::ERROR_VALUES.each do |error|
+      cell = Roo::Excelx::Cell::Number.new error, nil, ['General'], nil, nil, nil
+      assert_equal error, cell.value
+      assert_equal error, cell.formatted_value
     end
   end
 

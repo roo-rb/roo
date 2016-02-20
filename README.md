@@ -113,8 +113,8 @@ end
 Use ``sheet.parse`` to return an array of rows. Column names can be a ``String`` or a ``Regexp``.
 
 ```ruby
-sheet.parse(:id => /UPC|SKU/,:qty => /ATS*\sATP\s*QTY\z/)
-# => [{:upc => 727880013358, :qty => 12}, ...]
+sheet.parse(id: /UPC|SKU/, qty: /ATS*\sATP\s*QTY\z/)
+# => [{:id => 727880013358, :qty => 12}, ...]
 ```
 
 Use the ``:header_search`` option to locate the header row and assign the header names.
@@ -126,7 +126,7 @@ sheet.parse(header_search: [/UPC*SKU/,/ATS*\sATP\s*QTY\z/])
 Use the ``:clean`` option to strip out control characters and surrounding white space.
 
 ```ruby
-sheet.parse(:clean => true)
+sheet.parse(clean: true)
 ```
 
 ### Exporting spreadsheets
@@ -189,6 +189,9 @@ xlsx.cell(3, 'C')
 # => 600000383.0
 
 xlsx.excelx_value(row,col)
+# => '600000383'
+
+xlsx.formatted_value(row,col)
 # => '0600000383'
 ```
 
@@ -206,7 +209,7 @@ Roo::OpenOffice has support for encrypted OpenOffice spreadsheets.
 
 ```ruby
 # Load an encrypted OpenOffice Spreadsheet
-ods = Roo::OpenOffice.new("myspreadsheet.ods", :password => "password")
+ods = Roo::OpenOffice.new("myspreadsheet.ods", password: "password")
 ```
 
 ``Roo::OpenOffice`` can access celltype, comments, font information, formulas and labels.

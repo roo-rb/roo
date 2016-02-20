@@ -1,9 +1,4 @@
-require 'date'
-require 'roo/excelx/cell/base'
-require 'roo/excelx/cell/datetime'
-require 'roo/excelx/cell/date'
-require 'roo/link'
-require 'pry'
+require 'test_helper'
 
 class TestRooExcelxCellDate < Minitest::Test
   def date_cell
