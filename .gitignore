@@ -5,3 +5,7 @@
 .project
 *.lock
 .idea
+.buildpath
+*~
+.bundle/
+lbin/
