@@ -6,7 +6,10 @@ require 'forwardable'
 
 module Roo
   class Excelx < Roo::Base
+    require 'set'
     extend Forwardable
+
+    ERROR_VALUES = %w(#N/A #REF! #NAME? #DIV/0! #NULL! #VALUE! #NUM!).to_set
 
     require 'roo/excelx/shared'
     require 'roo/excelx/workbook'
@@ -36,7 +39,7 @@ module Roo
 
       unless is_stream?(filename_or_stream)
         file_type_check(filename_or_stream, %w[.xlsx .xlsm], 'an Excel 2007', file_warning, packed)
-        basename = File.basename(filename_or_stream)
+        basename = find_basename(filename_or_stream)
       end
 
       @tmpdir = make_tmpdir(basename, options[:tmpdir_root])
@@ -192,6 +195,13 @@ module Roo
     def excelx_value(row, col, sheet = nil)
       key = normalize(row, col)
       safe_send(sheet_for(sheet).cells[key], :cell_value)
+    end
+
+    # returns the internal value of an excelx cell
+    # Note: this is only available within the Excelx class
+    def formatted_value(row, col, sheet = nil)
+      key = normalize(row, col)
+      safe_send(sheet_for(sheet).cells[key], :formatted_value)
     end
 
     # returns the internal format of an excel cell
@@ -414,20 +424,6 @@ module Roo
 
         entry.extract(path) if path
       end
-    end
-
-    # NOTE: To reduce memory, styles, shared_strings, workbook can be class
-    #       variables in a Shared module.
-    def styles
-      @styles ||= Styles.new(File.join(@tmpdir, 'roo_styles.xml'))
-    end
-
-    def shared_strings
-      @shared_strings ||= SharedStrings.new(File.join(@tmpdir, 'roo_sharedStrings.xml'))
-    end
-
-    def workbook
-      @workbook ||= Workbook.new(File.join(@tmpdir, 'roo_workbook.xml'))
     end
 
     def safe_send(object, method, *args)

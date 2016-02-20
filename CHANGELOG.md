@@ -1,3 +1,27 @@
+## [2.3.2] 2016-02-18
+### Fixed
+- Handle url with long query params (ex. S3 secure url) [302](https://github.com/roo-rb/roo/pull/302)
+- Allow streaming for Roo::CSV [297](https://github.com/roo-rb/roo/pull/297)
+- Export Fixnums to Added csv [295](https://github.com/roo-rb/roo/pull/295)
+- Removed various Ruby warnings [289](https://github.com/roo-rb/roo/pull/289)
+- Fix incorrect example result in Readme.md [293](https://github.com/roo-rb/roo/pull/293)
+
+## [2.3.1] - 2016-01-08
+### Fixed
+- Properly parse sci-notation number like 1E-3 [#288](https://github.com/roo-rb/roo/pull/288)
+- Include all tests in default rake run [#283](https://github.com/roo-rb/roo/pull/283)
+- Fix zero-padded numbers for Excelx [#282](https://github.com/roo-rb/roo/pull/282)
+
+### Changed
+- Moved `ERROR_VALUES` from Excelx::Cell::Number ~> Excelx. [#280](https://github.com/roo-rb/roo/pull/280)
+
+## [2.3.0] - 2015-12-10
+### Changed
+- Excelx::Cell::Number will return a String instead of an Integer or Float if the cell has an error like #DIV/0, etc. [#273](https://github.com/roo-rb/roo/pull/273)
+
+### Fixed
+- Excelx::Cell::Number now handles cell errors. [#273](https://github.com/roo-rb/roo/pull/273)
+
 ## [2.2.0] - 2015-10-31
 ### Added
 - Added support for returning Integers values to Roo::OpenOffice [#258](https://github.com/roo-rb/roo/pull/258)

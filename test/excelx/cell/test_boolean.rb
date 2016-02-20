@@ -1,6 +1,4 @@
-require 'roo/excelx/cell/base'
-require 'roo/excelx/cell/boolean'
-require 'roo/link'
+require 'test_helper'
 
 class TestRooExcelxCellNumber < Minitest::Test
   def boolean

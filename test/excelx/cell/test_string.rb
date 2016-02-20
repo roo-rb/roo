@@ -1,6 +1,4 @@
-require 'roo/excelx/cell/base'
-require 'roo/excelx/cell/string'
-require 'roo/link'
+require 'test_helper'
 
 class TestRooExcelxCellString < Minitest::Test
   def string
