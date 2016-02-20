@@ -16,6 +16,7 @@ module Roo
       end
 
       # Use to_html or to_a for html returns
+      # See what is happening with commit???
       def use_html?(index)
         to_html[index][/<([biu]|sup|sub)>/]
       end
