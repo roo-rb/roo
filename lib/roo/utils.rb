@@ -2,6 +2,8 @@ module Roo
   module Utils
     extend self
 
+    LETTERS = ("A".."Z").to_a
+
     def split_coordinate(str)
       @split_coordinate ||= {}
 
@@ -27,16 +29,14 @@ module Roo
 
     # convert a number to something like 'AB' (1 => 'A', 2 => 'B', ...)
     def number_to_letter(num)
-      results = []
-      num = num.to_i
+      result = ""
 
-      while (num > 0)
-        mod = (num - 1) % 26
-        results = [(65 + mod).chr] + results
-        num = ((num - mod) / 26)
+      until num.zero?
+        num, index = (num - 1).divmod(26)
+        result.prepend(LETTERS[index])
       end
 
-      results.join
+      result
     end
 
     def letter_to_number(letters)
