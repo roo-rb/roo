@@ -2,7 +2,7 @@ module Roo
   module Utils
     extend self
 
-    LETTERS = ("A".."Z").to_a
+    LETTERS = ('A'..'Z').to_a
 
     def split_coordinate(str)
       @split_coordinate ||= {}
