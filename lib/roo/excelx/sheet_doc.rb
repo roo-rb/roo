@@ -119,7 +119,7 @@ module Roo
         #       3. formula
         case value_type
         when :shared
-          value = shared_strings[cell.content.to_i]
+          value = shared_strings.use_html?(cell.content.to_i) ? shared_strings.to_html[cell.content.to_i] : shared_strings[cell.content.to_i]
           Excelx::Cell.create_cell(:string, value, formula, style, hyperlink, coordinate)
         when :boolean, :string
           value = cell.content
