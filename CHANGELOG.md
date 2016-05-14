@@ -1,3 +1,13 @@
+## [2.4.0] 2016-05-14
+### Fixed  
+- Fixed opening spreadsheets with charts [315](https://github.com/roo-rb/roo/pull/315)
+- Fixed memory issues for Roo::Utils.number_to_letter [308](https://github.com/roo-rb/roo/pull/308)
+- Fixed Roo::Excelx::Cell::Number to recognize floating point numbers [306](https://github.com/roo-rb/roo/pull/306)
+- Fixed version number in Readme.md [304](https://github.com/roo-rb/roo/pull/304)
+
+### Added
+- Added initial support for HTML formatting [278](https://github.com/roo-rb/roo/pull/278)
+
 ## [2.3.2] 2016-02-18
 ### Fixed
 - Handle url with long query params (ex. S3 secure url) [302](https://github.com/roo-rb/roo/pull/302)
