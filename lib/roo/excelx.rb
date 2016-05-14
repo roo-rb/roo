@@ -354,8 +354,10 @@ module Roo
       end
     end
 
+    # Extracts the sheets in order, but it will ignore sheets that are not
+    # worksheets.
     def extract_sheets_in_order(entries, sheet_ids, sheets, tmpdir)
-      sheet_ids.each_with_index do |id, i|
+      (sheet_ids & sheets.keys).each_with_index do |id, i|
         name = sheets[id]
         entry = entries.find { |e| e.name =~ /#{name}$/ }
         path = "#{tmpdir}/roo_sheet#{i + 1}"
@@ -414,6 +416,10 @@ module Roo
           #       ECMA-376 12.3.3 in "Ecma Office Open XML Part 1".
           nr = Regexp.last_match[1].to_i
           comments_files[nr - 1] = "#{@tmpdir}/roo_comments#{nr}"
+        when %r{chartsheets/_rels/sheet([0-9]+).xml.rels$}
+          # NOTE: Chart sheet relationship files were interfering with
+          #       worksheets.
+          nil
         when /sheet([0-9]+).xml.rels$/
           # FIXME: Roo seems to use sheet[\d].xml.rels for hyperlinks only, but
           #        it also stores the location for sharedStrings, comments,

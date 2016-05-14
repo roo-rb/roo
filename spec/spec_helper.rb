@@ -1,7 +1,6 @@
 require 'simplecov'
 require 'roo'
 require 'vcr'
-
 require 'helpers'
 
 RSpec.configure do |c|
