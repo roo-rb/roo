@@ -56,7 +56,6 @@ describe Roo::Excelx do
         expect(subject).to be_a(Roo::Excelx)
       end
     end
-
   end
 
   describe '#cell' do
@@ -482,7 +481,7 @@ describe Roo::Excelx do
 
   describe '#html_strings' do
     let(:path) { 'test/files/html_strings_formatting.xlsx' }
-  
+
     it 'returns the expected result' do
       expect(subject.excelx_value(1, 1, "Sheet1")).to eq "This has no formatting."
       expect(subject.excelx_value(2, 1, "Sheet1")).to eq "<html>This has<b> bold </b>formatting.</html>"
@@ -490,7 +489,7 @@ describe Roo::Excelx do
       expect(subject.excelx_value(2, 3, "Sheet1")).to eq "<html>This has <u>underline</u> format.</html>"
       expect(subject.excelx_value(2, 4, "Sheet1")).to eq "<html>Superscript. x<sup>123</sup></html>"
       expect(subject.excelx_value(2, 5, "Sheet1")).to eq "<html>SubScript.  T<sub>j</sub></html>"
-        
+
       expect(subject.excelx_value(3, 1, "Sheet1")).to eq "<html>Bold, italics <b><i>together</i></b>.</html>"
       expect(subject.excelx_value(3, 2, "Sheet1")).to eq "<html>Bold, Underline <b><u>together</u></b>.</html>"
       expect(subject.excelx_value(3, 3, "Sheet1")).to eq "<html>Bold, Superscript. <b>x</b><sup><b>N</b></sup></html>"
@@ -512,11 +511,17 @@ describe Roo::Excelx do
     end
   end
 
-  
   describe '_x000D_' do
     let(:path) { 'test/files/x000D.xlsx' }
     it 'does not contain _x000D_' do
       expect(subject.cell(2, 9)).not_to include('_x000D_')
+    end
+  end
+
+  describe 'opening a file with a chart sheet' do
+    let(:path) { 'test/files/chart_sheet.xlsx' }
+    it 'should not raise' do
+      expect{ subject }.to_not raise_error
     end
   end
 end
