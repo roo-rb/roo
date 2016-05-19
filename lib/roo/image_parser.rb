@@ -11,7 +11,6 @@ module Roo
           find_drawing_entries(zip_file)
           parse_drawings(zip_file)
           find_images(zip_file)
-          extracting_files(zip_file)
         end
       end
 
@@ -40,14 +39,7 @@ module Roo
         @array_of_images.flatten.each do |image|
           @image_files << zip_file.find_entry(File.join('xl', image))
         end
-      end
-
-      def extracting_files(zip_file)
-        @image_files.each do |entry|
-          entry_path = File.join('images', entry.name.sub('xl/media/', ''))
-          FileUtils.mkdir_p(File.dirname(entry_path))
-          zip_file.extract(entry, entry_path) unless File.exist?(entry_path)
-        end
+        @image_files
       end
     end
   end
