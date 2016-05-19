@@ -19,6 +19,10 @@ describe Roo::ImageParser do
         i_files = subject.parse_xlsx(filename)
         expect(i_files).to eql([])
       end
+
+      it "doesn't raise error if incorrect file given" do
+        expect{ subject.parse_xlsx('fail.xlsx') }.to_not raise_error
+      end
     end
 
     context 'expect to return correct images count' do
