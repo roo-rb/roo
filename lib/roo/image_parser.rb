@@ -7,11 +7,13 @@ module Roo
       attr_accessor :array_of_drawings, :array_of_images, :image_files
 
       def parse_xlsx(file_name)
+        return [] unless File.exist? file_name
         Zip::File.open(file_name) do |zip_file|
           find_drawing_entries(zip_file)
           parse_drawings(zip_file)
           find_images(zip_file)
         end
+        @image_files
       end
 
       private
@@ -39,7 +41,6 @@ module Roo
         @array_of_images.flatten.each do |image|
           @image_files << zip_file.find_entry(File.join('xl', image))
         end
-        @image_files
       end
     end
   end
