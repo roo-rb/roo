@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'pry'
 
 describe Roo::ImageParser do
   describe 'parse_xlsx' do
