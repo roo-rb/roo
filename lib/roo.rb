@@ -2,6 +2,7 @@ require 'roo/constants'
 require 'roo/errors'
 require 'roo/spreadsheet'
 require 'roo/base'
+require 'roo/image_parser'
 
 module Roo
   autoload :OpenOffice,   'roo/open_office'
