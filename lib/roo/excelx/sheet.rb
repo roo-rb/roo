@@ -6,12 +6,26 @@ module Roo
 
       delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files] => :@shared
 
-      def initialize(name, shared, sheet_index, options = {})
+      def initialize(name, shared, sheet_index, file_name = nil, options = {})
         @name = name
         @shared = shared
+        @sheet_index = sheet_index
+        @filename = file_name
+        @array_of_images = []
         @rels = Relationships.new(rels_files[sheet_index])
         @comments = Comments.new(comments_files[sheet_index])
         @sheet = SheetDoc.new(sheet_files[sheet_index], @rels, shared, options)
+      end
+
+      def images
+        Zip::File.open(@filename) do |zip_file|
+          sheet_index = @sheet_index + 1
+          doc = zip_file.find_entry("xl/drawings/_rels/drawing#{sheet_index}.xml.rels")
+          xml = Nokogiri::XML.parse(doc.respond_to?(:get_input_stream) ? doc.get_input_stream : [])
+          @array_of_images << xml.xpath('//@Target').map { |e| e.text.sub('..', '')}
+          @array_of_images.flatten!.map! { |image| File.join('xl', image)}
+        end
+        @array_of_images
       end
 
       def cells

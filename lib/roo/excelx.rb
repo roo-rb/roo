@@ -54,7 +54,7 @@ module Roo
       end.compact
       @sheets = []
       @sheets_by_name = Hash[@sheet_names.map.with_index do |sheet_name, n|
-        @sheets[n] = Sheet.new(sheet_name, @shared, n, sheet_options)
+        @sheets[n] = Sheet.new(sheet_name, @shared, n, @filename, sheet_options)
         [sheet_name, @sheets[n]]
       end]
 
@@ -86,6 +86,11 @@ module Roo
       sheet ||= default_sheet
       validate_sheet!(sheet)
       @sheets_by_name[sheet]
+    end
+
+    def images(sheet)
+      sheet_index = @sheet_names.index(sheet)
+      Sheet.new(sheet, @shared, sheet_index, @filename, {}).images
     end
 
     # Returns the content of a spreadsheet-cell.

@@ -6,6 +6,32 @@ describe Roo::Excelx do
     Roo::Excelx.new(path)
   end
 
+  describe 'images' do
+    let(:filename) { 'spec/fixtures/bar.xlsx' }
+    
+    context 'expect to return array of images' do
+      it 'loads the proper type' do
+        i_files = Roo::Excelx.new(filename).images("MEN'S")
+        expect(i_files).to be_kind_of(Array)
+      end
+    end
+
+    context 'expect to return correct images count' do
+      it 'loads the proper type' do
+        i_files = Roo::Excelx.new(filename).images("MEN'S")
+        expect(i_files.count).to eql(19)
+      end
+    end
+
+    context 'expect to return empty array of images if file not exist' do
+
+      it 'loads the proper type' do
+        i_files = Roo::Excelx.new(filename).images("Sheet2")
+        expect(i_files).to eql([])
+      end
+    end
+  end
+
   describe 'Constants' do
     describe 'ERROR_VALUES' do
       it 'returns all possible errorr values' do
