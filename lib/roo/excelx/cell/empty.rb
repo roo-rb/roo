@@ -1,4 +1,3 @@
-
 module Roo
   class Excelx
     class Cell

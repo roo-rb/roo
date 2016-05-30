@@ -12,7 +12,7 @@ describe Roo::Excelx do
     context 'expect to return array of images' do
       it 'loads the proper type' do
         i_files = Roo::Excelx.new(filename).images("MEN'S")
-        expect(i_files).to be_kind_of(Array)
+        expect(i_files).to be_kind_of(Hash)
       end
     end
 
@@ -27,7 +27,7 @@ describe Roo::Excelx do
 
       it 'loads the proper type' do
         i_files = Roo::Excelx.new(filename).images("Sheet2")
-        expect(i_files).to eql([])
+        expect(i_files).to eql({})
       end
     end
   end
