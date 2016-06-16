@@ -25,6 +25,18 @@ module Roo
       open_oo_file(options)
       super(filename, options)
       initialize_default_variables
+
+      unless @table_display.any?
+        doc.xpath(XPATH_FIND_TABLE_STYLES).each do |style|
+          read_table_styles(style)
+        end
+      end
+
+      @sheet_names = doc.xpath(XPATH_LOCAL_NAME_TABLE).map do |sheet|
+        if !@only_visible_sheets || @table_display[attribute(sheet, 'style-name')]
+          sheet.attributes['name'].value
+        end
+      end.compact
     rescue => e # clean up any temp files, but only if an error was raised
       close
       raise e
@@ -132,16 +144,7 @@ module Roo
     end
 
     def sheets
-      unless @table_display.any?
-        doc.xpath(XPATH_FIND_TABLE_STYLES).each do |style|
-          read_table_styles(style)
-        end
-      end
-      doc.xpath(XPATH_LOCAL_NAME_TABLE).map do |sheet|
-        if !@only_visible_sheets || @table_display[attribute(sheet, 'style-name')]
-          sheet.attributes['name'].value
-        end
-      end.compact
+      @sheet_names
     end
 
     # version of the Roo::OpenOffice document
