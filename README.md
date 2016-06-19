@@ -50,7 +50,7 @@ ods.sheet(0).row(1)
 
 # Set the last sheet as the default sheet.
 ods.default_sheet = ods.sheets.last
-ods.default_sheet = s.sheets[3]
+ods.default_sheet = ods.sheets[2]
 ods.default_sheet = 'Sheet 3'
 
 # Iterate through each sheet
