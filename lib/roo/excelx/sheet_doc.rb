@@ -90,10 +90,9 @@ module Roo
         cell_xml.children.each do |cell|
           case cell.name
           when 'is'
-            cell.children.each do |inline_str|
-              if inline_str.name == 't'
-                return Excelx::Cell.create_cell(:string, inline_str.content, formula, style, hyperlink, coordinate)
-              end
+            content_arr = cell.search('t').map(&:content)
+            unless content_arr.empty?
+              return Excelx::Cell.create_cell(:string, content_arr.join(''), formula, style, hyperlink, coordinate)
             end
           when 'f'
             formula = cell.content
