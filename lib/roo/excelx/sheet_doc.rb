@@ -101,6 +101,8 @@ module Roo
             return create_cell_from_value(value_type, cell, formula, format, style, hyperlink, base_date, coordinate)
           end
         end
+
+        Excelx::Cell::Empty.new(coordinate)
       end
 
       def create_cell_from_value(value_type, cell, formula, format, style, hyperlink, base_date, coordinate)
