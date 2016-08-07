@@ -3,10 +3,13 @@ require 'nokogiri'
 require 'cgi'
 require 'zip/filesystem'
 require 'roo/font'
+require 'roo/tempdir'
 require 'base64'
 
 module Roo
   class OpenOffice < Roo::Base
+    extend Roo::Tempdir
+
     ERROR_MISSING_CONTENT_XML = 'file missing required content.xml'.freeze
     XPATH_FIND_TABLE_STYLES   = "//*[local-name()='automatic-styles']".freeze
     XPATH_LOCAL_NAME_TABLE    = "//*[local-name()='table']".freeze
@@ -19,7 +22,7 @@ module Roo
 
       @only_visible_sheets = options[:only_visible_sheets]
       file_type_check(filename, '.ods', 'an Roo::OpenOffice', file_warning, packed)
-      @tmpdir   = make_tmpdir(find_basename(filename), options[:tmpdir_root])
+      @tmpdir   = self.class.make_tempdir(self, find_basename(filename), options[:tmpdir_root])
       @filename = local_filename(filename, @tmpdir, packed)
       # TODO: @cells_read[:default] = false
       open_oo_file(options)
@@ -38,7 +41,7 @@ module Roo
         end
       end.compact
     rescue
-      self.class.finalize(object_id)
+      self.class.finalize_tempdirs(object_id)
       raise
     end
 

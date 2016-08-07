@@ -4,6 +4,11 @@
   all known cases, rather than just when the #close method is called. The #close
   method can be used to cleanup early. [326](https://github.com/roo-rb/roo/issues/326)
 
+### Deprecations
+- Roo::Base::TEMP_PREFIX should be accessed via Roo::TEMP_PREFIX
+- The private Roo::Base#make_tempdir is now available at the class level in
+  classes that use tempdirs, added via Roo::Tempdir
+
 ## [2.4.0] 2016-05-14
 ### Fixed  
 - Fixed opening spreadsheets with charts [315](https://github.com/roo-rb/roo/pull/315)

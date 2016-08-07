@@ -9,7 +9,6 @@ require 'roo/utils'
 class Roo::Base
   include Enumerable
 
-  TEMP_PREFIX = 'roo_'.freeze
   MAX_ROW_COL = 999_999.freeze
   MIN_ROW_COL = 0.freeze
 
@@ -18,27 +17,9 @@ class Roo::Base
   # sets the line with attribute names (default: 1)
   attr_accessor :header_line
 
-  class << self
-    attr_reader :tempdirs
-
-    def record_tempdir(object, path)
-      @tempdirs ||= {}
-      if tempdirs[object.object_id]
-        tempdirs[object.object_id] << path
-      else
-        tempdirs[object.object_id] = [path]
-        ObjectSpace.define_finalizer(object, method(:finalize))
-      end
-    end
-
-    def finalize(object_id)
-      if tempdirs && (dirs_to_remove = tempdirs[object_id])
-        tempdirs[object_id] = nil
-        dirs_to_remove.each do |dir|
-          ::FileUtils.remove_entry(dir)
-        end
-      end
-    end
+  def self.TEMP_PREFIX
+    warn '[DEPRECATION] please access TEMP_PREFIX via Roo::TEMP_PREFIX'
+    Roo::TEMP_PREFIX
   end
 
   def initialize(filename, options = {}, _file_warning = :error, _tmpdir = nil)
@@ -55,13 +36,12 @@ class Roo::Base
     @last_column = {}
 
     @header_line = 1
-  rescue
-    self.class.finalize(object_id)
-    raise
   end
 
   def close
-    self.class.finalize(object_id)
+    if self.class.respond_to?(:finalize_tempdirs)
+      self.class.finalize_tempdirs(object_id)
+    end
     nil
   end
 
@@ -564,6 +544,7 @@ class Roo::Base
   end
 
   def make_tmpdir(prefix = nil, root = nil, &block)
+    warn '[DEPRECATION] extend Roo::Tempdir and use its .make_tempdir instead'
     prefix = "#{TEMP_PREFIX}#{prefix}"
     root ||= ENV['ROO_TMP']
 
@@ -571,10 +552,7 @@ class Roo::Base
       # folder is deleted at end of block
       ::Dir.mktmpdir(prefix, root, &block)
     else
-      # folder is cleaned up in .finalize
-      ::Dir.mktmpdir(prefix, root).tap do |tmpdir|
-        self.class.record_tempdir(self, tmpdir)
-      end
+      self.class.make_tempdir(self, prefix, root)
     end
   end
 

@@ -56,7 +56,7 @@ class Roo::CSV < Roo::Base
 
   def each_row(options, &block)
     if uri?(filename)
-      make_tmpdir do |tmpdir|
+      ::Dir.mktmpdir(Roo::TEMP_PREFIX, ENV['ROO_TMP']) do |tmpdir|
         tmp_filename = download_uri(filename, tmpdir)
         CSV.foreach(tmp_filename, options, &block)
       end
