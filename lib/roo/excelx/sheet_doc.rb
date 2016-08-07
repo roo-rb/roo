@@ -165,10 +165,10 @@ module Roo
       end
 
       def extract_hyperlinks
-        return {} unless (hyperlinks = doc.xpath('/worksheet/hyperlinks/hyperlink'))
+        return {} unless (hyperlinks = doc.xpath('/worksheet/hyperlinks/hyperlink[@id]'))
 
         Hash[hyperlinks.map do |hyperlink|
-          if hyperlink.attribute('id') && (relationship = @relationships[hyperlink.attribute('id').text])
+          if (relationship = @relationships[hyperlink.attribute('id').text])
             [::Roo::Utils.ref_to_key(hyperlink.attributes['ref'].to_s), relationship.attribute('Target').text]
           end
         end.compact]
