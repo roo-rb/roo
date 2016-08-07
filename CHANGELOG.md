@@ -1,3 +1,7 @@
+## Unreleased
+### Breaking Changes
+- Excelx::Relationships now responds to #to_h rather than #to_a, as consistently returns a hash
+
 ## [2.4.0] 2016-05-14
 ### Fixed  
 - Fixed opening spreadsheets with charts [315](https://github.com/roo-rb/roo/pull/315)

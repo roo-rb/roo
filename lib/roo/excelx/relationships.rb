@@ -4,10 +4,10 @@ module Roo
   class Excelx
     class Relationships < Excelx::Extractor
       def [](index)
-        to_a[index]
+        to_h[index]
       end
 
-      def to_a
+      def to_h
         @relationships ||= extract_relationships
       end
 
