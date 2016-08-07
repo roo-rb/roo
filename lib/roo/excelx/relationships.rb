@@ -4,17 +4,17 @@ module Roo
   class Excelx
     class Relationships < Excelx::Extractor
       def [](index)
-        to_a[index]
+        to_h[index]
       end
 
-      def to_a
+      def to_h
         @relationships ||= extract_relationships
       end
 
       private
 
       def extract_relationships
-        return [] unless doc_exists?
+        return {} unless doc_exists?
 
         Hash[doc.xpath('/Relationships/Relationship').map do |rel|
           [rel.attribute('Id').text, rel]
