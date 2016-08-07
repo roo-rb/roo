@@ -64,9 +64,9 @@ module Roo
       end
 
       super
-    rescue => e # clean up any temp files, but only if an error was raised
-      close
-      raise e
+    rescue
+      self.class.finalize(object_id)
+      raise
     end
 
     def method_missing(method, *args)

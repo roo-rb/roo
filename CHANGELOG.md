@@ -1,3 +1,9 @@
+## Unreleased
+### Fixed
+- Remove tempdirs via finalizers on garbage collection. This cleans them up in
+  all known cases, rather than just when the #close method is called. The #close
+  method can be used to cleanup early. [326](https://github.com/roo-rb/roo/issues/326)
+
 ## [2.4.0] 2016-05-14
 ### Fixed  
 - Fixed opening spreadsheets with charts [315](https://github.com/roo-rb/roo/pull/315)

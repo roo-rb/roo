@@ -2089,6 +2089,19 @@ where the expected result is
     end
   end
 
+  def test_finalize
+    tempdirs = []
+    begin
+      with_each_spreadsheet(:name=>'numbers1') do |oo|
+        tempdirs << oo.instance_variable_get('@tmpdir')
+      end
+      GC.start
+    end
+    tempdirs.each do |tempdir|
+      assert !File.exists?(tempdir), "Expected #{tempdir} to be cleaned up, but it still exists"
+    end
+  end
+
   def test_cleanup_on_error
     old_temp_files = Dir.open(Dir.tmpdir).to_a
     with_each_spreadsheet(:name=>'non_existent_file', :ignore_errors=>true) do |oo|; end

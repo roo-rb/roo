@@ -18,6 +18,29 @@ class Roo::Base
   # sets the line with attribute names (default: 1)
   attr_accessor :header_line
 
+  class << self
+    attr_reader :tempdirs
+
+    def record_tempdir(object, path)
+      @tempdirs ||= {}
+      if tempdirs[object.object_id]
+        tempdirs[object.object_id] << path
+      else
+        tempdirs[object.object_id] = [path]
+        ObjectSpace.define_finalizer(object, method(:finalize))
+      end
+    end
+
+    def finalize(object_id)
+      if tempdirs && (dirs_to_remove = tempdirs[object_id])
+        tempdirs[object_id] = nil
+        dirs_to_remove.each do |dir|
+          ::FileUtils.remove_entry(dir)
+        end
+      end
+    end
+  end
+
   def initialize(filename, options = {}, _file_warning = :error, _tmpdir = nil)
     @filename = filename
     @options = options
@@ -32,14 +55,13 @@ class Roo::Base
     @last_column = {}
 
     @header_line = 1
-  rescue => e # clean up any temp files, but only if an error was raised
-    close
-    raise e
+  rescue
+    self.class.finalize(object_id)
+    raise
   end
 
   def close
-    return nil unless @tmpdirs
-    @tmpdirs.each { |dir| ::FileUtils.remove_entry(dir) }
+    self.class.finalize(object_id)
     nil
   end
 
@@ -449,10 +471,6 @@ class Roo::Base
 
   private
 
-  def track_tmpdir!(tmpdir)
-    (@tmpdirs ||= []) << tmpdir
-  end
-
   def clean_sheet_if_need(options)
     return unless options[:clean]
     options.delete(:clean)
@@ -538,7 +556,7 @@ class Roo::Base
   def find_basename(filename)
     if uri?(filename)
       require 'uri'
-      uri = URI::parse filename
+      uri = URI.parse filename
       File.basename(uri.path)
     elsif !is_stream?(filename)
       File.basename(filename)
@@ -547,9 +565,16 @@ class Roo::Base
 
   def make_tmpdir(prefix = nil, root = nil, &block)
     prefix = "#{TEMP_PREFIX}#{prefix}"
+    root ||= ENV['ROO_TMP']
 
-    ::Dir.mktmpdir(prefix, root || ENV['ROO_TMP'], &block).tap do |result|
-      block_given? || track_tmpdir!(result)
+    if block_given?
+      # folder is deleted at end of block
+      ::Dir.mktmpdir(prefix, root, &block)
+    else
+      # folder is cleaned up in .finalize
+      ::Dir.mktmpdir(prefix, root).tap do |tmpdir|
+        self.class.record_tempdir(self, tmpdir)
+      end
     end
   end
 

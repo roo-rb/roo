@@ -37,9 +37,9 @@ module Roo
           sheet.attributes['name'].value
         end
       end.compact
-    rescue => e # clean up any temp files, but only if an error was raised
-      close
-      raise e
+    rescue
+      self.class.finalize(object_id)
+      raise
     end
 
     def open_oo_file(options)
