@@ -1,3 +1,7 @@
+## [Unreleased]
+### Added
+- Discard hiperlinks lookups to allow streaming parsing without loading whole files
+
 ## [2.4.0] 2016-05-14
 ### Fixed  
 - Fixed opening spreadsheets with charts [315](https://github.com/roo-rb/roo/pull/315)
