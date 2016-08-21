@@ -42,6 +42,11 @@ class Roo::Base
     if self.class.respond_to?(:finalize_tempdirs)
       self.class.finalize_tempdirs(object_id)
     end
+
+    instance_variables.each do |instance_variable|
+      instance_variable_set(instance_variable, nil)
+    end
+
     nil
   end
 
