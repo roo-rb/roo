@@ -8,6 +8,9 @@
 - Roo::Base::TEMP_PREFIX should be accessed via Roo::TEMP_PREFIX
 - The private Roo::Base#make_tempdir is now available at the class level in
   classes that use tempdirs, added via Roo::Tempdir
+=======
+### Added
+- Discard hiperlinks lookups to allow streaming parsing without loading whole files
 
 ## [2.4.0] 2016-05-14
 ### Fixed  
