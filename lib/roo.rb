@@ -9,6 +9,8 @@ module Roo
   autoload :Excelx,       'roo/excelx'
   autoload :CSV,          'roo/csv'
 
+  TEMP_PREFIX = 'roo_'.freeze
+
   CLASS_FOR_EXTENSION = {
     ods: Roo::OpenOffice,
     xlsx: Roo::Excelx,

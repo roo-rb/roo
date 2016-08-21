@@ -9,7 +9,6 @@ require 'roo/utils'
 class Roo::Base
   include Enumerable
 
-  TEMP_PREFIX = 'roo_'.freeze
   MAX_ROW_COL = 999_999.freeze
   MIN_ROW_COL = 0.freeze
 
@@ -17,6 +16,11 @@ class Roo::Base
 
   # sets the line with attribute names (default: 1)
   attr_accessor :header_line
+
+  def self.TEMP_PREFIX
+    warn '[DEPRECATION] please access TEMP_PREFIX via Roo::TEMP_PREFIX'
+    Roo::TEMP_PREFIX
+  end
 
   def initialize(filename, options = {}, _file_warning = :error, _tmpdir = nil)
     @filename = filename
@@ -32,14 +36,12 @@ class Roo::Base
     @last_column = {}
 
     @header_line = 1
-  rescue => e # clean up any temp files, but only if an error was raised
-    close
-    raise e
   end
 
   def close
-    return nil unless @tmpdirs
-    @tmpdirs.each { |dir| ::FileUtils.remove_entry(dir) }
+    if self.class.respond_to?(:finalize_tempdirs)
+      self.class.finalize_tempdirs(object_id)
+    end
     nil
   end
 
@@ -449,10 +451,6 @@ class Roo::Base
 
   private
 
-  def track_tmpdir!(tmpdir)
-    (@tmpdirs ||= []) << tmpdir
-  end
-
   def clean_sheet_if_need(options)
     return unless options[:clean]
     options.delete(:clean)
@@ -538,7 +536,7 @@ class Roo::Base
   def find_basename(filename)
     if uri?(filename)
       require 'uri'
-      uri = URI::parse filename
+      uri = URI.parse filename
       File.basename(uri.path)
     elsif !is_stream?(filename)
       File.basename(filename)
@@ -546,10 +544,15 @@ class Roo::Base
   end
 
   def make_tmpdir(prefix = nil, root = nil, &block)
+    warn '[DEPRECATION] extend Roo::Tempdir and use its .make_tempdir instead'
     prefix = "#{TEMP_PREFIX}#{prefix}"
+    root ||= ENV['ROO_TMP']
 
-    ::Dir.mktmpdir(prefix, root || ENV['ROO_TMP'], &block).tap do |result|
-      block_given? || track_tmpdir!(result)
+    if block_given?
+      # folder is deleted at end of block
+      ::Dir.mktmpdir(prefix, root, &block)
+    else
+      self.class.make_tempdir(self, prefix, root)
     end
   end
 

@@ -1,11 +1,14 @@
 require 'nokogiri'
 require 'zip/filesystem'
 require 'roo/link'
+require 'roo/tempdir'
 require 'roo/utils'
 require 'forwardable'
 
 module Roo
   class Excelx < Roo::Base
+    extend Roo::Tempdir
+
     require 'set'
     extend Forwardable
 
@@ -42,7 +45,7 @@ module Roo
         basename = find_basename(filename_or_stream)
       end
 
-      @tmpdir = make_tmpdir(basename, options[:tmpdir_root])
+      @tmpdir = self.class.make_tempdir(self, basename, options[:tmpdir_root])
       @shared = Shared.new(@tmpdir)
       @filename = local_filename(filename_or_stream, @tmpdir, packed)
       process_zipfile(@filename || filename_or_stream)
@@ -64,9 +67,9 @@ module Roo
       end
 
       super
-    rescue => e # clean up any temp files, but only if an error was raised
-      close
-      raise e
+    rescue
+      self.class.finalize_tempdirs(object_id)
+      raise
     end
 
     def method_missing(method, *args)
