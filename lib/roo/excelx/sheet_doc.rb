@@ -39,8 +39,13 @@ module Roo
       def each_cell(row_xml)
         return [] unless row_xml
         row_xml.children.each do |cell_element|
-          key = ::Roo::Utils.ref_to_key(cell_element['r'])
-          yield cell_from_xml(cell_element, hyperlinks(@relationships)[key])
+          # If you're sure you're not going to need this hyperlinks you can discard it
+          hyperlinks = unless @options[:no_hyperlinks]
+                         key = ::Roo::Utils.ref_to_key(cell_element['r'])
+                         hyperlinks(@relationships)[key]
+                       end
+
+          yield cell_from_xml(cell_element, hyperlinks)
         end
       end
 
