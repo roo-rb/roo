@@ -1,12 +1,17 @@
 language: ruby
 rvm:
-  - 2.0.0
-  - 2.1.8
   - 2.2.4
   - ruby-head
   - jruby-19mode # JRuby in 1.9 mode
   - rbx-2
 matrix:
+  include:
+    - rvm: 2.0.0
+      gemfile:
+        - Gemfile_ruby2
+    - rvm: 2.1.8
+      gemfile:
+        - Gemfile_ruby2
   allow_failures:
     - rvm: ruby-head
     - rvm: jruby-19mode
