@@ -1,8 +1,13 @@
 ## Unreleased
+
+## [2.5.0] 2016-08-21
 ### Fixed
-- Remove tempdirs via finalizers on garbage collection. This cleans them up in
-  all known cases, rather than just when the #close method is called. The #close
-  method can be used to cleanup early. [326](https://github.com/roo-rb/roo/issues/326)
+- Remove tempdirs via finalizers on garbage collection. This cleans them up in all known cases, rather than just when the #close method is called. The #close method can be used to cleanup early. [329](https://github.com/roo-rb/roo/pull/329)
+- Fixed README.md typo [318](https://github.com/roo-rb/roo/pull/318)
+- Parse sheets in ODS files once to improve performance [320](https://github.com/roo-rb/roo/pull/320)
+- Fix some Cell conversion issues [324](https://github.com/roo-rb/roo/pull/324) and [331](https://github.com/roo-rb/roo/pull/331)
+- Improved memory performance [332](https://github.com/roo-rb/roo/pull/332)
+- Added `no_hyperlinks` option to improve streamig performance [319](https://github.com/roo-rb/roo/pull/319) and [333](https://github.com/roo-rb/roo/pull/333)
 
 ### Deprecations
 - Roo::Base::TEMP_PREFIX should be accessed via Roo::TEMP_PREFIX
