@@ -3,6 +3,14 @@ require 'roo/excelx/extractor'
 module Roo
   class Excelx
     class SharedStrings < Excelx::Extractor
+
+      COMMON_STRINGS = {
+        t: "t",
+        r: "r",
+        html_tag_open: "<html>",
+        html_tag_closed: "</html>"
+      }
+
       def [](index)
         to_a[index]
       end
@@ -26,18 +34,17 @@ module Roo
       def fix_invalid_shared_strings(doc)
         invalid = { '_x000D_'  => "\n" }
         xml = doc.to_s
+        return doc unless xml[/#{invalid.keys.join('|')}/]
 
-        if xml[/#{invalid.keys.join('|')}/]
-          @doc = ::Nokogiri::XML(xml.gsub(/#{invalid.keys.join('|')}/, invalid))
-        end
+        ::Nokogiri::XML(xml.gsub(/#{invalid.keys.join('|')}/, invalid))
       end
 
       def extract_shared_strings
         return [] unless doc_exists?
 
-        fix_invalid_shared_strings(doc)
+        document = fix_invalid_shared_strings(doc)
         # read the shared strings xml document
-        doc.xpath('/sst/si').map do |si|
+        document.xpath('/sst/si').map do |si|
           shared_string = ''
           si.children.each do |elem|
             case elem.name
