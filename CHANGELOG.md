@@ -1,5 +1,9 @@
 ## Unreleased
 
+## [2.5.1] 2016-08-26
+### Fixed
+- Fixed NameError. [337](https://github.com/roo-rb/roo/pull/337)
+
 ## [2.5.0] 2016-08-21
 ### Fixed
 - Remove tempdirs via finalizers on garbage collection. This cleans them up in all known cases, rather than just when the #close method is called. The #close method can be used to cleanup early. [329](https://github.com/roo-rb/roo/pull/329)
