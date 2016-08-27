@@ -545,7 +545,7 @@ class Roo::Base
 
   def make_tmpdir(prefix = nil, root = nil, &block)
     warn '[DEPRECATION] extend Roo::Tempdir and use its .make_tempdir instead'
-    prefix = "#{TEMP_PREFIX}#{prefix}"
+    prefix = "#{Roo::TEMP_PREFIX}#{prefix}"
     root ||= ENV['ROO_TMP']
 
     if block_given?
