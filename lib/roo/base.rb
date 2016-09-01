@@ -362,14 +362,17 @@ class Roo::Base
         yield row(line)
       end
     else
+      offset = options.delete(:offset)
       clean_sheet_if_need(options)
       search_or_set_header(options)
       headers = @headers ||
                 Hash[(first_column..last_column).map do |col|
                   [cell(@header_line, col), col]
                 end]
-
-      @header_line.upto(last_row) do |line|
+                
+      start_line = @header_line
+      start_line += offset.to_i if offset.present?
+      start_line.upto(last_row) do |line|
         yield(Hash[headers.map { |k, v| [k, cell(line, v)] }])
       end
     end
@@ -388,7 +391,7 @@ class Roo::Base
     line_no = 0
     each do |row|
       line_no += 1
-      headers = query.map { |q| row.grep(q)[0] }.compact
+      headers = query.map { |q| q.is_a?(Integer) ? row[q] : row.grep(q)[0] }.compact
 
       if headers.length == query.length
         @header_line = line_no
