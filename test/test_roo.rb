@@ -2109,4 +2109,9 @@ where the expected result is
     with_each_spreadsheet(:name=>'non_existent_file', :ignore_errors=>true) do |oo|; end
     assert_equal Dir.open(Dir.tmpdir).to_a, old_temp_files
   end
+
+  def test_name_with_leading_slash
+    xlsx = Roo::Excelx.new(File.join(TESTDIR,'name_with_leading_slash.xlsx'))
+    assert_equal 1, xlsx.sheets.count
+  end
 end # class
