@@ -363,7 +363,7 @@ module Roo
     def extract_sheets_in_order(entries, sheet_ids, sheets, tmpdir)
       (sheet_ids & sheets.keys).each_with_index do |id, i|
         name = sheets[id]
-        entry = entries.find { |e| e.name =~ /#{name}$/ }
+        entry = entries.find { |e| "/#{e.name}" =~ /#{name}$/ }
         path = "#{tmpdir}/roo_sheet#{i + 1}"
         sheet_files << path
         @sheet_files << path
