@@ -41,6 +41,14 @@ class Roo::CSV < Roo::Base
     @options[:csv_options] || {}
   end
 
+  def set_value(row, col, value, _sheet)
+    @cell[[row, col]] = value
+  end
+
+  def set_type(row, col, type, _sheet)
+    @cell_type[[row, col]] = type
+  end
+
   private
 
   TYPE_MAP = {

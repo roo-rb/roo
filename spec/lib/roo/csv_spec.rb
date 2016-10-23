@@ -66,4 +66,16 @@ describe Roo::CSV do
       end
     end
   end
+
+  describe '#set_value' do
+    it 'returns the cell value' do
+      expect(csv.set_value('A', 1, 'some-value', nil)).to eq('some-value')
+    end
+  end
+
+  describe '#set_type' do
+    it 'returns the cell type' do
+      expect(csv.set_type('A', 1, 'some-type', nil)).to eq('some-type')
+    end
+  end
 end
