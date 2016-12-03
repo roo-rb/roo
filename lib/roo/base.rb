@@ -287,10 +287,14 @@ class Roo::Base
                 first_column.upto(last_column) do |col|
                   next if empty?(row, col)
 
+                  font = font(row, col)
                   x.cell(cell(row, col),
                            row: row,
                            column: col,
-                           type: celltype(row, col))
+                           type: celltype(row, col),
+                           bold: font.bold,
+                           italic: font.italic,
+                           underline: font.underline)
                 end
               end
             end
