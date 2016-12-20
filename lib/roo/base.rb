@@ -605,7 +605,7 @@ class Roo::Base
   end
 
   def uri?(filename)
-    filename.start_with?('http://', 'https://')
+    filename.start_with?('http://', 'https://', 'ftp://')
   rescue
     false
   end
