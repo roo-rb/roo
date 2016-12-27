@@ -1056,14 +1056,14 @@ Sheet 3:
   def test_bug_to_xml_with_empty_sheets
     with_each_spreadsheet(:name=>'emptysheets', :format=>[:openoffice, :excelx]) do |oo|
       oo.sheets.each { |sheet|
-        assert_equal nil, oo.first_row, "first_row not nil in sheet #{sheet}"
-        assert_equal nil, oo.last_row, "last_row not nil in sheet #{sheet}"
-        assert_equal nil, oo.first_column, "first_column not nil in sheet #{sheet}"
-        assert_equal nil, oo.last_column, "last_column not nil in sheet #{sheet}"
-        assert_equal nil, oo.first_row(sheet), "first_row not nil in sheet #{sheet}"
-        assert_equal nil, oo.last_row(sheet), "last_row not nil in sheet #{sheet}"
-        assert_equal nil, oo.first_column(sheet), "first_column not nil in sheet #{sheet}"
-        assert_equal nil, oo.last_column(sheet), "last_column not nil in sheet #{sheet}"
+        assert_nil oo.first_row, "first_row not nil in sheet #{sheet}"
+        assert_nil oo.last_row, "last_row not nil in sheet #{sheet}"
+        assert_nil oo.first_column, "first_column not nil in sheet #{sheet}"
+        assert_nil oo.last_column, "last_column not nil in sheet #{sheet}"
+        assert_nil oo.first_row(sheet), "first_row not nil in sheet #{sheet}"
+        assert_nil oo.last_row(sheet), "last_row not nil in sheet #{sheet}"
+        assert_nil oo.first_column(sheet), "first_column not nil in sheet #{sheet}"
+        assert_nil oo.last_column(sheet), "last_column not nil in sheet #{sheet}"
       }
       oo.to_xml
     end
