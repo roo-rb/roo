@@ -25,6 +25,6 @@ class TestRooExcelxCellTime < Minitest::Test
 
   def test_value
     cell = time.new('0.0751', nil, [:numeric_or_formula, 'h:mm'], 6, nil, base_date, nil)
-    assert_kind_of Fixnum, cell.value
+    assert_kind_of Integer, cell.value
   end
 end
