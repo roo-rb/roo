@@ -2,6 +2,8 @@ source 'https://rubygems.org'
 
 gemspec
 
+gem 'nokogiri', "< 1.7.0"
+
 group :test do
   # additional testing libs
   gem 'webmock'
