@@ -18,7 +18,7 @@ Install as a gem
 Or add it to your Gemfile
 
 ```ruby
-gem 'roo', '~> 2.5.0'
+gem "roo", "~> 2.6.0"
 ```
 ## Usage
 
@@ -256,10 +256,11 @@ Roo's public methods have stayed relatively consistent between 1.13.x and 2.0.0,
 ## Contributing
 ### Features
 1. Fork it ( https://github.com/[my-github-username]/roo/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'My new feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+2. Install it (`bundle install --with local_development`)
+3. Create your feature branch (`git checkout -b my-new-feature`)
+4. Commit your changes (`git commit -am 'My new feature'`)
+5. Push to the branch (`git push origin my-new-feature`)
+6. Create a new Pull Request
 
 ### Issues
 

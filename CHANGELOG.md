@@ -1,12 +1,23 @@
 ## Unreleased
 
+## [2.6.0] 2016-12-28
+### Fixed
+- Fixed error if sheet name starts with a slash [348](https://github.com/roo-rb/roo/pull/348)
+- Fixed loading to support files on ftp [355](https://github.com/roo-rb/roo/pull/355)
+- Fixed Ruby 2.4.0 deprecation warnings [356](https://github.com/roo-rb/roo/pull/356)
+- properly return date as string [359](https://github.com/roo-rb/roo/pull/359)
+
+### Added
+- Cell values can be set in a CSV [350](https://github.com/roo-rb/roo/pull/350/)
+- Raise an error Roo::Excelx::Extractor document is missing [358](https://github.com/roo-rb/roo/pull/358/)
+
 ## [2.5.1] 2016-08-26
 ### Fixed
 - Fixed NameError. [337](https://github.com/roo-rb/roo/pull/337)
 
 ## [2.5.0] 2016-08-21
 ### Fixed
-- Remove tempdirs via finalizers on garbage collection. This cleans them up in all known cases, rather than just when the #close method is called. The #close method can be used to cleanup early. [329](https://github.com/roo-rb/roo/pull/329)
+- Remove temporary directories via finalizers on garbage collection. This cleans them up in all known cases, rather than just when the #close method is called. The #close method can be used to cleanup early. [329](https://github.com/roo-rb/roo/pull/329)
 - Fixed README.md typo [318](https://github.com/roo-rb/roo/pull/318)
 - Parse sheets in ODS files once to improve performance [320](https://github.com/roo-rb/roo/pull/320)
 - Fix some Cell conversion issues [324](https://github.com/roo-rb/roo/pull/324) and [331](https://github.com/roo-rb/roo/pull/331)
@@ -16,10 +27,10 @@
 ### Deprecations
 - Roo::Base::TEMP_PREFIX should be accessed via Roo::TEMP_PREFIX
 - The private Roo::Base#make_tempdir is now available at the class level in
-  classes that use tempdirs, added via Roo::Tempdir
+  classes that use temporary directories, added via Roo::Tempdir
 =======
 ### Added
-- Discard hiperlinks lookups to allow streaming parsing without loading whole files
+- Discard hyperlinks lookups to allow streaming parsing without loading whole files
 
 ## [2.4.0] 2016-05-14
 ### Fixed  
@@ -41,7 +52,7 @@
 
 ## [2.3.1] - 2016-01-08
 ### Fixed
-- Properly parse sci-notation number like 1E-3 [#288](https://github.com/roo-rb/roo/pull/288)
+- Properly parse scientific-notation number like 1E-3 [#288](https://github.com/roo-rb/roo/pull/288)
 - Include all tests in default rake run [#283](https://github.com/roo-rb/roo/pull/283)
 - Fix zero-padded numbers for Excelx [#282](https://github.com/roo-rb/roo/pull/282)
 
