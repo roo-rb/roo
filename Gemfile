@@ -6,7 +6,7 @@ group :test do
   # additional testing libs
   gem 'webmock'
   gem 'shoulda'
-  gem 'activesupport', '< 5.0.0'
+  gem 'activesupport', '< 5.1'
   gem 'rspec', '>= 3.0.0'
   gem 'vcr'
   gem 'simplecov', '>= 0.9.0', require: false
