@@ -6,4 +6,6 @@ module Roo
   # Raised when Roo cannot find a header row that matches the given column
   # name(s).
   class HeaderRowNotFoundError < Error; end
+
+  class FileNotFound < Error; end
 end
