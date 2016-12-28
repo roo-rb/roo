@@ -524,4 +524,14 @@ describe Roo::Excelx do
       expect{ subject }.to_not raise_error
     end
   end
+
+  describe 'opening a file with white space in the styles.xml' do
+    let(:path) { 'test/files/style_nodes_with_white_spaces.xlsx' }
+    subject(:xlsx) do
+      Roo::Spreadsheet.open(path, expand_merged_ranges: true, extension: :xlsx)
+    end
+    it 'should properly recognize formats' do
+      expect(subject.sheet(0).excelx_format(2,1)).to eq 'm/d/yyyy" "h:mm:ss" "AM/PM'
+    end
+  end
 end

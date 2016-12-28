@@ -51,7 +51,7 @@ module Roo
           xfs.children.map do |xf|
             xf['numFmtId']
           end
-        end
+        end.compact
       end
 
       def extract_num_fmts
