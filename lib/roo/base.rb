@@ -139,6 +139,31 @@ class Roo::Base
     result
   end
 
+  #Immitate the to_yaml function to generate a valid json output
+  #As demonstrated by https://gist.github.com/spraints/2895311
+  #Using += seems to be a bit faster than <<
+
+    def to_json(from_row = nil, from_column = nil, to_row = nil, to_column = nil, sheet = default_sheet)
+      return '' unless first_row # empty result if there is no first_row in a sheet
+      from_row ||= first_row(sheet)
+      to_row ||= last_row(sheet)
+      from_column ||= first_column(sheet)
+      to_column ||= last_column(sheet)
+      headers = row(first_row(sheet),sheet)
+      result = "["
+      from_row.upto(to_row) do |row|
+        result << "{"
+        #iterating over columns
+        from_column.upto(to_column) do |col|
+          value = cell(row, col, sheet)
+          result << '"' << "#{headers[col-1]}" << '":"' << " #{value} " << '", '
+        end
+        result << "},"
+      end
+      # data clean up  before leaving
+      result.gsub(", }", "}")[0..-2] + "]"
+    end
+
   # write the current spreadsheet to stdout or into a file
   def to_csv(filename = nil, separator = ',', sheet = default_sheet)
     if filename
