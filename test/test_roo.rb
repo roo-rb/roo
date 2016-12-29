@@ -1,17 +1,3 @@
-# encoding: utf-8
-# damit keine falschen Vermutungen aufkommen: Ich habe religioes rein gar nichts
-# mit diesem Bibelbund zu tun, aber die hatten eine ziemlich grosse
-# Spreadsheet-Datei mit ca. 3500 Zeilen oeffentlich im Netz, die sich ganz gut
-# zum Testen eignete.
-#
-#--
-# these test cases were developed to run under Linux OS, some commands
-# (like 'diff') must be changed (or commented out ;-)) if you want to run
-# the tests under another OS
-#
-
-#TODO
-# Look at formulas in excel - does not work with date/time
 
 # Dump warnings that come from the test to open files
 # with the wrong spreadsheet class
@@ -23,8 +9,6 @@ require 'test_helper'
 require 'stringio'
 
 class TestRoo < Minitest::Test
-
-  EXCELX       = true   # do Excelx Tests? (.xlsx files)
   LIBREOFFICE  = true   # do LibreOffice tests? (.ods files)
   CSV          = true   # do CSV tests? (.csv files)
 
@@ -426,12 +410,6 @@ class TestRoo < Minitest::Test
     with_each_spreadsheet(:name=>'Bibelbund1', :format=>:openoffice) do |oo|
       assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
     end
-    #if EXCELX
-    #    #Datei gibt es noch nicht
-    #    oo = Roo::Excelx.new(File.join(TESTDIR,"Bibelbund1.xlsx"))
-    #    oo.default_sheet = oo.sheets.first
-    #    assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
-    #end
   end
 
   # "/tmp/xxxx" darf man unter Windows nicht verwenden, weil das nicht erkannt
@@ -806,14 +784,6 @@ class TestRoo < Minitest::Test
     end
   end
 
-  def test_should_raise_file_not_found_error
-    if EXCELX
-      assert_raises(IOError) {
-        Roo::Excelx.new(File.join('testnichtvorhanden','Bibelbund.xlsx'))
-      }
-    end
-  end
-
   def test_bug_bbu
     with_each_spreadsheet(:name=>'bbu', :format=>[:openoffice, :excelx]) do |oo|
         assert_equal "File: bbu#{get_extension(oo)}
@@ -947,46 +917,6 @@ Sheet 3:
         } # end of sheet
         sheetname = oo.sheets[oo.sheets.index(sheetname)+1]
       }
-    end
-  end
-
-  def test_file_warning_default
-    if EXCELX
-      assert_raises(TypeError) { Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods")) }
-      assert_raises(TypeError) { Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls")) }
-    end
-  end
-
-  def test_file_warning_error
-    if EXCELX
-      assert_raises(TypeError) {
-        Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),
-          packed: false,
-          file_warning: :error)
-      }
-      assert_raises(TypeError) {
-        Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls"),
-          packed: false,
-          file_warning: :error)
-      }
-    end
-  end
-
-  def test_file_warning_warning
-    if EXCELX
-      assert_raises(ArgumentError) {
-        Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),
-        packed: false,
-        file_warning: :warning)
-      }
-    end
-  end
-
-  def test_file_warning_ignore
-    if EXCELX
-        assert Roo::Excelx.new(File.join(TESTDIR,"type_excelx.ods"),
-          packed: false,
-          file_warning: :ignore), "Should not throw an error"
     end
   end
 
@@ -1434,44 +1364,6 @@ Sheet 3:
     end
   end
 
-  # unter Windows soll es laut Bug-Reports nicht moeglich sein, eine Excel-Datei, die
-  # mit Excel.new geoeffnet wurde nach dem Processing anschliessend zu loeschen.
-  # Anmerkung: Das Spreadsheet-Gem erlaubt kein explizites Close von Spreadsheet-Dateien,
-  # was verhindern koennte, das die Datei geloescht werden kann.
-  # def test_bug_cannot_delete_opened_excel_sheet
-  #   with_each_spreadsheet(:name=>'simple_spreadsheet') do |oo|
-  #     'kopiere  nach temporaere Datei und versuche diese zu oeffnen und zu loeschen'
-  #   end
-  # end
-
-  def test_bug_xlsx_reference_cell
-
-    if EXCELX
-=begin
-    If cell A contains a string and cell B references cell A.  When reading the value of cell B, the result will be
-"0.0" instead of the value of cell A.
-
-With the attached test case, I ran the following code:
-spreadsheet = Roo::Excelx.new('formula_string_error.xlsx')
-spreadsheet.default_sheet = 'sheet1'
-p "A: #{spreadsheet.cell(1, 1)}"
-p "B: #{spreadsheet.cell(2, 1)}"
-
-with the following results
-"A: TestString"
-"B: 0.0"
-
-where the expected result is
-"A: TestString"
-"B: TestString"
-=end
-      xlsx = Roo::Excelx.new(File.join(TESTDIR, "formula_string_error.xlsx"))
-      xlsx.default_sheet = xlsx.sheets.first
-      assert_equal 'Teststring', xlsx.cell('a',1)
-      assert_equal 'Teststring', xlsx.cell('a',2)
-    end
-  end
-
   # #formulas of an empty sheet should return an empty array and not result in
   # an error message
   # 2011-06-24
@@ -1690,111 +1582,6 @@ where the expected result is
     with_each_spreadsheet(:name=>'bug-numbered-sheet-names', :format=>:excelx) do |oo|
       oo.each_with_pagename { }
     end
-  end
-
-  def test_parsing_xslx_from_numbers
-    return unless EXCELX
-    xlsx  = Roo::Excelx.new(File.join(TESTDIR, "numbers-export.xlsx"))
-
-    xlsx.default_sheet = xlsx.sheets.first
-    assert_equal 'Sheet 1', xlsx.cell('a',1)
-
-    # Another buggy behavior of Numbers 3.1: if a warkbook has more than a
-    # single sheet, all sheets except the first one will have an extra row and
-    # column added to the beginning. That's why we assert against cell B2 and
-    # not A1
-    xlsx.default_sheet = xlsx.sheets.last
-    assert_equal 'Sheet 2', xlsx.cell('b',2)
-  end
-
-  def test_expand_merged_range
-    return unless EXCELX
-    xlsx  = Roo::Excelx.new(File.join(TESTDIR, "merged_ranges.xlsx"), {:expand_merged_ranges => true})
-    for row in 3..7 do
-      for col in 'a'..'b'
-        if row > 3 && row < 7 && col == 'a'
-          assert_equal 'vertical1', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-    for row in 3..11 do
-      for col in 'f'..'h'
-        if row > 3 && row < 11 && col == 'g'
-          assert_equal 'vertical2', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-    for row in 3..5 do
-      for col in 'b'..'f'
-        if row == 4 && col > 'b' && col < 'f'
-          assert_equal 'horizontal', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-    for row in 8..13 do
-      for col in 'a'..'e'
-        if row > 8 && row < 13 && col > 'a' && col < 'e'
-          assert_equal 'block', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-  end
-
-  def test_noexpand_merged_range
-    return unless EXCELX
-    xlsx  = Roo::Excelx.new(File.join(TESTDIR, "merged_ranges.xlsx"))
-    for row in 3..7 do
-      for col in 'a'..'b'
-        if row == 4 && col == 'a'
-          assert_equal 'vertical1', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-    for row in 3..11 do
-      for col in 'f'..'h'
-        if row == 4 && col == 'g'
-          assert_equal 'vertical2', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-    for row in 3..5 do
-      for col in 'b'..'f'
-        if row == 4 && col == 'c'
-          assert_equal 'horizontal', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-    for row in 8..13 do
-      for col in 'a'..'e'
-        if row == 9 && col == 'b'
-          assert_equal 'block', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-  end
-
-  def test_open_stream
-    return unless EXCELX
-    file_contents = File.read File.join(TESTDIR, fixture_filename(:numbers1, :excelx)), encoding: 'BINARY'
-    stream = StringIO.new(file_contents)
-    xlsx = Roo::Excelx.new(stream)
-    assert_equal ["Tabelle1","Name of Sheet 2","Sheet3","Sheet4","Sheet5"], xlsx.sheets
   end
 
   def test_close
