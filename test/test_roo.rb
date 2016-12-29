@@ -9,9 +9,6 @@ require 'test_helper'
 require 'stringio'
 
 class TestRoo < Minitest::Test
-  LIBREOFFICE  = true   # do LibreOffice tests? (.ods files)
-  CSV          = true   # do CSV tests? (.csv files)
-
   FORMATS = [
     :excelx,
     :excelxm,
@@ -53,19 +50,6 @@ class TestRoo < Minitest::Test
       rescue => e
         raise e, "#{e.message} for #{format}", e.backtrace unless options[:ignore_errors]
       end
-    end
-  end
-
-  def test_sheets_csv
-    if CSV
-      oo = Roo::CSV.new(File.join(TESTDIR,'numbers1.csv'))
-      assert_equal ["default"], oo.sheets
-      assert_raises(RangeError) { oo.default_sheet = "no_sheet" }
-      assert_raises(TypeError)  { oo.default_sheet = [1,2,3] }
-      oo.sheets.each { |sh|
-        oo.default_sheet = sh
-        assert_equal sh, oo.default_sheet
-      }
     end
   end
 
@@ -147,14 +131,6 @@ class TestRoo < Minitest::Test
   def test_office_version
     with_each_spreadsheet(:name=>'numbers1', :format=>:openoffice) do |oo|
       assert_equal "1.0", oo.officeversion
-    end
-  end
-
-  def test_libre_office
-    if LIBREOFFICE
-      oo = Roo::LibreOffice.new(File.join(TESTDIR, "numbers1.ods"))
-      oo.default_sheet = oo.sheets.first
-      assert_equal 41, oo.cell('a',12)
     end
   end
 
@@ -1413,79 +1389,6 @@ Sheet 3:
     end
   end
 
-  # 2011-08-11
-  def test_bug_openoffice_formula_missing_letters
-    if LIBREOFFICE
-      # Dieses Dokument wurde mit LibreOffice angelegt.
-      # Keine Ahnung, ob es damit zusammenhaengt, das diese
-      # Formeln anders sind, als in der Datei formula.ods, welche
-      # mit OpenOffice angelegt wurde.
-      # Bei den OpenOffice-Dateien ist in diesem Feld in der XML-
-      # Datei of: als Prefix enthalten, waehrend in dieser Datei
-      # irgendetwas mit oooc: als Prefix verwendet wird.
-      oo = Roo::OpenOffice.new(File.join(TESTDIR,'dreimalvier.ods'))
-      oo.default_sheet = oo.sheets.first
-      assert_equal '=SUM([.A1:.D1])', oo.formula('e',1)
-      assert_equal '=SUM([.A2:.D2])', oo.formula('e',2)
-      assert_equal '=SUM([.A3:.D3])', oo.formula('e',3)
-      assert_equal [
-       [1,5,'=SUM([.A1:.D1])'],
-        [2,5,'=SUM([.A2:.D2])'],
-        [3,5,'=SUM([.A3:.D3])'],
-      ], oo.formulas
-
-    end
-  end
-
-=begin
-  def test_postprocessing_and_types_in_csv
-    if CSV
-      oo = CSV.new(File.join(TESTDIR,'csvtypes.csv'))
-      oo.default_sheet = oo.sheets.first
-      assert_equal(1,oo.a1)
-      assert_equal(:float,oo.celltype('A',1))
-      assert_equal("2",oo.b1)
-      assert_equal(:string,oo.celltype('B',1))
-      assert_equal("Mayer",oo.c1)
-      assert_equal(:string,oo.celltype('C',1))
-    end
-  end
-=end
-
-=begin
-  def test_postprocessing_with_callback_function
-    if CSV
-      oo = CSV.new(File.join(TESTDIR,'csvtypes.csv'))
-      oo.default_sheet = oo.sheets.first
-
-      #
-      assert_equal(1, oo.last_column)
-    end
-  end
-=end
-
-=begin
-  def x_123
-  class ::CSV
-    def cell_postprocessing(row,col,value)
-      if row < 3
-        return nil
-      end
-      return value
-    end
-  end
-  end
-=end
-
-  def test_nil_rows_and_lines_csv
-    # x_123
-    if CSV
-      oo = Roo::CSV.new(File.join(TESTDIR,'Bibelbund.csv'))
-      oo.default_sheet = oo.sheets.first
-      assert_equal 1, oo.first_row
-    end
-  end
-
   def test_bug_pfand_from_windows_phone_xlsx
     return if defined? JRUBY_VERSION
     with_each_spreadsheet(:name=>'Pfand_from_windows_phone', :format=>:excelx) do |oo|
@@ -1569,15 +1472,6 @@ Sheet 3:
     return letter,number
   end
 
-  def test_csv_parsing_with_headers
-    return unless CSV
-    headers = ["TITEL", "VERFASSER", "OBJEKT", "NUMMER", "SEITE", "INTERNET", "PC", "KENNUNG"]
-
-    oo = Roo::Spreadsheet.open(File.join(TESTDIR, 'Bibelbund.csv'))
-    parsed = oo.parse(:headers => true)
-    assert_equal headers, parsed[1].keys
-  end
-
   def test_bug_numbered_sheet_names
     with_each_spreadsheet(:name=>'bug-numbered-sheet-names', :format=>:excelx) do |oo|
       oo.each_with_pagename { }
@@ -1592,16 +1486,29 @@ Sheet 3:
     end
   end
 
+  # NOTE: Ruby 2.4.0 changed the way GC works. The last Roo object created by
+  #       with_each_spreadsheet wasn't getting GC'd until after the process
+  #       ended.
+  #
+  #       That behavior change broke this test. In order to fix it, I forked the
+  #       process and passed the temp directories from the forked process in
+  #       order to check if they were removed properly.
   def test_finalize
-    tempdirs = []
-    begin
-      with_each_spreadsheet(:name=>'numbers1') do |oo|
-        tempdirs << oo.instance_variable_get('@tmpdir')
+    read, write = IO.pipe
+    Process.fork do
+      with_each_spreadsheet(name: "numbers1") do |oo|
+        write.puts oo.instance_variable_get("@tmpdir")
       end
-      GC.start
     end
+
+    Process.wait
+    write.close
+    tempdirs = read.read.split("\n")
+    read.close
+
+    refute tempdirs.empty?
     tempdirs.each do |tempdir|
-      assert !File.exists?(tempdir), "Expected #{tempdir} to be cleaned up, but it still exists"
+      refute File.exist?(tempdir), "Expected #{tempdir} to be cleaned up, but it still exists"
     end
   end
 

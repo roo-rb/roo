@@ -13,7 +13,6 @@ class TestRooExcelx < Minitest::Test
 
     start_local_server(file) do
       spreadsheet = roo_class.new(url)
-      spreadsheet.default_sheet = spreadsheet.sheets.first
       assert_equal "Task 1", spreadsheet.cell("f", 4)
     end
   end
@@ -67,7 +66,6 @@ class TestRooExcelx < Minitest::Test
     # "A: TestString"
     # "B: TestString"
     xlsx = Roo::Excelx.new(File.join(TESTDIR, "formula_string_error.xlsx"))
-    xlsx.default_sheet = xlsx.sheets.first
     assert_equal "Teststring", xlsx.cell("a", 1)
     assert_equal "Teststring", xlsx.cell("a", 2)
   end
