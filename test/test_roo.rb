@@ -24,7 +24,6 @@ require 'stringio'
 
 class TestRoo < Minitest::Test
 
-  OPENOFFICE   = true   # do OpenOffice-Spreadsheet Tests? (.ods files)
   EXCELX       = true   # do Excelx Tests? (.xlsx files)
   LIBREOFFICE  = true   # do LibreOffice tests? (.ods files)
   CSV          = true   # do CSV tests? (.csv files)
@@ -375,14 +374,6 @@ class TestRoo < Minitest::Test
       assert_equal 42, oo.cell('B',4)
       assert_equal 43, oo.cell('C',4)
       assert_equal 44, oo.cell('D',4)
-    end
-  end
-
-  def test_openoffice_zipped
-    if OPENOFFICE
-      oo = Roo::OpenOffice.new(File.join(TESTDIR,"bode-v1.ods.zip"), packed: :zip)
-      assert oo
-      assert_equal 'ist "e" im Nenner von H(s)', oo.cell('b', 5)
     end
   end
 
@@ -816,11 +807,6 @@ class TestRoo < Minitest::Test
   end
 
   def test_should_raise_file_not_found_error
-    if OPENOFFICE
-      assert_raises(IOError) {
-        Roo::OpenOffice.new(File.join('testnichtvorhanden','Bibelbund.ods'))
-      }
-    end
     if EXCELX
       assert_raises(IOError) {
         Roo::Excelx.new(File.join('testnichtvorhanden','Bibelbund.xlsx'))
@@ -965,12 +951,6 @@ Sheet 3:
   end
 
   def test_file_warning_default
-    if OPENOFFICE
-      assert_raises(TypeError, "test/files/numbers1.xls is not an openoffice spreadsheet") {
-        Roo::OpenOffice.new(File.join(TESTDIR,"numbers1.xls"))
-      }
-      assert_raises(TypeError) { Roo::OpenOffice.new(File.join(TESTDIR,"numbers1.xlsx")) }
-    end
     if EXCELX
       assert_raises(TypeError) { Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods")) }
       assert_raises(TypeError) { Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls")) }
@@ -978,19 +958,6 @@ Sheet 3:
   end
 
   def test_file_warning_error
-    if OPENOFFICE
-      assert_raises(TypeError) {
-        Roo::OpenOffice.new(File.join(TESTDIR,"numbers1.xls"),
-          packed: false,
-          file_warning: :error
-        )
-      }
-      assert_raises(TypeError) {
-        Roo::OpenOffice.new(File.join(TESTDIR,"numbers1.xlsx"),
-          packed: false,
-          file_warning: :error)
-      }
-    end
     if EXCELX
       assert_raises(TypeError) {
         Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),
@@ -1006,13 +973,6 @@ Sheet 3:
   end
 
   def test_file_warning_warning
-    if OPENOFFICE
-      assert_raises(ArgumentError) {
-        Roo::OpenOffice.new(File.join(TESTDIR,"numbers1.xlsx"),
-        packed: false,
-        file_warning: :warning)
-      }
-    end
     if EXCELX
       assert_raises(ArgumentError) {
         Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),
@@ -1023,21 +983,10 @@ Sheet 3:
   end
 
   def test_file_warning_ignore
-    if OPENOFFICE
-      # Files, die eigentlich OpenOffice-
-      # Files sind, aber die falsche Endung haben.
-      # Es soll ohne Fehlermeldung oder Warnung
-      # oder Abbruch die Datei geoffnet werden
-
-      # xlsx
-        Roo::OpenOffice.new(File.join(TESTDIR,"type_openoffice.xlsx"),
-          packed: false,
-          file_warning: :ignore)
-    end
     if EXCELX
-        Roo::Excelx.new(File.join(TESTDIR,"type_excelx.ods"),
+        assert Roo::Excelx.new(File.join(TESTDIR,"type_excelx.ods"),
           packed: false,
-          file_warning: :ignore)
+          file_warning: :ignore), "Should not throw an error"
     end
   end
 
@@ -1695,50 +1644,6 @@ where the expected result is
     end
   end
 
-  ## PREVIOUSLY SKIPPED
-
-  # don't have these test files so removing. We can easily add in
-  # by modifying with_each_spreadsheet
-  GNUMERIC_ODS = false  # do gnumeric with ods files Tests?
-  OPENOFFICEWRITE = false # experimental: write access with OO-Documents
-
-  def test_writeopenoffice
-    if OPENOFFICEWRITE
-      File.cp(File.join(TESTDIR,"numbers1.ods"),
-        File.join(TESTDIR,"numbers2.ods"))
-      File.cp(File.join(TESTDIR,"numbers2.ods"),
-        File.join(TESTDIR,"bak_numbers2.ods"))
-      oo = OpenOffice.new(File.join(TESTDIR,"numbers2.ods"))
-      oo.default_sheet = oo.sheets.first
-      oo.first_row.upto(oo.last_row) {|y|
-        oo.first_column.upto(oo.last_column) {|x|
-          unless oo.empty?(y,x)
-            # oo.set(y, x, oo.cell(y,x) + 7) if oo.celltype(y,x) == "float"
-            oo.set(y, x, oo.cell(y,x) + 7) if oo.celltype(y,x) == :float
-          end
-        }
-      }
-      oo.save
-
-      oo1 = Roo::OpenOffice.new(File.join(TESTDIR,"numbers2.ods"))
-      oo2 = Roo::OpenOffice.new(File.join(TESTDIR,"bak_numbers2.ods"))
-      #p oo2.to_s
-      assert_equal 999, oo2.cell('a',1), oo2.cell('a',1)
-      assert_equal oo2.cell('a',1) + 7, oo1.cell('a',1)
-      assert_equal oo2.cell('b',1)+7, oo1.cell('b',1)
-      assert_equal oo2.cell('c',1)+7, oo1.cell('c',1)
-      assert_equal oo2.cell('d',1)+7, oo1.cell('d',1)
-      assert_equal oo2.cell('a',2)+7, oo1.cell('a',2)
-      assert_equal oo2.cell('b',2)+7, oo1.cell('b',2)
-      assert_equal oo2.cell('c',2)+7, oo1.cell('c',2)
-      assert_equal oo2.cell('d',2)+7, oo1.cell('d',2)
-      assert_equal oo2.cell('e',2)+7, oo1.cell('e',2)
-
-      File.cp(File.join(TESTDIR,"bak_numbers2.ods"),
-        File.join(TESTDIR,"numbers2.ods"))
-    end
-  end
-
   def common_possible_bug_snowboard_cells(ss)
     assert_equal "A.", ss.cell(13,'A'), ss.class
     assert_equal 147, ss.cell(13,'f'), ss.class
@@ -1800,16 +1705,6 @@ where the expected result is
     # not A1
     xlsx.default_sheet = xlsx.sheets.last
     assert_equal 'Sheet 2', xlsx.cell('b',2)
-  end
-
-  def test_openoffice_encryption
-    if OPENOFFICE
-      assert_raises(ArgumentError) { Roo::LibreOffice.new(File.join(TESTDIR, "encrypted-letmein.ods")) }
-      assert_raises(ArgumentError) { Roo::LibreOffice.new(File.join(TESTDIR, "encrypted-letmein.ods"), :password => "badpassword") }
-      oo = Roo::LibreOffice.new(File.join(TESTDIR, "encrypted-letmein.ods"), :password => "letmein")
-      oo.default_sheet = oo.sheets.first
-      assert_equal "Hello World", oo.cell('a',1)
-    end
   end
 
   def test_expand_merged_range
