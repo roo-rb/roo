@@ -68,7 +68,7 @@ def start_local_server(filename)
 
   t = Thread.new { Rack::Handler::WEBrick.run web_server, Port: TEST_RACK_PORT, Logger: WEBrick::BasicLog.new(nil,1) }
   # give the app a chance to startup
-  sleep(0.5)
+  sleep(1)
 
   yield
 ensure
