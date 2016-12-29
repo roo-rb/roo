@@ -36,7 +36,6 @@ class TestRoo < Minitest::Test
     :libreoffice
   ]
 
-  ONLINE = false
   LONG_RUN = false
 
   def fixture_filename(name, format)
@@ -376,17 +375,6 @@ class TestRoo < Minitest::Test
       assert_equal 42, oo.cell('B',4)
       assert_equal 43, oo.cell('C',4)
       assert_equal 44, oo.cell('D',4)
-    end
-  end
-
-  def test_openoffice_download_uri_and_zipped
-    if OPENOFFICE
-      if ONLINE
-        url = 'http://spazioinwind.libero.it/s2/rata.ods.zip'
-        sheet = Roo::OpenOffice.new(url, packed: :zip)
-        #has been changed: assert_equal 'ist "e" im Nenner von H(s)', sheet.cell('b', 5)
-        assert_in_delta 0.001, 505.14, sheet.cell('c', 33).to_f
-      end
     end
   end
 
@@ -1766,96 +1754,6 @@ where the expected result is
     assert_equal "168W", ss.cell(13,'o'), ss.class
   end
 
-  # def test_false_encoding
-  #   ex = Roo::Excel.new(File.join(TESTDIR,'false_encoding.xls'))
-  #   ex.default_sheet = ex.sheets.first
-  #   assert_equal "Sheet1", ex.sheets.first
-  #   ex.first_row.upto(ex.last_row) do |row|
-  #     ex.first_column.upto(ex.last_column) do |col|
-  #       content = ex.cell(row,col)
-  #       puts "#{row}/#{col}"
-  #       #puts content if ! ex.empty?(row,col) or ex.formula?(row,col)
-  #       if ex.formula?(row,col)
-  #         #! ex.empty?(row,col)
-  #         puts content
-  #       end
-  #     end
-  #   end
-  # end
-
-  def test_download_uri
-    if ONLINE
-      if OPENOFFICE
-        assert_raises(RuntimeError) {
-          Roo::OpenOffice.new("http://gibbsnichtdomainxxxxx.com/file.ods")
-        }
-      end
-      if EXCELX
-        assert_raises(RuntimeError) {
-          Roo::Excelx.new("http://gibbsnichtdomainxxxxx.com/file.xlsx")
-        }
-      end
-    end
-  end
-
-  def test_download_uri_with_query_string
-    dir = File.expand_path("#{File.dirname __FILE__}/files")
-    { xlsx: [EXCELX,      Roo::Excelx],
-      ods:  [OPENOFFICE,  Roo::OpenOffice]}.each do |extension, (flag, type)|
-        if flag
-          file = "#{dir}/simple_spreadsheet.#{extension}"
-          url = "http://test.example.com/simple_spreadsheet.#{extension}?query-param=value"
-          stub_request(:any, url).to_return(body: File.read(file))
-          spreadsheet = type.new(url)
-          spreadsheet.default_sheet = spreadsheet.sheets.first
-          assert_equal 'Task 1', spreadsheet.cell('f', 4)
-        end
-      end
-  end
-
-  # def test_soap_server
-  #   #threads = []
-  #   #threads << Thread.new("serverthread") do
-  #   fork do
-  #     p "serverthread started"
-  #     puts "in child, pid = #$$"
-  #     puts `/usr/bin/ruby rooserver.rb`
-  #     p "serverthread finished"
-  #   end
-  #   #threads << Thread.new("clientthread") do
-  #   p "clientthread started"
-  #   sleep 10
-  #   proxy = SOAP::RPC::Driver.new("http://localhost:12321","spreadsheetserver")
-  #   proxy.add_method('cell','row','col')
-  #   proxy.add_method('officeversion')
-  #   proxy.add_method('last_row')
-  #   proxy.add_method('last_column')
-  #   proxy.add_method('first_row')
-  #   proxy.add_method('first_column')
-  #   proxy.add_method('sheets')
-  #   proxy.add_method('set_default_sheet','s')
-  #   proxy.add_method('ferien_fuer_region', 'region')
-
-  #   sheets = proxy.sheets
-  #   p sheets
-  #   proxy.set_default_sheet(sheets.first)
-
-  #   assert_equal 1, proxy.first_row
-  #   assert_equal 1, proxy.first_column
-  #   assert_equal 187, proxy.last_row
-  #   assert_equal 7, proxy.last_column
-  #   assert_equal 42, proxy.cell('C',8)
-  #   assert_equal 43, proxy.cell('F',12)
-  #   assert_equal "1.0", proxy.officeversion
-  #   p "clientthread finished"
-  #   #end
-  #   #threads.each {|t| t.join }
-  #   puts "fertig"
-  #   Process.kill("INT",pid)
-  #   pid = Process.wait
-  #   puts "child terminated, pid= #{pid}, status= #{$?.exitstatus}"
-  # end
-
   def split_coord(s)
     letter = ""
     number = 0
@@ -1873,85 +1771,6 @@ where the expected result is
     end
     return letter,number
   end
-
-  #def sum(s,expression)
-  #  arg = expression.split(':')
-  #  b,z = split_coord(arg[0])
-  #  first_row = z
-  #  first_col = OpenOffice.letter_to_number(b)
-  #  b,z = split_coord(arg[1])
-  #  last_row = z
-  #  last_col = OpenOffice.letter_to_number(b)
-  #  result = 0
-  #  first_row.upto(last_row) {|row|
-  #    first_col.upto(last_col) {|col|
-  #      result = result + s.cell(row,col)
-  #    }
-  #  }
-  #  result
-  #end
-
-  #def test_dsl
-  #  s = OpenOffice.new(File.join(TESTDIR,"numbers1.ods"))
-  #  s.default_sheet = s.sheets.first
-  #
-  #    s.set 'a',1, 5
-  #    s.set 'b',1, 3
-  #    s.set 'c',1, 7
-  #    s.set('a',2, s.cell('a',1)+s.cell('b',1))
-  #    assert_equal 8, s.cell('a',2)
-  #
-  #    assert_equal 15, sum(s,'A1:C1')
-  #  end
-
-  #def test_create_spreadsheet1
-  #  name = File.join(TESTDIR,'createdspreadsheet.ods')
-  #  rm(name) if File.exists?(File.join(TESTDIR,'createdspreadsheet.ods'))
-  #  # anlegen, falls noch nicht existierend
-  #  s = OpenOffice.new(name,true)
-  #  assert File.exists?(name)
-  #end
-
-  #def test_create_spreadsheet2
-  #  # anlegen, falls noch nicht existierend
-  #  s = OpenOffice.new(File.join(TESTDIR,"createdspreadsheet.ods"),true)
-  #  s.set 'a',1,42
-  #  s.set 'b',1,43
-  #  s.set 'c',1,44
-  #  s.save
-  #
-  #  t = OpenOffice.new(File.join(TESTDIR,"createdspreadsheet.ods"))
-  #  assert_equal 42, t.cell(1,'a')
-  #  assert_equal 43, t.cell('b',1)
-  #  assert_equal 44, t.cell('c',3)
-  #end
-
-  # We don't have the bode-v1.xlsx test file
-  # #TODO: xlsx-Datei anpassen!
-  # def test_excelx_download_uri_and_zipped
-  #   #TODO: gezippte xlsx Datei online zum Testen suchen
-  #   if EXCELX
-  #     if ONLINE
-  #       url = 'http://stiny-leonhard.de/bode-v1.xlsx.zip'
-  #       excel = Roo::Excelx.new(url, :zip)
-  #       assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-  #     end
-  #   end
-  # end
-
-  # def test_excelx_zipped
-  #   # TODO: bode...xls bei Gelegenheit nach .xlsx konverieren lassen und zippen!
-  #   if EXCELX
-  #     # diese Datei gibt es noch nicht gezippt
-  #     excel = Roo::Excelx.new(File.join(TESTDIR,"bode-v1.xlsx.zip"), :zip)
-  #     assert excel
-  #     assert_raises(ArgumentError) {
-  #       assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-  #     }
-  #     excel.default_sheet = excel.sheets.first
-  #     assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-  #   end
-  # end
 
   def test_csv_parsing_with_headers
     return unless CSV

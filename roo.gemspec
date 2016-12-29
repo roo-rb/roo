@@ -22,4 +22,5 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'rake', '~> 10.1'
   spec.add_development_dependency 'minitest', '~> 5.4', '>= 5.4.3'
+  spec.add_development_dependency 'rack', '~> 1.6', '< 2.0.0'
 end

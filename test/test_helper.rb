@@ -8,12 +8,13 @@ require 'fileutils'
 require 'timeout'
 require 'logger'
 require 'date'
-require 'webmock/minitest'
 
 # require gem files
 require 'roo'
 
-TESTDIR =  File.join(File.dirname(__FILE__), 'files')
+TESTDIR = File.join(File.dirname(__FILE__), 'files')
+TEST_RACK_PORT = (ENV["ROO_TEST_PORT"] || 5000).to_i
+TEST_URL= "http://0.0.0.0:#{TEST_RACK_PORT}"
 
 # very simple diff implementation
 # output is an empty string if the files are equal
@@ -51,4 +52,25 @@ class File
       File.delete(filename)
     end
   end
+end
+
+def start_local_server(filename)
+  require "rack"
+  content_type = filename.split(".").last
+
+  web_server = Proc.new do |env|
+    [
+      "200",
+      { "Content-Type" => content_type },
+      [File.read("#{TESTDIR}/#{filename}")]
+    ]
+  end
+
+  t = Thread.new { Rack::Handler::WEBrick.run web_server, Port: TEST_RACK_PORT, Logger: WEBrick::BasicLog.new(nil,1) }
+  # give the app a chance to startup
+  sleep(0.5)
+
+  yield
+ensure
+  t.kill
 end
