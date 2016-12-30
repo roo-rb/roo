@@ -1495,13 +1495,13 @@ Sheet 3:
   #       order to check if they were removed properly.
   def test_finalize
     read, write = IO.pipe
-    Process.fork do
+    pid = Process.fork do
       with_each_spreadsheet(name: "numbers1") do |oo|
         write.puts oo.instance_variable_get("@tmpdir")
       end
     end
 
-    Process.wait
+    Process.wait(pid)
     write.close
     tempdirs = read.read.split("\n")
     read.close

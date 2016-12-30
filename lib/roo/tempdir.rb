@@ -11,14 +11,9 @@ module Roo
 
     def make_tempdir(object, prefix, root)
       root ||= ENV["ROO_TMP"]
-      # folder is cleaned up in .finalize_tempdirs
+      # NOTE: This folder is cleaned up by finalize_tempdirs.
       ::Dir.mktmpdir("#{Roo::TEMP_PREFIX}#{prefix}", root).tap do |tmpdir|
         @tempdirs ||= Hash.new { |h, k| h[k] = [] }
-
-        if @tempdirs[object.object_id].empty?
-          ObjectSpace.define_finalizer(object, method(:finalize_tempdirs))
-        end
-
         @tempdirs[object.object_id] << tmpdir
       end
     end

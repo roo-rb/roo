@@ -4,7 +4,6 @@ require 'tmpdir'
 require 'fileutils'
 require 'minitest/autorun'
 require 'shoulda'
-require 'fileutils'
 require 'timeout'
 require 'logger'
 require 'date'
@@ -14,7 +13,7 @@ require 'roo'
 
 TESTDIR = File.join(File.dirname(__FILE__), 'files')
 TEST_RACK_PORT = (ENV["ROO_TEST_PORT"] || 5000).to_i
-TEST_URL= "http://0.0.0.0:#{TEST_RACK_PORT}"
+TEST_URL = "http://0.0.0.0:#{TEST_RACK_PORT}"
 
 # very simple diff implementation
 # output is an empty string if the files are equal

@@ -4,12 +4,11 @@ require 'roo/link'
 require 'roo/tempdir'
 require 'roo/utils'
 require 'forwardable'
+require 'set'
 
 module Roo
   class Excelx < Roo::Base
     extend Roo::Tempdir
-
-    require 'set'
     extend Forwardable
 
     ERROR_VALUES = %w(#N/A #REF! #NAME? #DIV/0! #NULL! #VALUE! #NUM!).to_set
@@ -46,7 +45,13 @@ module Roo
         basename = find_basename(filename_or_stream)
       end
 
+      # NOTE: Create temp directory and allow Ruby to cleanup the temp directory
+      #       when the object is garbage collected. Initially, the finalizer was
+      #       created in the Roo::Tempdir module, but that led to a segfault
+      #       when testing in Ruby 2.4.0.
       @tmpdir = self.class.make_tempdir(self, basename, options[:tmpdir_root])
+      ObjectSpace.define_finalizer(self, self.class.finalize(object_id))
+
       @shared = Shared.new(@tmpdir)
       @filename = local_filename(filename_or_stream, @tmpdir, packed)
       process_zipfile(@filename || filename_or_stream)
