@@ -11,6 +11,9 @@ require 'date'
 
 # require gem files
 require 'roo'
+require "minitest/reporters"
+Minitest::Reporters.use!([Minitest::Reporters::DefaultReporter.new,
+                          Minitest::Reporters::SpecReporter.new]) unless defined? JRUBY_VERSION
 
 TESTDIR = File.join(File.dirname(__FILE__), 'files')
 
