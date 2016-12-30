@@ -12,8 +12,6 @@ matrix:
       gemfile: Gemfile_ruby2
     - rvm: 2.1.8
       gemfile: Gemfile_ruby2
-    - rvm: jruby-19mode
-      gemfile: Gemfile_ruby2
   allow_failures:
     - rvm: ruby-head
     - rvm: jruby-9.1.6.0
