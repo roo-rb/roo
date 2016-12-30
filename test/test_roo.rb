@@ -1,3 +1,4 @@
+# encoding: utf-8
 
 # Dump warnings that come from the test to open files
 # with the wrong spreadsheet class
@@ -1494,6 +1495,8 @@ Sheet 3:
   #       process and passed the temp directories from the forked process in
   #       order to check if they were removed properly.
   def test_finalize
+    skip if defined? JRUBY_VERSION
+
     read, write = IO.pipe
     pid = Process.fork do
       with_each_spreadsheet(name: "numbers1") do |oo|

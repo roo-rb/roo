@@ -4,16 +4,18 @@ rvm:
   - 2.3.1
   - 2.4.0
   - ruby-head
-  - jruby-19mode # JRuby in 1.9 mode
   - rbx-2
+  - jruby-9.1.6.0
 matrix:
   include:
     - rvm: 2.0.0
       gemfile: Gemfile_ruby2
     - rvm: 2.1.8
       gemfile: Gemfile_ruby2
+    - rvm: jruby-19mode
+      gemfile: Gemfile_ruby2
   allow_failures:
     - rvm: ruby-head
-    - rvm: jruby-19mode
+    - rvm: jruby-9.1.6.0
     - rvm: rbx-2
 bundler_args: --without local_development

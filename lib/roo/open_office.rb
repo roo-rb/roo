@@ -5,6 +5,7 @@ require 'zip/filesystem'
 require 'roo/font'
 require 'roo/tempdir'
 require 'base64'
+require 'openssl'
 
 module Roo
   class OpenOffice < Roo::Base
@@ -345,7 +346,7 @@ module Roo
     def find_cipher(*args)
       fail ArgumentError, 'Unknown algorithm ' + algorithm unless args[0] == 'http://www.w3.org/2001/04/xmlenc#aes256-cbc'
 
-      cipher = OpenSSL::Cipher.new('AES-256-CBC')
+      cipher = ::OpenSSL::Cipher.new('AES-256-CBC')
       cipher.decrypt
       cipher.padding = 0
       cipher.key     = find_cipher_key(cipher, *args[1..4])
@@ -358,7 +359,7 @@ module Roo
     def find_cipher_key(*args)
       fail ArgumentError, 'Unknown key derivation name ', args[1] unless args[1] == 'PBKDF2'
 
-      OpenSSL::PKCS5.pbkdf2_hmac_sha1(args[2], args[3], args[4], args[0].key_len)
+      ::OpenSSL::PKCS5.pbkdf2_hmac_sha1(args[2], args[3], args[4], args[0].key_len)
     end
 
     # Block decrypt raw bytes from the zip file based on the cipher
