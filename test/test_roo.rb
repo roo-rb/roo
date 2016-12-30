@@ -1,17 +1,3 @@
-# encoding: utf-8
-# damit keine falschen Vermutungen aufkommen: Ich habe religioes rein gar nichts
-# mit diesem Bibelbund zu tun, aber die hatten eine ziemlich grosse
-# Spreadsheet-Datei mit ca. 3500 Zeilen oeffentlich im Netz, die sich ganz gut
-# zum Testen eignete.
-#
-#--
-# these test cases were developed to run under Linux OS, some commands
-# (like 'diff') must be changed (or commented out ;-)) if you want to run
-# the tests under another OS
-#
-
-#TODO
-# Look at formulas in excel - does not work with date/time
 
 # Dump warnings that come from the test to open files
 # with the wrong spreadsheet class
@@ -23,12 +9,6 @@ require 'test_helper'
 require 'stringio'
 
 class TestRoo < Minitest::Test
-
-  OPENOFFICE   = true   # do OpenOffice-Spreadsheet Tests? (.ods files)
-  EXCELX       = true   # do Excelx Tests? (.xlsx files)
-  LIBREOFFICE  = true   # do LibreOffice tests? (.ods files)
-  CSV          = true   # do CSV tests? (.csv files)
-
   FORMATS = [
     :excelx,
     :excelxm,
@@ -36,7 +16,6 @@ class TestRoo < Minitest::Test
     :libreoffice
   ]
 
-  ONLINE = false
   LONG_RUN = false
 
   def fixture_filename(name, format)
@@ -71,19 +50,6 @@ class TestRoo < Minitest::Test
       rescue => e
         raise e, "#{e.message} for #{format}", e.backtrace unless options[:ignore_errors]
       end
-    end
-  end
-
-  def test_sheets_csv
-    if CSV
-      oo = Roo::CSV.new(File.join(TESTDIR,'numbers1.csv'))
-      assert_equal ["default"], oo.sheets
-      assert_raises(RangeError) { oo.default_sheet = "no_sheet" }
-      assert_raises(TypeError)  { oo.default_sheet = [1,2,3] }
-      oo.sheets.each { |sh|
-        oo.default_sheet = sh
-        assert_equal sh, oo.default_sheet
-      }
     end
   end
 
@@ -165,14 +131,6 @@ class TestRoo < Minitest::Test
   def test_office_version
     with_each_spreadsheet(:name=>'numbers1', :format=>:openoffice) do |oo|
       assert_equal "1.0", oo.officeversion
-    end
-  end
-
-  def test_libre_office
-    if LIBREOFFICE
-      oo = Roo::LibreOffice.new(File.join(TESTDIR, "numbers1.ods"))
-      oo.default_sheet = oo.sheets.first
-      assert_equal 41, oo.cell('a',12)
     end
   end
 
@@ -379,25 +337,6 @@ class TestRoo < Minitest::Test
     end
   end
 
-  def test_openoffice_download_uri_and_zipped
-    if OPENOFFICE
-      if ONLINE
-        url = 'http://spazioinwind.libero.it/s2/rata.ods.zip'
-        sheet = Roo::OpenOffice.new(url, packed: :zip)
-        #has been changed: assert_equal 'ist "e" im Nenner von H(s)', sheet.cell('b', 5)
-        assert_in_delta 0.001, 505.14, sheet.cell('c', 33).to_f
-      end
-    end
-  end
-
-  def test_openoffice_zipped
-    if OPENOFFICE
-      oo = Roo::OpenOffice.new(File.join(TESTDIR,"bode-v1.ods.zip"), packed: :zip)
-      assert oo
-      assert_equal 'ist "e" im Nenner von H(s)', oo.cell('b', 5)
-    end
-  end
-
   def test_bug_ric
     with_each_spreadsheet(:name=>'ric', :format=>:openoffice) do |oo|
       assert oo.empty?('A',1)
@@ -447,12 +386,6 @@ class TestRoo < Minitest::Test
     with_each_spreadsheet(:name=>'Bibelbund1', :format=>:openoffice) do |oo|
       assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
     end
-    #if EXCELX
-    #    #Datei gibt es noch nicht
-    #    oo = Roo::Excelx.new(File.join(TESTDIR,"Bibelbund1.xlsx"))
-    #    oo.default_sheet = oo.sheets.first
-    #    assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
-    #end
   end
 
   # "/tmp/xxxx" darf man unter Windows nicht verwenden, weil das nicht erkannt
@@ -827,19 +760,6 @@ class TestRoo < Minitest::Test
     end
   end
 
-  def test_should_raise_file_not_found_error
-    if OPENOFFICE
-      assert_raises(IOError) {
-        Roo::OpenOffice.new(File.join('testnichtvorhanden','Bibelbund.ods'))
-      }
-    end
-    if EXCELX
-      assert_raises(IOError) {
-        Roo::Excelx.new(File.join('testnichtvorhanden','Bibelbund.xlsx'))
-      }
-    end
-  end
-
   def test_bug_bbu
     with_each_spreadsheet(:name=>'bbu', :format=>[:openoffice, :excelx]) do |oo|
         assert_equal "File: bbu#{get_extension(oo)}
@@ -973,83 +893,6 @@ Sheet 3:
         } # end of sheet
         sheetname = oo.sheets[oo.sheets.index(sheetname)+1]
       }
-    end
-  end
-
-  def test_file_warning_default
-    if OPENOFFICE
-      assert_raises(TypeError, "test/files/numbers1.xls is not an openoffice spreadsheet") {
-        Roo::OpenOffice.new(File.join(TESTDIR,"numbers1.xls"))
-      }
-      assert_raises(TypeError) { Roo::OpenOffice.new(File.join(TESTDIR,"numbers1.xlsx")) }
-    end
-    if EXCELX
-      assert_raises(TypeError) { Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods")) }
-      assert_raises(TypeError) { Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls")) }
-    end
-  end
-
-  def test_file_warning_error
-    if OPENOFFICE
-      assert_raises(TypeError) {
-        Roo::OpenOffice.new(File.join(TESTDIR,"numbers1.xls"),
-          packed: false,
-          file_warning: :error
-        )
-      }
-      assert_raises(TypeError) {
-        Roo::OpenOffice.new(File.join(TESTDIR,"numbers1.xlsx"),
-          packed: false,
-          file_warning: :error)
-      }
-    end
-    if EXCELX
-      assert_raises(TypeError) {
-        Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),
-          packed: false,
-          file_warning: :error)
-      }
-      assert_raises(TypeError) {
-        Roo::Excelx.new(File.join(TESTDIR,"numbers1.xls"),
-          packed: false,
-          file_warning: :error)
-      }
-    end
-  end
-
-  def test_file_warning_warning
-    if OPENOFFICE
-      assert_raises(ArgumentError) {
-        Roo::OpenOffice.new(File.join(TESTDIR,"numbers1.xlsx"),
-        packed: false,
-        file_warning: :warning)
-      }
-    end
-    if EXCELX
-      assert_raises(ArgumentError) {
-        Roo::Excelx.new(File.join(TESTDIR,"numbers1.ods"),
-        packed: false,
-        file_warning: :warning)
-      }
-    end
-  end
-
-  def test_file_warning_ignore
-    if OPENOFFICE
-      # Files, die eigentlich OpenOffice-
-      # Files sind, aber die falsche Endung haben.
-      # Es soll ohne Fehlermeldung oder Warnung
-      # oder Abbruch die Datei geoffnet werden
-
-      # xlsx
-        Roo::OpenOffice.new(File.join(TESTDIR,"type_openoffice.xlsx"),
-          packed: false,
-          file_warning: :ignore)
-    end
-    if EXCELX
-        Roo::Excelx.new(File.join(TESTDIR,"type_excelx.ods"),
-          packed: false,
-          file_warning: :ignore)
     end
   end
 
@@ -1497,44 +1340,6 @@ Sheet 3:
     end
   end
 
-  # unter Windows soll es laut Bug-Reports nicht moeglich sein, eine Excel-Datei, die
-  # mit Excel.new geoeffnet wurde nach dem Processing anschliessend zu loeschen.
-  # Anmerkung: Das Spreadsheet-Gem erlaubt kein explizites Close von Spreadsheet-Dateien,
-  # was verhindern koennte, das die Datei geloescht werden kann.
-  # def test_bug_cannot_delete_opened_excel_sheet
-  #   with_each_spreadsheet(:name=>'simple_spreadsheet') do |oo|
-  #     'kopiere  nach temporaere Datei und versuche diese zu oeffnen und zu loeschen'
-  #   end
-  # end
-
-  def test_bug_xlsx_reference_cell
-
-    if EXCELX
-=begin
-    If cell A contains a string and cell B references cell A.  When reading the value of cell B, the result will be
-"0.0" instead of the value of cell A.
-
-With the attached test case, I ran the following code:
-spreadsheet = Roo::Excelx.new('formula_string_error.xlsx')
-spreadsheet.default_sheet = 'sheet1'
-p "A: #{spreadsheet.cell(1, 1)}"
-p "B: #{spreadsheet.cell(2, 1)}"
-
-with the following results
-"A: TestString"
-"B: 0.0"
-
-where the expected result is
-"A: TestString"
-"B: TestString"
-=end
-      xlsx = Roo::Excelx.new(File.join(TESTDIR, "formula_string_error.xlsx"))
-      xlsx.default_sheet = xlsx.sheets.first
-      assert_equal 'Teststring', xlsx.cell('a',1)
-      assert_equal 'Teststring', xlsx.cell('a',2)
-    end
-  end
-
   # #formulas of an empty sheet should return an empty array and not result in
   # an error message
   # 2011-06-24
@@ -1581,79 +1386,6 @@ where the expected result is
         assert File.exists?(datetime_csv_file)
         assert_equal "", file_diff('test/files/so_datetime.csv', datetime_csv_file)
       end
-    end
-  end
-
-  # 2011-08-11
-  def test_bug_openoffice_formula_missing_letters
-    if LIBREOFFICE
-      # Dieses Dokument wurde mit LibreOffice angelegt.
-      # Keine Ahnung, ob es damit zusammenhaengt, das diese
-      # Formeln anders sind, als in der Datei formula.ods, welche
-      # mit OpenOffice angelegt wurde.
-      # Bei den OpenOffice-Dateien ist in diesem Feld in der XML-
-      # Datei of: als Prefix enthalten, waehrend in dieser Datei
-      # irgendetwas mit oooc: als Prefix verwendet wird.
-      oo = Roo::OpenOffice.new(File.join(TESTDIR,'dreimalvier.ods'))
-      oo.default_sheet = oo.sheets.first
-      assert_equal '=SUM([.A1:.D1])', oo.formula('e',1)
-      assert_equal '=SUM([.A2:.D2])', oo.formula('e',2)
-      assert_equal '=SUM([.A3:.D3])', oo.formula('e',3)
-      assert_equal [
-       [1,5,'=SUM([.A1:.D1])'],
-        [2,5,'=SUM([.A2:.D2])'],
-        [3,5,'=SUM([.A3:.D3])'],
-      ], oo.formulas
-
-    end
-  end
-
-=begin
-  def test_postprocessing_and_types_in_csv
-    if CSV
-      oo = CSV.new(File.join(TESTDIR,'csvtypes.csv'))
-      oo.default_sheet = oo.sheets.first
-      assert_equal(1,oo.a1)
-      assert_equal(:float,oo.celltype('A',1))
-      assert_equal("2",oo.b1)
-      assert_equal(:string,oo.celltype('B',1))
-      assert_equal("Mayer",oo.c1)
-      assert_equal(:string,oo.celltype('C',1))
-    end
-  end
-=end
-
-=begin
-  def test_postprocessing_with_callback_function
-    if CSV
-      oo = CSV.new(File.join(TESTDIR,'csvtypes.csv'))
-      oo.default_sheet = oo.sheets.first
-
-      #
-      assert_equal(1, oo.last_column)
-    end
-  end
-=end
-
-=begin
-  def x_123
-  class ::CSV
-    def cell_postprocessing(row,col,value)
-      if row < 3
-        return nil
-      end
-      return value
-    end
-  end
-  end
-=end
-
-  def test_nil_rows_and_lines_csv
-    # x_123
-    if CSV
-      oo = Roo::CSV.new(File.join(TESTDIR,'Bibelbund.csv'))
-      oo.default_sheet = oo.sheets.first
-      assert_equal 1, oo.first_row
     end
   end
 
@@ -1707,50 +1439,6 @@ where the expected result is
     end
   end
 
-  ## PREVIOUSLY SKIPPED
-
-  # don't have these test files so removing. We can easily add in
-  # by modifying with_each_spreadsheet
-  GNUMERIC_ODS = false  # do gnumeric with ods files Tests?
-  OPENOFFICEWRITE = false # experimental: write access with OO-Documents
-
-  def test_writeopenoffice
-    if OPENOFFICEWRITE
-      File.cp(File.join(TESTDIR,"numbers1.ods"),
-        File.join(TESTDIR,"numbers2.ods"))
-      File.cp(File.join(TESTDIR,"numbers2.ods"),
-        File.join(TESTDIR,"bak_numbers2.ods"))
-      oo = OpenOffice.new(File.join(TESTDIR,"numbers2.ods"))
-      oo.default_sheet = oo.sheets.first
-      oo.first_row.upto(oo.last_row) {|y|
-        oo.first_column.upto(oo.last_column) {|x|
-          unless oo.empty?(y,x)
-            # oo.set(y, x, oo.cell(y,x) + 7) if oo.celltype(y,x) == "float"
-            oo.set(y, x, oo.cell(y,x) + 7) if oo.celltype(y,x) == :float
-          end
-        }
-      }
-      oo.save
-
-      oo1 = Roo::OpenOffice.new(File.join(TESTDIR,"numbers2.ods"))
-      oo2 = Roo::OpenOffice.new(File.join(TESTDIR,"bak_numbers2.ods"))
-      #p oo2.to_s
-      assert_equal 999, oo2.cell('a',1), oo2.cell('a',1)
-      assert_equal oo2.cell('a',1) + 7, oo1.cell('a',1)
-      assert_equal oo2.cell('b',1)+7, oo1.cell('b',1)
-      assert_equal oo2.cell('c',1)+7, oo1.cell('c',1)
-      assert_equal oo2.cell('d',1)+7, oo1.cell('d',1)
-      assert_equal oo2.cell('a',2)+7, oo1.cell('a',2)
-      assert_equal oo2.cell('b',2)+7, oo1.cell('b',2)
-      assert_equal oo2.cell('c',2)+7, oo1.cell('c',2)
-      assert_equal oo2.cell('d',2)+7, oo1.cell('d',2)
-      assert_equal oo2.cell('e',2)+7, oo1.cell('e',2)
-
-      File.cp(File.join(TESTDIR,"bak_numbers2.ods"),
-        File.join(TESTDIR,"numbers2.ods"))
-    end
-  end
-
   def common_possible_bug_snowboard_cells(ss)
     assert_equal "A.", ss.cell(13,'A'), ss.class
     assert_equal 147, ss.cell(13,'f'), ss.class
@@ -1765,96 +1453,6 @@ where the expected result is
     assert_equal "164W", ss.cell(13,'n'), ss.class
     assert_equal "168W", ss.cell(13,'o'), ss.class
   end
-
-  # def test_false_encoding
-  #   ex = Roo::Excel.new(File.join(TESTDIR,'false_encoding.xls'))
-  #   ex.default_sheet = ex.sheets.first
-  #   assert_equal "Sheet1", ex.sheets.first
-  #   ex.first_row.upto(ex.last_row) do |row|
-  #     ex.first_column.upto(ex.last_column) do |col|
-  #       content = ex.cell(row,col)
-  #       puts "#{row}/#{col}"
-  #       #puts content if ! ex.empty?(row,col) or ex.formula?(row,col)
-  #       if ex.formula?(row,col)
-  #         #! ex.empty?(row,col)
-  #         puts content
-  #       end
-  #     end
-  #   end
-  # end
-
-  def test_download_uri
-    if ONLINE
-      if OPENOFFICE
-        assert_raises(RuntimeError) {
-          Roo::OpenOffice.new("http://gibbsnichtdomainxxxxx.com/file.ods")
-        }
-      end
-      if EXCELX
-        assert_raises(RuntimeError) {
-          Roo::Excelx.new("http://gibbsnichtdomainxxxxx.com/file.xlsx")
-        }
-      end
-    end
-  end
-
-  def test_download_uri_with_query_string
-    dir = File.expand_path("#{File.dirname __FILE__}/files")
-    { xlsx: [EXCELX,      Roo::Excelx],
-      ods:  [OPENOFFICE,  Roo::OpenOffice]}.each do |extension, (flag, type)|
-        if flag
-          file = "#{dir}/simple_spreadsheet.#{extension}"
-          url = "http://test.example.com/simple_spreadsheet.#{extension}?query-param=value"
-          stub_request(:any, url).to_return(body: File.read(file))
-          spreadsheet = type.new(url)
-          spreadsheet.default_sheet = spreadsheet.sheets.first
-          assert_equal 'Task 1', spreadsheet.cell('f', 4)
-        end
-      end
-  end
-
-  # def test_soap_server
-  #   #threads = []
-  #   #threads << Thread.new("serverthread") do
-  #   fork do
-  #     p "serverthread started"
-  #     puts "in child, pid = #$$"
-  #     puts `/usr/bin/ruby rooserver.rb`
-  #     p "serverthread finished"
-  #   end
-  #   #threads << Thread.new("clientthread") do
-  #   p "clientthread started"
-  #   sleep 10
-  #   proxy = SOAP::RPC::Driver.new("http://localhost:12321","spreadsheetserver")
-  #   proxy.add_method('cell','row','col')
-  #   proxy.add_method('officeversion')
-  #   proxy.add_method('last_row')
-  #   proxy.add_method('last_column')
-  #   proxy.add_method('first_row')
-  #   proxy.add_method('first_column')
-  #   proxy.add_method('sheets')
-  #   proxy.add_method('set_default_sheet','s')
-  #   proxy.add_method('ferien_fuer_region', 'region')
-
-  #   sheets = proxy.sheets
-  #   p sheets
-  #   proxy.set_default_sheet(sheets.first)
-
-  #   assert_equal 1, proxy.first_row
-  #   assert_equal 1, proxy.first_column
-  #   assert_equal 187, proxy.last_row
-  #   assert_equal 7, proxy.last_column
-  #   assert_equal 42, proxy.cell('C',8)
-  #   assert_equal 43, proxy.cell('F',12)
-  #   assert_equal "1.0", proxy.officeversion
-  #   p "clientthread finished"
-  #   #end
-  #   #threads.each {|t| t.join }
-  #   puts "fertig"
-  #   Process.kill("INT",pid)
-  #   pid = Process.wait
-  #   puts "child terminated, pid= #{pid}, status= #{$?.exitstatus}"
-  # end
 
   def split_coord(s)
     letter = ""
@@ -1874,213 +1472,10 @@ where the expected result is
     return letter,number
   end
 
-  #def sum(s,expression)
-  #  arg = expression.split(':')
-  #  b,z = split_coord(arg[0])
-  #  first_row = z
-  #  first_col = OpenOffice.letter_to_number(b)
-  #  b,z = split_coord(arg[1])
-  #  last_row = z
-  #  last_col = OpenOffice.letter_to_number(b)
-  #  result = 0
-  #  first_row.upto(last_row) {|row|
-  #    first_col.upto(last_col) {|col|
-  #      result = result + s.cell(row,col)
-  #    }
-  #  }
-  #  result
-  #end
-
-  #def test_dsl
-  #  s = OpenOffice.new(File.join(TESTDIR,"numbers1.ods"))
-  #  s.default_sheet = s.sheets.first
-  #
-  #    s.set 'a',1, 5
-  #    s.set 'b',1, 3
-  #    s.set 'c',1, 7
-  #    s.set('a',2, s.cell('a',1)+s.cell('b',1))
-  #    assert_equal 8, s.cell('a',2)
-  #
-  #    assert_equal 15, sum(s,'A1:C1')
-  #  end
-
-  #def test_create_spreadsheet1
-  #  name = File.join(TESTDIR,'createdspreadsheet.ods')
-  #  rm(name) if File.exists?(File.join(TESTDIR,'createdspreadsheet.ods'))
-  #  # anlegen, falls noch nicht existierend
-  #  s = OpenOffice.new(name,true)
-  #  assert File.exists?(name)
-  #end
-
-  #def test_create_spreadsheet2
-  #  # anlegen, falls noch nicht existierend
-  #  s = OpenOffice.new(File.join(TESTDIR,"createdspreadsheet.ods"),true)
-  #  s.set 'a',1,42
-  #  s.set 'b',1,43
-  #  s.set 'c',1,44
-  #  s.save
-  #
-  #  t = OpenOffice.new(File.join(TESTDIR,"createdspreadsheet.ods"))
-  #  assert_equal 42, t.cell(1,'a')
-  #  assert_equal 43, t.cell('b',1)
-  #  assert_equal 44, t.cell('c',3)
-  #end
-
-  # We don't have the bode-v1.xlsx test file
-  # #TODO: xlsx-Datei anpassen!
-  # def test_excelx_download_uri_and_zipped
-  #   #TODO: gezippte xlsx Datei online zum Testen suchen
-  #   if EXCELX
-  #     if ONLINE
-  #       url = 'http://stiny-leonhard.de/bode-v1.xlsx.zip'
-  #       excel = Roo::Excelx.new(url, :zip)
-  #       assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-  #     end
-  #   end
-  # end
-
-  # def test_excelx_zipped
-  #   # TODO: bode...xls bei Gelegenheit nach .xlsx konverieren lassen und zippen!
-  #   if EXCELX
-  #     # diese Datei gibt es noch nicht gezippt
-  #     excel = Roo::Excelx.new(File.join(TESTDIR,"bode-v1.xlsx.zip"), :zip)
-  #     assert excel
-  #     assert_raises(ArgumentError) {
-  #       assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-  #     }
-  #     excel.default_sheet = excel.sheets.first
-  #     assert_equal 'ist "e" im Nenner von H(s)', excel.cell('b', 5)
-  #   end
-  # end
-
-  def test_csv_parsing_with_headers
-    return unless CSV
-    headers = ["TITEL", "VERFASSER", "OBJEKT", "NUMMER", "SEITE", "INTERNET", "PC", "KENNUNG"]
-
-    oo = Roo::Spreadsheet.open(File.join(TESTDIR, 'Bibelbund.csv'))
-    parsed = oo.parse(:headers => true)
-    assert_equal headers, parsed[1].keys
-  end
-
   def test_bug_numbered_sheet_names
     with_each_spreadsheet(:name=>'bug-numbered-sheet-names', :format=>:excelx) do |oo|
       oo.each_with_pagename { }
     end
-  end
-
-  def test_parsing_xslx_from_numbers
-    return unless EXCELX
-    xlsx  = Roo::Excelx.new(File.join(TESTDIR, "numbers-export.xlsx"))
-
-    xlsx.default_sheet = xlsx.sheets.first
-    assert_equal 'Sheet 1', xlsx.cell('a',1)
-
-    # Another buggy behavior of Numbers 3.1: if a warkbook has more than a
-    # single sheet, all sheets except the first one will have an extra row and
-    # column added to the beginning. That's why we assert against cell B2 and
-    # not A1
-    xlsx.default_sheet = xlsx.sheets.last
-    assert_equal 'Sheet 2', xlsx.cell('b',2)
-  end
-
-  def test_openoffice_encryption
-    if OPENOFFICE
-      assert_raises(ArgumentError) { Roo::LibreOffice.new(File.join(TESTDIR, "encrypted-letmein.ods")) }
-      assert_raises(ArgumentError) { Roo::LibreOffice.new(File.join(TESTDIR, "encrypted-letmein.ods"), :password => "badpassword") }
-      oo = Roo::LibreOffice.new(File.join(TESTDIR, "encrypted-letmein.ods"), :password => "letmein")
-      oo.default_sheet = oo.sheets.first
-      assert_equal "Hello World", oo.cell('a',1)
-    end
-  end
-
-  def test_expand_merged_range
-    return unless EXCELX
-    xlsx  = Roo::Excelx.new(File.join(TESTDIR, "merged_ranges.xlsx"), {:expand_merged_ranges => true})
-    for row in 3..7 do
-      for col in 'a'..'b'
-        if row > 3 && row < 7 && col == 'a'
-          assert_equal 'vertical1', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-    for row in 3..11 do
-      for col in 'f'..'h'
-        if row > 3 && row < 11 && col == 'g'
-          assert_equal 'vertical2', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-    for row in 3..5 do
-      for col in 'b'..'f'
-        if row == 4 && col > 'b' && col < 'f'
-          assert_equal 'horizontal', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-    for row in 8..13 do
-      for col in 'a'..'e'
-        if row > 8 && row < 13 && col > 'a' && col < 'e'
-          assert_equal 'block', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-  end
-
-  def test_noexpand_merged_range
-    return unless EXCELX
-    xlsx  = Roo::Excelx.new(File.join(TESTDIR, "merged_ranges.xlsx"))
-    for row in 3..7 do
-      for col in 'a'..'b'
-        if row == 4 && col == 'a'
-          assert_equal 'vertical1', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-    for row in 3..11 do
-      for col in 'f'..'h'
-        if row == 4 && col == 'g'
-          assert_equal 'vertical2', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-    for row in 3..5 do
-      for col in 'b'..'f'
-        if row == 4 && col == 'c'
-          assert_equal 'horizontal', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-    for row in 8..13 do
-      for col in 'a'..'e'
-        if row == 9 && col == 'b'
-          assert_equal 'block', xlsx.cell(col,row)
-        else
-          assert_nil xlsx.cell(col,row)
-        end
-      end
-    end
-  end
-
-  def test_open_stream
-    return unless EXCELX
-    file_contents = File.read File.join(TESTDIR, fixture_filename(:numbers1, :excelx)), encoding: 'BINARY'
-    stream = StringIO.new(file_contents)
-    xlsx = Roo::Excelx.new(stream)
-    assert_equal ["Tabelle1","Name of Sheet 2","Sheet3","Sheet4","Sheet5"], xlsx.sheets
   end
 
   def test_close
@@ -2091,16 +1486,29 @@ where the expected result is
     end
   end
 
+  # NOTE: Ruby 2.4.0 changed the way GC works. The last Roo object created by
+  #       with_each_spreadsheet wasn't getting GC'd until after the process
+  #       ended.
+  #
+  #       That behavior change broke this test. In order to fix it, I forked the
+  #       process and passed the temp directories from the forked process in
+  #       order to check if they were removed properly.
   def test_finalize
-    tempdirs = []
-    begin
-      with_each_spreadsheet(:name=>'numbers1') do |oo|
-        tempdirs << oo.instance_variable_get('@tmpdir')
+    read, write = IO.pipe
+    pid = Process.fork do
+      with_each_spreadsheet(name: "numbers1") do |oo|
+        write.puts oo.instance_variable_get("@tmpdir")
       end
-      GC.start
     end
+
+    Process.wait(pid)
+    write.close
+    tempdirs = read.read.split("\n")
+    read.close
+
+    refute tempdirs.empty?
     tempdirs.each do |tempdir|
-      assert !File.exists?(tempdir), "Expected #{tempdir} to be cleaned up, but it still exists"
+      refute File.exist?(tempdir), "Expected #{tempdir} to be cleaned up, but it still exists"
     end
   end
 
