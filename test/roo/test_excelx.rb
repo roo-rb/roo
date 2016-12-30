@@ -9,9 +9,10 @@ class TestRooExcelx < Minitest::Test
 
   def test_download_uri_with_query_string
     file = filename("simple_spreadsheet")
-    url = "#{TEST_URL}/#{file}?query-param=value"
+    port = 12_344
+    url = "#{local_server(port)}/#{file}?query-param=value"
 
-    start_local_server(file) do
+    start_local_server(file, port) do
       spreadsheet = roo_class.new(url)
       assert_equal "Task 1", spreadsheet.cell("f", 4)
     end

@@ -1,9 +1,13 @@
+# encoding: utf-8
 require "test_helper"
 
 class TestRooOpenOffice < Minitest::Test
   def test_openoffice_download_uri_and_zipped
-    start_local_server("rata.ods.zip") do
-      url = "http://0.0.0.0:5000/rata.ods.zip"
+    port = 12_345
+    file = "rata.ods.zip"
+    start_local_server(file, port) do
+      url = "#{local_server(port)}/#{file}"
+
       oo = roo_class.new(url, packed: :zip)
       assert_in_delta 0.001, 505.14, oo.cell("c", 33).to_f
     end
@@ -17,9 +21,9 @@ class TestRooOpenOffice < Minitest::Test
 
   def test_download_uri_with_query_string
     file = filename("simple_spreadsheet")
-    url = "#{TEST_URL}/#{file}?query-param=value"
-
-    start_local_server(file) do
+    port = 12_346
+    url = "#{local_server(port)}/#{file}?query-param=value"
+    start_local_server(file, port) do
       spreadsheet = roo_class.new(url)
       assert_equal "Task 1", spreadsheet.cell("f", 4)
     end
