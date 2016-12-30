@@ -6,13 +6,10 @@ gem 'nokogiri', "< 1.7.0"
 
 group :test do
   # additional testing libs
-  gem 'webmock'
   gem 'shoulda'
   gem 'rspec', '>= 3.0.0'
-  gem 'vcr'
   gem 'simplecov', '>= 0.9.0', require: false
   gem 'coveralls', require: false
-  # gem "pry"
   gem "activesupport", "~> 4.2.0"
 end
 
@@ -25,5 +22,6 @@ group :local_development do
   gem 'guard-preek', require: false
   gem 'guard-rubocop', require: false
   gem 'guard-reek', github: 'pericles/guard-reek', require: false
+  gem 'rb-readline'
   gem 'pry'
 end

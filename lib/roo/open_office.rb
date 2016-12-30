@@ -22,7 +22,12 @@ module Roo
 
       @only_visible_sheets = options[:only_visible_sheets]
       file_type_check(filename, '.ods', 'an Roo::OpenOffice', file_warning, packed)
-      @tmpdir   = self.class.make_tempdir(self, find_basename(filename), options[:tmpdir_root])
+      # NOTE: Create temp directory and allow Ruby to cleanup the temp directory
+      #       when the object is garbage collected. Initially, the finalizer was
+      #       created in the Roo::Tempdir module, but that led to a segfault
+      #       when testing in Ruby 2.4.0.
+      @tmpdir = self.class.make_tempdir(self, find_basename(filename), options[:tmpdir_root])
+      ObjectSpace.define_finalizer(self, self.class.finalize(object_id))
       @filename = local_filename(filename, @tmpdir, packed)
       # TODO: @cells_read[:default] = false
       open_oo_file(options)

@@ -22,6 +22,10 @@ class Roo::Base
     Roo::TEMP_PREFIX
   end
 
+  def self.finalize(object_id)
+    proc { finalize_tempdirs(object_id) }
+  end
+
   def initialize(filename, options = {}, _file_warning = :error, _tmpdir = nil)
     @filename = filename
     @options = options
