@@ -4,10 +4,20 @@ require 'tmpdir'
 require 'stringio'
 require 'nokogiri'
 require 'roo/utils'
+require "roo/formatters/base"
+require "roo/formatters/csv"
+require "roo/formatters/matrix"
+require "roo/formatters/xml"
+require "roo/formatters/yaml"
 
 # Base class for all other types of spreadsheets
 class Roo::Base
   include Enumerable
+  include Roo::Formatters::Base
+  include Roo::Formatters::CSV
+  include Roo::Formatters::Matrix
+  include Roo::Formatters::XML
+  include Roo::Formatters::YAML
 
   MAX_ROW_COL = 999_999.freeze
   MIN_ROW_COL = 0.freeze
@@ -107,73 +117,6 @@ class Roo::Base
         @#{key}[sheet] ||= first_last_row_col_for_sheet(sheet)[:#{key}]   #   @first_row[sheet] ||= first_last_row_col_for_sheet(sheet)[:first_row]
       end                                                                 # end
     EOS
-  end
-
-  # returns a rectangular area (default: all cells) as yaml-output
-  # you can add additional attributes with the prefix parameter like:
-  # oo.to_yaml({"file"=>"flightdata_2007-06-26", "sheet" => "1"})
-  def to_yaml(prefix = {}, from_row = nil, from_column = nil, to_row = nil, to_column = nil, sheet = default_sheet)
-    return '' unless first_row # empty result if there is no first_row in a sheet
-
-    from_row ||= first_row(sheet)
-    to_row ||= last_row(sheet)
-    from_column ||= first_column(sheet)
-    to_column ||= last_column(sheet)
-
-    result = "--- \n"
-    from_row.upto(to_row) do |row|
-      from_column.upto(to_column) do |col|
-        next if empty?(row, col, sheet)
-
-        result << "cell_#{row}_#{col}: \n"
-        prefix.each do|k, v|
-          result << "  #{k}: #{v} \n"
-        end
-        result << "  row: #{row} \n"
-        result << "  col: #{col} \n"
-        result << "  celltype: #{celltype(row, col, sheet)} \n"
-        value = cell(row, col, sheet)
-        if celltype(row, col, sheet) == :time
-          value = integer_to_timestring(value)
-        end
-        result << "  value: #{value} \n"
-      end
-    end
-
-    result
-  end
-
-  # write the current spreadsheet to stdout or into a file
-  def to_csv(filename = nil, separator = ',', sheet = default_sheet)
-    if filename
-      File.open(filename, 'w') do |file|
-        write_csv_content(file, sheet, separator)
-      end
-      true
-    else
-      sio = ::StringIO.new
-      write_csv_content(sio, sheet, separator)
-      sio.rewind
-      sio.read
-    end
-  end
-
-  # returns a matrix object from the whole sheet or a rectangular area of a sheet
-  def to_matrix(from_row = nil, from_column = nil, to_row = nil, to_column = nil, sheet = default_sheet)
-    require 'matrix'
-
-    return Matrix.empty unless first_row
-
-    from_row ||= first_row(sheet)
-    to_row ||= last_row(sheet)
-    from_column ||= first_column(sheet)
-    to_column ||= last_column(sheet)
-
-    Matrix.rows(from_row.upto(to_row).map do |row|
-      from_column.upto(to_column).map do |col|
-        cell(row, col, sheet)
-      end
-    end)
   end
 
   def inspect
@@ -278,31 +221,31 @@ class Roo::Base
     end
   end
 
-  # returns an XML representation of all sheets of a spreadsheet file
-  def to_xml
-    Nokogiri::XML::Builder.new do |xml|
-      xml.spreadsheet do
-        sheets.each do |sheet|
-          self.default_sheet = sheet
-          xml.sheet(name: sheet) do |x|
-            if first_row && last_row && first_column && last_column
-              # sonst gibt es Fehler bei leeren Blaettern
-              first_row.upto(last_row) do |row|
-                first_column.upto(last_column) do |col|
-                  next if empty?(row, col)
-
-                  x.cell(cell(row, col),
-                           row: row,
-                           column: col,
-                           type: celltype(row, col))
-                end
-              end
-            end
-          end
-        end
-      end
-    end.to_xml
-  end
+  # # returns an XML representation of all sheets of a spreadsheet file
+  # def to_xml
+  #   Nokogiri::XML::Builder.new do |xml|
+  #     xml.spreadsheet do
+  #       sheets.each do |sheet|
+  #         self.default_sheet = sheet
+  #         xml.sheet(name: sheet) do |x|
+  #           if first_row && last_row && first_column && last_column
+  #             # sonst gibt es Fehler bei leeren Blaettern
+  #             first_row.upto(last_row) do |row|
+  #               first_column.upto(last_column) do |col|
+  #                 next if empty?(row, col)
+  #
+  #                 x.cell(cell(row, col),
+  #                          row: row,
+  #                          column: col,
+  #                          type: celltype(row, col))
+  #               end
+  #             end
+  #           end
+  #         end
+  #       end
+  #     end
+  #   end.to_xml
+  # end
 
   # when a method like spreadsheet.a42 is called
   # convert it to a call of spreadsheet.cell('a',42)
@@ -680,75 +623,13 @@ class Roo::Base
     end
   end
 
-  # Write all cells to the csv file. File can be a filename or nil. If the this
-  # parameter is nil the output goes to STDOUT
-  def write_csv_content(file = nil, sheet = nil, separator = ',')
-    file ||= STDOUT
-    return unless first_row(sheet) # The sheet is empty
-
-    1.upto(last_row(sheet)) do |row|
-      1.upto(last_column(sheet)) do |col|
-        file.print(separator) if col > 1
-        file.print cell_to_csv(row, col, sheet)
-      end
-      file.print("\n")
-    end
-  end
-
-  # The content of a cell in the csv output
-  def cell_to_csv(row, col, sheet)
-    return '' if empty?(row, col, sheet)
-
-    onecell = cell(row, col, sheet)
-
-    case celltype(row, col, sheet)
-    when :string
-      %("#{onecell.gsub('"', '""')}") unless onecell.empty?
-    when :boolean
-      # TODO: this only works for excelx
-      onecell = self.sheet_for(sheet).cells[[row, col]].formatted_value
-      %("#{onecell.gsub('"', '""').downcase}")
-    when :float, :percentage
-      if onecell == onecell.to_i
-        onecell.to_i.to_s
-      else
-        onecell.to_s
-      end
-    when :formula
-      case onecell
-      when String
-        %("#{onecell.gsub('"', '""')}") unless onecell.empty?
-      when Integer
-        onecell.to_s
-      when Float
-        if onecell == onecell.to_i
-          onecell.to_i.to_s
-        else
-          onecell.to_s
-        end
-      when DateTime
-        onecell.to_s
-      else
-        fail "unhandled onecell-class #{onecell.class}"
-      end
-    when :date, :datetime
-      onecell.to_s
-    when :time
-      integer_to_timestring(onecell)
-    when :link
-      %("#{onecell.url.gsub('"', '""')}")
-    else
-      fail "unhandled celltype #{celltype(row, col, sheet)}"
-    end || ''
-  end
-
-  # converts an integer value to a time string like '02:05:06'
-  def integer_to_timestring(content)
-    h = (content / 3600.0).floor
-    content -= h * 3600
-    m = (content / 60.0).floor
-    content -= m * 60
-    s = content
-    sprintf('%02d:%02d:%02d', h, m, s)
-  end
+  # # converts an integer value to a time string like '02:05:06'
+  # def integer_to_timestring(content)
+  #   h = (content / 3600.0).floor
+  #   content -= h * 3600
+  #   m = (content / 60.0).floor
+  #   content -= m * 60
+  #   s = content
+  #   sprintf('%02d:%02d:%02d', h, m, s)
+  # end
 end
