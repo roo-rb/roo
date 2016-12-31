@@ -32,7 +32,7 @@ module Roo
           if formatter.is_a? Proc
             formatter.call(@cell_value)
           elsif zero_padded_number?
-            "%0#{@format.size}d"% @cell_value
+            "%0#{@format.size}d" % @cell_value
           else
             Kernel.format(formatter, @cell_value)
           end
@@ -46,12 +46,8 @@ module Roo
             '0' => '%.0f',
             '0.00' => '%.2f',
             '0.000000' => '%.6f',
-            '#,##0' => proc do |number|
-              Kernel.format('%.0f', number).reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
-            end,
-            '#,##0.00' => proc do |number|
-              Kernel.format('%.2f', number).reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
-            end,
+            '#,##0' => number_format('%.0f'),
+            '#,##0.00' => number_format('%.2f'),
             '0%' =>  proc do |number|
               Kernel.format('%d%', number.to_f * 100)
             end,
@@ -59,22 +55,10 @@ module Roo
               Kernel.format('%.2f%', number.to_f * 100)
             end,
             '0.00E+00' => '%.2E',
-            '#,##0 ;(#,##0)' => proc do |number|
-              formatter = number.to_i > 0 ? '%.0f' : '(%.0f)'
-              Kernel.format(formatter, number.to_f.abs).reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
-            end,
-            '#,##0 ;[Red](#,##0)' => proc do |number|
-              formatter = number.to_i > 0 ? '%.0f' : '[Red](%.0f)'
-              Kernel.format(formatter, number.to_f.abs).reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
-            end,
-            '#,##0.00;(#,##0.00)' => proc do |number|
-              formatter = number.to_i > 0 ? '%.2f' : '(%.2f)'
-              Kernel.format(formatter, number.to_f.abs).reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
-            end,
-            '#,##0.00;[Red](#,##0.00)' => proc do |number|
-              formatter = number.to_i > 0 ? '%.2f' : '[Red](%.2f)'
-              Kernel.format(formatter, number.to_f.abs).reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
-            end,
+            '#,##0 ;(#,##0)' => number_format('%.0f', '(%.0f)'),
+            '#,##0 ;[Red](#,##0)' => number_format('%.0f', '[Red](%.0f)'),
+            '#,##0.00;(#,##0.00)' => number_format('%.2f', '(%.2f)'),
+            '#,##0.00;[Red](#,##0.00)' => number_format('%.2f', '[Red](%.2f)'),
             # FIXME: not quite sure what the format should look like in this case.
             '##0.0E+0' => '%.1E',
             '@' => proc { |number| number }
@@ -82,6 +66,17 @@ module Roo
         end
 
         private
+
+        def number_format(formatter, negative_formatter = nil)
+          proc do |number|
+            if negative_formatter
+              formatter = number.to_i > 0 ? formatter : negative_formatter
+              number = number.to_f.abs
+            end
+
+            Kernel.format(formatter, number).reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
+          end
+        end
 
         def zero_padded_number?
           @format[/0+/] == @format
