@@ -32,14 +32,9 @@ module Roo
         #
         # Returns a String representation of a cell's value.
         def formatted_value
-          date_regex = /(?<date>[dmy]+[\-\/][dmy]+([\-\/][dmy]+)?)/
-          time_regex = /(?<time>(\[?[h]\]?+:)?[m]+(:?ss|:?s)?)/
-
           formatter = @format.downcase.split(' ').map do |part|
-            if part[date_regex] == part
-              part.gsub(/#{DATE_FORMATS.keys.join('|')}/, DATE_FORMATS)
-            elsif part[time_regex]
-              part.gsub(/#{TIME_FORMATS.keys.join('|')}/, TIME_FORMATS)
+            if (parsed_format = parse_date_or_time_format(part))
+              parsed_format
             else
               warn 'Unable to parse custom format. Using "YYYY-mm-dd HH:MM:SS" format.'
               return @value.strftime('%F %T')
@@ -51,35 +46,50 @@ module Roo
 
         private
 
+        def parse_date_or_time_format(part)
+          date_regex = /(?<date>[dmy]+[\-\/][dmy]+([\-\/][dmy]+)?)/
+          time_regex = /(?<time>(\[?[h]\]?+:)?[m]+(:?ss|:?s)?)/
+
+          if part[date_regex] == part
+            formats = DATE_FORMATS
+          elsif part[time_regex]
+            formats = TIME_FORMATS
+          else
+            return false
+          end
+
+          part.gsub(/#{formats.keys.join('|')}/, formats)
+        end
+
         DATE_FORMATS = {
-          'yyyy'.freeze => '%Y'.freeze,  # Year: 2000
-          'yy'.freeze => '%y'.freeze,    # Year: 00
+          'yyyy' => '%Y',  # Year: 2000
+          'yy' => '%y',    # Year: 00
           # mmmmm => J-D
-          'mmmm'.freeze => '%B'.freeze,  # Month: January
-          'mmm'.freeze => '%^b'.freeze,   # Month: JAN
-          'mm'.freeze => '%m'.freeze,    # Month: 01
-          'm'.freeze => '%-m'.freeze,    # Month: 1
-          'dddd'.freeze => '%A'.freeze,  # Day of the Week: Sunday
-          'ddd'.freeze => '%^a'.freeze,   # Day of the Week: SUN
-          'dd'.freeze => '%d'.freeze,    # Day of the Month: 01
-          'd'.freeze => '%-d'.freeze,    # Day of the Month: 1
+          'mmmm' => '%B',  # Month: January
+          'mmm' => '%^b',   # Month: JAN
+          'mm' => '%m',    # Month: 01
+          'm' => '%-m',    # Month: 1
+          'dddd' => '%A',  # Day of the Week: Sunday
+          'ddd' => '%^a',   # Day of the Week: SUN
+          'dd' => '%d',    # Day of the Month: 01
+          'd' => '%-d'    # Day of the Month: 1
           # '\\\\'.freeze => ''.freeze,  # NOTE: Fixes a custom format's output.
         }
 
         TIME_FORMATS = {
-          'hh'.freeze => '%H'.freeze,    # Hour (24): 01
-          'h'.freeze => '%-k'.freeze,    # Hour (24): 1
+          'hh' => '%H',    # Hour (24): 01
+          'h' => '%-k'.freeze,    # Hour (24): 1
           # 'hh'.freeze => '%I'.freeze,    # Hour (12): 08
           # 'h'.freeze => '%-l'.freeze,    # Hour (12): 8
-          'mm'.freeze => '%M'.freeze,    # Minute: 01
+          'mm' => '%M',    # Minute: 01
           # FIXME: is this used? Seems like 'm' is used for month, not minute.
-          'm'.freeze => '%-M'.freeze,    # Minute: 1
-          'ss'.freeze => '%S'.freeze,    # Seconds: 01
-          's'.freeze => '%-S'.freeze,    # Seconds: 1
-          'am/pm'.freeze => '%p'.freeze, # Meridian: AM
-          '000'.freeze => '%3N'.freeze,  # Fractional Seconds: thousandth.
-          '00'.freeze => '%2N'.freeze,   # Fractional Seconds: hundredth.
-          '0'.freeze => '%1N'.freeze,    # Fractional Seconds: tenths.
+          'm' => '%-M',    # Minute: 1
+          'ss' => '%S',    # Seconds: 01
+          's' => '%-S',    # Seconds: 1
+          'am/pm' => '%p', # Meridian: AM
+          '000' => '%3N',  # Fractional Seconds: thousandth.
+          '00' => '%2N',   # Fractional Seconds: hundredth.
+          '0' => '%1N'    # Fractional Seconds: tenths.
         }
 
         def create_datetime(base_date, value)
@@ -93,7 +103,7 @@ module Roo
         def round_datetime(datetime_string)
           /(?<yyyy>\d+)-(?<mm>\d+)-(?<dd>\d+) (?<hh>\d+):(?<mi>\d+):(?<ss>\d+.\d+)/ =~ datetime_string
 
-          ::Time.new(yyyy.to_i, mm.to_i, dd.to_i, hh.to_i, mi.to_i, ss.to_r).round(0)
+          ::Time.new(yyyy, mm, dd, hh, mi, ss.to_r).round(0)
         end
       end
     end

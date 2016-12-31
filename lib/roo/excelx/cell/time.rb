@@ -24,19 +24,19 @@ module Roo
 
         private
 
-        def create_datetime(base_date, value)
-          date = base_date + value.to_f.round(6)
-          datetime_string = date.strftime('%Y-%m-%d %H:%M:%S.%N')
-          t = round_datetime(datetime_string)
+        # def create_datetime(base_date, value)
+        #   date = base_date + value.to_f.round(6)
+        #   datetime_string = date.strftime('%Y-%m-%d %H:%M:%S.%N')
+        #   t = round_datetime(datetime_string)
+        #
+        #   ::DateTime.civil(t.year, t.month, t.day, t.hour, t.min, t.sec)
+        # end
 
-          ::DateTime.civil(t.year, t.month, t.day, t.hour, t.min, t.sec)
-        end
-
-        def round_datetime(datetime_string)
-          /(?<yyyy>\d+)-(?<mm>\d+)-(?<dd>\d+) (?<hh>\d+):(?<mi>\d+):(?<ss>\d+.\d+)/ =~ datetime_string
-
-          ::Time.new(yyyy.to_i, mm.to_i, dd.to_i, hh.to_i, mi.to_i, ss.to_r).round(0)
-        end
+        # def round_datetime(datetime_string)
+        #   /(?<yyyy>\d+)-(?<mm>\d+)-(?<dd>\d+) (?<hh>\d+):(?<mi>\d+):(?<ss>\d+.\d+)/ =~ datetime_string
+        #
+        #   ::Time.new(yyyy.to_i, mm.to_i, dd.to_i, hh.to_i, mi.to_i, ss.to_r).round(0)
+        # end
       end
     end
   end

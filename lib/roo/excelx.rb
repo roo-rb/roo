@@ -223,7 +223,7 @@ module Roo
       sheet = sheet_for(sheet)
       key = normalize(row, col)
       cell = sheet.cells[key]
-      !cell || cell.empty? || (cell.type == :string && cell.value.empty?) ||
+      !cell || cell.empty? ||
         (row < sheet.first_row || row > sheet.last_row || col < sheet.first_column || col > sheet.last_column)
     end
 
