@@ -1,5 +1,16 @@
 ## Unreleased
 
+## [2.7.0] 2016-12-31
+### Fixed
+- Added rack server for testing Roo's download capabilities [365](https://github.com/roo-rb/roo/pull/365)
+- Refactored tests into different formats [365](https://github.com/roo-rb/roo/pull/365)
+- Fixed OpenOffice for JRuby [362](https://github.com/roo-rb/roo/pull/362)
+- Added '0.000000' => '%.6f' number format [354](https://github.com/roo-rb/roo/pull/354)
+- Add additional formula cell types for to_csv [367][https://github.com/roo-rb/roo/pull/367]
+
+### Added
+- Extracted formatters from Roo::Base#to_* methods [364](https://github.com/roo-rb/roo/pull/364)
+
 ## [2.6.0] 2016-12-28
 ### Fixed
 - Fixed error if sheet name starts with a slash [348](https://github.com/roo-rb/roo/pull/348)

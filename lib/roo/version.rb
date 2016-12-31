@@ -1,3 +1,3 @@
 module Roo
-  VERSION = "2.6.0"
+  VERSION = "2.7.0"
 end
