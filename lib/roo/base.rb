@@ -221,32 +221,6 @@ class Roo::Base
     end
   end
 
-  # # returns an XML representation of all sheets of a spreadsheet file
-  # def to_xml
-  #   Nokogiri::XML::Builder.new do |xml|
-  #     xml.spreadsheet do
-  #       sheets.each do |sheet|
-  #         self.default_sheet = sheet
-  #         xml.sheet(name: sheet) do |x|
-  #           if first_row && last_row && first_column && last_column
-  #             # sonst gibt es Fehler bei leeren Blaettern
-  #             first_row.upto(last_row) do |row|
-  #               first_column.upto(last_column) do |col|
-  #                 next if empty?(row, col)
-  #
-  #                 x.cell(cell(row, col),
-  #                          row: row,
-  #                          column: col,
-  #                          type: celltype(row, col))
-  #               end
-  #             end
-  #           end
-  #         end
-  #       end
-  #     end
-  #   end.to_xml
-  # end
-
   # when a method like spreadsheet.a42 is called
   # convert it to a call of spreadsheet.cell('a',42)
   def method_missing(m, *args)
@@ -622,14 +596,4 @@ class Roo::Base
       ret
     end
   end
-
-  # # converts an integer value to a time string like '02:05:06'
-  # def integer_to_timestring(content)
-  #   h = (content / 3600.0).floor
-  #   content -= h * 3600
-  #   m = (content / 60.0).floor
-  #   content -= m * 60
-  #   s = content
-  #   sprintf('%02d:%02d:%02d', h, m, s)
-  # end
 end

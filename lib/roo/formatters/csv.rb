@@ -33,7 +33,6 @@ module Roo
         end
       end
 
-
       # The content of a cell in the csv output
       def cell_to_csv(row, col, sheet)
         return "" if empty?(row, col, sheet)
@@ -65,7 +64,7 @@ module Roo
             else
               onecell.to_s
             end
-          when DateTime
+          when Date, DateTime, TrueClass, FalseClass
             onecell.to_s
           else
             fail "unhandled onecell-class #{onecell.class}"

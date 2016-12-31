@@ -81,3 +81,45 @@ def start_local_server(filename, port = nil)
 ensure
   t.kill
 end
+
+ROO_FORMATS = [
+  :excelx,
+  :excelxm,
+  :openoffice,
+  :libreoffice
+]
+
+# call a block of code for each spreadsheet type
+# and yield a reference to the roo object
+def with_each_spreadsheet(options)
+  if options[:format]
+    formats = Array(options[:format])
+    invalid_formats = formats - ROO_FORMATS
+    unless invalid_formats.empty?
+      raise "invalid spreadsheet types: #{invalid_formats.join(', ')}"
+    end
+  else
+    formats = ROO_FORMATS
+  end
+  formats.each do |format|
+    begin
+      yield Roo::Spreadsheet.open(File.join(TESTDIR,
+        fixture_filename(options[:name], format)))
+    rescue => e
+      raise e, "#{e.message} for #{format}", e.backtrace unless options[:ignore_errors]
+    end
+  end
+end
+
+def fixture_filename(name, format)
+  case format
+  when :excelx
+    "#{name}.xlsx"
+  when :excelxm
+    "#{name}.xlsm"
+  when :openoffice, :libreoffice
+    "#{name}.ods"
+  else
+    raise ArgumentError, "unexpected format #{format}"
+  end
+end
