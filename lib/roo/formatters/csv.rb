@@ -33,7 +33,6 @@ module Roo
         end
       end
 
-
       # The content of a cell in the csv output
       def cell_to_csv(row, col, sheet)
         return "" if empty?(row, col, sheet)

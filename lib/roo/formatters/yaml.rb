@@ -5,7 +5,8 @@ module Roo
       # you can add additional attributes with the prefix parameter like:
       # oo.to_yaml({"file"=>"flightdata_2007-06-26", "sheet" => "1"})
       def to_yaml(prefix = {}, from_row = nil, from_column = nil, to_row = nil, to_column = nil, sheet = default_sheet)
-        return '' unless first_row # empty result if there is no first_row in a sheet
+        # return an empty string if there is no first_row, i.e. the sheet is empty
+        return "" unless first_row
 
         from_row ||= first_row(sheet)
         to_row ||= last_row(sheet)

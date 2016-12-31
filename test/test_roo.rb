@@ -10,49 +10,7 @@ require 'test_helper'
 require 'stringio'
 
 class TestRoo < Minitest::Test
-  FORMATS = [
-    :excelx,
-    :excelxm,
-    :openoffice,
-    :libreoffice
-  ]
-
-  LONG_RUN = false
-
-  def fixture_filename(name, format)
-    case format
-    when :excelx
-      "#{name}.xlsx"
-    when :excelxm
-      "#{name}.xlsm"
-    when :openoffice, :libreoffice
-      "#{name}.ods"
-    else
-      raise ArgumentError, "unexpected format #{format}"
-    end
-  end
-
-  # call a block of code for each spreadsheet type
-  # and yield a reference to the roo object
-  def with_each_spreadsheet(options)
-    if options[:format]
-      formats = Array(options[:format])
-      invalid_formats = formats - FORMATS
-      unless invalid_formats.empty?
-        raise "invalid spreadsheet types: #{invalid_formats.join(', ')}"
-      end
-    else
-      formats = FORMATS
-    end
-    formats.each do |format|
-      begin
-        yield Roo::Spreadsheet.open(File.join(TESTDIR,
-          fixture_filename(options[:name], format)))
-      rescue => e
-        raise e, "#{e.message} for #{format}", e.backtrace unless options[:ignore_errors]
-      end
-    end
-  end
+  LONG_RUN = ENV["LONG_RUN"] ? true : false
 
   def test_sheets
     with_each_spreadsheet(:name=>'numbers1') do |oo|
@@ -389,45 +347,6 @@ class TestRoo < Minitest::Test
     end
   end
 
-  # "/tmp/xxxx" darf man unter Windows nicht verwenden, weil das nicht erkannt
-  # wird.
-  # Besser: Methode um temporaeres Dir. portabel zu bestimmen
-  def test_huge_document_to_csv
-    if LONG_RUN
-      with_each_spreadsheet(:name=>'Bibelbund', :format=>[
-        :openoffice,
-        :excelx
-        # Google hier nicht, weil Google-Spreadsheets nicht so gross werden
-        # duerfen
-      ]) do |oo|
-        Dir.mktmpdir do |tempdir|
-          assert_equal "Tagebuch des Sekret\303\244rs.    Letzte Tagung 15./16.11.75 Schweiz", oo.cell(45,'A')
-          assert_equal "Tagebuch des Sekret\303\244rs.  Nachrichten aus Chile", oo.cell(46,'A')
-          assert_equal "Tagebuch aus Chile  Juli 1977", oo.cell(55,'A')
-          assert oo.to_csv(File.join(tempdir,"Bibelbund.csv"))
-          assert File.exists?(File.join(tempdir,"Bibelbund.csv"))
-          assert_equal "", file_diff(File.join(TESTDIR, "Bibelbund.csv"), File.join(tempdir,"Bibelbund.csv")),
-            "error in class #{oo.class}"
-          #end
-        end
-      end
-    end
-  end
-
-  def test_bug_quotes_excelx
-    if LONG_RUN
-      with_each_spreadsheet(:name=>'Bibelbund', :format=>[:openoffice, :excelx]) do |oo|
-        oo.default_sheet = oo.sheets.first
-        assert_equal 'Einflüsse der neuen Theologie in "de gereformeerde Kerken van Nederland"',
-        oo.cell('a',76)
-        oo.to_csv("csv#{$$}")
-        assert_equal 'Einflüsse der neuen Theologie in "de gereformeerde Kerken van Nederland"',
-        oo.cell('a',78)
-        File.delete_if_exist("csv#{$$}")
-      end
-    end
-  end
-
   def test_bug_mehrere_datum
     with_each_spreadsheet(:name=>'numbers1') do |oo|
       oo.default_sheet = 'Sheet5'
@@ -503,17 +422,6 @@ class TestRoo < Minitest::Test
         assert_equal "ABC", oo.cell('D',6,sheetname)
         assert_equal "ABC", oo.cell('E',6,sheetname)
         oo.reload
-      end
-    end
-  end
-
-
-  def test_bug_empty_sheet
-    with_each_spreadsheet(:name=>'formula', :format=>[:openoffice, :excelx]) do |oo|
-      oo.default_sheet = 'Sheet3' # is an empty sheet
-      Dir.mktmpdir do |tempdir|
-        oo.to_csv(File.join(tempdir,"emptysheet.csv"))
-        assert_equal "", `cat #{File.join(tempdir,"emptysheet.csv")}`
       end
     end
   end
@@ -793,123 +701,6 @@ Sheet 3:
       assert_equal :time, oo.celltype('C',1)
       assert_equal 23*3600, oo.cell('D',1) # 23:00    (secs since midnight)
       assert_equal :time, oo.celltype('D',1)
-    end
-  end
-
-  def test_date_time_to_csv
-    with_each_spreadsheet(:name=>'time-test') do |oo|
-      Dir.mktmpdir do |tempdir|
-        csv_output = File.join(tempdir,'time_test.csv')
-        assert oo.to_csv(csv_output)
-        assert File.exists?(csv_output)
-        assert_equal "", `diff --strip-trailing-cr #{TESTDIR}/time-test.csv #{csv_output}`
-        # --strip-trailing-cr is needed because the test-file use 0A and
-        # the test on an windows box generates 0D 0A as line endings
-      end
-    end
-  end
-
-  def test_boolean_to_csv
-    with_each_spreadsheet(:name=>'boolean') do |oo|
-      Dir.mktmpdir do |tempdir|
-        csv_output = File.join(tempdir,'boolean.csv')
-        assert oo.to_csv(csv_output)
-        assert File.exists?(csv_output)
-        assert_equal "", `diff --strip-trailing-cr #{TESTDIR}/boolean.csv #{csv_output}`
-        # --strip-trailing-cr is needed because the test-file use 0A and
-        # the test on an windows box generates 0D 0A as line endings
-      end
-    end
-  end
-  def test_link_to_csv
-    with_each_spreadsheet(:name=>'link',:format=>:excelx) do |oo|
-      Dir.mktmpdir do |tempdir|
-        csv_output = File.join(tempdir,'link.csv')
-        assert oo.to_csv(csv_output)
-        assert File.exists?(csv_output)
-        assert_equal "", `diff --strip-trailing-cr #{TESTDIR}/link.csv #{csv_output}`
-        # --strip-trailing-cr is needed because the test-file use 0A and
-        # the test on an windows box generates 0D 0A as line endings
-      end
-    end
-  end
-  def test_date_time_yaml
-    with_each_spreadsheet(:name=>'time-test') do |oo|
-      expected =
-        "--- \ncell_1_1: \n  row: 1 \n  col: 1 \n  celltype: string \n  value: Mittags: \ncell_1_2: \n  row: 1 \n  col: 2 \n  celltype: time \n  value: 12:13:14 \ncell_1_3: \n  row: 1 \n  col: 3 \n  celltype: time \n  value: 15:16:00 \ncell_1_4: \n  row: 1 \n  col: 4 \n  celltype: time \n  value: 23:00:00 \ncell_2_1: \n  row: 2 \n  col: 1 \n  celltype: date \n  value: 2007-11-21 \n"
-      assert_equal expected, oo.to_yaml
-    end
-  end
-
-  # Erstellt eine Liste aller Zellen im Spreadsheet. Dies ist nötig, weil ein einfacher
-  # Textvergleich des XML-Outputs nicht funktioniert, da xml-builder die Attribute
-  # nicht immer in der gleichen Reihenfolge erzeugt.
-  def init_all_cells(oo,sheet)
-    all = []
-    oo.first_row(sheet).upto(oo.last_row(sheet)) do |row|
-      oo.first_column(sheet).upto(oo.last_column(sheet)) do |col|
-        unless oo.empty?(row,col,sheet)
-          all << {:row => row.to_s,
-            :column => col.to_s,
-            :content => oo.cell(row,col,sheet).to_s,
-            :type => oo.celltype(row,col,sheet).to_s,
-          }
-        end
-      end
-    end
-    all
-  end
-
-  def test_to_xml
-    with_each_spreadsheet(:name=>'numbers1', :encoding => 'utf8') do |oo|
-      skip if defined? JRUBY_VERSION
-      oo.to_xml
-      sheetname = oo.sheets.first
-      doc = Nokogiri::XML(oo.to_xml)
-      sheet_count = 0
-      doc.xpath('//spreadsheet/sheet').each {|tmpelem|
-        sheet_count += 1
-      }
-      assert_equal 5, sheet_count
-      doc.xpath('//spreadsheet/sheet').each { |xml_sheet|
-        all_cells = init_all_cells(oo, sheetname)
-        x = 0
-        assert_equal sheetname, xml_sheet.attributes['name'].value
-        xml_sheet.children.each {|cell|
-          if cell.attributes['name']
-            expected = [all_cells[x][:row],
-              all_cells[x][:column],
-              all_cells[x][:content],
-              all_cells[x][:type],
-            ]
-            result = [
-              cell.attributes['row'],
-              cell.attributes['column'],
-              cell.content,
-              cell.attributes['type'],
-            ]
-            assert_equal expected, result
-            x += 1
-          end # if
-        } # end of sheet
-        sheetname = oo.sheets[oo.sheets.index(sheetname)+1]
-      }
-    end
-  end
-
-  def test_bug_to_xml_with_empty_sheets
-    with_each_spreadsheet(:name=>'emptysheets', :format=>[:openoffice, :excelx]) do |oo|
-      oo.sheets.each { |sheet|
-        assert_nil oo.first_row, "first_row not nil in sheet #{sheet}"
-        assert_nil oo.last_row, "last_row not nil in sheet #{sheet}"
-        assert_nil oo.first_column, "first_column not nil in sheet #{sheet}"
-        assert_nil oo.last_column, "last_column not nil in sheet #{sheet}"
-        assert_nil oo.first_row(sheet), "first_row not nil in sheet #{sheet}"
-        assert_nil oo.last_row(sheet), "last_row not nil in sheet #{sheet}"
-        assert_nil oo.first_column(sheet), "first_column not nil in sheet #{sheet}"
-        assert_nil oo.last_column(sheet), "last_column not nil in sheet #{sheet}"
-      }
-      oo.to_xml
     end
   end
 
@@ -1290,57 +1081,6 @@ Sheet 3:
      end
    end
 
-  require 'matrix'
-  def test_matrix
-    with_each_spreadsheet(:name => 'matrix', :format => :openoffice) do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal Matrix[
-        [1.0, 2.0, 3.0],
-        [4.0, 5.0, 6.0],
-        [7.0, 8.0, 9.0] ], oo.to_matrix
-    end
-  end
-
-  def test_matrix_selected_range
-    with_each_spreadsheet(:name => 'matrix', :format=>:openoffice) do |oo|
-      oo.default_sheet = 'Sheet2'
-      assert_equal Matrix[
-        [1.0, 2.0, 3.0],
-        [4.0, 5.0, 6.0],
-        [7.0, 8.0, 9.0] ], oo.to_matrix(3,4,5,6)
-    end
-  end
-
-  def test_matrix_all_nil
-    with_each_spreadsheet(:name => 'matrix', :format=>:openoffice) do |oo|
-      oo.default_sheet = 'Sheet2'
-      assert_equal Matrix[
-        [nil, nil, nil],
-        [nil, nil, nil],
-        [nil, nil, nil] ], oo.to_matrix(10,10,12,12)
-    end
-  end
-
-  def test_matrix_values_and_nil
-    with_each_spreadsheet(:name => 'matrix', :format=>:openoffice) do |oo|
-      oo.default_sheet = 'Sheet3'
-      assert_equal Matrix[
-        [1.0, nil, 3.0],
-        [4.0, 5.0, 6.0],
-        [7.0, 8.0, nil] ], oo.to_matrix(1,1,3,3)
-    end
-  end
-
-  def test_matrix_specifying_sheet
-    with_each_spreadsheet(:name => 'matrix', :format => :openoffice) do |oo|
-      oo.default_sheet = oo.sheets.first
-      assert_equal Matrix[
-        [1.0, nil, 3.0],
-        [4.0, 5.0, 6.0],
-        [7.0, 8.0, nil] ], oo.to_matrix(nil, nil, nil, nil, 'Sheet3')
-    end
-  end
-
   # #formulas of an empty sheet should return an empty array and not result in
   # an error message
   # 2011-06-24
@@ -1350,43 +1090,6 @@ Sheet 3:
         oo.default_sheet = oo.sheets.first
         oo.formulas
       assert_equal([], oo.formulas)
-    end
-  end
-
-  # #to_yaml of an empty sheet should return an empty string and not result in
-  # an error message
-  # 2011-06-24
-  def test_bug_to_yaml_empty_sheet
-    with_each_spreadsheet(:name =>'emptysheets',
-      :format=>[:openoffice,:excelx]) do |oo|
-        oo.default_sheet = oo.sheets.first
-        oo.to_yaml
-      assert_equal('', oo.to_yaml)
-    end
-  end
-
-  # #to_matrix of an empty sheet should return an empty matrix and not result in
-  # an error message
-  # 2011-06-25
-  def test_bug_to_matrix_empty_sheet
-    with_each_spreadsheet(:name =>'emptysheets',
-      :format=>[:openoffice,:excelx]) do |oo|
-        oo.default_sheet = oo.sheets.first
-        oo.to_matrix
-      assert_equal(Matrix.empty(0,0), oo.to_matrix)
-    end
-  end
-
-  # 2011-08-03
-  def test_bug_datetime_to_csv
-    with_each_spreadsheet(:name=>'datetime') do |oo|
-      Dir.mktmpdir do |tempdir|
-        datetime_csv_file = File.join(tempdir,"datetime.csv")
-
-        assert oo.to_csv(datetime_csv_file)
-        assert File.exists?(datetime_csv_file)
-        assert_equal "", file_diff('test/files/so_datetime.csv', datetime_csv_file)
-      end
     end
   end
 
