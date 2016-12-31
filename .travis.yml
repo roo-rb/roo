@@ -4,7 +4,6 @@ rvm:
   - 2.3.1
   - 2.4.0
   - ruby-head
-  - rbx-2
   - jruby-9.1.6.0
 matrix:
   include:
@@ -15,5 +14,4 @@ matrix:
   allow_failures:
     - rvm: ruby-head
     - rvm: jruby-9.1.6.0
-    - rvm: rbx-2
 bundler_args: --without local_development
