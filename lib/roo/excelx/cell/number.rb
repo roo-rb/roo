@@ -45,6 +45,7 @@ module Roo
             'General' => '%.0f',
             '0' => '%.0f',
             '0.00' => '%.2f',
+            '0.000000' => '%.6f',
             '#,##0' => proc do |number|
               Kernel.format('%.0f', number).reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
             end,
