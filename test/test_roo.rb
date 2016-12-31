@@ -560,7 +560,6 @@ class TestRoo < Minitest::Test
     end
   end
 
-
   #TODO: temporaerer Test
   def test_seiten_als_date
     if LONG_RUN
@@ -959,7 +958,6 @@ Sheet 3:
     end
   end
 
-
   # compare large spreadsheets
   def test_compare_large_spreadsheets
     # problematisch, weil Formeln in Excel nicht unterstützt werden
@@ -1156,24 +1154,6 @@ Sheet 3:
     assert_equal "159W", ss.cell(13,'m'), ss.class
     assert_equal "164W", ss.cell(13,'n'), ss.class
     assert_equal "168W", ss.cell(13,'o'), ss.class
-  end
-
-  def split_coord(s)
-    letter = ""
-    number = 0
-    i = 0
-    while i<s.length and "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".include?(s[i,1])
-      letter += s[i,1]
-      i+=1
-    end
-    while i<s.length and "01234567890".include?(s[i,1])
-      number = number*10 + s[i,1].to_i
-      i+=1
-    end
-    if letter=="" or number==0
-      raise ArgumentError
-    end
-    return letter,number
   end
 
   def test_bug_numbered_sheet_names
