@@ -726,7 +726,7 @@ class Roo::Base
         else
           onecell.to_s
         end
-      when DateTime
+      when Date, DateTime, TrueClass, FalseClass
         onecell.to_s
       else
         fail "unhandled onecell-class #{onecell.class}"
