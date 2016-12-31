@@ -18,6 +18,19 @@ class TestRooCSV < Minitest::Test
     oo = Roo::CSV.new(File.join(TESTDIR,'Bibelbund.csv'))
     oo.default_sheet = oo.sheets.first
     assert_equal 1, oo.first_row
+    assert_equal 3735, oo.last_row
+    assert_equal 1, oo.first_column
+    assert_equal 8, oo.last_column
+  end
+
+  def test_empty_csv
+    # x_123
+    oo = Roo::CSV.new(File.join(TESTDIR,'emptysheets.csv'))
+    oo.default_sheet = oo.sheets.first
+    assert_equal 1, oo.first_row
+    assert_equal 1, oo.last_row
+    assert_equal 1, oo.first_column
+    assert_equal 1, oo.last_column
   end
 
   def test_csv_parsing_with_headers
