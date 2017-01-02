@@ -3,20 +3,23 @@ require "test_helper"
 class TestRooFormatterXML < Minitest::Test
   def test_to_xml
     expected_sheet_count = 5
-    with_each_spreadsheet(name: "numbers1", encoding: "utf8") do |workbook|
+    options = { name: "numbers1", encoding: "utf8" }
+    with_each_spreadsheet(options) do |workbook|
       skip if defined? JRUBY_VERSION
       workbook.to_xml
       sheetname = workbook.sheets.first
       doc = Nokogiri::XML(workbook.to_xml)
-      all_cells = init_all_cells(workbook, sheetname)
 
       assert_equal expected_sheet_count, doc.xpath("//spreadsheet/sheet").count
 
       doc.xpath("//spreadsheet/sheet").each do |xml_sheet|
-        assert_equal sheetname, xml_sheet.attributes["name"].value
-        xml_sheet.children.each_with_index do |cell, i|
-          next unless cell.attributes["name"]
+        all_cells = init_all_cells(workbook, sheetname)
+        cells = xml_sheet.children.reject(&:text?)
 
+        assert_equal sheetname, xml_sheet.attribute("name").value
+        assert_equal all_cells.size, cells.size
+
+        cells.each_with_index do |cell, i|
           expected = [
             all_cells[i][:row],
             all_cells[i][:column],
@@ -24,11 +27,12 @@ class TestRooFormatterXML < Minitest::Test
             all_cells[i][:type],
           ]
           result = [
-            cell.attributes["row"],
-            cell.attributes["column"],
-            cell.content,
-            cell.attributes["type"],
+            cell.attribute("row").value,
+            cell.attribute("column").value,
+            cell.text,
+            cell.attribute("type").value,
           ]
+
           assert_equal expected, result
         end # end of sheet
         sheetname = workbook.sheets[workbook.sheets.index(sheetname) + 1]

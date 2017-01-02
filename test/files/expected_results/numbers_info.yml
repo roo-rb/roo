@@ -1,0 +1,28 @@
+File: numbers1%s
+Number of sheets: 5
+Sheets: Tabelle1, Name of Sheet 2, Sheet3, Sheet4, Sheet5
+Sheet 1:
+  First row: 1
+  Last row: 18
+  First column: A
+  Last column: G
+Sheet 2:
+  First row: 5
+  Last row: 14
+  First column: B
+  Last column: E
+Sheet 3:
+  First row: 1
+  Last row: 1
+  First column: A
+  Last column: BA
+Sheet 4:
+  First row: 1
+  Last row: 1
+  First column: A
+  Last column: E
+Sheet 5:
+  First row: 1
+  Last row: 6
+  First column: A
+  Last column: E

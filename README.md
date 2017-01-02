@@ -266,6 +266,9 @@ Roo's public methods have stayed relatively consistent between 1.13.x and 2.0.0,
 Roo uses Minitest and RSpec. The best of both worlds! Run `bundle exec rake` to
 run the tests/examples.
 
+You can run the tests/examples with Rspec like reporters by running
+`USE_REPORTERS=true bundle exec rake`
+
 Roo also has a few tests that take a long time (5+ seconds). To run these, use
 `LONG_RUN=true bundle exec rake`
 
