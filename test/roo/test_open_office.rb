@@ -41,7 +41,6 @@ class TestRooOpenOffice < Minitest::Test
     end
   end
 
-
   def test_file_warning_default_is_error
     expected_message = "test/files/numbers1.xls is not an openoffice spreadsheet"
     assert_raises(TypeError, expected_message) do
@@ -54,32 +53,27 @@ class TestRooOpenOffice < Minitest::Test
   end
 
   def test_file_warning_error
+    options = { packed: false, file_warning: :error }
+
     assert_raises(TypeError) do
-      roo_class.new(File.join(TESTDIR, "numbers1.xls"),
-      packed: false,
-      file_warning: :error
-      )
+      roo_class.new(File.join(TESTDIR, "numbers1.xls"), options)
     end
 
     assert_raises(TypeError) do
-      roo_class.new(File.join(TESTDIR, "numbers1.xlsx"),
-      packed: false,
-      file_warning: :error)
+      roo_class.new(File.join(TESTDIR, "numbers1.xlsx"), options)
     end
   end
 
   def test_file_warning_warning
     assert_raises(ArgumentError) do
-      roo_class.new(File.join(TESTDIR, "numbers1.xlsx"),
-      packed: false,
-      file_warning: :warning)
+      options = { packed: false, file_warning: :warning }
+      roo_class.new(File.join(TESTDIR, "numbers1.xlsx"), options)
     end
   end
 
   def test_file_warning_ignore
-    assert roo_class.new(File.join(TESTDIR, "type_openoffice.xlsx"),
-    packed: false,
-    file_warning: :ignore), "Should not throw an error"
+    options = { packed: false, file_warning: :ignore }
+    assert roo_class.new(File.join(TESTDIR, "type_openoffice.xlsx"), options), "Should not throw an error"
   end
 
   def test_encrypted_file
@@ -88,11 +82,15 @@ class TestRooOpenOffice < Minitest::Test
   end
 
   def test_encrypted_file_requires_password
-    assert_raises(ArgumentError) { roo_class.new(File.join(TESTDIR, "encrypted-letmein.ods")) }
+    assert_raises(ArgumentError) do
+      roo_class.new(File.join(TESTDIR, "encrypted-letmein.ods"))
+    end
   end
 
   def test_encrypted_file_with_incorrect_password
-    assert_raises(ArgumentError) { roo_class.new(File.join(TESTDIR, "encrypted-letmein.ods"), password:  "badpassword") }
+    assert_raises(ArgumentError) do
+      roo_class.new(File.join(TESTDIR, "encrypted-letmein.ods"), password: "badpassword")
+    end
   end
 
   # 2011-08-11
@@ -104,16 +102,26 @@ class TestRooOpenOffice < Minitest::Test
     # Bei den OpenOffice-Dateien ist in diesem Feld in der XML-
     # Datei of: als Prefix enthalten, waehrend in dieser Datei
     # irgendetwas mit oooc: als Prefix verwendet wird.
-    oo = Roo::OpenOffice.new(File.join(TESTDIR,'dreimalvier.ods'))
-    assert_equal '=SUM([.A1:.D1])', oo.formula('e',1)
-    assert_equal '=SUM([.A2:.D2])', oo.formula('e',2)
-    assert_equal '=SUM([.A3:.D3])', oo.formula('e',3)
-    assert_equal [
-      [1,5,'=SUM([.A1:.D1])'],
-      [2,5,'=SUM([.A2:.D2])'],
-      [3,5,'=SUM([.A3:.D3])'],
-      ], oo.formulas
+    workbook = roo_class.new(File.join(TESTDIR, "dreimalvier.ods"))
+    assert_equal "=SUM([.A1:.D1])", workbook.formula("e", 1)
+    assert_equal "=SUM([.A2:.D2])", workbook.formula("e", 2)
+    assert_equal "=SUM([.A3:.D3])", workbook.formula("e", 3)
+    expected_formulas = [
+      [1, 5, "=SUM([.A1:.D1])"],
+      [2, 5, "=SUM([.A2:.D2])"],
+      [3, 5, "=SUM([.A3:.D3])"],
+    ]
+    assert_equal expected_formulas, workbook.formulas
+  end
 
+  def test_header_with_brackets_oo
+    options = { name: "advanced_header", format: :openoffice }
+    with_each_spreadsheet(options) do |workbook|
+      parsed_head = workbook.parse(headers: true)
+      assert_equal "Date(yyyy-mm-dd)", workbook.cell("A", 1)
+      assert_equal parsed_head[0].keys, ["Date(yyyy-mm-dd)"]
+      assert_equal parsed_head[0].values, ["Date(yyyy-mm-dd)"]
+    end
   end
 
   def roo_class

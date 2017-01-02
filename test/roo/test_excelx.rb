@@ -176,6 +176,41 @@ class TestRooExcelx < Minitest::Test
     assert_equal expected_sheet_names, xlsx.sheets
   end
 
+  def test_header_offset
+    xlsx = Roo::Excelx.new(File.join(TESTDIR, "header_offset.xlsx"))
+    data = xlsx.parse(column_1: "Header A1", column_2: "Header B1")
+    assert_equal "Data A2", data[0][:column_1]
+    assert_equal "Data B2", data[0][:column_2]
+  end
+
+  def test_formula_excelx
+    with_each_spreadsheet(name: "formula", format: :excelx) do |workbook|
+      assert_equal 1, workbook.cell("A", 1)
+      assert_equal 2, workbook.cell("A", 2)
+      assert_equal 3, workbook.cell("A", 3)
+      assert_equal 4, workbook.cell("A", 4)
+      assert_equal 5, workbook.cell("A", 5)
+      assert_equal 6, workbook.cell("A", 6)
+      assert_equal 21, workbook.cell("A", 7)
+      assert_equal :formula, workbook.celltype("A", 7)
+      assert_nil workbook.formula("A", 6)
+
+      expected_result = [
+        [7, 1, "SUM(A1:A6)"],
+        [7, 2, "SUM($A$1:B6)"],
+      ]
+      assert_equal expected_result, workbook.formulas(workbook.sheets.first)
+
+      # setting a cell
+      workbook.set("A", 15, 41)
+      assert_equal 41, workbook.cell("A", 15)
+      workbook.set("A", 16, "41")
+      assert_equal "41", workbook.cell("A", 16)
+      workbook.set("A", 17, 42.5)
+      assert_equal 42.5, workbook.cell("A", 17)
+    end
+  end
+
   def roo_class
     Roo::Excelx
   end

@@ -297,12 +297,11 @@ class Roo::Base
   end
 
   def parse(options = {})
-    ary = []
-    each(options) do |row|
-      yield(row) if block_given?
-      ary << row
+    results = each(options).map do |row|
+      block_given? ? yield(row) : row
     end
-    ary
+
+    options[:headers] == true ? results : results.drop(1)
   end
 
   def row_with(query, return_headers = false)
