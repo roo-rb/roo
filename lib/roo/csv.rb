@@ -98,7 +98,7 @@ module Roo
 
     def set_row_count(sheet)
       @first_row[sheet] = 1
-      @last_row[sheet] = ::CSV.readlines(@filename).size
+      @last_row[sheet] = ::CSV.readlines(@filename, csv_options).size
       @last_row[sheet] = @first_row[sheet] if @last_row[sheet].zero?
 
       nil
@@ -106,7 +106,7 @@ module Roo
 
     def set_column_count(sheet)
       @first_column[sheet] = 1
-      @last_column[sheet] = (::CSV.readlines(@filename).first || []).size
+      @last_column[sheet] = (::CSV.readlines(@filename, csv_options).first || []).size
       @last_column[sheet] = @first_column[sheet] if @last_column[sheet].zero?
 
       nil
