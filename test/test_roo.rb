@@ -218,50 +218,6 @@ class TestRoo < Minitest::Test
     end
   end
 
-  def test_header_with_brackets_excelx
-    with_each_spreadsheet(:name => 'advanced_header', :format => :openoffice) do |oo|
-      parsed_head = oo.parse(:headers => true)
-      assert_equal "Date(yyyy-mm-dd)", oo.cell('A',1)
-      assert_equal parsed_head[0].keys, ["Date(yyyy-mm-dd)"]
-      assert_equal parsed_head[0].values, ["Date(yyyy-mm-dd)"]
-    end
-  end
-
-  def test_formula_excelx
-    with_each_spreadsheet(:name=>'formula', :format=>:excelx) do |oo|
-      assert_equal 1, oo.cell('A',1)
-      assert_equal 2, oo.cell('A',2)
-      assert_equal 3, oo.cell('A',3)
-      assert_equal 4, oo.cell('A',4)
-      assert_equal 5, oo.cell('A',5)
-      assert_equal 6, oo.cell('A',6)
-      assert_equal 21, oo.cell('A',7)
-      assert_equal :formula, oo.celltype('A',7)
-      #steht nicht in Datei, oder?
-      #nein, diesen Bezug habe ich nur in der OpenOffice-Datei
-      #assert_equal "=[Sheet2.A1]", oo.formula('C',7)
-      assert_nil oo.formula('A',6)
-      # assert_equal [[7, 1, "=SUM([.A1:.A6])"],
-      #  [7, 2, "=SUM([.$A$1:.B6])"],
-      #[7, 3, "=[Sheet2.A1]"],
-      #[8, 2, "=SUM([.$A$1:.B7])"],
-      #], oo.formulas(oo.sheets.first)
-      assert_equal [[7, 1, 'SUM(A1:A6)'],
-        [7, 2, 'SUM($A$1:B6)'],
-        # [7, 3, "=[Sheet2.A1]"],
-        # [8, 2, "=SUM([.$A$1:.B7])"],
-      ], oo.formulas(oo.sheets.first)
-
-      # setting a cell
-      oo.set('A',15, 41)
-      assert_equal 41, oo.cell('A',15)
-      oo.set('A',16, "41")
-      assert_equal "41", oo.cell('A',16)
-      oo.set('A',17, 42.5)
-      assert_equal 42.5, oo.cell('A',17)
-    end
-  end
-
   def test_borders_sheets
     with_each_spreadsheet(:name=>'borders') do |oo|
       oo.default_sheet = oo.sheets[1]
