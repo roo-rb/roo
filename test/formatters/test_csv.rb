@@ -44,7 +44,7 @@ class TestRooFormatterCSV < Minitest::Test
   # wird.
   # Besser: Methode um temporaeres Dir. portabel zu bestimmen
   def test_huge_document_to_csv
-    skip unless ENV["LONG_RUN"]
+    skip_long_test
 
     original_csv_path = File.join(TESTDIR, "Bibelbund.csv")
     with_each_spreadsheet(name: "Bibelbund", format: [:openoffice, :excelx]) do |workbook|
@@ -71,7 +71,7 @@ class TestRooFormatterCSV < Minitest::Test
   end
 
   def test_bug_quotes_excelx
-    skip unless ENV["LONG_RUN"]
+    skip_long_test
     # TODO: run this test with a much smaller document
     with_each_spreadsheet(name: "Bibelbund", format: [:openoffice, :excelx]) do |workbook|
       workbook.default_sheet = workbook.sheets.first
