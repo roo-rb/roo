@@ -42,6 +42,14 @@ class TestRooCSV < Minitest::Test
     assert_equal headers, parsed[1].keys
   end
 
+  def test_iso_8859_1
+    file = File.open(File.join(TESTDIR, "iso_8859_1.csv"))
+    options = { csv_options: { col_sep: ";", encoding: Encoding::ISO_8859_1 } }
+    workbook = Roo::CSV.new(file.path, options)
+    result = workbook.last_column
+    assert_equal(19, result)
+  end
+
   def roo_class
     Roo::CSV
   end
