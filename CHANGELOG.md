@@ -1,5 +1,9 @@
 ## Unreleased
 
+## [2.7.1] 2017-01-03
+### Fixed
+- Fixed regression where a CSV's encoding was being ignored [372](https://github.com/roo-rb/roo/pull/372)
+
 ## [2.7.0] 2016-12-31
 ### Fixed
 - Added rack server for testing Roo's download capabilities [365](https://github.com/roo-rb/roo/pull/365)
