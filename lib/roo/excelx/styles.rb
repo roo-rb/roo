@@ -1,4 +1,5 @@
 require 'roo/font'
+require 'roo/fill'
 require 'roo/excelx/extractor'
 
 module Roo
@@ -12,6 +13,14 @@ module Roo
 
       def definitions
         @definitions ||= extract_definitions
+      end
+
+      def fills
+        @fills ||= doc.xpath('//cellXfs').flat_map do |xfs|
+          xfs.children.map do |xf|
+            extract_fills[xf['fillId'].to_i]
+          end
+        end
       end
 
       private
@@ -58,6 +67,19 @@ module Roo
         Hash[doc.xpath('//numFmt').map do |num_fmt|
           [num_fmt['numFmtId'], num_fmt['formatCode']]
         end]
+      end
+
+      def extract_fills
+        doc.xpath('//fills/fill').map do |fill_el|
+          Fill.new.tap do |fill|
+            fill.color =
+              if fill_el.xpath('./patternFill/fgColor').empty?
+                'FFFFFFFF'
+              else
+                fill_el.xpath('./patternFill/fgColor').first['rgb']
+              end
+          end
+        end
       end
     end
   end

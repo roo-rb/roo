@@ -219,6 +219,12 @@ module Roo
       styles.definitions[definition_index] if definition_index
     end
 
+    def fills(row, col, sheet = nil)
+      key = normalize(row, col)
+      fill_index = safe_send(sheet_for(sheet).cells[key], :style)
+      styles.fills[fill_index] if fill_index
+    end
+
     # returns the type of a cell:
     # * :float
     # * :string,

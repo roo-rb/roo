@@ -72,10 +72,10 @@ class Roo::Base
     @first_last_row_cols[sheet] ||= begin
       result = collect_last_row_col_for_sheet(sheet)
       {
-          first_row: result[:first_row] == MAX_ROW_COL ? nil : result[:first_row],
-          first_column: result[:first_column] == MAX_ROW_COL ? nil : result[:first_column],
-          last_row: result[:last_row] == MIN_ROW_COL ? nil : result[:last_row],
-          last_column: result[:last_column] == MIN_ROW_COL ? nil : result[:last_column]
+        first_row: result[:first_row] == MAX_ROW_COL ? nil : result[:first_row],
+        first_column: result[:first_column] == MAX_ROW_COL ? nil : result[:first_column],
+        last_row: result[:last_row] == MIN_ROW_COL ? nil : result[:last_row],
+        last_column: result[:last_column] == MIN_ROW_COL ? nil : result[:last_column]
       }
     end
   end
@@ -283,10 +283,15 @@ class Roo::Base
               first_row.upto(last_row) do |row|
                 first_column.upto(last_column) do |col|
                   unless empty?(row, col)
-                    x.cell(cell(row, col),
-                           row: row,
-                           column: col,
-                           type: celltype(row, col))
+                    attributes = { row: row, column: col, type: celltype(row, col) }
+
+                    font = font(row, col)
+                    attributes.merge!(bold: font.bold?, italic: font.italic?, underline: font.underline?) if font
+
+                    fill = fills(row, col)
+                    attributes.merge!(cell_color: fill.color) if fill
+
+                    x.cell(cell(row, col), attributes)
                   end
                 end
               end
