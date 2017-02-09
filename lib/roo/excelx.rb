@@ -1,10 +1,19 @@
 require 'nokogiri'
 require 'zip/filesystem'
 require 'roo/link'
+require 'roo/tempdir'
 require 'roo/utils'
+require 'forwardable'
+require 'set'
 
 module Roo
   class Excelx < Roo::Base
+    extend Roo::Tempdir
+    extend Forwardable
+
+    ERROR_VALUES = %w(#N/A #REF! #NAME? #DIV/0! #NULL! #VALUE! #NUM!).to_set
+
+    require 'roo/excelx/shared'
     require 'roo/excelx/workbook'
     require 'roo/excelx/shared_strings'
     require 'roo/excelx/styles'
@@ -13,67 +22,10 @@ module Roo
     require 'roo/excelx/relationships'
     require 'roo/excelx/comments'
     require 'roo/excelx/sheet_doc'
+    require 'roo/excelx/coordinate'
+    require 'roo/excelx/format'
 
-    module Format
-      EXCEPTIONAL_FORMATS = {
-        'h:mm am/pm' => :date,
-        'h:mm:ss am/pm' => :date
-      }
-
-      STANDARD_FORMATS = {
-        0 => 'General'.freeze,
-        1 => '0'.freeze,
-        2 => '0.00'.freeze,
-        3 => '#,##0'.freeze,
-        4 => '#,##0.00'.freeze,
-        9 => '0%'.freeze,
-        10 => '0.00%'.freeze,
-        11 => '0.00E+00'.freeze,
-        12 => '# ?/?'.freeze,
-        13 => '# ??/??'.freeze,
-        14 => 'mm-dd-yy'.freeze,
-        15 => 'd-mmm-yy'.freeze,
-        16 => 'd-mmm'.freeze,
-        17 => 'mmm-yy'.freeze,
-        18 => 'h:mm AM/PM'.freeze,
-        19 => 'h:mm:ss AM/PM'.freeze,
-        20 => 'h:mm'.freeze,
-        21 => 'h:mm:ss'.freeze,
-        37 => '#,##0 ;(#,##0)'.freeze,
-        38 => '#,##0 ;[Red](#,##0)'.freeze,
-        39 => '#,##0.00;(#,##0.00)'.freeze,
-        40 => '#,##0.00;[Red](#,##0.00)'.freeze,
-        45 => 'mm:ss'.freeze,
-        46 => '[h]:mm:ss'.freeze,
-        47 => 'mmss.0'.freeze,
-        48 => '##0.0E+0'.freeze,
-        49 => '@'.freeze
-      }
-
-      def to_type(format)
-        format = format.to_s.downcase
-        if (type = EXCEPTIONAL_FORMATS[format])
-          type
-        elsif format.include?('#')
-          :float
-        elsif !format.match(/d+(?![\]])/).nil? || format.include?('y')
-          if format.include?('h') || format.include?('s')
-            :datetime
-          else
-            :date
-          end
-        elsif format.include?('h') || format.include?('s')
-          :time
-        elsif format.include?('%')
-          :percentage
-        else
-          :float
-        end
-      end
-
-      module_function :to_type
-    end
-
+    delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files] => :@shared
     ExceedsMaxError = Class.new(StandardError)
 
     # initialization and opening of a spreadsheet file
@@ -86,16 +38,22 @@ module Roo
       cell_max = options.delete(:cell_max)
       sheet_options = {}
       sheet_options[:expand_merged_ranges] = (options[:expand_merged_ranges] || false)
+      sheet_options[:no_hyperlinks] = (options[:no_hyperlinks] || false)
 
       unless is_stream?(filename_or_stream)
-        file_type_check(filename_or_stream, '.xlsx', 'an Excel-xlsx', file_warning, packed)
-        basename = File.basename(filename_or_stream)
+        file_type_check(filename_or_stream, %w[.xlsx .xlsm], 'an Excel 2007', file_warning, packed)
+        basename = find_basename(filename_or_stream)
       end
 
-      @tmpdir = make_tmpdir(basename, options[:tmpdir_root])
+      # NOTE: Create temp directory and allow Ruby to cleanup the temp directory
+      #       when the object is garbage collected. Initially, the finalizer was
+      #       created in the Roo::Tempdir module, but that led to a segfault
+      #       when testing in Ruby 2.4.0.
+      @tmpdir = self.class.make_tempdir(self, basename, options[:tmpdir_root])
+      ObjectSpace.define_finalizer(self, self.class.finalize(object_id))
+
+      @shared = Shared.new(@tmpdir)
       @filename = local_filename(filename_or_stream, @tmpdir, packed)
-      @comments_files = []
-      @rels_files = []
       process_zipfile(@filename || filename_or_stream)
 
       @sheet_names = workbook.sheets.map do |sheet|
@@ -105,7 +63,7 @@ module Roo
       end.compact
       @sheets = []
       @sheets_by_name = Hash[@sheet_names.map.with_index do |sheet_name, n|
-        @sheets[n] = Sheet.new(sheet_name, @rels_files[n], @sheet_files[n], @comments_files[n], styles, shared_strings, workbook, sheet_options)
+        @sheets[n] = Sheet.new(sheet_name, @shared, n, sheet_options)
         [sheet_name, @sheets[n]]
       end]
 
@@ -115,9 +73,9 @@ module Roo
       end
 
       super
-    rescue => e # clean up any temp files, but only if an error was raised
-      close
-      raise e
+    rescue
+      self.class.finalize_tempdirs(object_id)
+      raise
     end
 
     def method_missing(method, *args)
@@ -186,7 +144,7 @@ module Roo
     def set(row, col, value, sheet = nil) #:nodoc:
       key = normalize(row, col)
       cell_type = cell_type_by_value(value)
-      sheet_for(sheet).cells[key] = Cell.new(value, cell_type, nil, cell_type, value, nil, nil, nil, Cell::Coordinate.new(row, col))
+      sheet_for(sheet).cells[key] = Cell.new(value, cell_type, nil, cell_type, value, nil, nil, nil, Coordinate.new(row, col))
     end
 
     # Returns the formula at (row,col).
@@ -244,14 +202,21 @@ module Roo
     # Note: this is only available within the Excelx class
     def excelx_type(row, col, sheet = nil)
       key = normalize(row, col)
-      safe_send(sheet_for(sheet).cells[key], :excelx_type)
+      safe_send(sheet_for(sheet).cells[key], :cell_type)
     end
 
     # returns the internal value of an excelx cell
     # Note: this is only available within the Excelx class
     def excelx_value(row, col, sheet = nil)
       key = normalize(row, col)
-      safe_send(sheet_for(sheet).cells[key], :excelx_value)
+      safe_send(sheet_for(sheet).cells[key], :cell_value)
+    end
+
+    # returns the internal value of an excelx cell
+    # Note: this is only available within the Excelx class
+    def formatted_value(row, col, sheet = nil)
+      key = normalize(row, col)
+      safe_send(sheet_for(sheet).cells[key], :formatted_value)
     end
 
     # returns the internal format of an excel cell
@@ -264,8 +229,8 @@ module Roo
       sheet = sheet_for(sheet)
       key = normalize(row, col)
       cell = sheet.cells[key]
-      !cell || !cell.value || (cell.type == :string && cell.value.empty?) \
-      || (row < sheet.first_row || row > sheet.last_row || col < sheet.first_column || col > sheet.last_column)
+      !cell || cell.empty? ||
+        (row < sheet.first_row || row > sheet.last_row || col < sheet.first_column || col > sheet.last_column)
     end
 
     # shows the internal representation of all cells
@@ -288,8 +253,8 @@ module Roo
     def labels
       @labels ||= workbook.defined_names.map do |name, label|
         [
-            name,
-            [label.row, label.col, label.sheet]
+          name,
+          [label.row, label.col, label.sheet]
         ]
       end
     end
@@ -326,7 +291,12 @@ module Roo
     # Yield an array of Excelx::Cell
     # Takes options for sheet, pad_cells, and max_rows
     def each_row_streaming(options = {})
-      sheet_for(options.delete(:sheet)).each_row(options) { |row| yield row }
+      sheet = sheet_for(options.delete(:sheet))
+      if block_given?
+        sheet.each_row(options) { |row| yield row }
+      else
+        sheet.to_enum(:each_row, options)
+      end
     end
 
     private
@@ -399,11 +369,14 @@ module Roo
       end
     end
 
+    # Extracts the sheets in order, but it will ignore sheets that are not
+    # worksheets.
     def extract_sheets_in_order(entries, sheet_ids, sheets, tmpdir)
-      sheet_ids.each_with_index do |id, i|
+      (sheet_ids & sheets.keys).each_with_index do |id, i|
         name = sheets[id]
-        entry = entries.find { |e| e.name =~ /#{name}$/ }
+        entry = entries.find { |e| "/#{e.name}" =~ /#{name}$/ }
         path = "#{tmpdir}/roo_sheet#{i + 1}"
+        sheet_files << path
         @sheet_files << path
         entry.extract(path)
       end
@@ -414,19 +387,13 @@ module Roo
       @sheet_files = []
 
       unless is_stream?(zipfilename_or_stream)
-        process_zipfile_entries Zip::File.open(zipfilename_or_stream).to_a.sort_by(&:name)
+        zip_file = Zip::File.open(zipfilename_or_stream)
       else
-        stream = Zip::InputStream.open zipfilename_or_stream
-        begin
-          entries = []
-          while (entry = stream.get_next_entry)
-            entries << entry
-          end
-          process_zipfile_entries entries
-        ensure
-          stream.close
-        end
+        zip_file = Zip::CentralDirectory.new
+        zip_file.read_from_stream zipfilename_or_stream
       end
+
+      process_zipfile_entries zip_file.to_a.sort_by(&:name)
     end
 
     def process_zipfile_entries(entries)
@@ -451,41 +418,33 @@ module Roo
 
       entries.each do |entry|
         path =
-            case entry.name.downcase
-              when /sharedstrings.xml$/
-                "#{@tmpdir}/roo_sharedStrings.xml"
-              when /styles.xml$/
-                "#{@tmpdir}/roo_styles.xml"
-              when /comments([0-9]+).xml$/
-                # FIXME: Most of the time, The order of the comment files are the same
-                #       the sheet order, i.e. sheet1.xml's comments are in comments1.xml.
-                #       In some situations, this isn't true. The true location of a
-                #       sheet's comment file is in the sheet1.xml.rels file. SEE
-                #       ECMA-376 12.3.3 in "Ecma Office Open XML Part 1".
-                nr = Regexp.last_match[1].to_i
-                @comments_files[nr - 1] = "#{@tmpdir}/roo_comments#{nr}"
-              when /sheet([0-9]+).xml.rels$/
-                # FIXME: Roo seems to use sheet[\d].xml.rels for hyperlinks only, but
-                #        it also stores the location for sharedStrings, comments,
-                #        drawings, etc.
-                nr = Regexp.last_match[1].to_i
-                @rels_files[nr - 1] = "#{@tmpdir}/roo_rels#{nr}"
-            end
+          case entry.name.downcase
+          when /sharedstrings.xml$/
+            "#{@tmpdir}/roo_sharedStrings.xml"
+          when /styles.xml$/
+            "#{@tmpdir}/roo_styles.xml"
+          when /comments([0-9]+).xml$/
+            # FIXME: Most of the time, The order of the comment files are the same
+            #       the sheet order, i.e. sheet1.xml's comments are in comments1.xml.
+            #       In some situations, this isn't true. The true location of a
+            #       sheet's comment file is in the sheet1.xml.rels file. SEE
+            #       ECMA-376 12.3.3 in "Ecma Office Open XML Part 1".
+            nr = Regexp.last_match[1].to_i
+            comments_files[nr - 1] = "#{@tmpdir}/roo_comments#{nr}"
+          when %r{chartsheets/_rels/sheet([0-9]+).xml.rels$}
+            # NOTE: Chart sheet relationship files were interfering with
+            #       worksheets.
+            nil
+          when /sheet([0-9]+).xml.rels$/
+            # FIXME: Roo seems to use sheet[\d].xml.rels for hyperlinks only, but
+            #        it also stores the location for sharedStrings, comments,
+            #        drawings, etc.
+            nr = Regexp.last_match[1].to_i
+            rels_files[nr - 1] = "#{@tmpdir}/roo_rels#{nr}"
+          end
 
         entry.extract(path) if path
       end
-    end
-
-    def styles
-      @styles ||= Styles.new(File.join(@tmpdir, 'roo_styles.xml'))
-    end
-
-    def shared_strings
-      @shared_strings ||= SharedStrings.new(File.join(@tmpdir, 'roo_sharedStrings.xml'))
-    end
-
-    def workbook
-      @workbook ||= Workbook.new(File.join(@tmpdir, 'roo_workbook.xml'))
     end
 
     def safe_send(object, method, *args)
