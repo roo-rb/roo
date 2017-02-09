@@ -18,16 +18,16 @@ module Roo
     csv: Roo::CSV
   }
 
-  def self.const_missing(const_name)
-    case const_name
-    when :Excel
-      raise ROO_EXCEL_NOTICE
-    when :Excel2003XML
-      raise ROO_EXCELML_NOTICE
-    when :Google
-      raise ROO_GOOGLE_NOTICE
-    else
-      super
-    end
-  end
+#   def self.const_missing(const_name)
+#     case const_name
+#     when :Excel
+#       raise ROO_EXCEL_NOTICE
+#     when :Excel2003XML
+#       raise ROO_EXCELML_NOTICE
+#     when :Google
+#       raise ROO_GOOGLE_NOTICE
+#     else
+#       super
+#     end
+#   end
 end
