@@ -123,19 +123,19 @@ module Roo
               when 'vertAlign'
                 # See if the Vertical Alignment is subscript or superscript
                 case rPr_elem_value
-                  when 'subscript'
-                    # set formatting for Subscript to true and Superscript to false ... Can't have both
-                    xml_elems[:sub] = true
-                    xml_elems[:sup] = false
-                  when 'superscript'
-                    # set formatting for Superscript to true and Subscript to false ... Can't have both
-                    xml_elems[:sup] = true
-                    xml_elems[:sub] = false
+                when 'subscript'
+                  # set formatting for Subscript to true and Superscript to false ... Can't have both
+                  xml_elems[:sub] = true
+                  xml_elems[:sup] = false
+                when 'superscript'
+                  # set formatting for Superscript to true and Subscript to false ... Can't have both
+                  xml_elems[:sup] = true
+                  xml_elems[:sub] = false
                 end
               end
             end
-            when 't'
-              str << create_html(elem.content, xml_elems)
+          when 't'
+            str << create_html(elem.content, xml_elems)
           end
         end
         str
