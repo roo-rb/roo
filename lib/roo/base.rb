@@ -4,12 +4,21 @@ require 'tmpdir'
 require 'stringio'
 require 'nokogiri'
 require 'roo/utils'
+require "roo/formatters/base"
+require "roo/formatters/csv"
+require "roo/formatters/matrix"
+require "roo/formatters/xml"
+require "roo/formatters/yaml"
 
 # Base class for all other types of spreadsheets
 class Roo::Base
   include Enumerable
+  include Roo::Formatters::Base
+  include Roo::Formatters::CSV
+  include Roo::Formatters::Matrix
+  include Roo::Formatters::XML
+  include Roo::Formatters::YAML
 
-  TEMP_PREFIX = 'roo_'.freeze
   MAX_ROW_COL = 999_999.freeze
   MIN_ROW_COL = 0.freeze
 
@@ -17,6 +26,15 @@ class Roo::Base
 
   # sets the line with attribute names (default: 1)
   attr_accessor :header_line
+
+  def self.TEMP_PREFIX
+    warn '[DEPRECATION] please access TEMP_PREFIX via Roo::TEMP_PREFIX'
+    Roo::TEMP_PREFIX
+  end
+
+  def self.finalize(object_id)
+    proc { finalize_tempdirs(object_id) }
+  end
 
   def initialize(filename, options = {}, _file_warning = :error, _tmpdir = nil)
     @filename = filename
@@ -32,14 +50,12 @@ class Roo::Base
     @last_column = {}
 
     @header_line = 1
-  rescue => e # clean up any temp files, but only if an error was raised
-    close
-    raise e
   end
 
   def close
-    return nil unless @tmpdirs
-    @tmpdirs.each { |dir| ::FileUtils.remove_entry(dir) }
+    if self.class.respond_to?(:finalize_tempdirs)
+      self.class.finalize_tempdirs(object_id)
+    end
     nil
   end
 
@@ -91,7 +107,7 @@ class Roo::Base
       first_column = [first_column, key.last.to_i].min
       last_column = [last_column, key.last.to_i].max
     end if @cell[sheet]
-    {first_row: first_row, first_column: first_column, last_row: last_row, last_column: last_column}
+    { first_row: first_row, first_column: first_column, last_row: last_row, last_column: last_column }
   end
 
   %w(first_row last_row first_column last_column).each do |key|
@@ -103,74 +119,8 @@ class Roo::Base
     EOS
   end
 
-  # returns a rectangular area (default: all cells) as yaml-output
-  # you can add additional attributes with the prefix parameter like:
-  # oo.to_yaml({"file"=>"flightdata_2007-06-26", "sheet" => "1"})
-  def to_yaml(prefix = {}, from_row = nil, from_column = nil, to_row = nil, to_column = nil, sheet = default_sheet)
-    return '' unless first_row # empty result if there is no first_row in a sheet
-
-    from_row ||= first_row(sheet)
-    to_row ||= last_row(sheet)
-    from_column ||= first_column(sheet)
-    to_column ||= last_column(sheet)
-
-    result = "--- \n"
-    from_row.upto(to_row) do |row|
-      from_column.upto(to_column) do |col|
-        unless empty?(row, col, sheet)
-          result << "cell_#{row}_#{col}: \n"
-          prefix.each do|k, v|
-            result << "  #{k}: #{v} \n"
-          end
-          result << "  row: #{row} \n"
-          result << "  col: #{col} \n"
-          result << "  celltype: #{celltype(row, col, sheet)} \n"
-          value = cell(row, col, sheet)
-          if celltype(row, col, sheet) == :time
-            value = integer_to_timestring(value)
-          end
-          result << "  value: #{value} \n"
-        end
-      end
-    end
-    result
-  end
-
-  # write the current spreadsheet to stdout or into a file
-  def to_csv(filename = nil, separator = ',', sheet = default_sheet)
-    if filename
-      File.open(filename, 'w') do |file|
-        write_csv_content(file, sheet, separator)
-      end
-      true
-    else
-      sio = ::StringIO.new
-      write_csv_content(sio, sheet, separator)
-      sio.rewind
-      sio.read
-    end
-  end
-
-  # returns a matrix object from the whole sheet or a rectangular area of a sheet
-  def to_matrix(from_row = nil, from_column = nil, to_row = nil, to_column = nil, sheet = default_sheet)
-    require 'matrix'
-
-    return Matrix.empty unless first_row
-
-    from_row ||= first_row(sheet)
-    to_row ||= last_row(sheet)
-    from_column ||= first_column(sheet)
-    to_column ||= last_column(sheet)
-
-    Matrix.rows(from_row.upto(to_row).map do |row|
-      from_column.upto(to_column).map do |col|
-        cell(row, col, sheet)
-      end
-    end)
-  end
-
   def inspect
-    "<##{ self.class }:#{ self.object_id.to_s(8) } #{ self.instance_variables.join(' ') }>"
+    "<##{self.class}:#{object_id.to_s(8)} #{instance_variables.join(' ')}>"
   end
 
   # find a row either by row number or a condition
@@ -180,7 +130,7 @@ class Roo::Base
     options = (args.last.is_a?(Hash) ? args.pop : {})
 
     case args[0]
-      when Fixnum
+      when Integer
         find_by_row(args[0])
       when :all
         find_by_conditions(options)
@@ -217,15 +167,15 @@ class Roo::Base
     row, col = normalize(row, col)
     cell_type = cell_type_by_value(value)
     set_value(row, col, value, sheet)
-    set_type(row, col, cell_type , sheet)
+    set_type(row, col, cell_type, sheet)
   end
 
   def cell_type_by_value(value)
     case value
-      when Fixnum then :float
+      when Integer then :float
       when String, Float then :string
       else
-        raise ArgumentError, "Type for #{value} not set"
+        fail ArgumentError, "Type for #{value} not set"
     end
   end
 
@@ -256,13 +206,13 @@ class Roo::Base
       sheets.each do|sheet|
         self.default_sheet = sheet
         result << 'Sheet ' + n.to_s + ":\n"
-        unless first_row
-          result << '  - empty -'
-        else
+        if first_row
           result << "  First row: #{first_row}\n"
           result << "  Last row: #{last_row}\n"
           result << "  First column: #{::Roo::Utils.number_to_letter(first_column)}\n"
           result << "  Last column: #{::Roo::Utils.number_to_letter(last_column)}"
+        else
+          result << '  - empty -'
         end
         result << "\n" if sheet != sheets.last
         n += 1
@@ -271,43 +221,12 @@ class Roo::Base
     end
   end
 
-  # returns an XML representation of all sheets of a spreadsheet file
-  def to_xml
-    Nokogiri::XML::Builder.new do |xml|
-      xml.spreadsheet do
-        sheets.each do |sheet|
-          self.default_sheet = sheet
-          xml.sheet(name: sheet) do |x|
-            if first_row && last_row && first_column && last_column
-              # sonst gibt es Fehler bei leeren Blaettern
-              first_row.upto(last_row) do |row|
-                first_column.upto(last_column) do |col|
-                  unless empty?(row, col)
-                    attributes = { row: row, column: col, type: celltype(row, col) }
-
-                    font = font(row, col)
-                    attributes.merge!(bold: font.bold?, italic: font.italic?, underline: font.underline?) if font
-
-                    fill = fills(row, col)
-                    attributes.merge!(cell_color: fill.color) if fill
-
-                    x.cell(cell(row, col), attributes)
-                  end
-                end
-              end
-            end
-          end
-        end
-      end
-    end.to_xml
-  end
-
   # when a method like spreadsheet.a42 is called
   # convert it to a call of spreadsheet.cell('a',42)
   def method_missing(m, *args)
     # #aa42 => #cell('aa',42)
     # #aa42('Sheet1')  => #cell('aa',42,'Sheet1')
-    if m =~ /^([a-z]+)(\d)$/
+    if m =~ /^([a-z]+)(\d+)$/
       col = ::Roo::Utils.letter_to_number(Regexp.last_match[1])
       row = Regexp.last_match[2].to_i
       if args.empty?
@@ -323,7 +242,7 @@ class Roo::Base
   # access different worksheets by calling spreadsheet.sheet(1)
   # or spreadsheet.sheet('SHEETNAME')
   def sheet(index, name = false)
-    self.default_sheet = String === index ? index : sheets[index]
+    self.default_sheet = index.is_a?(::String) ? index : sheets[index]
     name ? [default_sheet, self] : self
   end
 
@@ -357,35 +276,32 @@ class Roo::Base
   # control characters and white spaces around columns
 
   def each(options = {})
-    if block_given?
-      if options.empty?
-        1.upto(last_row) do |line|
-          yield row(line)
-        end
-      else
-        clean_sheet_if_need(options)
-        search_or_set_header(options)
-        headers = @headers ||
-            Hash[(first_column..last_column).map do |col|
-              [cell(@header_line, col), col]
-            end]
+    return to_enum(:each, options) unless block_given?
 
-        @header_line.upto(last_row) do |line|
-          yield(Hash[headers.map { |k, v| [k, cell(line, v)] }])
-        end
+    if options.empty?
+      1.upto(last_row) do |line|
+        yield row(line)
       end
     else
-      to_enum(:each, options)
+      clean_sheet_if_need(options)
+      search_or_set_header(options)
+      headers = @headers ||
+          Hash[(first_column..last_column).map do |col|
+            [cell(@header_line, col), col]
+          end]
+
+      @header_line.upto(last_row) do |line|
+        yield(Hash[headers.map { |k, v| [k, cell(line, v)] }])
+      end
     end
   end
 
   def parse(options = {})
-    ary = []
-    each(options) do |row|
-      yield(row) if block_given?
-      ary << row
+    results = each(options).map do |row|
+      block_given? ? yield(row) : row
     end
-    ary
+
+    options[:headers] == true ? results : results.drop(1)
   end
 
   def row_with(query, return_headers = false)
@@ -398,38 +314,40 @@ class Roo::Base
         @header_line = line_no
         return return_headers ? headers : line_no
       elsif line_no > 100
-        fail "Couldn't find header row."
+        raise Roo::HeaderRowNotFoundError
       end
     end
-    fail "Couldn't find header row."
+    raise Roo::HeaderRowNotFoundError
   end
 
   protected
 
-  def file_type_check(filename, ext, name, warning_level, packed = nil)
+  def file_type_check(filename, exts, name, warning_level, packed = nil)
     if packed == :zip
-      # lalala.ods.zip => lalala.ods
-      # hier wird KEIN unzip gemacht, sondern nur der Name der Datei
-      # getestet, falls es eine gepackte Datei ist.
+      # spreadsheet.ods.zip => spreadsheet.ods
+      # Decompression is not performed here, only the 'zip' extension
+      # is removed from the file.
       filename = File.basename(filename, File.extname(filename))
     end
 
-    if uri?(filename) && qs_begin = filename.rindex('?')
+    if uri?(filename) && (qs_begin = filename.rindex('?'))
       filename = filename[0..qs_begin - 1]
     end
-    if File.extname(filename).downcase != ext
-      case warning_level
-        when :error
-          warn file_type_warning_message(filename, ext)
-          fail TypeError, "#{filename} is not #{name} file"
-        when :warning
-          warn "are you sure, this is #{name} spreadsheet file?"
-          warn file_type_warning_message(filename, ext)
-        when :ignore
-          # ignore
-        else
-          fail "#{warning_level} illegal state of file_warning"
-      end
+    exts = Array(exts)
+
+    return if exts.include?(File.extname(filename).downcase)
+
+    case warning_level
+    when :error
+      warn file_type_warning_message(filename, exts)
+      fail TypeError, "#{filename} is not #{name} file"
+    when :warning
+      warn "are you sure, this is #{name} spreadsheet file?"
+      warn file_type_warning_message(filename, exts)
+    when :ignore
+      # ignore
+    else
+      fail "#{warning_level} illegal state of file_warning"
     end
   end
 
@@ -452,10 +370,6 @@ class Roo::Base
   end
 
   private
-
-  def track_tmpdir!(tmpdir)
-    (@tmpdirs ||= []) << tmpdir
-  end
 
   def clean_sheet_if_need(options)
     return unless options[:clean]
@@ -480,16 +394,18 @@ class Roo::Base
     return if is_stream?(filename)
     filename = download_uri(filename, tmpdir) if uri?(filename)
     filename = unzip(filename, tmpdir) if packed == :zip
-    unless File.file?(filename)
-      fail IOError, "file #{filename} does not exist"
-    end
+
+    fail IOError, "file #{filename} does not exist" unless File.file?(filename)
+
     filename
   end
 
-  def file_type_warning_message(filename, ext)
-    "use #{Roo::CLASS_FOR_EXTENSION.fetch(ext.sub('.', '').to_sym)}.new to handle #{ext} spreadsheet files. This has #{File.extname(filename).downcase}"
+  def file_type_warning_message(filename, exts)
+    *rest, last_ext = exts
+    ext_list = rest.any? ? "#{rest.join(', ')} or #{last_ext}" : last_ext
+    "use #{Roo::CLASS_FOR_EXTENSION.fetch(last_ext.sub('.', '').to_sym)}.new to handle #{ext_list} spreadsheet files. This has #{File.extname(filename).downcase}"
   rescue KeyError
-    raise "unknown file type: #{ext}"
+    raise "unknown file types: #{ext_list}"
   end
 
   def find_by_row(row_index)
@@ -537,14 +453,26 @@ class Roo::Base
     initialize(@filename)
   end
 
+  def find_basename(filename)
+    if uri?(filename)
+      require 'uri'
+      uri = URI.parse filename
+      File.basename(uri.path)
+    elsif !is_stream?(filename)
+      File.basename(filename)
+    end
+  end
+
   def make_tmpdir(prefix = nil, root = nil, &block)
-    prefix = if prefix
-               TEMP_PREFIX + prefix
-             else
-               TEMP_PREFIX
-             end
-    ::Dir.mktmpdir(prefix, root || ENV['ROO_TMP'], &block).tap do |result|
-      block_given? || track_tmpdir!(result)
+    warn '[DEPRECATION] extend Roo::Tempdir and use its .make_tempdir instead'
+    prefix = "#{Roo::TEMP_PREFIX}#{prefix}"
+    root ||= ENV['ROO_TMP']
+
+    if block_given?
+      # folder is deleted at end of block
+      ::Dir.mktmpdir(prefix, root, &block)
+    else
+      self.class.make_tempdir(self, prefix, root)
     end
   end
 
@@ -582,7 +510,7 @@ class Roo::Base
   # converts cell coordinate to numeric values of row,col
   def normalize(row, col)
     if row.is_a?(::String)
-      if col.is_a?(::Fixnum)
+      if col.is_a?(::Integer)
         # ('A',1):
         # ('B', 5) -> (5, 2)
         row, col = col, row
@@ -590,21 +518,21 @@ class Roo::Base
         fail ArgumentError
       end
     end
-    if col.is_a?(::String)
-      col = ::Roo::Utils.letter_to_number(col)
-    end
+
+    col = ::Roo::Utils.letter_to_number(col) if col.is_a?(::String)
+
     [row, col]
   end
 
   def uri?(filename)
-    filename.start_with?('http://', 'https://')
+    filename.start_with?('http://', 'https://', 'ftp://')
   rescue
     false
   end
 
   def download_uri(uri, tmpdir)
     require 'open-uri'
-    tempfilename = File.join(tmpdir, File.basename(uri))
+    tempfilename = File.join(tmpdir, find_basename(uri))
     begin
       File.open(tempfilename, 'wb') do |file|
         open(uri, 'User-Agent' => "Ruby/#{RUBY_VERSION}") do |net|
@@ -636,18 +564,18 @@ class Roo::Base
   # check if default_sheet was set and exists in sheets-array
   def validate_sheet!(sheet)
     case sheet
-      when nil
-        fail ArgumentError, "Error: sheet 'nil' not valid"
-      when Fixnum
-        sheets.fetch(sheet - 1) do
-          fail RangeError, "sheet index #{sheet} not found"
-        end
-      when String
-        unless sheets.include? sheet
-          fail RangeError, "sheet '#{sheet}' not found"
-        end
-      else
-        fail TypeError, "not a valid sheet type: #{sheet.inspect}"
+    when nil
+      fail ArgumentError, "Error: sheet 'nil' not valid"
+    when Integer
+      sheets.fetch(sheet - 1) do
+        fail RangeError, "sheet index #{sheet} not found"
+      end
+    when String
+      unless sheets.include?(sheet)
+        fail RangeError, "sheet '#{sheet}' not found"
+      end
+    else
+      fail TypeError, "not a valid sheet type: #{sheet.inspect}"
     end
   end
 
@@ -666,75 +594,5 @@ class Roo::Base
       end
       ret
     end
-  end
-
-  # Write all cells to the csv file. File can be a filename or nil. If the this
-  # parameter is nil the output goes to STDOUT
-  def write_csv_content(file = nil, sheet = nil, separator = ',')
-    file ||= STDOUT
-    if first_row(sheet) # sheet is not empty
-      1.upto(last_row(sheet)) do |row|
-        1.upto(last_column(sheet)) do |col|
-          file.print(separator) if col > 1
-          file.print cell_to_csv(row, col, sheet)
-        end
-        file.print("\n")
-      end # sheet not empty
-    end
-  end
-
-  # The content of a cell in the csv output
-  def cell_to_csv(row, col, sheet)
-    if empty?(row, col, sheet)
-      ''
-    else
-      onecell = cell(row, col, sheet)
-
-      case celltype(row, col, sheet)
-        when :string
-          %("#{onecell.gsub('"', '""')}") unless onecell.empty?
-        when :boolean
-          %("#{onecell.gsub('"', '""').downcase}")
-        when :float, :percentage
-          if onecell == onecell.to_i
-            onecell.to_i.to_s
-          else
-            onecell.to_s
-          end
-        when :formula
-          case onecell
-            when String
-              %("#{onecell.gsub('"', '""')}") unless onecell.empty?
-            when Float
-              if onecell == onecell.to_i
-                onecell.to_i.to_s
-              else
-                onecell.to_s
-              end
-            when DateTime
-              onecell.to_s
-            else
-              fail "unhandled onecell-class #{onecell.class}"
-          end
-        when :date, :datetime
-          onecell.to_s
-        when :time
-          integer_to_timestring(onecell)
-        when :link
-          %("#{onecell.url.gsub('"', '""')}")
-        else
-          fail "unhandled celltype #{celltype(row, col, sheet)}"
-      end || ''
-    end
-  end
-
-  # converts an integer value to a time string like '02:05:06'
-  def integer_to_timestring(content)
-    h = (content / 3600.0).floor
-    content = content - h * 3600
-    m = (content / 60.0).floor
-    content = content - m * 60
-    s = content
-    sprintf('%02d:%02d:%02d', h, m, s)
   end
 end
