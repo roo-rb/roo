@@ -1,0 +1,17 @@
+language: ruby
+rvm:
+  - 2.2.4
+  - 2.3.1
+  - 2.4.0
+  - ruby-head
+  - jruby-9.1.6.0
+matrix:
+  include:
+    - rvm: 2.0.0
+      gemfile: Gemfile_ruby2
+    - rvm: 2.1.8
+      gemfile: Gemfile_ruby2
+  allow_failures:
+    - rvm: ruby-head
+    - rvm: jruby-9.1.6.0
+bundler_args: --without local_development

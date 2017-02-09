@@ -11,8 +11,8 @@ describe Roo::Excelx::Format do
       '0%' => :percentage,
       '0.00%' => :percentage,
       '0.00E+00' => :float,
-      '# ?/?' => :float, #??? TODO:
-      '# ??/??' => :float, #??? TODO:
+      '# ?/?' => :float, # ??? TODO:
+      '# ??/??' => :float, # ??? TODO:
       'mm-dd-yy' => :date,
       'd-mmm-yy' => :date,
       'd-mmm' => :date,
@@ -33,10 +33,10 @@ describe Roo::Excelx::Format do
       '##0.0E+0' => :float,
       '@' => :float,
       #-- zusaetzliche Formate, die nicht standardmaessig definiert sind:
-      "yyyy\\-mm\\-dd" => :date,
+      'yyyy\\-mm\\-dd' => :date,
       'dd/mm/yy' => :date,
       'hh:mm:ss' => :time,
-      "dd/mm/yy\\ hh:mm" => :datetime,
+      'dd/mm/yy\\ hh:mm' => :datetime,
       'dd/mmm/yy\\ hh:mm' => :datetime,
       'dd/mmm/yy' => :date, # 2011-05-21
       'yyyy-mm-dd' => :date, # 2011-09-16
@@ -44,7 +44,7 @@ describe Roo::Excelx::Format do
       '#0_);[Red]\(0\)' => :float
     }.each do |format, type|
       it "translates #{format} to #{type}" do
-        Roo::Excelx::Format.to_type(format).should == type
+        expect(Roo::Excelx::Format.to_type(format)).to eq(type)
       end
     end
   end

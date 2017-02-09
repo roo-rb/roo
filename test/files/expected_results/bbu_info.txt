@@ -1,0 +1,12 @@
+File: bbu%s
+Number of sheets: 3
+Sheets: 2007_12, Tabelle2, Tabelle3
+Sheet 1:
+  First row: 1
+  Last row: 4
+  First column: A
+  Last column: F
+Sheet 2:
+  - empty -
+Sheet 3:
+  - empty -
