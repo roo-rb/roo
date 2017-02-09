@@ -41,6 +41,26 @@ describe Roo::Spreadsheet do
       end
     end
 
+    context 'for a windows path' do
+      context 'that is xlsx' do
+        let(:filename) { 'c:\Users\Joe\Desktop\myfile.xlsx' }
+
+        it 'loads the proper type' do
+          expect(Roo::Excelx).to receive(:new).with(filename, {})
+          Roo::Spreadsheet.open(filename)
+        end
+      end
+    end
+
+    context 'for a xlsm file' do
+      let(:filename) { 'macros spreadsheet.xlsm' }
+
+      it 'loads the proper type' do
+        expect(Roo::Excelx).to receive(:new).with(filename, {})
+        Roo::Spreadsheet.open(filename)
+      end
+    end
+
     context 'for a csv file' do
       let(:filename) { 'file.csv' }
       let(:options) { { csv_options: { col_sep: '"' } } }

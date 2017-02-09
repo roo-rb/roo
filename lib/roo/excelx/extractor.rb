@@ -8,10 +8,9 @@ module Roo
       private
 
       def doc
-        @doc ||=
-        if doc_exists?
-          ::Roo::Utils.load_xml(@path).remove_namespaces!
-        end
+        raise FileNotFound, "#{@path} file not found" unless doc_exists?
+
+        ::Roo::Utils.load_xml(@path).remove_namespaces!
       end
 
       def doc_exists?

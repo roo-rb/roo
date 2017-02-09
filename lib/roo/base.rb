@@ -72,10 +72,10 @@ class Roo::Base
     @first_last_row_cols[sheet] ||= begin
       result = collect_last_row_col_for_sheet(sheet)
       {
-        first_row: result[:first_row] == MAX_ROW_COL ? nil : result[:first_row],
-        first_column: result[:first_column] == MAX_ROW_COL ? nil : result[:first_column],
-        last_row: result[:last_row] == MIN_ROW_COL ? nil : result[:last_row],
-        last_column: result[:last_column] == MIN_ROW_COL ? nil : result[:last_column]
+          first_row: result[:first_row] == MAX_ROW_COL ? nil : result[:first_row],
+          first_column: result[:first_column] == MAX_ROW_COL ? nil : result[:first_column],
+          last_row: result[:last_row] == MIN_ROW_COL ? nil : result[:last_row],
+          last_column: result[:last_column] == MIN_ROW_COL ? nil : result[:last_column]
       }
     end
   end
@@ -180,12 +180,12 @@ class Roo::Base
     options = (args.last.is_a?(Hash) ? args.pop : {})
 
     case args[0]
-    when Fixnum
-      find_by_row(args[0])
-    when :all
-      find_by_conditions(options)
-    else
-      fail ArgumentError, "unexpected arg #{args[0].inspect}, pass a row index or :all"
+      when Fixnum
+        find_by_row(args[0])
+      when :all
+        find_by_conditions(options)
+      else
+        fail ArgumentError, "unexpected arg #{args[0].inspect}, pass a row index or :all"
     end
   end
 
@@ -222,10 +222,10 @@ class Roo::Base
 
   def cell_type_by_value(value)
     case value
-    when Fixnum then :float
-    when String, Float then :string
-    else
-      raise ArgumentError, "Type for #{value} not set"
+      when Fixnum then :float
+      when String, Float then :string
+      else
+        raise ArgumentError, "Type for #{value} not set"
     end
   end
 
@@ -361,9 +361,9 @@ class Roo::Base
         clean_sheet_if_need(options)
         search_or_set_header(options)
         headers = @headers ||
-                  Hash[(first_column..last_column).map do |col|
-                    [cell(@header_line, col), col]
-                  end]
+            Hash[(first_column..last_column).map do |col|
+              [cell(@header_line, col), col]
+            end]
 
         @header_line.upto(last_row) do |line|
           yield(Hash[headers.map { |k, v| [k, cell(line, v)] }])
@@ -414,16 +414,16 @@ class Roo::Base
     end
     if File.extname(filename).downcase != ext
       case warning_level
-      when :error
-        warn file_type_warning_message(filename, ext)
-        fail TypeError, "#{filename} is not #{name} file"
-      when :warning
-        warn "are you sure, this is #{name} spreadsheet file?"
-        warn file_type_warning_message(filename, ext)
-      when :ignore
-        # ignore
-      else
-        fail "#{warning_level} illegal state of file_warning"
+        when :error
+          warn file_type_warning_message(filename, ext)
+          fail TypeError, "#{filename} is not #{name} file"
+        when :warning
+          warn "are you sure, this is #{name} spreadsheet file?"
+          warn file_type_warning_message(filename, ext)
+        when :ignore
+          # ignore
+        else
+          fail "#{warning_level} illegal state of file_warning"
       end
     end
   end
@@ -534,10 +534,10 @@ class Roo::Base
 
   def make_tmpdir(prefix = nil, root = nil, &block)
     prefix = if prefix
-      TEMP_PREFIX + prefix
-    else
-      TEMP_PREFIX
-    end
+               TEMP_PREFIX + prefix
+             else
+               TEMP_PREFIX
+             end
     ::Dir.mktmpdir(prefix, root || ENV['ROO_TMP'], &block).tap do |result|
       block_given? || track_tmpdir!(result)
     end
@@ -631,18 +631,18 @@ class Roo::Base
   # check if default_sheet was set and exists in sheets-array
   def validate_sheet!(sheet)
     case sheet
-    when nil
-      fail ArgumentError, "Error: sheet 'nil' not valid"
-    when Fixnum
-      sheets.fetch(sheet - 1) do
-        fail RangeError, "sheet index #{sheet} not found"
-      end
-    when String
-      unless sheets.include? sheet
-        fail RangeError, "sheet '#{sheet}' not found"
-      end
-    else
-      fail TypeError, "not a valid sheet type: #{sheet.inspect}"
+      when nil
+        fail ArgumentError, "Error: sheet 'nil' not valid"
+      when Fixnum
+        sheets.fetch(sheet - 1) do
+          fail RangeError, "sheet index #{sheet} not found"
+        end
+      when String
+        unless sheets.include? sheet
+          fail RangeError, "sheet '#{sheet}' not found"
+        end
+      else
+        fail TypeError, "not a valid sheet type: #{sheet.inspect}"
     end
   end
 
@@ -686,39 +686,39 @@ class Roo::Base
       onecell = cell(row, col, sheet)
 
       case celltype(row, col, sheet)
-      when :string
-        %("#{onecell.gsub('"', '""')}") unless onecell.empty?
-      when :boolean
-        %("#{onecell.gsub('"', '""').downcase}")
-      when :float, :percentage
-        if onecell == onecell.to_i
-          onecell.to_i.to_s
-        else
-          onecell.to_s
-        end
-      when :formula
-        case onecell
-        when String
+        when :string
           %("#{onecell.gsub('"', '""')}") unless onecell.empty?
-        when Float
+        when :boolean
+          %("#{onecell.gsub('"', '""').downcase}")
+        when :float, :percentage
           if onecell == onecell.to_i
             onecell.to_i.to_s
           else
             onecell.to_s
           end
-        when DateTime
+        when :formula
+          case onecell
+            when String
+              %("#{onecell.gsub('"', '""')}") unless onecell.empty?
+            when Float
+              if onecell == onecell.to_i
+                onecell.to_i.to_s
+              else
+                onecell.to_s
+              end
+            when DateTime
+              onecell.to_s
+            else
+              fail "unhandled onecell-class #{onecell.class}"
+          end
+        when :date, :datetime
           onecell.to_s
+        when :time
+          integer_to_timestring(onecell)
+        when :link
+          %("#{onecell.url.gsub('"', '""')}")
         else
-          fail "unhandled onecell-class #{onecell.class}"
-        end
-      when :date, :datetime
-        onecell.to_s
-      when :time
-        integer_to_timestring(onecell)
-      when :link
-        %("#{onecell.url.gsub('"', '""')}")
-      else
-        fail "unhandled celltype #{celltype(row, col, sheet)}"
+          fail "unhandled celltype #{celltype(row, col, sheet)}"
       end || ''
     end
   end

@@ -1,0 +1,10 @@
+Thanks for filing an issue. Following these instructions will help us solve your problem sooner.
+
+1. Describe the issue.
+2. Create a gist for this issue (Sample gist: https://gist.github.com/stevendaniels/98a05849036e99bb8b3c)? 
+
+Here are some instructions for creating such a gist. 
+
+1. Create a gist (https://gist.github.com) with code that creates the error.
+2. Clone the gist repo locally, add a stripped down version of the offending spreadsheet to the gist repo, and push the gist's changes master.
+3. Paste the gist url here.

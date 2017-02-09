@@ -4,12 +4,12 @@ gemspec
 
 group :test do
   # additional testing libs
-  gem 'webmock'
   gem 'shoulda'
+  gem 'activesupport', '< 5.1'
   gem 'rspec', '>= 3.0.0'
-  gem 'vcr'
   gem 'simplecov', '>= 0.9.0', require: false
   gem 'coveralls', require: false
+  gem "minitest-reporters"
 end
 
 group :local_development do
@@ -17,8 +17,7 @@ group :local_development do
   gem 'guard-rspec', '>= 4.3.1', require: false
   gem 'guard-minitest', require: false
   gem 'guard-bundler', require: false
-  gem 'guard-preek', require: false
   gem 'guard-rubocop', require: false
-  gem 'guard-reek', github: 'pericles/guard-reek', require: false
+  gem "rb-readline"
   gem 'pry'
 end

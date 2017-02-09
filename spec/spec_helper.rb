@@ -1,9 +1,9 @@
 require 'simplecov'
 require 'roo'
+require 'helpers'
 
-require 'vcr'
-
-VCR.configure do |c|
-  c.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
-  c.hook_into :webmock # or :fakeweb
+RSpec.configure do |c|
+  c.include Helpers
+  c.color = true
+  c.formatter = :documentation if ENV["USE_REPORTERS"]
 end

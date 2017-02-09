@@ -1,10 +1,127 @@
-## [Unreleased] - Unreleased
+## Unreleased
+
+## [2.7.1] 2017-01-03
+### Fixed
+- Fixed regression where a CSV's encoding was being ignored [372](https://github.com/roo-rb/roo/pull/372)
+
+## [2.7.0] 2016-12-31
+### Fixed
+- Added rack server for testing Roo's download capabilities [365](https://github.com/roo-rb/roo/pull/365)
+- Refactored tests into different formats [365](https://github.com/roo-rb/roo/pull/365)
+- Fixed OpenOffice for JRuby [362](https://github.com/roo-rb/roo/pull/362)
+- Added '0.000000' => '%.6f' number format [354](https://github.com/roo-rb/roo/pull/354)
+- Add additional formula cell types for to_csv [367][https://github.com/roo-rb/roo/pull/367]
+
 ### Added
+- Extracted formatters from Roo::Base#to_* methods [364](https://github.com/roo-rb/roo/pull/364)
+
+## [2.6.0] 2016-12-28
+### Fixed
+- Fixed error if sheet name starts with a slash [348](https://github.com/roo-rb/roo/pull/348)
+- Fixed loading to support files on ftp [355](https://github.com/roo-rb/roo/pull/355)
+- Fixed Ruby 2.4.0 deprecation warnings [356](https://github.com/roo-rb/roo/pull/356)
+- properly return date as string [359](https://github.com/roo-rb/roo/pull/359)
+
+### Added
+- Cell values can be set in a CSV [350](https://github.com/roo-rb/roo/pull/350/)
+- Raise an error Roo::Excelx::Extractor document is missing [358](https://github.com/roo-rb/roo/pull/358/)
+
+## [2.5.1] 2016-08-26
+### Fixed
+- Fixed NameError. [337](https://github.com/roo-rb/roo/pull/337)
+
+## [2.5.0] 2016-08-21
+### Fixed
+- Remove temporary directories via finalizers on garbage collection. This cleans them up in all known cases, rather than just when the #close method is called. The #close method can be used to cleanup early. [329](https://github.com/roo-rb/roo/pull/329)
+- Fixed README.md typo [318](https://github.com/roo-rb/roo/pull/318)
+- Parse sheets in ODS files once to improve performance [320](https://github.com/roo-rb/roo/pull/320)
+- Fix some Cell conversion issues [324](https://github.com/roo-rb/roo/pull/324) and [331](https://github.com/roo-rb/roo/pull/331)
+- Improved memory performance [332](https://github.com/roo-rb/roo/pull/332)
+- Added `no_hyperlinks` option to improve streamig performance [319](https://github.com/roo-rb/roo/pull/319) and [333](https://github.com/roo-rb/roo/pull/333)
+
+### Deprecations
+- Roo::Base::TEMP_PREFIX should be accessed via Roo::TEMP_PREFIX
+- The private Roo::Base#make_tempdir is now available at the class level in
+  classes that use temporary directories, added via Roo::Tempdir
+=======
+### Added
+- Discard hyperlinks lookups to allow streaming parsing without loading whole files
+
+## [2.4.0] 2016-05-14
+### Fixed  
+- Fixed opening spreadsheets with charts [315](https://github.com/roo-rb/roo/pull/315)
+- Fixed memory issues for Roo::Utils.number_to_letter [308](https://github.com/roo-rb/roo/pull/308)
+- Fixed Roo::Excelx::Cell::Number to recognize floating point numbers [306](https://github.com/roo-rb/roo/pull/306)
+- Fixed version number in Readme.md [304](https://github.com/roo-rb/roo/pull/304)
+
+### Added
+- Added initial support for HTML formatting [278](https://github.com/roo-rb/roo/pull/278)
+
+## [2.3.2] 2016-02-18
+### Fixed
+- Handle url with long query params (ex. S3 secure url) [302](https://github.com/roo-rb/roo/pull/302)
+- Allow streaming for Roo::CSV [297](https://github.com/roo-rb/roo/pull/297)
+- Export Fixnums to Added csv [295](https://github.com/roo-rb/roo/pull/295)
+- Removed various Ruby warnings [289](https://github.com/roo-rb/roo/pull/289)
+- Fix incorrect example result in Readme.md [293](https://github.com/roo-rb/roo/pull/293)
+
+## [2.3.1] - 2016-01-08
+### Fixed
+- Properly parse scientific-notation number like 1E-3 [#288](https://github.com/roo-rb/roo/pull/288)
+- Include all tests in default rake run [#283](https://github.com/roo-rb/roo/pull/283)
+- Fix zero-padded numbers for Excelx [#282](https://github.com/roo-rb/roo/pull/282)
+
+### Changed
+- Moved `ERROR_VALUES` from Excelx::Cell::Number ~> Excelx. [#280](https://github.com/roo-rb/roo/pull/280)
+
+## [2.3.0] - 2015-12-10
+### Changed
+- Excelx::Cell::Number will return a String instead of an Integer or Float if the cell has an error like #DIV/0, etc. [#273](https://github.com/roo-rb/roo/pull/273)
+
+### Fixed
+- Excelx::Cell::Number now handles cell errors. [#273](https://github.com/roo-rb/roo/pull/273)
+
+## [2.2.0] - 2015-10-31
+### Added
+- Added support for returning Integers values to Roo::OpenOffice [#258](https://github.com/roo-rb/roo/pull/258)
+- A missing Header Raises `Roo::HeaderRowNotFoundError`  [#247](https://github.com/roo-rb/roo/pull/247)
+- Roo::Excelx::Shared class to pass shared data to Roo::Excelx sheets [#220](https://github.com/roo-rb/roo/pull/220)
+- Proper Type support to Roo::Excelx [#240](https://github.com/roo-rb/roo/pull/240)
+- Added Roo::HeaderRowNotFoundError [#247](https://github.com/roo-rb/roo/pull/247)
+
+### Changed
+- Made spelling/grammar corrections in the README[260](https://github.com/roo-rb/roo/pull/260)
+- Moved Roo::Excelx::Format module [#259](https://github.com/roo-rb/roo/pull/259)
+- Updated README with details about `Roo::Excelx#each_with_streaming` method [#250](https://github.com/roo-rb/roo/pull/250)
+
+### Fixed
+- Fixed Base64 not found issue in Open Office [#267](https://github.com/roo-rb/roo/pull/267)
+- Fixed Regexp to allow method access to cells with multiple digits [#255](https://github.com/roo-rb/roo/pull/255), [#268](https://github.com/roo-rb/roo/pull/268)
+
+## [2.1.1] - 2015-08-02
+### Fixed invalid new lines with _x000D_ character[#231](https://github.com/roo-rb/roo/pull/231)
+### Fixed missing URI issue. [#245](https://github.com/roo-rb/roo/pull/245)
+
+## [2.1.0] - 2015-07-18
+### Added
+- Added support for Excel 2007 `xlsm` files. [#232](https://github.com/roo-rb/roo/pull/232)
+- Roo::Excelx returns an enumerator when calling each_row_streaming without a block. [#224](https://github.com/roo-rb/roo/pull/224)
+- Returns an enumerator when calling `each` without a block. [#219](https://github.com/roo-rb/roo/pull/219)
+
+### Fixed
+- Removed tabs and windows CRLF. [#235](https://github.com/roo-rb/roo/pull/235), [#234](https://github.com/roo-rb/roo/pull/234)
+- Fixed Regexp to only check for valid URI's when opening a spreadsheet. [#229](https://github.com/roo-rb/roo/pull/228)
+- Open streams in Roo:Excelx correctly. [#222](https://github.com/roo-rb/roo/pull/222)
+
+## [2.0.1] - 2015-06-01
+### Added
+- Return an enumerator when calling '#each' without a block [#219](https://github.com/roo-rb/roo/pull/219)
 - Added Roo::Base#close to delete any temp directories[#211](https://github.com/roo-rb/roo/pull/211)
 - Offset option for excelx #each_row. [#214](https://github.com/roo-rb/roo/pull/214)
 - Allow Roo::Excelx to open streams [#209](https://github.com/roo-rb/roo/pull/209)
 
 ### Fixed
+- Use gsub instead of tr for double quote escaping [#212](https://github.com/roo-rb/roo/pull/212),  [#212-patch](https://github.com/roo-rb/roo/commit/fcc9a015868ebf9d42cbba5b6cfdaa58b81ecc01)
 - Fixed Changelog links and release data. [#204](https://github.com/roo-rb/roo/pull/204), [#206](https://github.com/roo-rb/roo/pull/206)
 - Allow Pathnames to be used when opening files. [#207](https://github.com/roo-rb/roo/pull/207)
 
@@ -462,7 +579,7 @@
 
 ## [0.2.4] - 2007-06-16
 ### Fixed
-- ID 11605	Two cols with same value: crash roo (openoffice version only)
+- ID 11605  Two cols with same value: crash roo (openoffice version only)
 
 ## [0.2.3] - 2007-06-02
 ### Changed / Added

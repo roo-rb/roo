@@ -1,0 +1,26 @@
+--- 
+cell_1_1: 
+  row: 1 
+  col: 1 
+  celltype: string 
+  value: Mittags: 
+cell_1_2: 
+  row: 1 
+  col: 2 
+  celltype: time 
+  value: 12:13:14 
+cell_1_3: 
+  row: 1 
+  col: 3 
+  celltype: time 
+  value: 15:16:00 
+cell_1_4: 
+  row: 1 
+  col: 4 
+  celltype: time 
+  value: 23:00:00 
+cell_2_1: 
+  row: 2 
+  col: 1 
+  celltype: date 
+  value: 2007-11-21 

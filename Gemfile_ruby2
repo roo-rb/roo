@@ -1,0 +1,30 @@
+source 'https://rubygems.org'
+
+gemspec
+
+gem 'nokogiri', "< 1.7.0"
+
+group :test do
+  # additional testing libs
+  gem 'shoulda'
+  gem 'rspec', '>= 3.0.0'
+  gem 'simplecov', '>= 0.9.0', require: false
+  gem 'coveralls', require: false
+  gem "activesupport", "~> 4.2.0"
+  gem "tins", '~> 1.6.0'
+  gem "term-ansicolor", "~> 1.3.2"
+  gem "minitest-reporters"
+end
+
+group :local_development do
+  gem "listen", "~> 3.0.6"
+  gem 'terminal-notifier-guard', require: false if RUBY_PLATFORM.downcase.include?('darwin')
+  gem 'guard-rspec', '>= 4.3.1', require: false
+  gem 'guard-minitest', require: false
+  gem 'guard-bundler', require: false
+  gem 'guard-preek', require: false
+  gem 'guard-rubocop', require: false
+  gem 'guard-reek', github: 'pericles/guard-reek', require: false
+  gem 'rb-readline'
+  gem 'pry'
+end

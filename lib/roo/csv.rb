@@ -1,5 +1,5 @@
-require 'csv'
-require 'time'
+require "csv"
+require "time"
 
 # The CSV class can read csv files (must be separated with commas) which then
 # can be handled like spreadsheets. This means you can access cells like A5
@@ -9,112 +9,119 @@ require 'time'
 #
 # You can pass options to the underlying CSV parse operation, via the
 # :csv_options option.
-#
+module Roo
+  class CSV < Roo::Base
+    attr_reader :filename
 
-class Roo::CSV < Roo::Base
-
-  attr_reader :filename
-
-  # Returns an array with the names of the sheets. In CSV class there is only
-  # one dummy sheet, because a csv file cannot have more than one sheet.
-  def sheets
-    ['default']
-  end
-
-  def cell(row, col, sheet=nil)
-    sheet ||= default_sheet
-    read_cells(sheet)
-    @cell[normalize(row,col)]
-  end
-
-  def celltype(row, col, sheet=nil)
-    sheet ||= default_sheet
-    read_cells(sheet)
-    @cell_type[normalize(row,col)]
-  end
-
-  def cell_postprocessing(row,col,value)
-    value
-  end
-
-  def csv_options
-    @options[:csv_options] || {}
-  end
-
-  private
-
-  TYPE_MAP = {
-    String => :string,
-    Float => :float,
-    Date => :date,
-    DateTime => :datetime,
-  }
-
-  def celltype_class(value)
-    TYPE_MAP[value.class]
-  end
-
-  def each_row(options, &block)
-    if uri?(filename)
-      make_tmpdir do |tmpdir|
-        tmp_filename = download_uri(filename, tmpdir)
-        CSV.foreach(tmp_filename, options, &block)
-      end
-    else
-      CSV.foreach(filename, options, &block)
+    # Returns an array with the names of the sheets. In CSV class there is only
+    # one dummy sheet, because a csv file cannot have more than one sheet.
+    def sheets
+      ["default"]
     end
-  end
 
-  def read_cells(sheet = default_sheet)
-    sheet ||= default_sheet
-    return if @cells_read[sheet]
-    @first_row[sheet] = 1
-    @last_row[sheet] = 0
-    @first_column[sheet] = 1
-    @last_column[sheet] = 1
-    rownum = 1
-    each_row csv_options do |row|
-      row.each_with_index do |elem,i|
-        @cell[[rownum,i+1]] = cell_postprocessing rownum,i+1, elem
-        @cell_type[[rownum,i+1]] = celltype_class @cell[[rownum,i+1]]
-        if i+1 > @last_column[sheet]
-          @last_column[sheet] += 1
+    def cell(row, col, sheet = nil)
+      sheet ||= default_sheet
+      read_cells(sheet)
+      @cell[normalize(row, col)]
+    end
+
+    def celltype(row, col, sheet = nil)
+      sheet ||= default_sheet
+      read_cells(sheet)
+      @cell_type[normalize(row, col)]
+    end
+
+    def cell_postprocessing(_row, _col, value)
+      value
+    end
+
+    def csv_options
+      @options[:csv_options] || {}
+    end
+
+    def set_value(row, col, value, _sheet)
+      @cell[[row, col]] = value
+    end
+
+    def set_type(row, col, type, _sheet)
+      @cell_type[[row, col]] = type
+    end
+
+    private
+
+    TYPE_MAP = {
+      String => :string,
+      Float => :float,
+      Date => :date,
+      DateTime => :datetime,
+    }
+
+    def celltype_class(value)
+      TYPE_MAP[value.class]
+    end
+
+    def read_cells(sheet = default_sheet)
+      sheet ||= default_sheet
+      return if @cells_read[sheet]
+      set_row_count(sheet)
+      set_column_count(sheet)
+      row_num = 1
+
+      each_row csv_options do |row|
+        row.each_with_index do |elem, col_num|
+          coordinate = [row_num, col_num + 1]
+          @cell[coordinate] = elem
+          @cell_type[coordinate] = celltype_class(elem)
         end
+        row_num += 1
       end
-      rownum += 1
-      @last_row[sheet] += 1
-    end
-    @cells_read[sheet] = true
-    #-- adjust @first_row if neccessary
-    while !row(@first_row[sheet]).any? and @first_row[sheet] < @last_row[sheet]
-      @first_row[sheet] += 1
-    end
-    #-- adjust @last_row if neccessary
-    while !row(@last_row[sheet]).any? and @last_row[sheet] and
-        @last_row[sheet] > @first_row[sheet]
-      @last_row[sheet] -= 1
-    end
-    #-- adjust @first_column if neccessary
-    while !column(@first_column[sheet]).any? and
-          @first_column[sheet] and
-          @first_column[sheet] < @last_column[sheet]
-      @first_column[sheet] += 1
-    end
-    #-- adjust @last_column if neccessary
-    while !column(@last_column[sheet]).any? and
-          @last_column[sheet] and
-          @last_column[sheet] > @first_column[sheet]
-      @last_column[sheet] -= 1
-    end
-  end
 
-  def clean_sheet(sheet)
-    read_cells(sheet)
-
-    @cell.each_pair do |coord, value|
-      @cell[coord] = sanitize_value(value) if value.is_a?(::String)
+      @cells_read[sheet] = true
     end
 
-    @cleaned[sheet] = true
+    def each_row(options, &block)
+      if uri?(filename)
+        each_row_using_temp_dir(filename)
+      elsif is_stream?(filename_or_stream)
+        ::CSV.new(filename_or_stream, options).each(&block)
+      else
+        ::CSV.foreach(filename, options, &block)
+      end
+    end
+
+    def each_row_using_tempdir
+      ::Dir.mktmpdir(Roo::TEMP_PREFIX, ENV["ROO_TMP"]) do |tmpdir|
+        tmp_filename = download_uri(filename, tmpdir)
+        ::CSV.foreach(tmp_filename, options, &block)
+      end
+    end
+
+    def set_row_count(sheet)
+      @first_row[sheet] = 1
+      @last_row[sheet] = ::CSV.readlines(@filename, csv_options).size
+      @last_row[sheet] = @first_row[sheet] if @last_row[sheet].zero?
+
+      nil
+    end
+
+    def set_column_count(sheet)
+      @first_column[sheet] = 1
+      @last_column[sheet] = (::CSV.readlines(@filename, csv_options).first || []).size
+      @last_column[sheet] = @first_column[sheet] if @last_column[sheet].zero?
+
+      nil
+    end
+
+    def clean_sheet(sheet)
+      read_cells(sheet)
+
+      @cell.each_pair do |coord, value|
+        @cell[coord] = sanitize_value(value) if value.is_a?(::String)
+      end
+
+      @cleaned[sheet] = true
+    end
+
+    alias_method :filename_or_stream, :filename
   end
 end

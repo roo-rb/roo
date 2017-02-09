@@ -1,3 +1,5 @@
+require 'roo/constants'
+require 'roo/errors'
 require 'roo/spreadsheet'
 require 'roo/base'
 
@@ -7,20 +9,23 @@ module Roo
   autoload :Excelx,       'roo/excelx'
   autoload :CSV,          'roo/csv'
 
+  TEMP_PREFIX = 'roo_'.freeze
+
   CLASS_FOR_EXTENSION = {
     ods: Roo::OpenOffice,
     xlsx: Roo::Excelx,
+    xlsm: Roo::Excelx,
     csv: Roo::CSV
   }
 
   def self.const_missing(const_name)
     case const_name
     when :Excel
-      raise "Excel support has been extracted to roo-xls due to its dependency on the GPL'd spreadsheet gem. Install roo-xls to use Roo::Excel."
+      raise ROO_EXCEL_NOTICE
     when :Excel2003XML
-      raise "Excel SpreadsheetML support has been extracted to roo-xls. Install roo-xls to use Roo::Excel2003XML."
+      raise ROO_EXCELML_NOTICE
     when :Google
-      raise "Google support has been extracted to roo-google. Install roo-google to use Roo::Google."
+      raise ROO_GOOGLE_NOTICE
     else
       super
     end

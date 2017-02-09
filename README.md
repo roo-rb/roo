@@ -3,16 +3,13 @@
 [![Build Status](https://img.shields.io/travis/roo-rb/roo.svg?style=flat-square)](https://travis-ci.org/roo-rb/roo) [![Code Climate](https://img.shields.io/codeclimate/github/roo-rb/roo.svg?style=flat-square)](https://codeclimate.com/github/roo-rb/roo) [![Coverage Status](https://img.shields.io/coveralls/roo-rb/roo.svg?style=flat-square)](https://coveralls.io/r/roo-rb/roo) [![Gem Version](https://img.shields.io/gem/v/roo.svg?style=flat-square)](https://rubygems.org/gems/roo)
 
 Roo implements read access for all common spreadsheet types. It can handle:
-
-* Excelx
-* OpenOffice / LibreOffice
+* Excel 2007 - 2013 formats (xlsx, xlsm)
+* LibreOffice / OpenOffice.org formats (ods)
 * CSV
+* Excel 97, Excel 2002 XML, and Excel 2003 XML formats when using the [roo-xls](https://github.com/roo-rb/roo-xls) gem (xls, xml)
+* Google spreadsheets with read/write access when using [roo-google](https://github.com/roo-rb/roo-google)
 
-## Additional Libraries
-
-In addition, the [roo-xls](https://github.com/roo-rb/roo-xls) and [roo-google](https://github.com/roo-rb/roo-google) gems exist to extend Roo to support reading classic Excel formats (i.e. `.xls` and ``Excel2003XML``) and read/write access for Google spreadsheets.
-
-# #Installation
+## Installation
 
 Install as a gem
 
@@ -21,7 +18,7 @@ Install as a gem
 Or add it to your Gemfile
 
 ```ruby
-gem 'roo', '~> 2.0.0'
+gem "roo", "~> 2.7.0"
 ```
 ## Usage
 
@@ -53,7 +50,7 @@ ods.sheet(0).row(1)
 
 # Set the last sheet as the default sheet.
 ods.default_sheet = ods.sheets.last
-ods.default_sheet = s.sheets[3]
+ods.default_sheet = ods.sheets[2]
 ods.default_sheet = 'Sheet 3'
 
 # Iterate through each sheet
@@ -102,7 +99,7 @@ s.cell(1,'A',s.sheets[1])
 ```
 
 #### Querying a spreadsheet
-Use ``each`` with a ``block`` to iterate over each row.
+Use ``each`` to iterate over each row.
 
 If each is given a hash with the names of some columns, then each will generate a hash with the columns supplied for each row.
 
@@ -116,8 +113,8 @@ end
 Use ``sheet.parse`` to return an array of rows. Column names can be a ``String`` or a ``Regexp``.
 
 ```ruby
-sheet.parse(:id => /UPC|SKU/,:qty => /ATS*\sATP\s*QTY\z/)
-# => [{:upc => 727880013358, :qty => 12}, ...]
+sheet.parse(id: /UPC|SKU/, qty: /ATS*\sATP\s*QTY\z/)
+# => [{:id => 727880013358, :qty => 12}, ...]
 ```
 
 Use the ``:header_search`` option to locate the header row and assign the header names.
@@ -129,7 +126,7 @@ sheet.parse(header_search: [/UPC*SKU/,/ATS*\sATP\s*QTY\z/])
 Use the ``:clean`` option to strip out control characters and surrounding white space.
 
 ```ruby
-sheet.parse(:clean => true)
+sheet.parse(clean: true)
 ```
 
 ### Exporting spreadsheets
@@ -143,13 +140,33 @@ sheet.to_xml
 sheet.to_yaml
 ```
 
-### Excel (xlsx) Support
+### Excel (xlsx and xlsm) Support
 
 Stream rows from an Excelx spreadsheet.
 
 ```ruby
 xlsx = Roo::Excelx.new("./test_data/test_small.xlsx")
 xlsx.each_row_streaming do |row|
+  puts row.inspect # Array of Excelx::Cell objects
+end
+```
+
+By default blank cells will be excluded from the array. To keep them, use the option pad_cells = true. (They will be set to nil in the array)
+```ruby
+xlsx.each_row_streaming(pad_cells: true) do |row|
+  puts row.inspect # Array of Excelx::Cell objects
+end
+```
+
+To stream only some of the rows, you can use the ```max_rows``` and ```offset```options.
+```ruby
+xlsx.each_row_streaming(offset: 1) do |row| # Will exclude first (inevitably header) row
+  puts row.inspect # Array of Excelx::Cell objects
+end
+```
+
+```ruby
+xlsx.each_row_streaming(max_rows: 3) do |row| # Will yield 4 rows (it's automatically incremented by 1) after the supplied offset.
   puts row.inspect # Array of Excelx::Cell objects
 end
 ```
@@ -172,6 +189,9 @@ xlsx.cell(3, 'C')
 # => 600000383.0
 
 xlsx.excelx_value(row,col)
+# => '600000383'
+
+xlsx.formatted_value(row,col)
 # => '0600000383'
 ```
 
@@ -185,11 +205,11 @@ xlsx.formula('A', 2)
 
 ### OpenOffice / LibreOffice Support
 
-Roo::OpenOffice supports for encrypted OpenOffice spreadsheets.
+Roo::OpenOffice has support for encrypted OpenOffice spreadsheets.
 
 ```ruby
 # Load an encrypted OpenOffice Spreadsheet
-ods = Roo::OpenOffice.new("myspreadsheet.ods", :password => "password")
+ods = Roo::OpenOffice.new("myspreadsheet.ods", password: "password")
 ```
 
 ``Roo::OpenOffice`` can access celltype, comments, font information, formulas and labels.
@@ -213,7 +233,7 @@ ods.formula('A', 2)
 s = Roo::CSV.new("mycsv.csv")
 ```
 
-Because Roo uses the [standard CSV library](), and you can use options available to that library to parse csv files. You can pass options using the ``csv_options`` key.
+Because Roo uses the [standard CSV library](), you can use options available to that library to parse csv files. You can pass options using the ``csv_options`` key.
 
 For instance, you can load tab-delimited files (``.tsv``), and you can use a particular encoding when opening the file.
 
@@ -236,10 +256,24 @@ Roo's public methods have stayed relatively consistent between 1.13.x and 2.0.0,
 ## Contributing
 ### Features
 1. Fork it ( https://github.com/[my-github-username]/roo/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'My new feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+2. Install it (`bundle install --with local_development`)
+3. Create your feature branch (`git checkout -b my-new-feature`)
+4. Commit your changes (`git commit -am 'My new feature'`)
+5. Push to the branch (`git push origin my-new-feature`)
+6. Create a new Pull Request
+
+### Testing
+Roo uses Minitest and RSpec. The best of both worlds! Run `bundle exec rake` to
+run the tests/examples.
+
+You can run the tests/examples with Rspec like reporters by running
+`USE_REPORTERS=true bundle exec rake`
+
+Roo also has a few tests that take a long time (5+ seconds). To run these, use
+`LONG_RUN=true bundle exec rake`
+
+When testing using Ruby 2.0 or 2.1, use this command:
+`BUNDLE_GEMFILE=Gemfile_ruby2 bundle exec rake`
 
 ### Issues
 
