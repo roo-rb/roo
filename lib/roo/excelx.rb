@@ -39,7 +39,6 @@ module Roo
         19 => 'h:mm:ss AM/PM'.freeze,
         20 => 'h:mm'.freeze,
         21 => 'h:mm:ss'.freeze,
-        22 => 'm/d/yy h:mm'.freeze,
         37 => '#,##0 ;(#,##0)'.freeze,
         38 => '#,##0 ;[Red](#,##0)'.freeze,
         39 => '#,##0.00;(#,##0.00)'.freeze,
