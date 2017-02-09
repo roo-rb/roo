@@ -1,34 +1,28 @@
-module Roo
+require 'roo/spreadsheet'
+require 'roo/base'
 
-  VERSION = '1.12.1'
+module Roo
+  autoload :OpenOffice,   'roo/open_office'
+  autoload :LibreOffice,  'roo/libre_office'
+  autoload :Excelx,       'roo/excelx'
+  autoload :CSV,          'roo/csv'
+
+  CLASS_FOR_EXTENSION = {
+    ods: Roo::OpenOffice,
+    xlsx: Roo::Excelx,
+    csv: Roo::CSV
+  }
 
   def self.const_missing(const_name)
     case const_name
-    when :Libreoffice
-      warn "`Roo::Libreoffice` has been deprecated. Use `Roo::LibreOffice` instead."
-      LibreOffice
-    when :Openoffice
-      warn "`Roo::Openoffice` has been deprecated. Use `Roo::OpenOffice` instead."
-      OpenOffice
-    when :Csv
-      warn "`Roo::Csv` has been deprecated. Use `Roo::CSV` instead."
-      CSV
-    when :GenericSpreadsheet
-      warn "`Roo::GenericSpreadsheet` has been deprecated. Use `Roo::Base` instead."
-      Base
+    when :Excel
+      raise "Excel support has been extracted to roo-xls due to its dependency on the GPL'd spreadsheet gem. Install roo-xls to use Roo::Excel."
+    when :Excel2003XML
+      raise "Excel SpreadsheetML support has been extracted to roo-xls. Install roo-xls to use Roo::Excel2003XML."
+    when :Google
+      raise "Google support has been extracted to roo-google. Install roo-google to use Roo::Google."
     else
       super
     end
   end
-
-  autoload :Spreadsheet,  'roo/spreadsheet'
-  autoload :Base,         'roo/base'
-
-  autoload :OpenOffice,   'roo/openoffice'
-  autoload :LibreOffice,  'roo/openoffice'
-  autoload :Excel,        'roo/excel'
-  autoload :Excelx,       'roo/excelx'
-  autoload :Excel2003XML, 'roo/excel2003xml'
-  autoload :Google,       'roo/google'
-  autoload :CSV,          'roo/csv'
 end

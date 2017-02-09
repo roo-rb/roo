@@ -12,9 +12,6 @@ require 'time'
 #
 
 class Roo::CSV < Roo::Base
-  def initialize(filename, options = {})
-    super
-  end
 
   attr_reader :filename
 
@@ -25,13 +22,13 @@ class Roo::CSV < Roo::Base
   end
 
   def cell(row, col, sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     @cell[normalize(row,col)]
   end
 
   def celltype(row, col, sheet=nil)
-    sheet ||= @default_sheet
+    sheet ||= default_sheet
     read_cells(sheet)
     @cell_type[normalize(row,col)]
   end
@@ -68,8 +65,8 @@ class Roo::CSV < Roo::Base
     end
   end
 
-  def read_cells(sheet=nil)
-    sheet ||= @default_sheet
+  def read_cells(sheet = default_sheet)
+    sheet ||= default_sheet
     return if @cells_read[sheet]
     @first_row[sheet] = 1
     @last_row[sheet] = 0
@@ -109,5 +106,15 @@ class Roo::CSV < Roo::Base
           @last_column[sheet] > @first_column[sheet]
       @last_column[sheet] -= 1
     end
+  end
+
+  def clean_sheet(sheet)
+    read_cells(sheet)
+
+    @cell.each_pair do |coord, value|
+      @cell[coord] = sanitize_value(value) if value.is_a?(::String)
+    end
+
+    @cleaned[sheet] = true
   end
 end
