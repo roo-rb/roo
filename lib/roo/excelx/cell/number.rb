@@ -29,6 +29,7 @@ module Roo
           return @cell_value if Excelx::ERROR_VALUES.include?(@cell_value)
 
           formatter = formats[@format]
+          formatter = formats["General"] if formatter.nil? and @format == "GENERAL"
           if formatter.is_a? Proc
             formatter.call(@cell_value)
           elsif zero_padded_number?
