@@ -11,6 +11,8 @@ module Roo
         html_tag_closed: "</html>"
       }
 
+      NO_FORMATTING_VALUES = %w(0 none).freeze
+
       def [](index)
         to_a[index]
       end
@@ -108,19 +110,22 @@ module Roo
           case elem.name
           when 'rPr'
             elem.children.each do |rPr_elem|
+              rPr_elem_value = rPr_elem.xpath('@val').first.value
+              apply = !rPr_elem_value.in?(NO_FORMATTING_VALUES)
+
               case rPr_elem.name
               when 'b'
                 # set formatting for Bold to true
-                xml_elems[:b] = true
+                xml_elems[:b] = apply && true
               when 'i'
                 # set formatting for Italics to true
-                xml_elems[:i] = true
+                xml_elems[:i] = apply && true
               when 'u'
                 # set formatting for Underline to true
-                xml_elems[:u] = true
+                xml_elems[:u] = apply && true
               when 'vertAlign'
                 # See if the Vertical Alignment is subscript or superscript
-                case rPr_elem.xpath('@val').first.value
+                case rPr_elem_value
                 when 'subscript'
                   # set formatting for Subscript to true and Superscript to false ... Can't have both
                   xml_elems[:sub] = true
