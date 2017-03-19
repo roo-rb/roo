@@ -1,4 +1,5 @@
 ## Unreleased
+- Updated rubyzip version for fixing security issue. Now minimal version is 1.2.1
 
 ## [2.7.1] 2017-01-03
 ### Fixed
