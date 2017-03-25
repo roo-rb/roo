@@ -89,13 +89,13 @@ sheet.last_column
 You can access the top-left cell in the following ways
 
 ```ruby
-s.cell(1,1)
-s.cell('A',1)
-s.cell(1,'A')
-s.a1
+sheet.cell(1,1)
+sheet.cell('A',1)
+sheet.cell(1,'A')
+sheet.a1
 
 # Access the second sheet's top-left cell.
-s.cell(1,'A',s.sheets[1])
+sheet.cell(1,'A',sheet.sheets[1])
 ```
 
 #### Querying a spreadsheet
@@ -230,7 +230,7 @@ ods.formula('A', 2)
 
 ```ruby
 # Load a CSV file
-s = Roo::CSV.new("mycsv.csv")
+csv = Roo::CSV.new("mycsv.csv")
 ```
 
 Because Roo uses the [standard CSV library](), you can use options available to that library to parse csv files. You can pass options using the ``csv_options`` key.
@@ -240,10 +240,10 @@ For instance, you can load tab-delimited files (``.tsv``), and you can use a par
 
 ```ruby
 # Load a tab-delimited csv
-s = Roo::CSV.new("mytsv.tsv", csv_options: {col_sep: "\t"})
+csv = Roo::CSV.new("mytsv.tsv", csv_options: {col_sep: "\t"})
 
 # Load a csv with an explicit encoding
-s = Roo::CSV.new("mycsv.csv", csv_options: {encoding: Encoding::ISO_8859_1})
+csv = Roo::CSV.new("mycsv.csv", csv_options: {encoding: Encoding::ISO_8859_1})
 ```
 
 ## Upgrading from Roo 1.13.x
