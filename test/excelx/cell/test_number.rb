@@ -53,6 +53,7 @@ class TestRooExcelxCellNumber < Minitest::Test
   def test_formats
     [
       ['General', '1042'],
+      ['GENERAL', '1042'],
       ['0', '1042'],
       ['0.00', '1042.00'],
       ['#,##0', '1,042'],
