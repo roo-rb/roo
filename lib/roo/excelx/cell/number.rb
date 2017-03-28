@@ -31,8 +31,6 @@ module Roo
           formatter = generate_formatter(@format)
           if formatter.is_a? Proc
             formatter.call(@cell_value)
-          elsif zero_padded_number?
-            "%0#{@format.size}d" % @cell_value
           else
             Kernel.format(formatter, @cell_value)
           end
@@ -44,6 +42,7 @@ module Roo
           case format
           when /^General$/i then '%.0f'
           when '0' then '%.0f'
+          when /^(0+)$/ then "%0#{$1.size}d"
           when /^0\.(0+)$/ then "%.#{$1.size}f"
           when '#,##0' then number_format('%.0f')
           when '#,##0.00' then number_format('%.2f')
@@ -79,10 +78,6 @@ module Roo
 
             Kernel.format(formatter, number).reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
           end
-        end
-
-        def zero_padded_number?
-          @format[/0+/] == @format
         end
       end
     end
