@@ -14,10 +14,15 @@ module Roo
                     first_column.upto(last_column) do |col|
                       next if empty?(row, col)
 
-                      x.cell(cell(row, col),
-                      row: row,
-                      column: col,
-                      type: celltype(row, col))
+                      attributes = { row: row, column: col, type: celltype(row, col) }
+
+                      font = font(row, col)
+                      attributes.merge!(bold: font.bold?, italic: font.italic?, underline: font.underline?) if font
+
+                      fill = fills(row, col)
+                      attributes.merge!(cell_color: fill.color) if fill
+
+                      x.cell(cell(row, col), attributes)
                     end
                   end
                 end

@@ -130,12 +130,12 @@ class Roo::Base
     options = (args.last.is_a?(Hash) ? args.pop : {})
 
     case args[0]
-    when Integer
-      find_by_row(args[0])
-    when :all
-      find_by_conditions(options)
-    else
-      fail ArgumentError, "unexpected arg #{args[0].inspect}, pass a row index or :all"
+      when Integer
+        find_by_row(args[0])
+      when :all
+        find_by_conditions(options)
+      else
+        fail ArgumentError, "unexpected arg #{args[0].inspect}, pass a row index or :all"
     end
   end
 
@@ -172,10 +172,10 @@ class Roo::Base
 
   def cell_type_by_value(value)
     case value
-    when Integer then :float
-    when String, Float then :string
-    else
-      fail ArgumentError, "Type for #{value} not set"
+      when Integer then :float
+      when String, Float then :string
+      else
+        fail ArgumentError, "Type for #{value} not set"
     end
   end
 
@@ -286,9 +286,9 @@ class Roo::Base
       clean_sheet_if_need(options)
       search_or_set_header(options)
       headers = @headers ||
-                Hash[(first_column..last_column).map do |col|
-                  [cell(@header_line, col), col]
-                end]
+          Hash[(first_column..last_column).map do |col|
+            [cell(@header_line, col), col]
+          end]
 
       @header_line.upto(last_row) do |line|
         yield(Hash[headers.map { |k, v| [k, cell(line, v)] }])

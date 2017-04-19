@@ -177,6 +177,12 @@ module Roo
       styles.definitions[definition_index] if definition_index
     end
 
+    def fills(row, col, sheet = nil)
+      key = normalize(row, col)
+      fill_index = safe_send(sheet_for(sheet).cells[key], :style)
+      styles.fills[fill_index] if fill_index
+    end
+
     # returns the type of a cell:
     # * :float
     # * :string,
@@ -412,30 +418,30 @@ module Roo
 
       entries.each do |entry|
         path =
-        case entry.name.downcase
-        when /sharedstrings.xml$/
-          "#{@tmpdir}/roo_sharedStrings.xml"
-        when /styles.xml$/
-          "#{@tmpdir}/roo_styles.xml"
-        when /comments([0-9]+).xml$/
-          # FIXME: Most of the time, The order of the comment files are the same
-          #       the sheet order, i.e. sheet1.xml's comments are in comments1.xml.
-          #       In some situations, this isn't true. The true location of a
-          #       sheet's comment file is in the sheet1.xml.rels file. SEE
-          #       ECMA-376 12.3.3 in "Ecma Office Open XML Part 1".
-          nr = Regexp.last_match[1].to_i
-          comments_files[nr - 1] = "#{@tmpdir}/roo_comments#{nr}"
-        when %r{chartsheets/_rels/sheet([0-9]+).xml.rels$}
-          # NOTE: Chart sheet relationship files were interfering with
-          #       worksheets.
-          nil
-        when /sheet([0-9]+).xml.rels$/
-          # FIXME: Roo seems to use sheet[\d].xml.rels for hyperlinks only, but
-          #        it also stores the location for sharedStrings, comments,
-          #        drawings, etc.
-          nr = Regexp.last_match[1].to_i
-          rels_files[nr - 1] = "#{@tmpdir}/roo_rels#{nr}"
-        end
+          case entry.name.downcase
+          when /sharedstrings.xml$/
+            "#{@tmpdir}/roo_sharedStrings.xml"
+          when /styles.xml$/
+            "#{@tmpdir}/roo_styles.xml"
+          when /comments([0-9]+).xml$/
+            # FIXME: Most of the time, The order of the comment files are the same
+            #       the sheet order, i.e. sheet1.xml's comments are in comments1.xml.
+            #       In some situations, this isn't true. The true location of a
+            #       sheet's comment file is in the sheet1.xml.rels file. SEE
+            #       ECMA-376 12.3.3 in "Ecma Office Open XML Part 1".
+            nr = Regexp.last_match[1].to_i
+            comments_files[nr - 1] = "#{@tmpdir}/roo_comments#{nr}"
+          when %r{chartsheets/_rels/sheet([0-9]+).xml.rels$}
+            # NOTE: Chart sheet relationship files were interfering with
+            #       worksheets.
+            nil
+          when /sheet([0-9]+).xml.rels$/
+            # FIXME: Roo seems to use sheet[\d].xml.rels for hyperlinks only, but
+            #        it also stores the location for sharedStrings, comments,
+            #        drawings, etc.
+            nr = Regexp.last_match[1].to_i
+            rels_files[nr - 1] = "#{@tmpdir}/roo_rels#{nr}"
+          end
 
         entry.extract(path) if path
       end
