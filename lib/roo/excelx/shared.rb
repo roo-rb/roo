@@ -5,11 +5,12 @@ module Roo
     #          to various inititializers.
     class Shared
       attr_accessor :comments_files, :sheet_files, :rels_files
-      def initialize(dir)
+      def initialize(dir, options = {})
         @dir = dir
         @comments_files = []
         @sheet_files = []
         @rels_files = []
+        @options = options
       end
 
       def styles
@@ -17,7 +18,7 @@ module Roo
       end
 
       def shared_strings
-        @shared_strings ||= SharedStrings.new(File.join(@dir, 'roo_sharedStrings.xml'))
+        @shared_strings ||= SharedStrings.new(File.join(@dir, 'roo_sharedStrings.xml'), @options)
       end
 
       def workbook
