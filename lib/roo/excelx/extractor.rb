@@ -1,7 +1,7 @@
 module Roo
   class Excelx
     class Extractor
-      def initialize(path, options)
+      def initialize(path, options = {})
         @path = path
         @options = options
       end

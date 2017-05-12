@@ -519,7 +519,7 @@ describe Roo::Excelx do
         expect(subject.excelx_value(2, 1, "Sheet1")).to eq("This has bold formatting.")
         expect(subject.excelx_value(2, 2, "Sheet1")).to eq("This has italics formatting.")
         expect(subject.excelx_value(2, 3, "Sheet1")).to eq("This has underline format.")
-        expect(subject.excelx_value(2, 4, "Sheet1")).to eq("Superscript. x123<")
+        expect(subject.excelx_value(2, 4, "Sheet1")).to eq("Superscript. x123")
         expect(subject.excelx_value(2, 5, "Sheet1")).to eq("SubScript.  Tj")
   
         expect(subject.excelx_value(3, 1, "Sheet1")).to eq("Bold, italics together.")
