@@ -511,6 +511,39 @@ describe Roo::Excelx do
         expect(subject.excelx_value(7, 1, "Sheet1")).to eq("<html>Does create html tags when formatting is used..\n<ol>\n  <li> <b>Denver Broncos</b> </li>\n  <li> <i>Carolina Panthers </i></li>\n  <li> <u>New England Patriots</u></li>\n  <li>Arizona Panthers</li>\n</ol></html>")
       end
     end
+  end
+
+  describe '_x000D_' do
+    let(:path) { 'test/files/x000D.xlsx' }
+    it 'does not contain _x000D_' do
+      expect(subject.cell(2, 9)).not_to include('_x000D_')
+    end
+  end
+
+  describe 'opening a file with a chart sheet' do
+    let(:path) { 'test/files/chart_sheet.xlsx' }
+    it 'should not raise' do
+      expect{ subject }.to_not raise_error
+    end
+  end
+
+  describe 'opening a file with white space in the styles.xml' do
+    let(:path) { 'test/files/style_nodes_with_white_spaces.xlsx' }
+    subject(:xlsx) do
+      Roo::Spreadsheet.open(path, expand_merged_ranges: true, extension: :xlsx)
+    end
+    it 'should properly recognize formats' do
+      expect(subject.sheet(0).excelx_format(2,1)).to eq 'm/d/yyyy" "h:mm:ss" "AM/PM'
+    end
+  end
+end
+
+describe 'Roo::Excelx with options set' do
+  subject(:xlsx) do
+    Roo::Excelx.new(path, disable_html_wrapper: true)
+  end
+
+  describe '#html_strings' do
     describe "HTML Parsing Disabled" do
       let(:path) { 'test/files/html_strings_formatting.xlsx' }
   
@@ -541,30 +574,6 @@ describe Roo::Excelx do
         expect(subject.excelx_value(6, 1, "Sheet1")).to eq("See that regular html tags do not create html tags.\n<ol>\n  <li> Denver Broncos </li>\n  <li> Carolina Panthers </li>\n  <li> New England Patriots</li>\n  <li>Arizona Panthers</li>\n</ol>")
         expect(subject.excelx_value(7, 1, "Sheet1")).to eq("Does create html tags when formatting is used..\n<ol>\n  <li> Denver Broncos </li>\n  <li> Carolina Panthers </li>\n  <li> New England Patriots</li>\n  <li>Arizona Panthers</li>\n</ol>")
       end
-    end
-  end
-
-  describe '_x000D_' do
-    let(:path) { 'test/files/x000D.xlsx' }
-    it 'does not contain _x000D_' do
-      expect(subject.cell(2, 9)).not_to include('_x000D_')
-    end
-  end
-
-  describe 'opening a file with a chart sheet' do
-    let(:path) { 'test/files/chart_sheet.xlsx' }
-    it 'should not raise' do
-      expect{ subject }.to_not raise_error
-    end
-  end
-
-  describe 'opening a file with white space in the styles.xml' do
-    let(:path) { 'test/files/style_nodes_with_white_spaces.xlsx' }
-    subject(:xlsx) do
-      Roo::Spreadsheet.open(path, expand_merged_ranges: true, extension: :xlsx)
-    end
-    it 'should properly recognize formats' do
-      expect(subject.sheet(0).excelx_format(2,1)).to eq 'm/d/yyyy" "h:mm:ss" "AM/PM'
     end
   end
 end
