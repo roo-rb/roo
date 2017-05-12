@@ -26,7 +26,7 @@ module Roo
       # Use to_html or to_a for html returns
       # See what is happening with commit???
       def use_html?(index)
-        return false if options[:disable_html_wrapper]
+        return false if @options[:disable_html_wrapper]
         to_html[index][/<([biu]|sup|sub)>/]
       end
 
