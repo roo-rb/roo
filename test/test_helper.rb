@@ -123,3 +123,6 @@ def fixture_filename(name, format)
     raise ArgumentError, "unexpected format #{format}"
   end
 end
+
+EPOCH_1900 = Roo::Excelx::Workbook::EPOCH_1900
+EPOCH_1904 = Roo::Excelx::Workbook::EPOCH_1904

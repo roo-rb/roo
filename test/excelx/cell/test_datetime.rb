@@ -40,6 +40,6 @@ class TestRooExcelxCellDateTime < Minitest::Test
   end
 
   def base_date
-    Date.new(1899, 12, 30)
+    EPOCH_1900
   end
 end

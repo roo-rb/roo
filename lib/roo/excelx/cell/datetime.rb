@@ -46,6 +46,8 @@ module Roo
 
         private
 
+        EPOCH_1900 = Roo::Excelx::Workbook::EPOCH_1900
+
         def parse_date_or_time_format(part)
           date_regex = /(?<date>[dmy]+[\-\/][dmy]+([\-\/][dmy]+)?)/
           time_regex = /(?<time>(\[?[h]\]?+:)?[m]+(:?ss|:?s)?)/
@@ -93,11 +95,24 @@ module Roo
         }
 
         def create_datetime(base_date, value)
-          date = base_date + value.to_f.round(6)
+          date = add_offset_to_base_date(base_date, value.to_f.round(6))
           datetime_string = date.strftime('%Y-%m-%d %H:%M:%S.%N')
           t = round_datetime(datetime_string)
 
           ::DateTime.civil(t.year, t.month, t.day, t.hour, t.min, t.sec)
+        end
+
+        def add_offset_to_base_date(base_date, offset)
+          # Adjust for Excel erroneously treating 1900 as a leap year
+          if EPOCH_1900 == base_date
+            offset -= 1
+
+            if offset > 58
+              offset -= 1
+            end
+          end
+
+          base_date + offset
         end
 
         def round_datetime(datetime_string)
