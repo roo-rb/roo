@@ -154,3 +154,6 @@ def skip_jruby_incompatible_test
   msg = "This test uses a feature incompatible with JRuby"
   skip(msg) if defined?(JRUBY_VERSION)
 end
+
+EPOCH_1900 = Roo::Excelx::Workbook::EPOCH_1900
+EPOCH_1904 = Roo::Excelx::Workbook::EPOCH_1904

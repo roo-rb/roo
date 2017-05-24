@@ -17,7 +17,7 @@ module Roo
         private
 
         def create_date(base_date, value)
-          date = base_date + value.to_i
+          date = add_offset_to_base_date(base_date, value.to_i)
           yyyy, mm, dd = date.strftime('%Y-%m-%d').split('-')
 
           ::Date.new(yyyy.to_i, mm.to_i, dd.to_i)

@@ -6,11 +6,11 @@ class TestRooExcelxCellDate < Minitest::Test
   end
 
   def base_date
-    ::Date.new(1899, 12, 30)
+    EPOCH_1900
   end
 
   def base_date_1904
-    ::Date.new(1904, 01, 01)
+    EPOCH_1904
   end
 
   def test_handles_1904_base_date

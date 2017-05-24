@@ -38,21 +38,19 @@ module Roo
         end]
       end
 
+      EPOCH_1900 = Date.new(1900, 1, 1).freeze
+      EPOCH_1904 = Date.new(1904, 1, 1).freeze
+
       def base_date
         @base_date ||=
-        begin
-          # Default to 1900 (minus one day due to excel quirk) but use 1904 if
-          # it's set in the Workbook's workbookPr
-          # http://msdn.microsoft.com/en-us/library/ff530155(v=office.12).aspx
-          result = Date.new(1899, 12, 30) # default
-          doc.css('workbookPr[date1904]').each do |workbookPr|
-            if workbookPr['date1904'] =~ /true|1/i
-              result = Date.new(1904, 01, 01)
-              break
-            end
+          begin
+            # Default to 1900 (minus one day due to excel quirk) but use 1904 if
+            # it's set in the Workbook's workbookPr
+            # http://msdn.microsoft.com/en-us/library/ff530155(v=office.12).aspx
+            doc.css('workbookPr[date1904]').any? {|workbookPr| workbookPr['date1904'] =~ /true|1/i} ?
+              EPOCH_1904 :
+              EPOCH_1900
           end
-          result
-        end
       end
     end
   end
