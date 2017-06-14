@@ -3,8 +3,8 @@
 [![Build Status](https://img.shields.io/travis/roo-rb/roo.svg?style=flat-square)](https://travis-ci.org/roo-rb/roo) [![Code Climate](https://img.shields.io/codeclimate/github/roo-rb/roo.svg?style=flat-square)](https://codeclimate.com/github/roo-rb/roo) [![Coverage Status](https://img.shields.io/coveralls/roo-rb/roo.svg?style=flat-square)](https://coveralls.io/r/roo-rb/roo) [![Gem Version](https://img.shields.io/gem/v/roo.svg?style=flat-square)](https://rubygems.org/gems/roo)
 
 Roo implements read access for all common spreadsheet types. It can handle:
-* Excel 2007 - 2013 formats (xlsx, xlsm)
-* LibreOffice / OpenOffice.org formats (ods)
+* Office Open XML Format Spreadsheets (xlsx, xlsm)
+* Open Document Format Spreadsheets (ods, fods)
 * CSV
 * Excel 97, Excel 2002 XML, and Excel 2003 XML formats when using the [roo-xls](https://github.com/roo-rb/roo-xls) gem (xls, xml)
 * Google spreadsheets with read/write access when using [roo-google](https://github.com/roo-rb/roo-google)
