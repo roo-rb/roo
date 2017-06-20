@@ -534,4 +534,17 @@ describe Roo::Excelx do
       expect(subject.sheet(0).excelx_format(2,1)).to eq 'm/d/yyyy" "h:mm:ss" "AM/PM'
     end
   end
+
+  describe 'images' do
+    let(:path) { 'test/files/images.xlsx' }
+
+    it 'returns array of images from default sheet' do
+      expect(subject.images).to be_kind_of(Array)
+      expect(subject.images.size).to eql(19)
+    end
+
+    it 'returns empty array if there is no images on the sheet' do
+      expect(subject.images("Sheet2")).to eql([])
+    end
+  end
 end
