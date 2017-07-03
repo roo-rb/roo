@@ -24,8 +24,9 @@ module Roo
     require 'roo/excelx/sheet_doc'
     require 'roo/excelx/coordinate'
     require 'roo/excelx/format'
+    require 'roo/excelx/images'
 
-    delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files] => :@shared
+    delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files, :image_rels, :image_files] => :@shared
     ExceedsMaxError = Class.new(StandardError)
 
     # initialization and opening of a spreadsheet file
@@ -95,6 +96,11 @@ module Roo
       sheet ||= default_sheet
       validate_sheet!(sheet)
       @sheets_by_name[sheet]
+    end
+
+    def images(sheet = nil)
+      images_names = sheet_for(sheet).images.map(&:last)
+      images_names.map { |iname| image_files.find { |ifile| ifile[iname] } }
     end
 
     # Returns the content of a spreadsheet-cell.
@@ -376,6 +382,15 @@ module Roo
       end
     end
 
+    def extract_images(entries, tmpdir)
+      img_entries = entries.select { |e| e.name[/media\/image([0-9]+)/] }
+      img_entries.each do |entry|
+        path = "#{@tmpdir}/roo#{entry.name.gsub(/xl\/|\//, "_")}"
+        image_files << path
+        entry.extract(path)
+      end
+    end
+
     # Extracts all needed files from the zip file
     def process_zipfile(zipfilename_or_stream)
       @sheet_files = []
@@ -409,6 +424,7 @@ module Roo
       sheet_ids = extract_worksheet_ids(entries, "#{@tmpdir}/roo_workbook.xml")
       sheets = extract_worksheet_rels(entries, "#{@tmpdir}/roo_workbook.xml.rels")
       extract_sheets_in_order(entries, sheet_ids, sheets, @tmpdir)
+      extract_images(entries, @tmpdir)
 
       entries.each do |entry|
         path =
@@ -435,6 +451,10 @@ module Roo
           #        drawings, etc.
           nr = Regexp.last_match[1].to_i
           rels_files[nr - 1] = "#{@tmpdir}/roo_rels#{nr}"
+        when /drawing([0-9]+).xml.rels$/
+          # Extracting drawing relationships to make images lists for each sheet
+          nr = Regexp.last_match[1].to_i
+          image_rels[nr -1] = "#{@tmpdir}/roo_image_rels#{nr}"
         end
 
         entry.extract(path) if path

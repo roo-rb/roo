@@ -4,11 +4,15 @@ module Roo
     class Sheet
       extend Forwardable
 
-      delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files] => :@shared
+      delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files, :image_rels] => :@shared
+
+      attr_reader :images
 
       def initialize(name, shared, sheet_index, options = {})
         @name = name
         @shared = shared
+        @sheet_index = sheet_index
+        @images = Images.new(image_rels[sheet_index]).list
         @rels = Relationships.new(rels_files[sheet_index])
         @comments = Comments.new(comments_files[sheet_index])
         @sheet = SheetDoc.new(sheet_files[sheet_index], @rels, shared, options)
