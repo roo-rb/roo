@@ -59,6 +59,7 @@ module Roo
           when Integer
             onecell.to_s
           when Float
+            return "infinity" if onecell == Float::INFINITY
             if onecell == onecell.to_i
               onecell.to_i.to_s
             else
