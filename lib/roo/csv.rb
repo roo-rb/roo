@@ -67,6 +67,7 @@ module Roo
       set_column_count(sheet)
       row_num = 1
 
+
       each_row csv_options do |row|
         row.each_with_index do |elem, col_num|
           coordinate = [row_num, col_num + 1]
@@ -106,7 +107,7 @@ module Roo
 
     def set_column_count(sheet)
       @first_column[sheet] = 1
-      @last_column[sheet] = (::CSV.readlines(@filename, csv_options).first || []).size
+      @last_column[sheet] = (::CSV.readlines(@filename, csv_options).max_by(&:length) || []).size
       @last_column[sheet] = @first_column[sheet] if @last_column[sheet].zero?
 
       nil
