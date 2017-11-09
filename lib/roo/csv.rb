@@ -67,6 +67,7 @@ module Roo
       set_column_count(sheet)
       row_num = 1
 
+
       each_row csv_options do |row|
         row.each_with_index do |elem, col_num|
           coordinate = [row_num, col_num + 1]
