@@ -129,6 +129,16 @@ Use the ``:clean`` option to strip out control characters and surrounding white 
 sheet.parse(clean: true)
 ```
 
+#### Options
+
+When opening the file you can add a hash of options.
+
+##### expand_merged_ranges
+If you open a document with merged cells and do not want to end up with nil values for the rows after the first one.
+```ruby
+xlsx = Roo::Excelx.new('./roo_error.xlsx', {:expand_merged_ranges => true})
+```
+
 ### Exporting spreadsheets
 Roo has the ability to export sheets using the following formats. It
 will only export the ``default_sheet``.
