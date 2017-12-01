@@ -5,17 +5,13 @@ module Roo
       extend Forwardable
 
       delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files] => :@shared
+      delegate [:cells, :hyperlinks, :dimensions] => :@sheet
 
       def initialize(name, shared, sheet_index, options = {})
         @name = name
         @shared = shared
-        @rels = Relationships.new(rels_files[sheet_index])
         @comments = Comments.new(comments_files[sheet_index])
-        @sheet = SheetDoc.new(sheet_files[sheet_index], @rels, shared, options)
-      end
-
-      def cells
-        @cells ||= @sheet.cells(@rels)
+        @sheet = SheetDoc.new(sheet_files[sheet_index], rels_files[sheet_index], shared, options)
       end
 
       def present_cells
@@ -73,16 +69,8 @@ module Roo
         styles.style_format(cell.style).to_s if cell
       end
 
-      def hyperlinks
-        @hyperlinks ||= @sheet.hyperlinks(@rels)
-      end
-
       def comments
         @comments.comments
-      end
-
-      def dimensions
-        @sheet.dimensions
       end
 
       private

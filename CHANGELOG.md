@@ -1,5 +1,9 @@
 ## Unreleased
+### Breaking Changes
+- Excelx::SheetDoc#hyperlinks and #cells no longer accept a relationships argument,
+  instead initialize the SheetDoc with the proper relationships path (the second argument)
 - Updated rubyzip version for fixing security issue. Now minimal version is 1.2.1
+- Discard hyperlinks lookups to allow streaming parsing without loading whole files
 
 ## [2.7.1] 2017-01-03
 ### Fixed
@@ -44,9 +48,6 @@
 - Roo::Base::TEMP_PREFIX should be accessed via Roo::TEMP_PREFIX
 - The private Roo::Base#make_tempdir is now available at the class level in
   classes that use temporary directories, added via Roo::Tempdir
-=======
-### Added
-- Discard hyperlinks lookups to allow streaming parsing without loading whole files
 
 ## [2.4.0] 2016-05-14
 ### Fixed  
