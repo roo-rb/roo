@@ -16,7 +16,8 @@ class TestRooExcelxCellTime < Minitest::Test
       ['h:mm:ss', '1:48:09'],
       ['mm:ss', '48:09'],
       ['[h]:mm:ss', '[1]:48:09'],
-      ['mmss.0', '4809.0'] # Cell::Time always get rounded to the nearest second.
+      ['mmss.0', '4809.0'], # Cell::Time always get rounded to the nearest second.
+      ['HH:MM:SS', '01:48:09'], # A capitalized example
     ].each do |style_format, result|
       cell = roo_time.new(value, nil, [:numeric_or_formula, style_format], 6, nil, base_date, nil)
       assert_equal result, cell.formatted_value, "Style=#{style_format} is not properly formatted"
