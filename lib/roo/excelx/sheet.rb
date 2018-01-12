@@ -6,12 +6,27 @@ module Roo
 
       delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files] => :@shared
 
-      def initialize(name, shared, sheet_index, options = {})
+      def initialize(name, shared, sheet_index, file_name = nil, options = {})
         @name = name
         @shared = shared
+        @sheet_index = sheet_index
+        @filename = file_name
         @rels = Relationships.new(rels_files[sheet_index])
         @comments = Comments.new(comments_files[sheet_index])
         @sheet = SheetDoc.new(sheet_files[sheet_index], @rels, shared, options)
+      end
+
+      def images
+        Zip::File.open(@filename, 'rb') do |zip_file|
+          array_of_paths = []
+          sheet_index = @sheet_index + 1
+          doc = zip_file.find_entry("xl/drawings/_rels/drawing#{sheet_index}.xml.rels")
+          xml = Nokogiri::XML.parse(doc.respond_to?(:get_input_stream) ? doc.get_input_stream : [])
+          array_of_paths << xml.xpath('//@Target').map { |e| e.text.sub('..', '')}
+          array_of_paths.flatten!.map! { |image| File.join('xl', image)}
+          image_hash(zip_file, array_of_paths)
+        end
+        @images
       end
 
       def cells
@@ -86,6 +101,14 @@ module Roo
       end
 
       private
+
+      def image_hash(zip_file, array_of_paths)
+        entries = []
+        @images = Hash[array_of_paths.map.with_index do |path, n|
+          entries[n] = zip_file.find_entry(path)
+          [path.sub('xl/media/', ''), entries[n]]
+        end]
+      end
 
       # Take an xml row and return an array of Excelx::Cell objects
       # optionally pad array to header width(assumed 1st row).
