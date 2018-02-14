@@ -48,11 +48,11 @@ module Roo
           when '#,##0.00' then number_format('%.2f')
           when '0%'
             proc do |number|
-              Kernel.format('%d%', number.to_f * 100)
+              Kernel.format('%d%%', number.to_f * 100)
             end
           when '0.00%'
             proc do |number|
-              Kernel.format('%.2f%', number.to_f * 100)
+              Kernel.format('%.2f%%', number.to_f * 100)
             end
           when '0.00E+00' then '%.2E'
           when '#,##0 ;(#,##0)' then number_format('%.0f', '(%.0f)')
