@@ -17,9 +17,9 @@ module Roo
       def extract_images_names
         return {} unless doc_exists?
 
-        doc.xpath('/Relationships/Relationship').map do |rel|
+        Hash[doc.xpath('/Relationships/Relationship').map do |rel|
           [rel['Id'], "roo" + rel['Target'].gsub(/\.\.\/|\//, '_')]
-        end.to_h
+        end]
       end
     end
   end
