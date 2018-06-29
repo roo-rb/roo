@@ -43,14 +43,16 @@ module Roo
 
       def row(row_number)
         first_column.upto(last_column).map do |col|
-          cells[[row_number, col]]
-        end.map { |cell| cell && cell.value }
+          cell = cells[[row_number, col]]
+          cell && cell.value
+        end
       end
 
       def column(col_number)
         first_row.upto(last_row).map do |row|
-          cells[[row, col_number]]
-        end.map { |cell| cell && cell.value }
+          cell = cells[[row, col_number]]
+          cell && cell.value
+        end
       end
 
       # returns the number of the first non-empty row

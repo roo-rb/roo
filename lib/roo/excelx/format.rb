@@ -1,6 +1,8 @@
+# frozen_string_literal: true
 module Roo
   class Excelx
     module Format
+      extend self
       EXCEPTIONAL_FORMATS = {
         'h:mm am/pm' => :date,
         'h:mm:ss am/pm' => :date
@@ -38,12 +40,17 @@ module Roo
       }
 
       def to_type(format)
+        @to_type ||= {}
+        @to_type[format] ||= _to_type(format)
+      end
+
+      def _to_type(format)
         format = format.to_s.downcase
         if (type = EXCEPTIONAL_FORMATS[format])
           type
         elsif format.include?('#')
           :float
-        elsif !format.match(/d+(?![\]])/).nil? || format.include?('y')
+        elsif format.include?('y') || !format.match(/d+(?![\]])/).nil?
           if format.include?('h') || format.include?('s')
             :datetime
           else
@@ -58,7 +65,6 @@ module Roo
         end
       end
 
-      module_function :to_type
     end
-  end 
+  end
 end

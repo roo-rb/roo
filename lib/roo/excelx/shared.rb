@@ -30,6 +30,10 @@ module Roo
       def base_date
         workbook.base_date
       end
+
+      def base_timestamp
+        workbook.base_timestamp
+      end
     end
   end
 end

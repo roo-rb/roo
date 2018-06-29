@@ -49,11 +49,11 @@ module Roo
           shared_string = ''
           si.children.each do |elem|
             case elem.name
-            when 'r'
+            when 'r'.freeze
               elem.children.each do |r_elem|
                 shared_string << r_elem.content if r_elem.name == 't'
               end
-            when 't'
+            when 't'.freeze
               shared_string = elem.content
             end
           end
@@ -69,13 +69,13 @@ module Roo
           html_string = '<html>'
           si.children.each do |elem|
             case elem.name
-            when 'r'
+            when 'r'.freeze
               html_string << extract_html_r(elem)
-            when 't'
+            when 't'.freeze
               html_string << elem.content
             end # case elem.name
           end # si.children.each do |elem|
-          html_string << '</html>'
+          html_string << '</html>'.freeze
         end # doc.xpath('/sst/si').map do |si|
       end # def extract_html
 
