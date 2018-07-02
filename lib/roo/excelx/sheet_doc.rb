@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'forwardable'
 require 'roo/excelx/extractor'
 
@@ -95,7 +94,7 @@ module Roo
         cell_xml_children.each do |cell|
           case cell.name
           when 'is'.freeze
-            content = +""
+            content = ""
             cell.children.each do |inline_str|
               if inline_str.name == 't'.freeze
                 content << inline_str.content
