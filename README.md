@@ -117,6 +117,12 @@ sheet.parse(id: /UPC|SKU/, qty: /ATS*\sATP\s*QTY\z/)
 # => [{:id => 727880013358, :qty => 12}, ...]
 ```
 
+Use the ``:headers`` option to include the header row in the parsed content.
+
+```ruby
+sheet.parse(headers: true)
+```
+
 Use the ``:header_search`` option to locate the header row and assign the header names.
 
 ```ruby
