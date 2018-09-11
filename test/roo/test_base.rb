@@ -63,11 +63,11 @@ class TestRooBase < Minitest::Test
       workbook.default_sheet = workbook.sheets.first
       result = workbook.find 20
       assert result
-      assert_equal "Brief aus dem Sekretariat", result[0]["TITEL"]
+      assert_equal "Brief aus dem Sekretariat", result[0]
 
       result = workbook.find 22
       assert result
-      assert_equal "Brief aus dem Skretariat. Tagung in Amberg/Opf.", result[0]["TITEL"]
+      assert_equal "Brief aus dem Skretariat. Tagung in Amberg/Opf.", result[0]
     end
   end
 
