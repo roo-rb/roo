@@ -104,7 +104,6 @@ module Roo
           i:   false,
           u:   false
         }
-        b, i, u, sub, sup = false, false, false, false, false
         r_elem.children.each do |elem|
           case elem.name
           when 'rPr'
