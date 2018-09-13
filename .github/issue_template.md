@@ -2,19 +2,13 @@ Thanks for filing an issue. Following these instructions will help us solve your
 
 ### Steps to reproduce
 
-1. Create a gist for this issue (Sample gist: https://gist.github.com/stevendaniels/98a05849036e99bb8b3c)
+1. Create an executable test case for this issue ([sample test case](https://gist.github.com/tgturner/e4b7f491639b8a6dd883fe2ace408652))
+2. You can share your executable test case as a [gist](https://gist.github.com), or simply paste the content into the issue description.
+  - You can execute the test case by running `ruby the_file.rb` in your terminal. If all goes well, you should see your test case failing. 
+3. Please provide a stripped down version of the offending spreadsheet.
 
-Here are some instructions for creating such a gist. 
-
-1. Create a gist (https://gist.github.com) with code that creates the error.
-2. Clone the gist repo locally, add a stripped down version of the offending spreadsheet to the gist repo, and push the gist's changes master.
-3. Paste the gist url here.
-
-### Expected behavior
-Tell us what should happen
-
-### Actual behavior
-Tell us what happens instead
+### Issue
+Describe the issue
 
 ### System configuration
 **Roo version**:
