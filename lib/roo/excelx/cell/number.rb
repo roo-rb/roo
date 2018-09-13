@@ -61,6 +61,7 @@ module Roo
           when '#,##0.00;[Red](#,##0.00)' then number_format('%.2f', '[Red](%.2f)')
             # FIXME: not quite sure what the format should look like in this case.
           when '##0.0E+0' then '%.1E'
+          when "_-* #,##0.00\\ _€_-;\\-* #,##0.00\\ _€_-;_-* \"-\"??\\ _€_-;_-@_-" then number_format('%.2f', '-%.2f')
           when '@' then proc { |number| number }
           else
             raise "Unknown format: #{format.inspect}"
