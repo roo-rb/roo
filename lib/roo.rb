@@ -1,3 +1,4 @@
+require 'roo/version'
 require 'roo/constants'
 require 'roo/errors'
 require 'roo/spreadsheet'
