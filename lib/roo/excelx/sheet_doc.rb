@@ -5,7 +5,7 @@ module Roo
   class Excelx
     class SheetDoc < Excelx::Extractor
       extend Forwardable
-      delegate [:workbook, :shared_strings] => :@shared
+      delegate [:workbook] => :@shared
 
       def initialize(path, relationships, shared, options = {})
         super(path)
@@ -41,7 +41,7 @@ module Roo
         row_xml.children.each do |cell_element|
           # If you're sure you're not going to need this hyperlinks you can discard it
           hyperlinks = unless @options[:no_hyperlinks]
-                         key = ::Roo::Utils.ref_to_key(cell_element['r'.freeze])
+                         key = ::Roo::Utils.ref_to_key(cell_element[COMMON_STRINGS[:r]])
                          hyperlinks(@relationships)[key]
                        end
 
@@ -53,13 +53,13 @@ module Roo
 
       def cell_value_type(type, format)
         case type
-        when 's'.freeze
+        when 's'
           :shared
-        when 'b'.freeze
+        when 'b'
           :boolean
-        when 'str'.freeze
+        when 'str'
           :string
-        when 'inlineStr'.freeze
+        when 'inlineStr'
           :inlinestr
         else
           Excelx::Format.to_type(format)
@@ -82,32 +82,32 @@ module Roo
       #
       # Returns a type of <Excelx::Cell>.
       def cell_from_xml(cell_xml, hyperlink)
-        coordinate = ::Roo::Utils.extract_coordinate(cell_xml['r'.freeze])
+        coordinate = ::Roo::Utils.extract_coordinate(cell_xml[COMMON_STRINGS[:r]])
         cell_xml_children = cell_xml.children
         return Excelx::Cell::Empty.new(coordinate) if cell_xml_children.empty?
 
         # NOTE: This is error prone, to_i will silently turn a nil into a 0.
         #       This works by coincidence because Format[0] is General.
-        style = cell_xml['s'.freeze].to_i
+        style = cell_xml[COMMON_STRINGS[:s]].to_i
         formula = nil
 
         cell_xml_children.each do |cell|
           case cell.name
-          when 'is'.freeze
-            content = ""
+          when 'is'
+            content = String.new
             cell.children.each do |inline_str|
-              if inline_str.name == 't'.freeze
+              if inline_str.name == 't'
                 content << inline_str.content
               end
             end
             unless content.empty?
               return Excelx::Cell.cell_class(:string).new(content, formula, style, hyperlink, coordinate)
             end
-          when 'f'.freeze
+          when 'f'
             formula = cell.content
-          when 'v'.freeze
+          when 'v'
             format = style_format(style)
-            value_type = cell_value_type(cell_xml['t'.freeze], format)
+            value_type = cell_value_type(cell_xml[COMMON_STRINGS[:t]], format)
 
             return create_cell_from_value(value_type, cell, formula, format, style, hyperlink, coordinate)
           end
@@ -169,8 +169,8 @@ module Roo
         return {} unless (hyperlinks = doc.xpath('/worksheet/hyperlinks/hyperlink'))
 
         Hash[hyperlinks.map do |hyperlink|
-          if hyperlink.attribute('id'.freeze) && (relationship = relationships[hyperlink.attribute('id'.freeze).text])
-            [::Roo::Utils.ref_to_key(hyperlink.attributes['ref'.freeze].to_s), relationship.attribute('Target'.freeze).text]
+          if hyperlink.attribute('id') && (relationship = relationships[hyperlink.attribute('id').text])
+            [::Roo::Utils.ref_to_key(hyperlink.attributes[COMMON_STRINGS[:ref]].to_s), relationship.attribute('Target').text]
           end
         end.compact]
       end
@@ -179,7 +179,7 @@ module Roo
         # Extract merged ranges from xml
         merges = {}
         doc.xpath('/worksheet/mergeCells/mergeCell').each do |mergecell_xml|
-          tl, br = mergecell_xml['ref'.freeze].split(/:/).map { |ref| ::Roo::Utils.ref_to_key(ref) }
+          tl, br = mergecell_xml[COMMON_STRINGS[:ref]].split(/:/).map { |ref| ::Roo::Utils.ref_to_key(ref) }
           for row in tl[0]..br[0] do
             for col in tl[1]..br[1] do
               next if row == tl[0] && col == tl[1]
@@ -196,7 +196,7 @@ module Roo
       def extract_cells(relationships)
         extracted_cells = {}
         doc.xpath('/worksheet/sheetData/row/c').each do |cell_xml|
-          key = ::Roo::Utils.ref_to_key(cell_xml['r'.freeze])
+          key = ::Roo::Utils.ref_to_key(cell_xml[COMMON_STRINGS[:r]])
           extracted_cells[key] = cell_from_xml(cell_xml, hyperlinks(relationships)[key])
         end
 
@@ -207,7 +207,7 @@ module Roo
 
       def extract_dimensions
         Roo::Utils.each_element(@path, 'dimension') do |dimension|
-          return dimension.attributes['ref'.freeze].value
+          return dimension.attributes[COMMON_STRINGS[:ref]].value
         end
       end
 

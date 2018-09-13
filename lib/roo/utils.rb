@@ -91,6 +91,7 @@ module Roo
     end
 
     private
+
     def char_index(byte)
       if byte >= 65 && byte <= 90
         byte - 64

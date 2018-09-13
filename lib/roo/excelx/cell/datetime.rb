@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'date'
 
 module Roo
@@ -80,7 +82,7 @@ module Roo
 
         TIME_FORMATS = {
           'hh' => '%H',    # Hour (24): 01
-          'h' => '%-k'.freeze,    # Hour (24): 1
+          'h' => '%-k',    # Hour (24): 1
           # 'hh'.freeze => '%I'.freeze,    # Hour (12): 08
           # 'h'.freeze => '%-l'.freeze,    # Hour (12): 8
           'mm' => '%M',    # Minute: 01
@@ -96,9 +98,7 @@ module Roo
 
         def create_datetime(base_timestamp, value)
           timestamp = (base_timestamp + (value.to_f.round(6) * SECONDS_IN_DAY)).round(0)
-          t = ::Time.at(timestamp).utc
-
-          ::DateTime.civil(t.year, t.month, t.day, t.hour, t.min, t.sec)
+          ::Time.at(timestamp).utc.to_datetime
         end
       end
     end

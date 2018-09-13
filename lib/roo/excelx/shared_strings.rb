@@ -1,16 +1,10 @@
+# frozen_string_literal: true
+
 require 'roo/excelx/extractor'
 
 module Roo
   class Excelx
     class SharedStrings < Excelx::Extractor
-
-      COMMON_STRINGS = {
-        t: "t",
-        r: "r",
-        html_tag_open: "<html>",
-        html_tag_closed: "</html>"
-      }
-
       def [](index)
         to_a[index]
       end
@@ -46,14 +40,14 @@ module Roo
         document = fix_invalid_shared_strings(doc)
         # read the shared strings xml document
         document.xpath('/sst/si').map do |si|
-          shared_string = ''
+          shared_string = String.new
           si.children.each do |elem|
             case elem.name
-            when 'r'.freeze
+            when 'r'
               elem.children.each do |r_elem|
                 shared_string << r_elem.content if r_elem.name == 't'
               end
-            when 't'.freeze
+            when 't'
               shared_string = elem.content
             end
           end
@@ -66,16 +60,16 @@ module Roo
         fix_invalid_shared_strings(doc)
         # read the shared strings xml document
         doc.xpath('/sst/si').map do |si|
-          html_string = '<html>'
+          html_string = '<html>'.dup
           si.children.each do |elem|
             case elem.name
-            when 'r'.freeze
+            when 'r'
               html_string << extract_html_r(elem)
-            when 't'.freeze
+            when 't'
               html_string << elem.content
             end # case elem.name
           end # si.children.each do |elem|
-          html_string << '</html>'.freeze
+          html_string << '</html>'
         end # doc.xpath('/sst/si').map do |si|
       end # def extract_html
 
@@ -96,7 +90,7 @@ module Roo
       #
       # Expected Output ::: "<html><sub|sup><b><i><u>TEXT</u></i></b></sub|/sup></html>"
       def extract_html_r(r_elem)
-        str = ''
+        str = String.new
         xml_elems = {
           sub: false,
           sup: false,
@@ -141,7 +135,7 @@ module Roo
 
       # This will return an html string
       def create_html(text, formatting)
-        tmp_str = ''
+        tmp_str = String.new
         formatting.each do |elem, val|
           tmp_str << "<#{elem}>" if val
         end
