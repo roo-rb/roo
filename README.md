@@ -51,8 +51,9 @@ info_sheet.each_row |row|
   p row
 end
 
-# Set default sheet
+# Set default sheet by name
 ods.sheet('Info').row(1)
+# Set default sheet by zero-based index
 ods.sheet(0).row(1)
 
 # Set the last sheet as the default sheet.
