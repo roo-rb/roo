@@ -11,7 +11,7 @@ module Roo
     end
 
     def extract_coord(s)
-      num =letter_num = 0
+      num = letter_num = 0
       num_only = false
 
       s.each_byte do |b|
