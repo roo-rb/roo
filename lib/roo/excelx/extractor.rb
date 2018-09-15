@@ -1,6 +1,18 @@
+# frozen_string_literal: true
+
 module Roo
   class Excelx
     class Extractor
+
+      COMMON_STRINGS = {
+        t: "t",
+        r: "r",
+        s: "s",
+        ref: "ref",
+        html_tag_open: "<html>",
+        html_tag_closed: "</html>"
+      }
+
       def initialize(path, options = {})
         @path = path
         @options = options

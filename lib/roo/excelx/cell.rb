@@ -40,19 +40,24 @@ module Roo
       end
 
       def self.create_cell(type, *values)
+        type_class = cell_class(type)
+        type_class && type_class.new(*values)
+      end
+
+      def self.cell_class(type)
         case type
         when :string
-          Cell::String.new(*values)
+          Cell::String
         when :boolean
-          Cell::Boolean.new(*values)
+          Cell::Boolean
         when :number
-          Cell::Number.new(*values)
+          Cell::Number
         when :date
-          Cell::Date.new(*values)
+          Cell::Date
         when :datetime
-          Cell::DateTime.new(*values)
+          Cell::DateTime
         when :time
-          Cell::Time.new(*values)
+          Cell::Time
         end
       end
 

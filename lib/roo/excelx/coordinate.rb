@@ -7,6 +7,10 @@ module Roo
         @row = row
         @column = column
       end
+
+      def to_a
+        @array ||= [row, column].freeze
+      end
     end
   end
 end

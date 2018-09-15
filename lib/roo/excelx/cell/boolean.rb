@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Roo
   class Excelx
     class Cell
@@ -11,7 +13,7 @@ module Roo
         end
 
         def formatted_value
-          value ? 'TRUE'.freeze : 'FALSE'.freeze
+          value ? 'TRUE' : 'FALSE'
         end
 
         private

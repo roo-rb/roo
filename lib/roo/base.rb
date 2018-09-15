@@ -19,8 +19,8 @@ class Roo::Base
   include Roo::Formatters::XML
   include Roo::Formatters::YAML
 
-  MAX_ROW_COL = 999_999.freeze
-  MIN_ROW_COL = 0.freeze
+  MAX_ROW_COL = 999_999
+  MIN_ROW_COL = 0
 
   attr_reader :headers
 

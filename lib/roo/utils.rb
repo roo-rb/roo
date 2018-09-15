@@ -4,27 +4,42 @@ module Roo
 
     LETTERS = ('A'..'Z').to_a
 
-    def split_coordinate(str)
-      @split_coordinate ||= {}
+    def extract_coordinate(str)
+      str = str.freeze
+      @extract_coordinate ||= {}
+      @extract_coordinate[str] ||= extract_coord(str)
+    end
 
-      @split_coordinate[str] ||= begin
-        letter, number = split_coord(str)
-        x = letter_to_number(letter)
-        y = number
-        [y, x]
+    def extract_coord(s)
+      num = letter_num = 0
+      num_only = false
+
+      s.each_byte do |b|
+        if !num_only && (index = char_index(b))
+          letter_num *= 26
+          letter_num += index
+        elsif index = num_index(b)
+          num_only = true
+          num *= 10
+          num += index
+        else
+          fail ArgumentError
+        end
       end
+      fail ArgumentError if letter_num == 0 || !num_only
+      Excelx::Coordinate.new(num,letter_num)
+    end
+
+    def split_coordinate(str)
+      extract_coordinate(str).to_a
     end
 
     alias_method :ref_to_key, :split_coordinate
 
-    def split_coord(s)
-      if s =~ /([a-zA-Z]+)([0-9]+)/
-        letter = Regexp.last_match[1]
-        number = Regexp.last_match[2].to_i
-      else
-        fail ArgumentError
-      end
-      [letter, number]
+
+    def split_coord(str)
+      coord = extract_coordinate(str)
+      [number_to_letter(coord.column), coord.row]
     end
 
     # convert a number to something like 'AB' (1 => 'A', 2 => 'B', ...)
@@ -72,6 +87,22 @@ module Roo
       Nokogiri::XML::Reader(::File.open(path, 'rb'), nil, nil, Nokogiri::XML::ParseOptions::NOBLANKS).each do |node|
         next unless node.node_type == Nokogiri::XML::Reader::TYPE_ELEMENT && Array(elements).include?(node.name)
         yield Nokogiri::XML(node.outer_xml).root if block_given?
+      end
+    end
+
+    private
+
+    def char_index(byte)
+      if byte >= 65 && byte <= 90
+        byte - 64
+      elsif byte >= 97 && byte <= 122
+        byte - 96
+      end
+    end
+
+    def num_index(byte)
+      if byte >= 48 && byte <= 57
+        byte - 48
       end
     end
   end

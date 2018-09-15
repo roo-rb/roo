@@ -5,7 +5,7 @@ module Roo
   class Excelx
     class SheetDoc < Excelx::Extractor
       extend Forwardable
-      delegate [:styles, :workbook, :shared_strings, :base_date] => :@shared
+      delegate [:workbook] => :@shared
 
       def initialize(path, relationships, shared, options = {})
         super(path)
@@ -41,7 +41,7 @@ module Roo
         row_xml.children.each do |cell_element|
           # If you're sure you're not going to need this hyperlinks you can discard it
           hyperlinks = unless @options[:no_hyperlinks]
-                         key = ::Roo::Utils.ref_to_key(cell_element['r'])
+                         key = ::Roo::Utils.ref_to_key(cell_element[COMMON_STRINGS[:r]])
                          hyperlinks(@relationships)[key]
                        end
 
@@ -53,13 +53,13 @@ module Roo
 
       def cell_value_type(type, format)
         case type
-        when 's'.freeze
+        when 's'
           :shared
-        when 'b'.freeze
+        when 'b'
           :boolean
-        when 'str'.freeze
+        when 'str'
           :string
-        when 'inlineStr'.freeze
+        when 'inlineStr'
           :inlinestr
         else
           Excelx::Format.to_type(format)
@@ -82,34 +82,41 @@ module Roo
       #
       # Returns a type of <Excelx::Cell>.
       def cell_from_xml(cell_xml, hyperlink)
-        coordinate = extract_coordinate(cell_xml['r'])
-        return Excelx::Cell::Empty.new(coordinate) if cell_xml.children.empty?
+        coordinate = ::Roo::Utils.extract_coordinate(cell_xml[COMMON_STRINGS[:r]])
+        cell_xml_children = cell_xml.children
+        return Excelx::Cell::Empty.new(coordinate) if cell_xml_children.empty?
 
         # NOTE: This is error prone, to_i will silently turn a nil into a 0.
         #       This works by coincidence because Format[0] is General.
-        style = cell_xml['s'].to_i
-        format = styles.style_format(style)
-        value_type = cell_value_type(cell_xml['t'], format)
+        style = cell_xml[COMMON_STRINGS[:s]].to_i
         formula = nil
 
-        cell_xml.children.each do |cell|
+        cell_xml_children.each do |cell|
           case cell.name
           when 'is'
-            content_arr = cell.search('t').map(&:content)
-            unless content_arr.empty?
-              return Excelx::Cell.create_cell(:string, content_arr.join(''), formula, style, hyperlink, coordinate)
+            content = String.new
+            cell.children.each do |inline_str|
+              if inline_str.name == 't'
+                content << inline_str.content
+              end
+            end
+            unless content.empty?
+              return Excelx::Cell.cell_class(:string).new(content, formula, style, hyperlink, coordinate)
             end
           when 'f'
             formula = cell.content
           when 'v'
-            return create_cell_from_value(value_type, cell, formula, format, style, hyperlink, base_date, coordinate)
+            format = style_format(style)
+            value_type = cell_value_type(cell_xml[COMMON_STRINGS[:t]], format)
+
+            return create_cell_from_value(value_type, cell, formula, format, style, hyperlink, coordinate)
           end
         end
 
         Excelx::Cell::Empty.new(coordinate)
       end
 
-      def create_cell_from_value(value_type, cell, formula, format, style, hyperlink, base_date, coordinate)
+      def create_cell_from_value(value_type, cell, formula, format, style, hyperlink, coordinate)
         # NOTE: format.to_s can replace excelx_type as an argument for
         #       Cell::Time, Cell::DateTime, Cell::Date or Cell::Number, but
         #       it will break some brittle tests.
@@ -125,11 +132,12 @@ module Roo
         #       3. formula
         case value_type
         when :shared
-          value = shared_strings.use_html?(cell.content.to_i) ? shared_strings.to_html[cell.content.to_i] : shared_strings[cell.content.to_i]
-          Excelx::Cell.create_cell(:string, value, formula, style, hyperlink, coordinate)
+          cell_content = cell.content.to_i
+          value = shared_strings.use_html?(cell_content) ? shared_strings.to_html[cell_content] : shared_strings[cell_content]
+          Excelx::Cell.cell_class(:string).new(value, formula, style, hyperlink, coordinate)
         when :boolean, :string
           value = cell.content
-          Excelx::Cell.create_cell(value_type, value, formula, style, hyperlink, coordinate)
+          Excelx::Cell.cell_class(value_type).new(value, formula, style, hyperlink, coordinate)
         when :time, :datetime
           cell_content = cell.content.to_f
           # NOTE: A date will be a whole number. A time will have be > 1. And
@@ -148,18 +156,13 @@ module Roo
                       else
                         :date
                       end
-          Excelx::Cell.create_cell(cell_type, cell.content, formula, excelx_type, style, hyperlink, base_date, coordinate)
+          base_value = cell_type == :date ? base_date : base_timestamp
+          Excelx::Cell.cell_class(cell_type).new(cell_content, formula, excelx_type, style, hyperlink, base_value, coordinate)
         when :date
-          Excelx::Cell.create_cell(value_type, cell.content, formula, excelx_type, style, hyperlink, base_date, coordinate)
+          Excelx::Cell.cell_class(:date).new(cell.content, formula, excelx_type, style, hyperlink, base_date, coordinate)
         else
-          Excelx::Cell.create_cell(:number, cell.content, formula, excelx_type, style, hyperlink, coordinate)
+          Excelx::Cell.cell_class(:number).new(cell.content, formula, excelx_type, style, hyperlink, coordinate)
         end
-      end
-
-      def extract_coordinate(coordinate)
-        row, column = ::Roo::Utils.split_coordinate(coordinate)
-
-        Excelx::Coordinate.new(row, column)
       end
 
       def extract_hyperlinks(relationships)
@@ -167,7 +170,7 @@ module Roo
 
         Hash[hyperlinks.map do |hyperlink|
           if hyperlink.attribute('id') && (relationship = relationships[hyperlink.attribute('id').text])
-            [::Roo::Utils.ref_to_key(hyperlink.attributes['ref'].to_s), relationship.attribute('Target').text]
+            [::Roo::Utils.ref_to_key(hyperlink.attributes[COMMON_STRINGS[:ref]].to_s), relationship.attribute('Target').text]
           end
         end.compact]
       end
@@ -176,7 +179,7 @@ module Roo
         # Extract merged ranges from xml
         merges = {}
         doc.xpath('/worksheet/mergeCells/mergeCell').each do |mergecell_xml|
-          tl, br = mergecell_xml['ref'].split(/:/).map { |ref| ::Roo::Utils.ref_to_key(ref) }
+          tl, br = mergecell_xml[COMMON_STRINGS[:ref]].split(/:/).map { |ref| ::Roo::Utils.ref_to_key(ref) }
           for row in tl[0]..br[0] do
             for col in tl[1]..br[1] do
               next if row == tl[0] && col == tl[1]
@@ -191,10 +194,11 @@ module Roo
       end
 
       def extract_cells(relationships)
-        extracted_cells = Hash[doc.xpath('/worksheet/sheetData/row/c').map do |cell_xml|
-          key = ::Roo::Utils.ref_to_key(cell_xml['r'])
-          [key, cell_from_xml(cell_xml, hyperlinks(relationships)[key])]
-        end]
+        extracted_cells = {}
+        doc.xpath('/worksheet/sheetData/row/c').each do |cell_xml|
+          key = ::Roo::Utils.ref_to_key(cell_xml[COMMON_STRINGS[:r]])
+          extracted_cells[key] = cell_from_xml(cell_xml, hyperlinks(relationships)[key])
+        end
 
         expand_merged_ranges(extracted_cells) if @options[:expand_merged_ranges]
 
@@ -203,8 +207,24 @@ module Roo
 
       def extract_dimensions
         Roo::Utils.each_element(@path, 'dimension') do |dimension|
-          return dimension.attributes['ref'].value
+          return dimension.attributes[COMMON_STRINGS[:ref]].value
         end
+      end
+
+      def style_format(style)
+        @shared.styles.style_format(style)
+      end
+
+      def base_date
+        @shared.base_date
+      end
+
+      def base_timestamp
+        @shared.base_timestamp
+      end
+
+      def shared_strings
+        @shared.shared_strings
       end
     end
   end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'date'
 require 'nokogiri'
 require 'cgi'
@@ -11,9 +13,9 @@ module Roo
   class OpenOffice < Roo::Base
     extend Roo::Tempdir
 
-    ERROR_MISSING_CONTENT_XML = 'file missing required content.xml'.freeze
-    XPATH_FIND_TABLE_STYLES   = "//*[local-name()='automatic-styles']".freeze
-    XPATH_LOCAL_NAME_TABLE    = "//*[local-name()='table']".freeze
+    ERROR_MISSING_CONTENT_XML = 'file missing required content.xml'
+    XPATH_FIND_TABLE_STYLES   = "//*[local-name()='automatic-styles']"
+    XPATH_LOCAL_NAME_TABLE    = "//*[local-name()='table']"
 
     # initialization and opening of a spreadsheet file
     # values for packed: :zip

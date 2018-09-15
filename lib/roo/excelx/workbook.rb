@@ -38,6 +38,10 @@ module Roo
         end]
       end
 
+      def base_timestamp
+        @base_timestamp ||= base_date.to_datetime.to_time.to_i
+      end
+
       def base_date
         @base_date ||=
         begin
