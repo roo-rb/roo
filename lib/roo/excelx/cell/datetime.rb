@@ -10,11 +10,12 @@ module Roo
 
         attr_reader :value, :formula, :format, :cell_value, :link, :coordinate
 
+        attr_reader_with_default default_type: :datetime
+
         def initialize(value, formula, excelx_type, style, link, base_timestamp, coordinate)
-          super(value, formula, excelx_type, style, link, coordinate)
-          @type = :datetime
+          super(value, formula, excelx_type, style, nil, coordinate)
           @format = excelx_type.last
-          @value = link? ? Roo::Link.new(link, value) : create_datetime(base_timestamp, value)
+          @value = link ? Roo::Link.new(link, value) : create_datetime(base_timestamp, value)
         end
 
         # Public: Returns formatted value for a datetime. Format's can be an

@@ -6,12 +6,13 @@ module Roo
       class Date < Roo::Excelx::Cell::DateTime
         attr_reader :value, :formula, :format, :cell_type, :cell_value, :link, :coordinate
 
+        attr_reader_with_default default_type: :date
+
         def initialize(value, formula, excelx_type, style, link, base_date, coordinate)
           # NOTE: Pass all arguments to the parent class, DateTime.
           super
-          @type = :date
           @format = excelx_type.last
-          @value = link? ? Roo::Link.new(link, value) : create_date(base_date, value)
+          @value = link ? Roo::Link.new(link, value) : create_date(base_date, value)
         end
 
         private

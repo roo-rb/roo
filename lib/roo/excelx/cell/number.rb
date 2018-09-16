@@ -6,13 +6,14 @@ module Roo
       class Number < Cell::Base
         attr_reader :value, :formula, :format, :cell_value, :link, :coordinate
 
+        # FIXME: change default_type to number. This will break brittle tests.
+        attr_reader_with_default default_type: :float
+
         def initialize(value, formula, excelx_type, style, link, coordinate)
           super
-          # FIXME: change @type to number. This will break brittle tests.
           # FIXME: Excelx_type is an array, but the first value isn't used.
-          @type = :float
           @format = excelx_type.last
-          @value = link? ? Roo::Link.new(link, value) : create_numeric(value)
+          @value = link ? Roo::Link.new(link, value) : create_numeric(value)
         end
 
         def create_numeric(number)
