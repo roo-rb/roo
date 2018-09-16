@@ -4,13 +4,7 @@ module Roo
 
     LETTERS = ('A'..'Z').to_a
 
-    def extract_coordinate(str)
-      str = str.freeze
-      @extract_coordinate ||= {}
-      @extract_coordinate[str] ||= extract_coord(str)
-    end
-
-    def extract_coord(s)
+    def extract_coord(s, klass = Excelx::Coordinate)
       num = letter_num = 0
       num_only = false
 
@@ -27,11 +21,18 @@ module Roo
         end
       end
       fail ArgumentError if letter_num == 0 || !num_only
-      Excelx::Coordinate.new(num,letter_num)
+
+      if klass == Array
+        [num, letter_num]
+      else
+        klass.new(num, letter_num)
+      end
     end
 
+    alias_method :extract_coordinate, :extract_coord
+
     def split_coordinate(str)
-      extract_coordinate(str).to_a
+      extract_coord(str, Array)
     end
 
     alias_method :ref_to_key, :split_coordinate
