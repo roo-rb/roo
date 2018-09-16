@@ -1,9 +1,7 @@
-# encoding: utf-8
-
-require 'tmpdir'
-require 'stringio'
-require 'nokogiri'
-require 'roo/utils'
+require "tmpdir"
+require "stringio"
+require "nokogiri"
+require "roo/utils"
 require "roo/formatters/base"
 require "roo/formatters/csv"
 require "roo/formatters/matrix"
@@ -28,7 +26,7 @@ class Roo::Base
   attr_accessor :header_line
 
   def self.TEMP_PREFIX
-    warn '[DEPRECATION] please access TEMP_PREFIX via Roo::TEMP_PREFIX'
+    warn "[DEPRECATION] please access TEMP_PREFIX via Roo::TEMP_PREFIX"
     Roo::TEMP_PREFIX
   end
 
@@ -105,7 +103,7 @@ class Roo::Base
   def collect_last_row_col_for_sheet(sheet)
     first_row = first_column = MAX_ROW_COL
     last_row = last_column = MIN_ROW_COL
-    @cell[sheet].each_pair do|key, value|
+    @cell[sheet].each_pair do |key, value|
       next unless value
       first_row = [first_row, key.first.to_i].min
       last_row = [last_row, key.first.to_i].max
@@ -208,16 +206,16 @@ class Roo::Base
         "Number of sheets: #{sheets.size}\n"\
         "Sheets: #{sheets.join(', ')}\n"
       n = 1
-      sheets.each do|sheet|
+      sheets.each do |sheet|
         self.default_sheet = sheet
-        result << 'Sheet ' + n.to_s + ":\n"
+        result << "Sheet " + n.to_s + ":\n"
         if first_row
           result << "  First row: #{first_row}\n"
           result << "  Last row: #{last_row}\n"
           result << "  First column: #{::Roo::Utils.number_to_letter(first_column)}\n"
           result << "  Last column: #{::Roo::Utils.number_to_letter(last_column)}"
         else
-          result << '  - empty -'
+          result << "  - empty -"
         end
         result << "\n" if sheet != sheets.last
         n += 1
@@ -335,7 +333,7 @@ class Roo::Base
       filename = File.basename(filename, File.extname(filename))
     end
 
-    if uri?(filename) && (qs_begin = filename.rindex('?'))
+    if uri?(filename) && (qs_begin = filename.rindex("?"))
       filename = filename[0..qs_begin - 1]
     end
     exts = Array(exts)
@@ -361,7 +359,7 @@ class Roo::Base
   # Diese Methode ist eine temp. Loesung, um zu erforschen, ob der
   # Zugriff mit numerischen Keys schneller ist.
   def key_to_num(str)
-    r, c = str.split(',')
+    r, c = str.split(",")
     [r.to_i, c.to_i]
   end
 
@@ -460,7 +458,7 @@ class Roo::Base
 
   def find_basename(filename)
     if uri?(filename)
-      require 'uri'
+      require "uri"
       uri = URI.parse filename
       File.basename(uri.path)
     elsif !is_stream?(filename)
@@ -469,9 +467,9 @@ class Roo::Base
   end
 
   def make_tmpdir(prefix = nil, root = nil, &block)
-    warn '[DEPRECATION] extend Roo::Tempdir and use its .make_tempdir instead'
+    warn "[DEPRECATION] extend Roo::Tempdir and use its .make_tempdir instead"
     prefix = "#{Roo::TEMP_PREFIX}#{prefix}"
-    root ||= ENV['ROO_TMP']
+    root ||= ENV["ROO_TMP"]
 
     if block_given?
       # folder is deleted at end of block
@@ -490,7 +488,7 @@ class Roo::Base
   end
 
   def sanitize_value(v)
-    v.gsub(/[[:cntrl:]]|^[\p{Space}]+|[\p{Space}]+$/, '')
+    v.gsub(/[[:cntrl:]]|^[\p{Space}]+|[\p{Space}]+$/, "")
   end
 
   def set_headers(hash = {})
@@ -530,17 +528,17 @@ class Roo::Base
   end
 
   def uri?(filename)
-    filename.start_with?('http://', 'https://', 'ftp://')
+    filename.start_with?("http://", "https://", "ftp://")
   rescue
     false
   end
 
   def download_uri(uri, tmpdir)
-    require 'open-uri'
+    require "open-uri"
     tempfilename = File.join(tmpdir, find_basename(uri))
     begin
-      File.open(tempfilename, 'wb') do |file|
-        open(uri, 'User-Agent' => "Ruby/#{RUBY_VERSION}") do |net|
+      File.open(tempfilename, "wb") do |file|
+        open(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}") do |net|
           file.write(net.read)
         end
       end
@@ -551,15 +549,15 @@ class Roo::Base
   end
 
   def open_from_stream(stream, tmpdir)
-    tempfilename = File.join(tmpdir, 'spreadsheet')
-    File.open(tempfilename, 'wb') do |file|
+    tempfilename = File.join(tmpdir, "spreadsheet")
+    File.open(tempfilename, "wb") do |file|
       file.write(stream[7..-1])
     end
-    File.join(tmpdir, 'spreadsheet')
+    File.join(tmpdir, "spreadsheet")
   end
 
   def unzip(filename, tmpdir)
-    require 'zip/filesystem'
+    require "zip/filesystem"
 
     Zip::File.open(filename) do |zip|
       process_zipfile_packed(zip, tmpdir)
@@ -584,16 +582,16 @@ class Roo::Base
     end
   end
 
-  def process_zipfile_packed(zip, tmpdir, path = '')
+  def process_zipfile_packed(zip, tmpdir, path = "")
     if zip.file.file? path
       # extract and return filename
-      File.open(File.join(tmpdir, path), 'wb') do |file|
+      File.open(File.join(tmpdir, path), "wb") do |file|
         file.write(zip.read(path))
       end
       File.join(tmpdir, path)
     else
       ret = nil
-      path += '/' unless path.empty?
+      path += "/" unless path.empty?
       zip.dir.foreach(path) do |filename|
         ret = process_zipfile_packed(zip, tmpdir, path + filename)
       end
