@@ -151,6 +151,10 @@ describe Roo::Excelx do
     it 'returns the expected result' do
       expect(subject.sheet_for("Tabelle1").instance_variable_get("@name")).to eq "Tabelle1"
     end
+
+    it 'returns the expected result when passed a number' do
+      expect(subject.sheet_for(0).instance_variable_get("@name")).to eq "Tabelle1"
+    end
   end
 
   describe '#row' do

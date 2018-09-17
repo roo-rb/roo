@@ -97,7 +97,7 @@ module Roo
     def sheet_for(sheet)
       sheet ||= default_sheet
       validate_sheet!(sheet)
-      @sheets_by_name[sheet]
+      @sheets_by_name[sheet] || @sheets[sheet]
     end
 
     def images(sheet = nil)
