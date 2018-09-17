@@ -154,3 +154,16 @@ def skip_jruby_incompatible_test
   msg = "This test uses a feature incompatible with JRuby"
   skip(msg) if defined?(JRUBY_VERSION)
 end
+
+def with_timezone(new_tz)
+  if new_tz
+    begin
+      prev_tz, ENV['TZ'] = ENV['TZ'], new_tz
+      yield
+    ensure
+      ENV['TZ'] = prev_tz
+    end
+  else
+    yield
+  end
+end

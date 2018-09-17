@@ -1,13 +1,18 @@
+# frozen_string_literal: true
+
+require "roo/attr_reader_helper"
+
 module Roo
   class Excelx
     class Cell
       class Base
+        extend Roo::AttrReaderHelper
         attr_reader :cell_type, :cell_value, :value
 
         # FIXME: I think style should be deprecated. Having a style attribute
         #        for a cell doesn't really accomplish much. It seems to be used
         #        when you want to export to excelx.
-        attr_reader :style
+        attr_reader_with_default default_type: :base, style: 1
 
 
         # FIXME: Updating a cell's value should be able tochange the cell's type,
@@ -34,14 +39,12 @@ module Roo
         attr_writer :value
 
         def initialize(value, formula, excelx_type, style, link, coordinate)
-          @link = !!link
           @cell_value = value
-          @cell_type = excelx_type
-          @formula = formula
-          @style = style
+          @cell_type = excelx_type if excelx_type
+          @formula = formula if formula
+          @style = style unless style == 1
           @coordinate = coordinate
-          @type = :base
-          @value = link? ? Roo::Link.new(link, value) : value
+          @value = link ? Roo::Link.new(link, value) : value
         end
 
         def type
@@ -50,7 +53,7 @@ module Roo
           elsif link?
             :link
           else
-            @type
+            default_type
           end
         end
 
@@ -59,7 +62,7 @@ module Roo
         end
 
         def link?
-          !!@link
+          Roo::Link === @value
         end
 
         alias_method :formatted_value, :value

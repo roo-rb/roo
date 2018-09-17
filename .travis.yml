@@ -6,6 +6,8 @@ rvm:
   - 2.5
   - ruby-head
   - jruby-9.1.6.0
+env:
+  - LONG_RUN=true
 matrix:
   include:
     - rvm: 2.0
