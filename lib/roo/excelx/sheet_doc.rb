@@ -42,12 +42,13 @@ module Roo
         return [] unless row_xml
         row_xml.children.each do |cell_element|
           # If you're sure you're not going to need this hyperlinks you can discard it
+          coordinate = ::Roo::Utils.extract_coordinate(cell_element[COMMON_STRINGS[:r]])
           hyperlinks = unless @options[:no_hyperlinks]
-                         key = ::Roo::Utils.ref_to_key(cell_element[COMMON_STRINGS[:r]])
+                         key = coordinate.to_a
                          hyperlinks(@relationships)[key]
                        end
 
-          yield cell_from_xml(cell_element, hyperlinks)
+          yield cell_from_xml(cell_element, hyperlinks, coordinate)
         end
       end
 
@@ -83,8 +84,8 @@ module Roo
       #    # => <Excelx::Cell::String>
       #
       # Returns a type of <Excelx::Cell>.
-      def cell_from_xml(cell_xml, hyperlink)
-        coordinate = ::Roo::Utils.extract_coordinate(cell_xml[COMMON_STRINGS[:r]])
+      def cell_from_xml(cell_xml, hyperlink, coordinate = nil)
+        coordinate ||= ::Roo::Utils.extract_coordinate(cell_xml[COMMON_STRINGS[:r]])
         cell_xml_children = cell_xml.children
         return Excelx::Cell::Empty.new(coordinate) if cell_xml_children.empty?
 
@@ -198,8 +199,9 @@ module Roo
       def extract_cells(relationships)
         extracted_cells = {}
         doc.xpath('/worksheet/sheetData/row/c').each do |cell_xml|
-          key = ::Roo::Utils.ref_to_key(cell_xml[COMMON_STRINGS[:r]])
-          extracted_cells[key] = cell_from_xml(cell_xml, hyperlinks(relationships)[key])
+          coordinate = ::Roo::Utils.extract_coordinate(cell_xml[COMMON_STRINGS[:r]])
+          key = coordinate.to_a
+          extracted_cells[key] = cell_from_xml(cell_xml, hyperlinks(relationships)[key], coordinate)
         end
 
         expand_merged_ranges(extracted_cells) if @options[:expand_merged_ranges]
