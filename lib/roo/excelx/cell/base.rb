@@ -88,6 +88,10 @@ module Roo
         def empty?
           false
         end
+
+        def presence
+          empty? ? nil : self
+        end
       end
     end
   end

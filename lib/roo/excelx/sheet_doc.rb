@@ -82,7 +82,7 @@ module Roo
       #    # => <Excelx::Cell::String>
       #
       # Returns a type of <Excelx::Cell>.
-      def cell_from_xml(cell_xml, hyperlink, coordinate=nil)
+      def cell_from_xml(cell_xml, hyperlink, coordinate = nil)
         coordinate ||= ::Roo::Utils.extract_coordinate(cell_xml[COMMON_STRINGS[:r]])
         cell_xml_children = cell_xml.children
         return Excelx::Cell::Empty.new(coordinate) if cell_xml_children.empty?

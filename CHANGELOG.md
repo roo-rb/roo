@@ -1,6 +1,9 @@
 ## Unreleased
 - Updated rubyzip version for fixing security issue. Now minimal version is 1.2.1
 
+### Deprecations
+- Roo::Excelx::Sheet#present_cells is deprecated [454](https://github.com/roo-rb/roo/pull/454)
+
 ## [2.7.1] 2017-01-03
 ### Fixed
 - Fixed regression where a CSV's encoding was being ignored [372](https://github.com/roo-rb/roo/pull/372)
@@ -49,7 +52,7 @@
 - Discard hyperlinks lookups to allow streaming parsing without loading whole files
 
 ## [2.4.0] 2016-05-14
-### Fixed  
+### Fixed
 - Fixed opening spreadsheets with charts [315](https://github.com/roo-rb/roo/pull/315)
 - Fixed memory issues for Roo::Utils.number_to_letter [308](https://github.com/roo-rb/roo/pull/308)
 - Fixed Roo::Excelx::Cell::Number to recognize floating point numbers [306](https://github.com/roo-rb/roo/pull/306)

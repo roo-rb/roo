@@ -22,6 +22,19 @@ module Roo
         @cells ||= @sheet.cells(@rels)
       end
 
+      def present_cells
+        @present_cells ||= begin
+          warn %{
+[DEPRECATION] present_cells is deprecated. Alternate:
+  with activesupport    => cells[key].presence
+  without activesupport
+    (ruby -v >= 2.3)      => cells[key]&.presence
+    (ruby -v < 2.3)       => (cell = cells[key]) && cell.presence
+          }
+          cells.select { |_, cell| cell && cell.presence }
+        end
+      end
+
       # Yield each row as array of Excelx::Cell objects
       # accepts options max_rows (int) (offset by 1 for header),
       # pad_cells (boolean) and offset (int)
@@ -115,23 +128,22 @@ module Roo
           first_row = last_row = first_col = last_col = nil
 
           cells.each do |(row, col), cell|
-            if cell && !cell.empty?
-              first_row ||= row
-              last_row ||= row
-              first_col ||= col
-              last_col ||= col
+            next unless cell && cell.presence
+            first_row ||= row
+            last_row ||= row
+            first_col ||= col
+            last_col ||= col
 
-              if row > last_row
-                last_row = row
-              elsif row < first_row
-                first_row = row
-              end
+            if row > last_row
+              last_row = row
+            elsif row < first_row
+              first_row = row
+            end
 
-              if col > last_col
-                last_col = col
-              elsif col < first_col
-                first_col = col
-              end
+            if col > last_col
+              last_col = col
+            elsif col < first_col
+              first_col = col
             end
           end
 
