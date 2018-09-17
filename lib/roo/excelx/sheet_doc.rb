@@ -169,6 +169,7 @@ module Roo
 
       def extract_hyperlinks(relationships)
         hyperlinks = {}
+
         Roo::Utils.each_element(@path, 'hyperlinks') do |hyperlinks_xml|
           hyperlinks_xml.children.each do |hyperlink|
             hyperlink_id = hyperlink.attribute('id')
