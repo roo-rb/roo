@@ -71,9 +71,14 @@ module Roo
           formatted_value
         end
 
-        # DEPRECATED: Please use link instead.
+        # DEPRECATED: Please use link? instead.
         def hyperlink
           warn '[DEPRECATION] `hyperlink` is deprecated.  Please use `link?` instead.'
+        end
+
+        # DEPRECATED: Please use link? instead.
+        def link
+          warn '[DEPRECATION] `link` is deprecated.  Please use `link?` instead.'
         end
 
         # DEPRECATED: Please use cell_value instead.
