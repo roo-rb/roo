@@ -113,13 +113,12 @@ class Roo::Base
     { first_row: first_row, first_column: first_column, last_row: last_row, last_column: last_column }
   end
 
-  %w(first_row last_row first_column last_column).each do |key|
-    class_eval <<-EOS, __FILE__, __LINE__ + 1
-      def #{key}(sheet = default_sheet)                                   # def first_row(sheet = default_sheet)
-        read_cells(sheet)                                                 #   read_cells(sheet)
-        @#{key}[sheet] ||= first_last_row_col_for_sheet(sheet)[:#{key}]   #   @first_row[sheet] ||= first_last_row_col_for_sheet(sheet)[:first_row]
-      end                                                                 # end
-    EOS
+  %i(first_row last_row first_column last_column).each do |key|
+    ivar = "@#{key}".to_sym
+    define_method(key) do |sheet = default_sheet|
+      read_cells(sheet)
+      instance_variable_get(ivar)[sheet] ||= first_last_row_col_for_sheet(sheet)[key]
+    end
   end
 
   def inspect
