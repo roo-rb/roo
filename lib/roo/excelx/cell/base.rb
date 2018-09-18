@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require "roo/attr_reader_helper"
+require "roo/helpers/default_attr_reader"
 
 module Roo
   class Excelx
     class Cell
       class Base
-        extend Roo::AttrReaderHelper
+        extend Roo::Helpers::DefaultAttrReader
         attr_reader :cell_type, :cell_value, :value
 
         # FIXME: I think style should be deprecated. Having a style attribute

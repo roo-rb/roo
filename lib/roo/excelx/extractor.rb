@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
+require "roo/helpers/weak_instance_cache"
+
 module Roo
   class Excelx
     class Extractor
+      include Roo::Helpers::WeakInstanceCache
 
       COMMON_STRINGS = {
         t: "t",
@@ -21,9 +24,11 @@ module Roo
       private
 
       def doc
-        raise FileNotFound, "#{@path} file not found" unless doc_exists?
+        instance_cache(:@doc) do
+          raise FileNotFound, "#{@path} file not found" unless doc_exists?
 
-        ::Roo::Utils.load_xml(@path).remove_namespaces!
+          ::Roo::Utils.load_xml(@path).remove_namespaces!
+        end
       end
 
       def doc_exists?
