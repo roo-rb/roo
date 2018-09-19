@@ -4,7 +4,7 @@ module Roo
   class Excelx
     class Cell
       class Number < Cell::Base
-        attr_reader :value, :formula, :format, :cell_value, :link, :coordinate
+        attr_reader :value, :formula, :format, :cell_value, :coordinate
 
         # FIXME: change default_type to number. This will break brittle tests.
         attr_reader_with_default default_type: :float

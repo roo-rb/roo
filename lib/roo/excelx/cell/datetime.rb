@@ -8,7 +8,7 @@ module Roo
       class DateTime < Cell::Base
         SECONDS_IN_DAY = 60 * 60 * 24
 
-        attr_reader :value, :formula, :format, :cell_value, :link, :coordinate
+        attr_reader :value, :formula, :format, :cell_value, :coordinate
 
         attr_reader_with_default default_type: :datetime
 

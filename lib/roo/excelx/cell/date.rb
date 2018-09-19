@@ -4,7 +4,7 @@ module Roo
   class Excelx
     class Cell
       class Date < Roo::Excelx::Cell::DateTime
-        attr_reader :value, :formula, :format, :cell_type, :cell_value, :link, :coordinate
+        attr_reader :value, :formula, :format, :cell_type, :cell_value, :coordinate
 
         attr_reader_with_default default_type: :date
 
