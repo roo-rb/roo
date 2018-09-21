@@ -1,15 +1,18 @@
 module Roo
   class Excelx
-    class Coordinate
-      attr_accessor :row, :column
+    class Coordinate < ::Array
 
       def initialize(row, column)
-        @row = row
-        @column = column
+        super() << row << column
+        freeze
       end
 
-      def to_a
-        @array ||= [row, column].freeze
+      def row
+        self[0]
+      end
+
+      def column
+        self[1]
       end
     end
   end
