@@ -44,8 +44,7 @@ module Roo
           # If you're sure you're not going to need this hyperlinks you can discard it
           coordinate = ::Roo::Utils.extract_coordinate(cell_element[COMMON_STRINGS[:r]])
           hyperlinks = unless @options[:no_hyperlinks]
-                         key = coordinate.to_a
-                         hyperlinks(@relationships)[key]
+                         hyperlinks(@relationships)[coordinate]
                        end
 
           yield cell_from_xml(cell_element, hyperlinks, coordinate)
@@ -200,8 +199,7 @@ module Roo
         extracted_cells = {}
         doc.xpath('/worksheet/sheetData/row/c').each do |cell_xml|
           coordinate = ::Roo::Utils.extract_coordinate(cell_xml[COMMON_STRINGS[:r]])
-          key = coordinate.to_a
-          extracted_cells[key] = cell_from_xml(cell_xml, hyperlinks(relationships)[key], coordinate)
+          extracted_cells[coordinate] = cell_from_xml(cell_xml, hyperlinks(relationships)[coordinate], coordinate)
         end
 
         expand_merged_ranges(extracted_cells) if @options[:expand_merged_ranges]

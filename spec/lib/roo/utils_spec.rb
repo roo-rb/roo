@@ -52,6 +52,15 @@ RSpec.describe ::Roo::Utils do
     end
   end
 
+  context '.extract_coordinate' do
+    it "returns the expected result" do
+      expect(described_class.extract_coordinate('A1')).to eq [1, 1]
+      expect(described_class.extract_coordinate('B2')).to eq [2, 2]
+      expect(described_class.extract_coordinate('R2')).to eq [2, 18]
+      expect(described_class.extract_coordinate('AR31')).to eq [31, 18 + 26]
+    end
+  end
+
   context '.split_coord' do
     it "returns the expected result" do
       expect(described_class.split_coord('A1')).to eq ["A", 1]

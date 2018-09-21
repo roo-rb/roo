@@ -4,7 +4,7 @@ module Roo
 
     LETTERS = ('A'..'Z').to_a
 
-    def extract_coord(s, klass = Excelx::Coordinate)
+    def extract_coordinate(s)
       num = letter_num = 0
       num_only = false
 
@@ -22,20 +22,16 @@ module Roo
       end
       fail ArgumentError if letter_num == 0 || !num_only
 
-      if klass == Array
-        [num, letter_num]
-      else
-        klass.new(num, letter_num)
-      end
+      Excelx::Coordinate.new(num, letter_num)
     end
 
-    alias_method :extract_coordinate, :extract_coord
+    alias_method :ref_to_key, :extract_coordinate
 
     def split_coordinate(str)
-      extract_coord(str, Array)
+      warn "[DEPRECATION] `Roo::Utils.split_coordinate` is deprecated.  Please use `Roo::Utils.extract_coordinate` instead."
+      extract_coordinate(str)
     end
 
-    alias_method :ref_to_key, :split_coordinate
 
 
     def split_coord(str)
@@ -72,8 +68,8 @@ module Roo
       cells = str.split(':')
       return 1 if cells.count == 1
       raise ArgumentError.new("invalid range string: #{str}. Supported range format 'A1:B2'") if cells.count != 2
-      x1, y1 = split_coordinate(cells[0])
-      x2, y2 = split_coordinate(cells[1])
+      x1, y1 = extract_coordinate(cells[0])
+      x2, y2 = extract_coordinate(cells[1])
       (x2 - (x1 - 1)) * (y2 - (y1 - 1))
     end
 
