@@ -67,10 +67,10 @@ class Roo::Base
   end
 
   # sets the working sheet in the document
-  # 'sheet' can be a number (1 = first sheet) or the name of a sheet.
+  # 'sheet' can be a number (0 = first sheet) or the name of a sheet.
   def default_sheet=(sheet)
     validate_sheet!(sheet)
-    @default_sheet = sheet
+    @default_sheet = sheet.is_a?(String) ? sheet : sheets[sheet]
     @first_row[sheet] = @last_row[sheet] = @first_column[sheet] = @last_column[sheet] = nil
     @cells_read[sheet] = false
   end
@@ -569,7 +569,7 @@ class Roo::Base
     when nil
       fail ArgumentError, "Error: sheet 'nil' not valid"
     when Integer
-      sheets.fetch(sheet - 1) do
+      sheets.fetch(sheet) do
         fail RangeError, "sheet index #{sheet} not found"
       end
     when String

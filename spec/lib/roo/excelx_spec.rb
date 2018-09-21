@@ -151,6 +151,22 @@ describe Roo::Excelx do
     it 'returns the expected result' do
       expect(subject.sheet_for("Tabelle1").instance_variable_get("@name")).to eq "Tabelle1"
     end
+
+    it 'returns the expected result when passed a number' do
+      expect(subject.sheet_for(0).instance_variable_get("@name")).to eq "Tabelle1"
+    end
+
+    it 'returns the expected result when passed a number that is not the first sheet' do
+      expect(subject.sheet_for(1).instance_variable_get("@name")).to eq "Name of Sheet 2"
+    end
+
+    it "should raise an error if passed a sheet that does not exist as an integer" do
+      expect { subject.sheet_for(10) }.to raise_error RangeError
+    end
+
+    it "should raise an error if passed a sheet that does not exist as a string" do
+      expect { subject.sheet_for("does_not_exist") }.to raise_error RangeError
+    end
   end
 
   describe '#row' do
