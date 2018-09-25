@@ -21,7 +21,12 @@ module Roo
       end
 
       def hyperlinks(relationships)
-        @hyperlinks ||= extract_hyperlinks(relationships)
+        # If you're sure you're not going to need this hyperlinks you can discard it
+        @hyperlinks ||= if @options[:no_hyperlinks]
+          {}
+        else
+          extract_hyperlinks(relationships)
+        end
       end
 
       # Get the dimensions for the sheet.
@@ -41,11 +46,8 @@ module Roo
       def each_cell(row_xml)
         return [] unless row_xml
         row_xml.children.each do |cell_element|
-          # If you're sure you're not going to need this hyperlinks you can discard it
           coordinate = ::Roo::Utils.extract_coordinate(cell_element[COMMON_STRINGS[:r]])
-          hyperlinks = unless @options[:no_hyperlinks]
-                         hyperlinks(@relationships)[coordinate]
-                       end
+          hyperlinks = hyperlinks(@relationships)[coordinate]
 
           yield cell_from_xml(cell_element, hyperlinks, coordinate)
         end
