@@ -154,9 +154,9 @@ describe Roo::Base do
     end
 
     context 'without a matching header row' do
-      it 'raises an error' do
+      it 'raises an error with missing headers' do
         expect { spreadsheet.row_with([/Missing Header/]) }.to \
-          raise_error(Roo::HeaderRowNotFoundError)
+          raise_error(Roo::HeaderRowNotFoundError, /Missing Header/)
       end
     end
   end
