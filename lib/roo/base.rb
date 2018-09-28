@@ -308,18 +308,22 @@ class Roo::Base
 
   def row_with(query, return_headers = false)
     line_no = 0
+    closest_mismatched_headers = []
     each do |row|
       line_no += 1
       headers = query.map { |q| row.grep(q)[0] }.compact
-
       if headers.length == query.length
         @header_line = line_no
         return return_headers ? headers : line_no
-      elsif line_no > 100
-        raise Roo::HeaderRowNotFoundError
+      else
+        closest_mismatched_headers = headers if headers.length > closest_mismatched_headers.length
+        if line_no > 100
+          break
+        end
       end
     end
-    raise Roo::HeaderRowNotFoundError
+    missing_headers = query.select { |q| closest_mismatched_headers.grep(q).empty? }
+    raise Roo::HeaderRowNotFoundError, missing_headers
   end
 
   protected
