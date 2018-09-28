@@ -322,7 +322,7 @@ class Roo::Base
         end
       end
     end
-    missing_headers = query.select{ |q| closest_mismatched_headers.grep(q).empty?}
+    missing_headers = query.select { |q| closest_mismatched_headers.grep(q).empty? }
     raise Roo::HeaderRowNotFoundError, missing_headers
   end
 

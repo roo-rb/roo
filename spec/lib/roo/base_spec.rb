@@ -161,7 +161,7 @@ describe Roo::Base do
 
       it 'returns missing headers' do
         expect { spreadsheet.row_with([/Header/, /Missing Header 1/, /Missing Header 2/]) }.to \
-          raise_error(Roo::HeaderRowNotFoundError, /(?=.*Missing Header 1)(?=.*Missing Header 2)/)
+          raise_error(Roo::HeaderRowNotFoundError, '[/Missing Header 1/, /Missing Header 2/]')
       end
     end
   end
