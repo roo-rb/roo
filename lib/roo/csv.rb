@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "csv"
 require "time"
 
@@ -63,25 +65,31 @@ module Roo
     def read_cells(sheet = default_sheet)
       sheet ||= default_sheet
       return if @cells_read[sheet]
-      set_row_count(sheet)
-      set_column_count(sheet)
-      row_num = 1
+      row_num = 0
+      max_col_num = 0
 
       each_row csv_options do |row|
-        row.each_with_index do |elem, col_num|
-          coordinate = [row_num, col_num + 1]
+        row_num += 1
+        col_num = 0
+
+        row.each do |elem|
+          col_num += 1
+          coordinate = [row_num, col_num]
           @cell[coordinate] = elem
           @cell_type[coordinate] = celltype_class(elem)
         end
-        row_num += 1
+
+        max_col_num = col_num if col_num > max_col_num
       end
 
+      set_row_count(sheet, row_num)
+      set_column_count(sheet, max_col_num)
       @cells_read[sheet] = true
     end
 
     def each_row(options, &block)
       if uri?(filename)
-        each_row_using_temp_dir(filename)
+        each_row_using_tempdir(options, &block)
       elsif is_stream?(filename_or_stream)
         ::CSV.new(filename_or_stream, options).each(&block)
       else
@@ -89,24 +97,24 @@ module Roo
       end
     end
 
-    def each_row_using_tempdir
+    def each_row_using_tempdir(options, &block)
       ::Dir.mktmpdir(Roo::TEMP_PREFIX, ENV["ROO_TMP"]) do |tmpdir|
         tmp_filename = download_uri(filename, tmpdir)
         ::CSV.foreach(tmp_filename, options, &block)
       end
     end
 
-    def set_row_count(sheet)
+    def set_row_count(sheet, last_row)
       @first_row[sheet] = 1
-      @last_row[sheet] = ::CSV.readlines(@filename, csv_options).size
+      @last_row[sheet] = last_row
       @last_row[sheet] = @first_row[sheet] if @last_row[sheet].zero?
 
       nil
     end
 
-    def set_column_count(sheet)
+    def set_column_count(sheet, last_col)
       @first_column[sheet] = 1
-      @last_column[sheet] = (::CSV.readlines(@filename, csv_options).max_by(&:length) || []).size
+      @last_column[sheet] = last_col
       @last_column[sheet] = @first_column[sheet] if @last_column[sheet].zero?
 
       nil
