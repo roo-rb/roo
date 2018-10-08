@@ -81,8 +81,9 @@ module Roo
 
     # Yield each element of a given type ('row', 'c', etc.) to caller
     def each_element(path, elements)
+      elements = Array(elements)
       Nokogiri::XML::Reader(::File.open(path, 'rb'), nil, nil, Nokogiri::XML::ParseOptions::NOBLANKS).each do |node|
-        next unless node.node_type == Nokogiri::XML::Reader::TYPE_ELEMENT && Array(elements).include?(node.name)
+        next unless node.node_type == Nokogiri::XML::Reader::TYPE_ELEMENT && elements.include?(node.name)
         yield Nokogiri::XML(node.outer_xml).root if block_given?
       end
     end
