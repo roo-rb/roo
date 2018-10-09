@@ -25,13 +25,10 @@ class Roo::Base
   # sets the line with attribute names (default: 1)
   attr_accessor :header_line
 
-  def self.TEMP_PREFIX
-    warn "[DEPRECATION] please access TEMP_PREFIX via Roo::TEMP_PREFIX"
-    Roo::TEMP_PREFIX
-  end
-
-  def self.finalize(object_id)
-    proc { finalize_tempdirs(object_id) }
+  class << self
+    def finalize(object_id)
+      proc { finalize_tempdirs(object_id) }
+    end
   end
 
   def initialize(filename, options = {}, _file_warning = :error, _tmpdir = nil)
