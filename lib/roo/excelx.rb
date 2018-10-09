@@ -40,8 +40,9 @@ module Roo
       sheet_options = {}
       sheet_options[:expand_merged_ranges] = (options[:expand_merged_ranges] || false)
       sheet_options[:no_hyperlinks] = (options[:no_hyperlinks] || false)
+      sheet_options[:empty_cells] = (options[:empty_cells] || false)
       shared_options = {}
-        
+
       shared_options[:disable_html_wrapper] = (options[:disable_html_wrapper] || false)
       unless is_stream?(filename_or_stream)
         file_type_check(filename_or_stream, %w[.xlsx .xlsm], 'an Excel 2007', file_warning, packed)
