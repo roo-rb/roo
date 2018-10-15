@@ -15,7 +15,7 @@ class TestRooCSV < Minitest::Test
 
   def test_download_uri_with_query_string
     file = filename("simple_spreadsheet")
-    port = 12_344
+    port = 12_347
     url = "#{local_server(port)}/#{file}?query-param=value"
 
     start_local_server(file, port) do
