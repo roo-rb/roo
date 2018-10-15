@@ -14,7 +14,7 @@ module Roo
 
         def initialize(value, formula, excelx_type, style, link, base_timestamp, coordinate)
           super(value, formula, excelx_type, style, nil, coordinate)
-          @format = excelx_type.last
+          @format = excelx_type
           @value = link ? Roo::Link.new(link, value) : create_datetime(base_timestamp, value)
         end
 

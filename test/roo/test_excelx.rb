@@ -243,11 +243,11 @@ class TestRworkbookExcelx < Minitest::Test
 
   def test_simple2_excelx
     with_each_spreadsheet(name: "simple_spreadsheet", format: :excelx) do |workbook|
-      assert_equal [:numeric_or_formula, "yyyy\\-mm\\-dd"], workbook.excelx_type("A", 4)
-      assert_equal [:numeric_or_formula, "#,##0.00"], workbook.excelx_type("B", 4)
-      assert_equal [:numeric_or_formula, "#,##0.00"], workbook.excelx_type("c", 4)
-      assert_equal [:numeric_or_formula, "General"], workbook.excelx_type("d", 4)
-      assert_equal [:numeric_or_formula, "General"], workbook.excelx_type("e", 4)
+      assert_equal "yyyy\\-mm\\-dd", workbook.excelx_type("A", 4)
+      assert_equal "#,##0.00", workbook.excelx_type("B", 4)
+      assert_equal "#,##0.00", workbook.excelx_type("c", 4)
+      assert_equal "General", workbook.excelx_type("d", 4)
+      assert_equal "General", workbook.excelx_type("e", 4)
       assert_equal :string, workbook.excelx_type("f", 4)
 
       assert_equal "39209", workbook.excelx_value("a", 4)

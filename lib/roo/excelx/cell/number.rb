@@ -12,7 +12,7 @@ module Roo
         def initialize(value, formula, excelx_type, style, link, coordinate)
           super
           # FIXME: Excelx_type is an array, but the first value isn't used.
-          @format = excelx_type.last
+          @format = excelx_type
           @value = link ? Roo::Link.new(link, value) : create_numeric(value)
         end
 

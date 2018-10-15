@@ -14,25 +14,25 @@ class TestRooExcelxCellDate < Minitest::Test
   end
 
   def test_handles_1904_base_date
-    cell = date_cell.new('41791', nil, [:numeric_or_formula, 'mm-dd-yy'], 6, nil, base_date_1904, nil)
+    cell = date_cell.new('41791', nil, 'mm-dd-yy', 6, nil, base_date_1904, nil)
     assert_equal ::Date.new(2018, 06, 02), cell.value
   end
 
   def test_formatted_value
-    cell = date_cell.new('41791', nil, [:numeric_or_formula, 'mm-dd-yy'], 6, nil, base_date, nil)
+    cell = date_cell.new('41791', nil, 'mm-dd-yy', 6, nil, base_date, nil)
     assert_equal '06-01-14', cell.formatted_value
 
-    cell = date_cell.new('41791', nil, [:numeric_or_formula, 'yyyy-mm-dd'], 6, nil, base_date, nil)
+    cell = date_cell.new('41791', nil, 'yyyy-mm-dd', 6, nil, base_date, nil)
     assert_equal '2014-06-01', cell.formatted_value
   end
 
   def test_value_is_date
-    cell = date_cell.new('41791', nil, [:numeric_or_formula, 'mm-dd-yy'], 6, nil, base_date, nil)
+    cell = date_cell.new('41791', nil, 'mm-dd-yy', 6, nil, base_date, nil)
     assert_kind_of ::Date, cell.value
   end
 
   def test_value
-    cell = date_cell.new('41791', nil, [:numeric_or_formula, 'mm-dd-yy'], 6, nil, base_date, nil)
+    cell = date_cell.new('41791', nil, 'mm-dd-yy', 6, nil, base_date, nil)
     assert_equal ::Date.new(2014, 06, 01), cell.value
   end
 end

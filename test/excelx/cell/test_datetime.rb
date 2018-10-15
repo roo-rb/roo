@@ -19,7 +19,7 @@ class TestRooExcelxCellDateTime < Minitest::Test
       ['mmm-yy', 'JAN-15'],
       ['m/d/yy h:mm', '1/25/15 8:15']
     ].each do |format, formatted_value|
-      cell = datetime.new '42029.34375', nil, [format], nil, nil, base_timestamp, nil
+      cell = datetime.new '42029.34375', nil, format, nil, nil, base_timestamp, nil
       assert_equal formatted_value, cell.formatted_value
     end
   end
@@ -30,7 +30,7 @@ class TestRooExcelxCellDateTime < Minitest::Test
       ['h:mm:ss000 mm/yy', '8:15:00000 01/15'],
       ['mmm yyy', '2015-01-25 08:15:00']
     ].each do |format, formatted_value|
-      cell = datetime.new '42029.34375', nil, [format], nil, nil, base_timestamp, nil
+      cell = datetime.new '42029.34375', nil, format, nil, nil, base_timestamp, nil
       assert_equal formatted_value, cell.formatted_value
     end
   end

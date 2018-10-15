@@ -124,7 +124,7 @@ module Roo
         # NOTE: format.to_s can replace excelx_type as an argument for
         #       Cell::Time, Cell::DateTime, Cell::Date or Cell::Number, but
         #       it will break some brittle tests.
-        excelx_type = [:numeric_or_formula, format.to_s]
+        excelx_type = format.to_s
 
         # NOTE: There are only a few situations where value != cell.content
         #       1. when a sharedString is used. value = sharedString;

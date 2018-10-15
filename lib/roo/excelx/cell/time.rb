@@ -11,7 +11,7 @@ module Roo
         def initialize(value, formula, excelx_type, style, link, base_date, coordinate)
           # NOTE: Pass all arguments to DateTime super class.
           super
-          @format = excelx_type.last
+          @format = excelx_type
           @datetime = create_datetime(base_date, value)
           @value = link ? Roo::Link.new(link, value) : (value.to_f * 86_400).to_i
         end
