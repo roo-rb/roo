@@ -269,7 +269,7 @@ EOS
     end
 
     it 'should convert the spreadsheet to csv using the separator when is passed on the parameter' do
-      expect(spreadsheet.to_csv(nil, ';')).to eq(expected_csv_with_semicolons)
+      expect(spreadsheet.to_csv(separator: ';')).to eq(expected_csv_with_semicolons)
     end
   end
 end

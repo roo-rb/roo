@@ -1,7 +1,7 @@
 module Roo
   module Formatters
     module CSV
-      def to_csv(filename = nil, separator = ",", sheet = default_sheet)
+      def to_csv(filename = nil, separator: ",", sheet: default_sheet)
         if filename
           File.open(filename, "w") do |file|
             write_csv_content(file, sheet, separator)
