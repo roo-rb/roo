@@ -121,9 +121,6 @@ module Roo
       end
 
       def create_cell_from_value(value_type, cell, formula, format, style, hyperlink, coordinate)
-        # NOTE: format.to_s can replace excelx_type as an argument for
-        #       Cell::Time, Cell::DateTime, Cell::Date or Cell::Number, but
-        #       it will break some brittle tests.
         excelx_type = format.to_s
 
         # NOTE: There are only a few situations where value != cell.content
