@@ -219,7 +219,7 @@ class TestRworkbookExcelx < Minitest::Test
       assert_equal "Bericht aus dem Sekretariat", workbook.cell(13, 1)
       assert_equal "1981-4", workbook.cell(13, "D")
       assert_equal String, workbook.excelx_type(13, "E")[1].class
-      assert_equal [:numeric_or_formula, "General"], workbook.excelx_type(13, "E")
+      assert_equal "General", workbook.excelx_type(13, "E")
       assert_equal "428", workbook.excelx_value(13, "E")
       assert_equal 428.0, workbook.cell(13, "E")
     end

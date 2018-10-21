@@ -44,9 +44,9 @@ class TestAttrReaderDefault < Minitest::Test
   def test_cell_default_values
     assert_values base.new(nil, nil, [], 1, nil, nil), default_type: :base, :@default_type => nil, style: 1, :@style => nil
     assert_values boolean.new("1", nil, nil, nil, nil), default_type: :boolean, :@default_type => nil, cell_type: :boolean, :@cell_type => nil
-    assert_values class_date.new("41791", nil, [:numeric_or_formula, "mm-dd-yy"], 6, nil, base_date, nil), default_type: :date, :@default_type => nil
-    assert_values class_time.new("0.521", nil, [:numeric_or_formula, "hh:mm"], 6, nil, base_timestamp, nil), default_type: :time, :@default_type => nil
-    assert_values datetime.new("41791.521", nil, [:numeric_or_formula, "mm-dd-yy hh:mm"], 6, nil, base_timestamp, nil), default_type: :datetime, :@default_type => nil
+    assert_values class_date.new("41791", nil, "mm-dd-yy", 6, nil, base_date, nil), default_type: :date, :@default_type => nil
+    assert_values class_time.new("0.521", nil, "hh:mm", 6, nil, base_timestamp, nil), default_type: :time, :@default_type => nil
+    assert_values datetime.new("41791.521", nil, "mm-dd-yy hh:mm", 6, nil, base_timestamp, nil), default_type: :datetime, :@default_type => nil
     assert_values empty.new(nil), default_type: nil, :@default_type => nil, style: nil, :@style => nil
     assert_values number.new("42", nil, ["0"], nil, nil, nil), default_type: :float, :@default_type => nil
     assert_values string.new("1", nil, nil, nil, nil), default_type: :string, :@default_type => nil, cell_type: :string, :@cell_type => nil

@@ -288,7 +288,7 @@ describe Roo::Excelx do
     let(:path) { 'test/files/numbers1.xlsx' }
 
     it 'returns the expected result' do
-      expect(subject.excelx_type(1, 1, "Sheet5")).to eq [:numeric_or_formula, "General"]
+      expect(subject.excelx_type(1, 1, "Sheet5")).to eq "General"
       expect(subject.excelx_type(6, 2, "Sheet5")).to eq :string
       expect(subject.excelx_type(1000, 2000, "Sheet5")).to eq nil
     end
@@ -498,7 +498,7 @@ describe Roo::Excelx do
   describe '#html_strings' do
     describe "HTML Parsing Enabling" do
       let(:path) { 'test/files/html_strings_formatting.xlsx' }
-  
+
       it 'returns the expected result' do
         expect(subject.excelx_value(1, 1, "Sheet1")).to eq("This has no formatting.")
         expect(subject.excelx_value(2, 1, "Sheet1")).to eq("<html>This has<b> bold </b>formatting.</html>")
@@ -506,7 +506,7 @@ describe Roo::Excelx do
         expect(subject.excelx_value(2, 3, "Sheet1")).to eq("<html>This has <u>underline</u> format.</html>")
         expect(subject.excelx_value(2, 4, "Sheet1")).to eq("<html>Superscript. x<sup>123</sup></html>")
         expect(subject.excelx_value(2, 5, "Sheet1")).to eq("<html>SubScript.  T<sub>j</sub></html>")
-  
+
         expect(subject.excelx_value(3, 1, "Sheet1")).to eq("<html>Bold, italics <b><i>together</i></b>.</html>")
         expect(subject.excelx_value(3, 2, "Sheet1")).to eq("<html>Bold, Underline <b><u>together</u></b>.</html>")
         expect(subject.excelx_value(3, 3, "Sheet1")).to eq("<html>Bold, Superscript. <b>x</b><sup><b>N</b></sup></html>")
@@ -575,7 +575,7 @@ describe 'Roo::Excelx with options set' do
   describe '#html_strings' do
     describe "HTML Parsing Disabled" do
       let(:path) { 'test/files/html_strings_formatting.xlsx' }
-  
+
       it 'returns the expected result' do
         expect(subject.excelx_value(1, 1, "Sheet1")).to eq("This has no formatting.")
         expect(subject.excelx_value(2, 1, "Sheet1")).to eq("This has bold formatting.")
@@ -583,7 +583,7 @@ describe 'Roo::Excelx with options set' do
         expect(subject.excelx_value(2, 3, "Sheet1")).to eq("This has underline format.")
         expect(subject.excelx_value(2, 4, "Sheet1")).to eq("Superscript. x123")
         expect(subject.excelx_value(2, 5, "Sheet1")).to eq("SubScript.  Tj")
-  
+
         expect(subject.excelx_value(3, 1, "Sheet1")).to eq("Bold, italics together.")
         expect(subject.excelx_value(3, 2, "Sheet1")).to eq("Bold, Underline together.")
         expect(subject.excelx_value(3, 3, "Sheet1")).to eq("Bold, Superscript. xN")

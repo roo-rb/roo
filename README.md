@@ -199,7 +199,7 @@ end
 
 ```ruby
 xlsx.excelx_type(3, 'C')
-# => :numeric_or_formula
+# => "mm-dd-yy hh:mm"
 
 xlsx.cell(3, 'C')
 # => 600000383.0
