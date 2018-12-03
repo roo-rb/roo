@@ -85,10 +85,10 @@ module Roo
       #    # => <Excelx::Cell::String>
       #
       # Returns a type of <Excelx::Cell>.
-      def cell_from_xml(cell_xml, hyperlink, coordinate = nil)
+      def cell_from_xml(cell_xml, hyperlink, coordinate, empty_cell=true)
         coordinate ||= ::Roo::Utils.extract_coordinate(cell_xml[COMMON_STRINGS[:r]])
         cell_xml_children = cell_xml.children
-        return Excelx::Cell::Empty.new(coordinate) if cell_xml_children.empty?
+        return create_empty_cell(coordinate, empty_cell) if cell_xml_children.empty?
 
         # NOTE: This is error prone, to_i will silently turn a nil into a 0.
         #       This works by coincidence because Format[0] is General.
@@ -117,7 +117,13 @@ module Roo
           end
         end
 
-        Excelx::Cell::Empty.new(coordinate)
+        create_empty_cell(coordinate)
+      end
+
+      def create_empty_cell(coordinate, empty_cell)
+        if empty_cell
+          Excelx::Cell::Empty.new(coordinate)
+        end
       end
 
       def create_cell_from_value(value_type, cell, formula, format, style, hyperlink, coordinate)
@@ -199,9 +205,12 @@ module Roo
 
       def extract_cells(relationships)
         extracted_cells = {}
+        empty_cell = @options[:empty_cell]
+
         doc.xpath('/worksheet/sheetData/row/c').each do |cell_xml|
           coordinate = ::Roo::Utils.extract_coordinate(cell_xml[COMMON_STRINGS[:r]])
-          extracted_cells[coordinate] = cell_from_xml(cell_xml, hyperlinks(relationships)[coordinate], coordinate)
+          cell = cell_from_xml(cell_xml, hyperlinks(relationships)[coordinate], coordinate, empty_cell)
+          extracted_cells[coordinate] = cell if cell
         end
 
         expand_merged_ranges(extracted_cells) if @options[:expand_merged_ranges]
