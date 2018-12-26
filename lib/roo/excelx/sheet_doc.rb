@@ -46,7 +46,7 @@ module Roo
       def each_cell(row_xml)
         return [] unless row_xml
         row_xml.children.each do |cell_element|
-          coordinate = ::Roo::Utils.extract_coordinate(cell_element[COMMON_STRINGS[:r]])
+          coordinate = ::Roo::Utils.extract_coordinate(cell_element["r"])
           hyperlinks = hyperlinks(@relationships)[coordinate]
 
           yield cell_from_xml(cell_element, hyperlinks, coordinate)
@@ -86,13 +86,13 @@ module Roo
       #
       # Returns a type of <Excelx::Cell>.
       def cell_from_xml(cell_xml, hyperlink, coordinate, empty_cell=true)
-        coordinate ||= ::Roo::Utils.extract_coordinate(cell_xml[COMMON_STRINGS[:r]])
+        coordinate ||= ::Roo::Utils.extract_coordinate(cell_xml["r"])
         cell_xml_children = cell_xml.children
         return create_empty_cell(coordinate, empty_cell) if cell_xml_children.empty?
 
         # NOTE: This is error prone, to_i will silently turn a nil into a 0.
         #       This works by coincidence because Format[0] is General.
-        style = cell_xml[COMMON_STRINGS[:s]].to_i
+        style = cell_xml["s"].to_i
         formula = nil
 
         cell_xml_children.each do |cell|
@@ -111,7 +111,7 @@ module Roo
             formula = cell.content
           when 'v'
             format = style_format(style)
-            value_type = cell_value_type(cell_xml[COMMON_STRINGS[:t]], format)
+            value_type = cell_value_type(cell_xml["t"], format)
 
             return create_cell_from_value(value_type, cell, formula, format, style, hyperlink, coordinate)
           end
@@ -180,7 +180,7 @@ module Roo
 
         Hash[hyperlinks.map do |hyperlink|
           if hyperlink.attribute('id') && (relationship = relationships[hyperlink.attribute('id').text])
-            [::Roo::Utils.ref_to_key(hyperlink.attributes[COMMON_STRINGS[:ref]].to_s), relationship.attribute('Target').text]
+            [::Roo::Utils.ref_to_key(hyperlink.attributes["ref"].to_s), relationship.attribute('Target').text]
           end
         end.compact]
       end
@@ -189,7 +189,7 @@ module Roo
         # Extract merged ranges from xml
         merges = {}
         doc.xpath('/worksheet/mergeCells/mergeCell').each do |mergecell_xml|
-          tl, br = mergecell_xml[COMMON_STRINGS[:ref]].split(/:/).map { |ref| ::Roo::Utils.ref_to_key(ref) }
+          tl, br = mergecell_xml["ref"].split(/:/).map { |ref| ::Roo::Utils.ref_to_key(ref) }
           for row in tl[0]..br[0] do
             for col in tl[1]..br[1] do
               next if row == tl[0] && col == tl[1]
@@ -208,7 +208,7 @@ module Roo
         empty_cell = @options[:empty_cell]
 
         doc.xpath('/worksheet/sheetData/row/c').each do |cell_xml|
-          coordinate = ::Roo::Utils.extract_coordinate(cell_xml[COMMON_STRINGS[:r]])
+          coordinate = ::Roo::Utils.extract_coordinate(cell_xml["r"])
           cell = cell_from_xml(cell_xml, hyperlinks(relationships)[coordinate], coordinate, empty_cell)
           extracted_cells[coordinate] = cell if cell
         end
@@ -220,7 +220,7 @@ module Roo
 
       def extract_dimensions
         Roo::Utils.each_element(@path, 'dimension') do |dimension|
-          return dimension.attributes[COMMON_STRINGS[:ref]].value
+          return dimension.attributes["ref"].value
         end
       end
 
