@@ -4,6 +4,7 @@ rvm:
   - 2.3
   - 2.4
   - 2.5
+  - 2.6
   - ruby-head
   - jruby-9.1.6.0
 env:
@@ -14,7 +15,13 @@ matrix:
       gemfile: Gemfile_ruby2
     - rvm: 2.1
       gemfile: Gemfile_ruby2
+    - rvm: 2.6
+      env: RUBYOPT=--jit LONG_RUN=true
+    - rvm: ruby-head
+      env: RUBYOPT=--jit LONG_RUN=true
   allow_failures:
     - rvm: ruby-head
+    - rvm: ruby-head
+      env: RUBYOPT=--jit LONG_RUN=true
     - rvm: jruby-9.1.6.0
 bundler_args: --without local_development
