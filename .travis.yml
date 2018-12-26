@@ -17,7 +17,11 @@ matrix:
       gemfile: Gemfile_ruby2
     - rvm: 2.6
       env: RUBYOPT=--jit LONG_RUN=true
+    - rvm: ruby-head
+      env: RUBYOPT=--jit LONG_RUN=true
   allow_failures:
     - rvm: ruby-head
+    - rvm: ruby-head
+      env: RUBYOPT=--jit LONG_RUN=true
     - rvm: jruby-9.1.6.0
 bundler_args: --without local_development
