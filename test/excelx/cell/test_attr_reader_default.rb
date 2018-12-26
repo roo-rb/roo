@@ -57,7 +57,7 @@ class TestAttrReaderDefault < Minitest::Test
   def assert_values(object, value_hash)
     value_hash.each do |attr_name, expected_value|
       value = if attr_name.to_s.include?("@")
-                object.instance_variable_get(attr_name)
+                object.instance_variable_defined?(attr_name) ? object.instance_variable_get(attr_name) : nil
               else
                 object.public_send(attr_name)
       end
