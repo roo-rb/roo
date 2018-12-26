@@ -10,7 +10,7 @@ module Roo
       def instance_cache(key)
         object = nil
 
-        if (ref = instance_variable_get(key)) && ref.weakref_alive?
+        if instance_variable_defined?(key) && (ref = instance_variable_get(key)) && ref.weakref_alive?
           begin
             object = ref.__getobj__
           rescue => e

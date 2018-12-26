@@ -58,7 +58,7 @@ module Roo
         end
 
         def formula?
-          !!@formula
+          !!(defined?(@formula) && @formula)
         end
 
         def link?
