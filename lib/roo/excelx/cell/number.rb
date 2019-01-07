@@ -24,7 +24,7 @@ module Roo
           when /\.0/
             Float(number)
           else
-            (number.include?('.') || (/\A[-+]?\d+E[-+]?\d+\z/i =~ number)) ? Float(number) : Integer(number)
+            (number.include?('.') || (/\A[-+]?\d+E[-+]?\d+\z/i =~ number)) ? Float(number) : Integer(number, 10)
           end
         end
 
