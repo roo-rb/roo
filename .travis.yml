@@ -1,6 +1,5 @@
 language: ruby
 rvm:
-  - 2.2
   - 2.3
   - 2.4
   - 2.5
@@ -11,14 +10,6 @@ env:
   - LONG_RUN=true
 matrix:
   include:
-    - rvm: 2.0
-      gemfile: Gemfile_ruby2
-      before_install:
-        - gem install bundler -v '< 2'
-    - rvm: 2.1
-      gemfile: Gemfile_ruby2
-      before_install:
-        - gem install bundler -v '< 2'
     - rvm: 2.6
       env: RUBYOPT=--jit LONG_RUN=true
     - rvm: ruby-head

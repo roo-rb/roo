@@ -40,8 +40,7 @@ module Roo
       end
 
       def self.create_cell(type, *values)
-        type_class = cell_class(type)
-        type_class && type_class.new(*values)
+        cell_class(type)&.new(*values)
       end
 
       def self.cell_class(type)

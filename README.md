@@ -288,9 +288,6 @@ You can run the tests/examples with Rspec like reporters by running
 Roo also has a few tests that take a long time (5+ seconds). To run these, use
 `LONG_RUN=true bundle exec rake`
 
-When testing using Ruby 2.0 or 2.1, use this command:
-`BUNDLE_GEMFILE=Gemfile_ruby2 bundle exec rake`
-
 ### Issues
 
 If you find an issue, please create a gist and refer to it in an issue ([sample gist](https://gist.github.com/stevendaniels/98a05849036e99bb8b3c)). Here are some instructions for creating such a gist.

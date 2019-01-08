@@ -27,11 +27,9 @@ module Roo
           warn %{
 [DEPRECATION] present_cells is deprecated. Alternate:
   with activesupport    => cells[key].presence
-  without activesupport
-    (ruby -v >= 2.3)      => cells[key]&.presence
-    (ruby -v < 2.3)       => (cell = cells[key]) && cell.presence
+  without activesupport => cells[key]&.presence
           }
-          cells.select { |_, cell| cell && cell.presence }
+          cells.select { |_, cell| cell&.presence }
         end
       end
 
@@ -52,15 +50,13 @@ module Roo
 
       def row(row_number)
         first_column.upto(last_column).map do |col|
-          cell = cells[[row_number, col]]
-          cell && cell.value
+          cells[[row_number, col]]&.value
         end
       end
 
       def column(col_number)
         first_row.upto(last_row).map do |row|
-          cell = cells[[row, col_number]]
-          cell && cell.value
+          cells[[row, col_number]]&.value
         end
       end
 
@@ -128,7 +124,7 @@ module Roo
           first_row = last_row = first_col = last_col = nil
 
           cells.each do |(row, col), cell|
-            next unless cell && cell.presence
+            next unless cell&.presence
             first_row ||= row
             last_row ||= row
             first_col ||= col
