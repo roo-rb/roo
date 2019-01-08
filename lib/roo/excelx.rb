@@ -464,7 +464,7 @@ module Roo
     end
 
     def safe_send(object, method, *args)
-      object.send(method, *args) if object && object.respond_to?(method)
+      object.send(method, *args) if object&.respond_to?(method)
     end
 
     def worksheet_types

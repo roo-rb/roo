@@ -98,7 +98,7 @@ module Roo
         cell_xml_children.each do |cell|
           case cell.name
           when 'is'
-            content = String.new
+            content = +""
             cell.children.each do |inline_str|
               if inline_str.name == 't'
                 content << inline_str.content
