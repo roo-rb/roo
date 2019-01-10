@@ -178,13 +178,13 @@ module Roo
       def extract_hyperlinks(relationships)
         return {} unless (hyperlinks = doc.xpath('/worksheet/hyperlinks/hyperlink'))
 
-        Hash[hyperlinks.map do |hyperlink|
-          if hyperlink['id'] && (relationship = relationships[hyperlink['id']])
+        hyperlinks.each_with_object({}) do |hyperlink, hash|
+          if relationship = relationships[hyperlink['id']]
             target_link = relationship['Target']
             target_link += "##{hyperlink['location']}" if hyperlink['location']
-            [::Roo::Utils.ref_to_key(hyperlink['ref']), target_link]
+            hash[::Roo::Utils.ref_to_key(hyperlink.attributes["ref"].to_s)] = target_link
           end
-        end.compact]
+        end
       end
 
       def expand_merged_ranges(cells)

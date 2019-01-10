@@ -288,12 +288,12 @@ class Roo::Base
       clean_sheet_if_need(options)
       search_or_set_header(options)
       headers = @headers ||
-                Hash[(first_column..last_column).map do |col|
-                  [cell(@header_line, col), col]
-                end]
+                (first_column..last_column).each_with_object({}) do |col, hash|
+                  hash[cell(@header_line, col)] = col
+                end
 
       @header_line.upto(last_row) do |line|
-        yield(Hash[headers.map { |k, v| [k, cell(line, v)] }])
+        yield(headers.each_with_object({}) { |(k, v), hash| hash[k] = cell(line, v) })
       end
     end
   end
@@ -424,9 +424,9 @@ class Roo::Base
 
   def find_by_conditions(options)
     rows = first_row.upto(last_row)
-    header_for = Hash[1.upto(last_column).map do |col|
-      [col, cell(@header_line, col)]
-    end]
+    header_for = 1.upto(last_column).each_with_object({}) do |col, hash|
+      hash[col] = cell(@header_line, col)
+    end
 
     # are all conditions met?
     conditions = options[:conditions]
@@ -441,9 +441,9 @@ class Roo::Base
       rows.map { |i| row(i) }
     else
       rows.map do |i|
-        Hash[1.upto(row(i).size).map do |j|
-          [header_for.fetch(j), cell(i, j)]
-        end]
+        1.upto(row(i).size).each_with_object({}) do |j, hash|
+          hash[header_for.fetch(j)] = cell(i, j)
+        end
       end
     end
   end
@@ -497,8 +497,11 @@ class Roo::Base
   def set_headers(hash = {})
     # try to find header row with all values or give an error
     # then create new hash by indexing strings and keeping integers for header array
-    @headers = row_with(hash.values, true)
-    @headers = Hash[hash.keys.zip(@headers.map { |x| header_index(x) })]
+    header_row = row_with(hash.values, true)
+    @headers = {}
+    hash.each_with_index do |(key, _), index|
+      @headers[key] = header_index(header_row[index])
+    end
   end
 
   def header_index(query)

@@ -563,7 +563,7 @@ module Roo
     end
 
     def read_labels
-      @label ||= Hash[doc.xpath('//table:named-range').map do |ne|
+      @label ||= doc.xpath('//table:named-range').each_with_object({}) do |ne, hash|
         #-
         # $Sheet1.$C$5
         #+
@@ -571,8 +571,8 @@ module Roo
         sheetname, coords = attribute(ne, 'cell-range-address').to_s.split('.$')
         col, row          = coords.split('$')
         sheetname         = sheetname[1..-1] if sheetname[0, 1] == '$'
-        [name, [sheetname, row, col]]
-      end]
+        hash[name] = [sheetname, row, col]
+      end
     end
 
     def read_styles(style_elements)
