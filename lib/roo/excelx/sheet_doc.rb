@@ -179,8 +179,10 @@ module Roo
         return {} unless (hyperlinks = doc.xpath('/worksheet/hyperlinks/hyperlink'))
 
         Hash[hyperlinks.map do |hyperlink|
-          if hyperlink.attribute('id') && (relationship = relationships[hyperlink.attribute('id').text])
-            [::Roo::Utils.ref_to_key(hyperlink.attributes["ref"].to_s), relationship.attribute('Target').text]
+          if hyperlink['id'] && (relationship = relationships[hyperlink['id']])
+            target_link = relationship['Target']
+            target_link += "##{hyperlink['location']}" if hyperlink['location']
+            [::Roo::Utils.ref_to_key(hyperlink['ref']), target_link]
           end
         end.compact]
       end

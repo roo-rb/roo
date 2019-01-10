@@ -382,11 +382,22 @@ describe Roo::Excelx do
   end
 
   describe '#hyperlink' do
-    let(:path) { 'test/files/link.xlsx' }
+    context 'without location' do
+      let(:path) { 'test/files/link.xlsx' }
 
-    it 'returns the expected result' do
-      expect(subject.hyperlink(1, 1)).to eq "http://www.google.com"
-      expect(subject.hyperlink(1, 2)).to eq nil
+      it 'returns the expected result' do
+        expect(subject.hyperlink(1, 1)).to eq "http://www.google.com"
+        expect(subject.hyperlink(1, 2)).to eq nil
+      end
+    end
+
+    context 'with location' do
+      let(:path) { 'test/files/link_with_location.xlsx' }
+
+      it 'returns the expected result' do
+        expect(subject.hyperlink(1, 1)).to eq "http://www.google.com/#hey"
+        expect(subject.hyperlink(1, 2)).to eq nil
+      end
     end
   end
 
