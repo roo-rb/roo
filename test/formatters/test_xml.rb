@@ -16,7 +16,7 @@ class TestRooFormatterXML < Minitest::Test
         all_cells = init_all_cells(workbook, sheetname)
         cells = xml_sheet.children.reject(&:text?)
 
-        assert_equal sheetname, xml_sheet.attribute("name").value
+        assert_equal sheetname, xml_sheet["name"]
         assert_equal all_cells.size, cells.size
 
         cells.each_with_index do |cell, i|
@@ -27,10 +27,10 @@ class TestRooFormatterXML < Minitest::Test
             all_cells[i][:type],
           ]
           result = [
-            cell.attribute("row").value,
-            cell.attribute("column").value,
+            cell["row"],
+            cell["column"],
             cell.text,
-            cell.attribute("type").value,
+            cell["type"],
           ]
 
           assert_equal expected, result

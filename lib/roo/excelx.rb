@@ -334,7 +334,7 @@ module Roo
 
       wb.extract(path)
       workbook_doc = Roo::Utils.load_xml(path).remove_namespaces!
-      workbook_doc.xpath('//sheet').map { |s| s.attributes['id'].value }
+      workbook_doc.xpath('//sheet').map { |s| s['id'] }
     end
 
     # Internal
@@ -360,14 +360,11 @@ module Roo
       rels_doc = Roo::Utils.load_xml(path).remove_namespaces!
 
       relationships = rels_doc.xpath('//Relationship').select do |relationship|
-        worksheet_types.include? relationship.attributes['Type'].value
+        worksheet_types.include? relationship['Type']
       end
 
-      relationships.inject({}) do |hash, relationship|
-        attributes = relationship.attributes
-        id = attributes['Id']
-        hash[id.value] = attributes['Target'].value
-        hash
+      relationships.each_with_object({}) do |relationship, hash|
+        hash[relationship['Id']] = relationship['Target']
       end
     end
 

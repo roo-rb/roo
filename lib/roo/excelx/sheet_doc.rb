@@ -182,7 +182,7 @@ module Roo
           if relationship = relationships[hyperlink['id']]
             target_link = relationship['Target']
             target_link += "##{hyperlink['location']}" if hyperlink['location']
-            hash[::Roo::Utils.ref_to_key(hyperlink.attributes["ref"].to_s)] = target_link
+            hash[::Roo::Utils.ref_to_key(hyperlink["ref"].to_s)] = target_link
           end
         end
       end
@@ -222,7 +222,7 @@ module Roo
 
       def extract_dimensions
         Roo::Utils.each_element(@path, 'dimension') do |dimension|
-          return dimension.attributes["ref"].value
+          return dimension["ref"]
         end
       end
 

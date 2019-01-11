@@ -17,7 +17,7 @@ module Roo
         return [] unless doc_exists?
 
         doc.xpath('/Relationships/Relationship').each_with_object({}) do |rel, hash|
-          hash[rel.attribute('Id').text] = rel
+          hash[rel['Id']] = rel
         end
       end
     end
