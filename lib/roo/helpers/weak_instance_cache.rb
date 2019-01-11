@@ -22,10 +22,19 @@ module Roo
 
         unless object
           object = yield
+          ObjectSpace.define_finalizer(object, instance_cache_finalizer(key))
           instance_variable_set(key, WeakRef.new(object))
         end
 
         object
+      end
+
+      def instance_cache_finalizer(key)
+        proc do
+          if instance_variable_defined?(key) && (ref = instance_variable_get(key)) && !ref.weakref_alive?
+            remove_instance_variable(key)
+          end
+        end
       end
     end
   end
