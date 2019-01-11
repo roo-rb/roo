@@ -140,8 +140,8 @@ module Roo
           tmp_str << "<#{elem}>" if val
         end
         tmp_str << text
-        reverse_format = Hash[formatting.to_a.reverse]
-        reverse_format.each do |elem, val|
+
+        formatting.reverse_each do |elem, val|
           tmp_str << "</#{elem}>" if val
         end
         tmp_str
