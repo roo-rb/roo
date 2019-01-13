@@ -84,7 +84,9 @@ describe Roo::Helpers::WeakInstanceCache do
     end
   else
     def force_gc
-      GC.start
+      GC.start(full_mark: true, immediate_sweep: true)
+      sleep(0.1)
+      GC.start(full_mark: true, immediate_sweep: true)
     end
   end
 end
