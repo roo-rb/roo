@@ -6,7 +6,7 @@ require 'roo/version'
 Gem::Specification.new do |spec|
   spec.name                   = 'roo'
   spec.version                = Roo::VERSION
-  spec.authors                = ['Thomas Preymesser', 'Hugh McGowan', 'Ben Woosley', 'Oleksandr Simonov', 'Steven Daniels']
+  spec.authors                = ['Thomas Preymesser', 'Hugh McGowan', 'Ben Woosley', 'Oleksandr Simonov', 'Steven Daniels', 'Anmol Chopra']
   spec.email                  = ['ruby.ruby.ruby.roo@gmail.com', 'oleksandr@simonov.me']
   spec.summary                = 'Roo can access the contents of various spreadsheet files.'
   spec.description            = "Roo can access the contents of various spreadsheet files. It can handle\n* OpenOffice\n* Excelx\n* LibreOffice\n* CSV"

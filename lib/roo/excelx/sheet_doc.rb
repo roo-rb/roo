@@ -78,10 +78,13 @@ module Roo
       #             </c>
       # hyperlink - a String for the hyperlink for the cell or nil when no
       #             hyperlink is present.
+      # coordinate - a Roo::Excelx::Coordinate for the coordinate for the cell
+      #              or nil to extract coordinate from cell_xml.
+      # empty_cell - an Optional Boolean value.
       #
       # Examples
       #
-      #    cells_from_xml(<Nokogiri::XML::Element>, nil)
+      #    cells_from_xml(<Nokogiri::XML::Element>, nil, nil)
       #    # => <Excelx::Cell::String>
       #
       # Returns a type of <Excelx::Cell>.

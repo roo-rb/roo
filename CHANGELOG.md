@@ -1,8 +1,33 @@
 ## Unreleased
+### Fixed
+- Fixed inconsistent column length for CSV [375](https://github.com/roo-rb/roo/pull/375)
+- Fixed formatted_value with `%` for Excelx [416](https://github.com/roo-rb/roo/pull/416)
+- Improved Memory consumption and performance [434](https://github.com/roo-rb/roo/pull/434) [449](https://github.com/roo-rb/roo/pull/449) [454](https://github.com/roo-rb/roo/pull/454) [456](https://github.com/roo-rb/roo/pull/456) [458](https://github.com/roo-rb/roo/pull/458) [462](https://github.com/roo-rb/roo/pull/462) [466](https://github.com/roo-rb/roo/pull/466)
+- Accept both Transitional and Strict Type for Excelx's worksheets [441](https://github.com/roo-rb/roo/pull/441)
+- Fixed ruby warnings [442](https://github.com/roo-rb/roo/pull/442) [476](https://github.com/roo-rb/roo/pull/476)
+- Restore support for URL as file identifier for CSV [462](https://github.com/roo-rb/roo/pull/462)
+- Fixed missing location for Excelx's links [482](https://github.com/roo-rb/roo/pull/482)
+
+### Changed / Added
+- Drop support for ruby 2.2.x and lower
 - Updated rubyzip version for fixing security issue. Now minimal version is 1.2.1
+- Roo::Excelx::Coordinate now inherits Array [458](https://github.com/roo-rb/roo/pull/458)
+- Improved Roo::HeaderRowNotFoundError exception's message [461](https://github.com/roo-rb/roo/pull/461)
+- Added `empty_cell` option which by default disable allocation for Roo::Excelx::Cell::Empty [464](https://github.com/roo-rb/roo/pull/464)
+- Added support for variable number of decimals for Excelx's formatted_value [387](https://github.com/roo-rb/roo/pull/387)
+- Added `disable_html_injection` option to disable html injection for shared string in `Roo::Excelx` [392](https://github.com/roo-rb/roo/pull/392)
+- Added image extraction for Excelx [414](https://github.com/roo-rb/roo/pull/414) [397](https://github.com/roo-rb/roo/pull/397)
+- Added support for `1e6` as scientific notation for Excelx [433](https://github.com/roo-rb/roo/pull/433)
+- Added support for Integer as 0 based index for Excelx's `sheet_for` [455](https://github.com/roo-rb/roo/pull/455)
+- Extended `no_hyperlinks` option for non streaming Excelx methods [459](https://github.com/roo-rb/roo/pull/459)
+- Added `empty_cell` option to disable Roo::Excelx::Cell::Empty allocation for Excelx [464](https://github.com/roo-rb/roo/pull/464)
+- Added support for Integer with leading zero for Roo:Excelx [479](https://github.com/roo-rb/roo/pull/479)
+- Refactored Excelx code [453](https://github.com/roo-rb/roo/pull/453) [477](https://github.com/roo-rb/roo/pull/477) [483](https://github.com/roo-rb/roo/pull/483) [484](https://github.com/roo-rb/roo/pull/484)
 
 ### Deprecations
 - Roo::Excelx::Sheet#present_cells is deprecated [454](https://github.com/roo-rb/roo/pull/454)
+- Roo::Utils.split_coordinate is deprecated [458](https://github.com/roo-rb/roo/pull/458)
+- Roo::Excelx::Cell::Base#link is deprecated [457](https://github.com/roo-rb/roo/pull/457)
 
 ## [2.7.1] 2017-01-03
 ### Fixed
