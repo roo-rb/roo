@@ -1,4 +1,4 @@
-## Unreleased
+##  [2.8.0] 2019-01-18
 ### Fixed
 - Fixed inconsistent column length for CSV [375](https://github.com/roo-rb/roo/pull/375)
 - Fixed formatted_value with `%` for Excelx [416](https://github.com/roo-rb/roo/pull/416)
