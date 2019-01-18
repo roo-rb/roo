@@ -120,7 +120,7 @@ module Roo
           end
         end
 
-        create_empty_cell(coordinate)
+        create_empty_cell(coordinate, empty_cell)
       end
 
       def create_empty_cell(coordinate, empty_cell)
