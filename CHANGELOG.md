@@ -1,3 +1,9 @@
+##  Unreleased
+
+##  [2.8.1] 2019-01-21
+### Fixed
+- Fixed error if excelx's cell have empty children [487](https://github.com/roo-rb/roo/pull/487)
+
 ##  [2.8.0] 2019-01-18
 ### Fixed
 - Fixed inconsistent column length for CSV [375](https://github.com/roo-rb/roo/pull/375)
