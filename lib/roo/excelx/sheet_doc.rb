@@ -185,7 +185,10 @@ module Roo
           if relationship = relationships[hyperlink['id']]
             target_link = relationship['Target']
             target_link += "##{hyperlink['location']}" if hyperlink['location']
-            hash[::Roo::Utils.ref_to_key(hyperlink["ref"].to_s)] = target_link
+
+            Roo::Utils.coordinates_in_range(hyperlink["ref"].to_s) do |coord|
+              hash[coord] = target_link
+            end
           end
         end
       end
