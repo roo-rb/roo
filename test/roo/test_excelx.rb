@@ -302,6 +302,11 @@ class TestRworkbookExcelx < Minitest::Test
     end
   end
 
+  def test_handles_link_without_hyperlink
+    workbook = Roo::Spreadsheet.open(File.join(TESTDIR, "bad_link.xlsx"))
+    assert_equal "Test", workbook.cell(1, 1)
+  end
+
   # Excel has two base date formats one from 1900 and the other from 1904.
   # see #test_base_dates_in_excel
   def test_base_dates_in_excelx
