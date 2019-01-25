@@ -90,6 +90,19 @@ RSpec.describe ::Roo::Utils do
     end
   end
 
+  context '.coordinates_in_range' do
+    it "returns the expected result" do
+      expect(described_class.coordinates_in_range('').to_a).to eq []
+      expect(described_class.coordinates_in_range('B2').to_a).to eq [[2, 2]]
+      expect(described_class.coordinates_in_range('D2:G3').to_a).to eq [[2, 4], [2, 5], [2, 6], [2, 7], [3, 4], [3, 5], [3, 6], [3, 7]]
+      expect(described_class.coordinates_in_range('G3:D2').to_a).to eq []
+    end
+
+    it "raises an error when appropriate" do
+      expect { described_class.coordinates_in_range('D2:G3:I5').to_a }.to raise_error(ArgumentError)
+    end
+  end
+
   context '.load_xml' do
     it 'returns the expected result' do
       expect(described_class.load_xml('test/files/sheet1.xml')).to be_a(Nokogiri::XML::Document)

@@ -379,9 +379,34 @@ describe Roo::Excelx do
       expect(subject.hyperlink?(1, 1)).to eq true
       expect(subject.hyperlink?(1, 2)).to eq false
     end
+
+    context 'defined on cell range' do
+     let(:path) { 'test/files/cell-range-link.xlsx' }
+
+      it 'returns the expected result' do
+        [[false]*3, *[[true, true, false]]*4, [false]*3].each.with_index(1) do |row, row_index|
+          row.each.with_index(1) do |value, col_index|
+            expect(subject.hyperlink?(row_index, col_index)).to eq(value)
+          end
+        end
+      end
+    end
   end
 
   describe '#hyperlink' do
+    context 'defined on cell range' do
+     let(:path) { 'test/files/cell-range-link.xlsx' }
+
+      it 'returns the expected result' do
+        link = "http://www.google.com"
+        [[nil]*3, *[[link, link, nil]]*4, [nil]*3].each.with_index(1) do |row, row_index|
+          row.each.with_index(1) do |value, col_index|
+            expect(subject.hyperlink(row_index, col_index)).to eq(value)
+          end
+        end
+      end
+    end
+
     context 'without location' do
       let(:path) { 'test/files/link.xlsx' }
 

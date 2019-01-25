@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Roo
   module Utils
     extend self
@@ -41,7 +43,7 @@ module Roo
 
     # convert a number to something like 'AB' (1 => 'A', 2 => 'B', ...)
     def number_to_letter(num)
-      result = ""
+      result = +""
 
       until num.zero?
         num, index = (num - 1).divmod(26)
@@ -71,6 +73,25 @@ module Roo
       x1, y1 = extract_coordinate(cells[0])
       x2, y2 = extract_coordinate(cells[1])
       (x2 - (x1 - 1)) * (y2 - (y1 - 1))
+    end
+
+    def coordinates_in_range(str)
+      return to_enum(:coordinates_in_range, str) unless block_given?
+      coordinates = str.split(":", 2).map! { |s| extract_coordinate s }
+
+      case coordinates.size
+      when 1
+        yield coordinates[0]
+      when 2
+        tl, br = coordinates
+        rows = tl.row..br.row
+        cols = tl.column..br.column
+        rows.each do |row|
+          cols.each do |column|
+            yield Excelx::Coordinate.new(row, column)
+          end
+        end
+      end
     end
 
     def load_xml(path)
