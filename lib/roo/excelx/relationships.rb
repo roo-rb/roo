@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'roo/excelx/extractor'
 
 module Roo
@@ -9,6 +11,12 @@ module Roo
 
       def to_a
         @relationships ||= extract_relationships
+      end
+
+      def include_type?(type)
+        to_a.any? do |_, rel|
+          rel["Type"]&.include? type
+        end
       end
 
       private

@@ -22,7 +22,7 @@ module Roo
 
       def hyperlinks(relationships)
         # If you're sure you're not going to need this hyperlinks you can discard it
-        @hyperlinks ||= if @options[:no_hyperlinks]
+        @hyperlinks ||= if @options[:no_hyperlinks] || !relationships.include_type?("hyperlink")
           {}
         else
           extract_hyperlinks(relationships)
