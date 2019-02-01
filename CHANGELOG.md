@@ -1,10 +1,12 @@
 ##  Unreleased
+
+##  [2.8.2] 2019-02-01
 ### Changed/Added
 - Support range cell for Excelx's links [490](https://github.com/roo-rb/roo/pull/490)
 - Skip `extract_hyperlinks` if not required [488](https://github.com/roo-rb/roo/pull/488)
 
 ### Fixed
-- Fixed error for invalid link [491](https://github.com/roo-rb/roo/pull/491)
+- Fixed error for invalid link [492](https://github.com/roo-rb/roo/pull/492)
 
 ##  [2.8.1] 2019-01-21
 ### Fixed
