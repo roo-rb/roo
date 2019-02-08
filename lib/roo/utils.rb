@@ -94,6 +94,12 @@ module Roo
       end
     end
 
+    def anchor_to_coordinates(anchor)
+      col, _, row  = *anchor.split(',').map(&:strip).map(&:to_i)
+
+      Excelx::Coordinate.new(row + 1, col + 1)
+    end
+
     def load_xml(path)
       ::File.open(path, 'rb') do |file|
         ::Nokogiri::XML(file)

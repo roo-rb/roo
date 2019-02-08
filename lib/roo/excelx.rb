@@ -21,12 +21,13 @@ module Roo
     require 'roo/excelx/sheet'
     require 'roo/excelx/relationships'
     require 'roo/excelx/comments'
+    require 'roo/excelx/drawings'
     require 'roo/excelx/sheet_doc'
     require 'roo/excelx/coordinate'
     require 'roo/excelx/format'
     require 'roo/excelx/images'
 
-    delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files, :image_rels, :image_files] => :@shared
+    delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files, :image_rels, :image_files, :drawing_files] => :@shared
     ExceedsMaxError = Class.new(StandardError)
 
     # initialization and opening of a spreadsheet file
@@ -184,6 +185,11 @@ module Roo
       key = normalize(row, col)
       definition_index = safe_send(sheet_for(sheet).cells[key], :style)
       styles.definitions[definition_index] if definition_index
+    end
+
+    def drawing(row, col, sheet = nil)
+      key = normalize(row, col)
+      sheet_for(sheet).drawings[key]
     end
 
     # returns the type of a cell:
@@ -454,6 +460,9 @@ module Roo
           # Extracting drawing relationships to make images lists for each sheet
           nr = Regexp.last_match[1].to_i
           image_rels[nr - 1] = "#{@tmpdir}/roo_image_rels#{nr}"
+        when /vmldrawing([0-9+]).vml$/
+          nr = Regexp.last_match[1].to_i
+          drawing_files[nr - 1] = "#{@tmpdir}/vml_drawing#{nr}"
         end
 
         entry.extract(path) if path

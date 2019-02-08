@@ -584,6 +584,21 @@ describe Roo::Excelx do
     end
   end
 
+  describe 'drawings' do
+    let(:path) { 'test/files/checkbox.xlsx' }
+    it 'reads a drawing of type checkbox with value false' do
+      checkbox = subject.drawing(1, 'A')
+      expect(checkbox).to be_a(Roo::Excelx::Drawing::Checkbox)
+      expect(checkbox.value).to be(false)
+    end
+
+    it 'reads a drawing of type checkbox with value true' do
+      checkbox = subject.drawing(2, 'A')
+      expect(checkbox).to be_a(Roo::Excelx::Drawing::Checkbox)
+      expect(checkbox.value).to be(true)
+    end
+  end
+
   describe 'opening a file with a chart sheet' do
     let(:path) { 'test/files/chart_sheet.xlsx' }
     it 'should not raise' do
