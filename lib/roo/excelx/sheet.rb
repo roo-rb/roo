@@ -6,7 +6,7 @@ module Roo
 
       delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files, :image_rels, :drawing_files] => :@shared
 
-      attr_reader :images, :drawings
+      attr_reader :images
 
       def initialize(name, shared, sheet_index, options = {})
         @name = name
@@ -15,12 +15,15 @@ module Roo
         @images = Images.new(image_rels[sheet_index]).list
         @rels = Relationships.new(rels_files[sheet_index])
         @comments = Comments.new(comments_files[sheet_index])
-        @drawings = Drawings.new(drawing_files[sheet_index]).list
         @sheet = SheetDoc.new(sheet_files[sheet_index], @rels, shared, options)
       end
 
       def cells
         @cells ||= @sheet.cells(@rels)
+      end
+
+      def drawings
+        @drawings ||= Drawings.new(drawing_files[@sheet_index]).list
       end
 
       def present_cells
