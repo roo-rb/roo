@@ -6,10 +6,10 @@ require 'roo/excelx/drawing/unknown'
 module Roo
   class Excelx
     class Drawings < Excelx::Extractor
-      # Returns: Hash { id1: extracted_file_name1 },
-      # Example: { "rId1"=>"roo_media_image1.png",
-      #            "rId2"=>"roo_media_image2.png",
-      #            "rId3"=>"roo_media_image3.png" }
+      # Returns: Hash { [col, row]: drawing },
+      # Example: { [10, 3]=>#<Roo::Excelx::Drawing::Checkbox>,
+      #            [19, 7]=>#<Roo::Excelx::Drawing::Checkbox>,
+      #            [1, 14]=>#<Roo::Excelx::Drawing::Unknown> }
       def list
         @drawings ||= extract_drawings
       end
