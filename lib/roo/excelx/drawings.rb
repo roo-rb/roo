@@ -19,8 +19,7 @@ module Roo
       def extract_drawings
         return {} unless doc_exists?
 
-        doc.xpath('//shape').each_with_object({}) do |shape, hash|
-          client_data = shape.xpath('./ClientData').first
+        doc.xpath('//shape/ClientData').each_with_object({}) do |client_data, hash|
           anchors = client_data.xpath('./Anchor').text
           coords = Utils.anchor_to_coordinates(anchors)
 
