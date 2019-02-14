@@ -460,7 +460,7 @@ module Roo
           # Extracting drawing relationships to make images lists for each sheet
           nr = Regexp.last_match[1].to_i
           image_rels[nr - 1] = "#{@tmpdir}/roo_image_rels#{nr}"
-        when /vmldrawing([0-9+]).vml$/
+        when /vmldrawing([0-9]+).vml$/
           nr = Regexp.last_match[1].to_i
           drawing_files[nr - 1] = "#{@tmpdir}/vml_drawing#{nr}"
         end
