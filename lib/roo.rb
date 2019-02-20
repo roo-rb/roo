@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+require 'roo/version'
 require 'roo/constants'
 require 'roo/errors'
 require 'roo/spreadsheet'
@@ -9,7 +12,7 @@ module Roo
   autoload :Excelx,       'roo/excelx'
   autoload :CSV,          'roo/csv'
 
-  TEMP_PREFIX = 'roo_'.freeze
+  TEMP_PREFIX = 'roo_'
 
   CLASS_FOR_EXTENSION = {
     ods: Roo::OpenOffice,

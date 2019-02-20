@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'roo/excelx/extractor'
 
 module Roo
@@ -11,14 +13,20 @@ module Roo
         @relationships ||= extract_relationships
       end
 
+      def include_type?(type)
+        to_a.any? do |_, rel|
+          rel["Type"]&.include? type
+        end
+      end
+
       private
 
       def extract_relationships
-        return [] unless doc_exists?
+        return {} unless doc_exists?
 
-        Hash[doc.xpath('/Relationships/Relationship').map do |rel|
-          [rel.attribute('Id').text, rel]
-        end]
+        doc.xpath('/Relationships/Relationship').each_with_object({}) do |rel, hash|
+          hash[rel['Id']] = rel
+        end
       end
     end
   end

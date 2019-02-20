@@ -25,6 +25,11 @@ class TestRooExcelxCellBase < Minitest::Test
     refute cell.empty?
   end
 
+  def test_presence
+    cell = base.new(value, nil, [], nil, nil, nil)
+    assert_equal cell, cell.presence
+  end
+
   def test_cell_type_is_formula
     formula = true
     cell = base.new(value, formula, [], nil, nil, nil)

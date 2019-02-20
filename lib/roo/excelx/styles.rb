@@ -55,9 +55,9 @@ module Roo
       end
 
       def extract_num_fmts
-        Hash[doc.xpath('//numFmt').map do |num_fmt|
-          [num_fmt['numFmtId'], num_fmt['formatCode']]
-        end]
+        doc.xpath('//numFmt').each_with_object({}) do |num_fmt, hash|
+          hash[num_fmt['numFmtId']] = num_fmt['formatCode']
+        end
       end
     end
   end

@@ -4,15 +4,16 @@ module Roo
   class Excelx
     class Cell
       class Time < Roo::Excelx::Cell::DateTime
-        attr_reader :value, :formula, :format, :cell_value, :link, :coordinate
+        attr_reader :value, :formula, :format, :cell_value, :coordinate
+
+        attr_reader_with_default default_type: :time
 
         def initialize(value, formula, excelx_type, style, link, base_date, coordinate)
           # NOTE: Pass all arguments to DateTime super class.
           super
-          @type = :time
           @format = excelx_type.last
           @datetime = create_datetime(base_date, value)
-          @value = link? ? Roo::Link.new(link, value) : (value.to_f * 86_400).to_i
+          @value = link ? Roo::Link.new(link, value) : (value.to_f * 86_400).to_i
         end
 
         def formatted_value

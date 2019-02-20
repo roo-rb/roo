@@ -4,12 +4,15 @@ module Roo
     #          reduce memory usage and reduce the number of objects being passed
     #          to various inititializers.
     class Shared
-      attr_accessor :comments_files, :sheet_files, :rels_files
-      def initialize(dir)
+      attr_accessor :comments_files, :sheet_files, :rels_files, :image_rels, :image_files
+      def initialize(dir, options = {})
         @dir = dir
         @comments_files = []
         @sheet_files = []
         @rels_files = []
+        @options = options
+        @image_rels = []
+        @image_files = []
       end
 
       def styles
@@ -17,7 +20,7 @@ module Roo
       end
 
       def shared_strings
-        @shared_strings ||= SharedStrings.new(File.join(@dir, 'roo_sharedStrings.xml'))
+        @shared_strings ||= SharedStrings.new(File.join(@dir, 'roo_sharedStrings.xml'), @options)
       end
 
       def workbook
@@ -26,6 +29,10 @@ module Roo
 
       def base_date
         workbook.base_date
+      end
+
+      def base_timestamp
+        workbook.base_timestamp
       end
     end
   end

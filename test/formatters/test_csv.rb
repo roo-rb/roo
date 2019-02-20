@@ -100,6 +100,23 @@ class TestRooFormatterCSV < Minitest::Test
     end
   end
 
+  def test_bug_datetime_offset_change
+    # DO NOT REMOVE Asia/Calcutta
+    [nil, "US/Eastern", "US/Pacific", "Asia/Calcutta"].each do |zone|
+      with_timezone(zone) do
+        with_each_spreadsheet(name: "datetime_timezone_ist_offset_change", format: %i[excelx openoffice libreoffice]) do |workbook|
+          Dir.mktmpdir do |tempdir|
+            datetime_csv_file = File.join(tempdir, "datetime_timezone_ist_offset_change.csv")
+
+            assert workbook.to_csv(datetime_csv_file)
+            assert File.exist?(datetime_csv_file)
+            assert_equal "", file_diff("#{TESTDIR}/so_datetime_timezone_ist_offset_change.csv", datetime_csv_file)
+          end
+        end
+      end
+    end
+  end
+
   def test_true_class
     assert_equal "true", cell_to_csv(1, 1)
   end

@@ -1,16 +1,10 @@
+# frozen_string_literal: true
+
 require 'roo/excelx/extractor'
 
 module Roo
   class Excelx
     class SharedStrings < Excelx::Extractor
-
-      COMMON_STRINGS = {
-        t: "t",
-        r: "r",
-        html_tag_open: "<html>",
-        html_tag_closed: "</html>"
-      }
-
       def [](index)
         to_a[index]
       end
@@ -26,6 +20,7 @@ module Roo
       # Use to_html or to_a for html returns
       # See what is happening with commit???
       def use_html?(index)
+        return false if @options[:disable_html_wrapper]
         to_html[index][/<([biu]|sup|sub)>/]
       end
 
@@ -45,7 +40,7 @@ module Roo
         document = fix_invalid_shared_strings(doc)
         # read the shared strings xml document
         document.xpath('/sst/si').map do |si|
-          shared_string = ''
+          shared_string = +""
           si.children.each do |elem|
             case elem.name
             when 'r'
@@ -65,7 +60,7 @@ module Roo
         fix_invalid_shared_strings(doc)
         # read the shared strings xml document
         doc.xpath('/sst/si').map do |si|
-          html_string = '<html>'
+          html_string = '<html>'.dup
           si.children.each do |elem|
             case elem.name
             when 'r'
@@ -95,7 +90,7 @@ module Roo
       #
       # Expected Output ::: "<html><sub|sup><b><i><u>TEXT</u></i></b></sub|/sup></html>"
       def extract_html_r(r_elem)
-        str = ''
+        str = +""
         xml_elems = {
           sub: false,
           sup: false,
@@ -103,7 +98,6 @@ module Roo
           i:   false,
           u:   false
         }
-        b, i, u, sub, sup = false, false, false, false, false
         r_elem.children.each do |elem|
           case elem.name
           when 'rPr'
@@ -141,13 +135,13 @@ module Roo
 
       # This will return an html string
       def create_html(text, formatting)
-        tmp_str = ''
+        tmp_str = +""
         formatting.each do |elem, val|
           tmp_str << "<#{elem}>" if val
         end
         tmp_str << text
-        reverse_format = Hash[formatting.to_a.reverse]
-        reverse_format.each do |elem, val|
+
+        formatting.reverse_each do |elem, val|
           tmp_str << "</#{elem}>" if val
         end
         tmp_str
