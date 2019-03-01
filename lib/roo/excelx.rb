@@ -449,7 +449,6 @@ module Roo
           # FIXME: Roo seems to use sheet[\d].xml.rels for hyperlinks only, but
           #        it also stores the location for sharedStrings, comments,
           #        drawings, etc.
-          #
           nr = Regexp.last_match[1].to_i
 
           entry.get_input_stream.readlines.drop(1).each { |line|
