@@ -425,7 +425,6 @@ module Roo
       extract_sheets_in_order(entries, sheet_ids, sheets, @tmpdir)
       extract_images(entries, @tmpdir)
 
-      drawings_indices = {}
       entries.each do |entry|
         path =
         case entry.name.downcase
@@ -450,29 +449,11 @@ module Roo
           #        it also stores the location for sharedStrings, comments,
           #        drawings, etc.
           nr = Regexp.last_match[1].to_i
-
-          entry.get_input_stream.readlines.drop(1).each { |line|
-            match = /Target="..\/drawings\/(drawing[0-9]+.xml)"/.match(line)
-            if match
-              drawing_name = match[1] + ".rels"
-              drawings_indices[drawing_name] = nr - 1
-            end
-          }
           rels_files[nr - 1] = "#{@tmpdir}/roo_rels#{nr}"
-        end
-
-        entry.extract(path) if path
-      end
-
-      # had to make sure all the indices for images are set by now
-      entries.each do |entry|
-        path =
-        case entry.name.downcase
         when /drawing([0-9]+).xml.rels$/
           # Extracting drawing relationships to make images lists for each sheet
           nr = Regexp.last_match[1].to_i
-          index = drawings_indices[Regexp.last_match[0]]
-          image_rels[index] = "#{@tmpdir}/roo_image_rels#{nr}"
+          image_rels[nr - 1] = "#{@tmpdir}/roo_image_rels#{nr}"
         end
         entry.extract(path) if path
       end

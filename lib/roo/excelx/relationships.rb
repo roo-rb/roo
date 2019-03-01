@@ -19,6 +19,12 @@ module Roo
         end
       end
 
+      def target(type)
+        to_a.map do |_, rel|
+          rel["Target"] if rel["Type"]&.include? type
+        end.compact.first
+      end
+
       private
 
       def extract_relationships
