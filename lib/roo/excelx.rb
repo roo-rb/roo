@@ -425,7 +425,6 @@ module Roo
       extract_sheets_in_order(entries, sheet_ids, sheets, @tmpdir)
       extract_images(entries, @tmpdir)
 
-      #
       drawings_indices = {}
       entries.each do |entry|
         path =
