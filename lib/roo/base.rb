@@ -280,8 +280,10 @@ class Roo::Base
   def each(options = {})
     return to_enum(:each, options) unless block_given?
 
+    offset = options.delete(:offset) || 0
+
     if options.empty?
-      1.upto(last_row) do |line|
+      (1 + offset).upto(last_row) do |line|
         yield row(line)
       end
     else
@@ -292,7 +294,9 @@ class Roo::Base
                   hash[cell(@header_line, col)] = col
                 end
 
-      @header_line.upto(last_row) do |line|
+      header_or_next_row = options[:headers] == true ? @header_line : @header_line + 1
+
+      (header_or_next_row + offset).upto(last_row) do |line|
         yield(headers.each_with_object({}) { |(k, v), hash| hash[k] = cell(line, v) })
       end
     end
@@ -302,8 +306,6 @@ class Roo::Base
     results = each(options).map do |row|
       block_given? ? yield(row) : row
     end
-
-    options[:headers] == true ? results : results.drop(1)
   end
 
   def row_with(query, return_headers = false)
@@ -392,6 +394,7 @@ class Roo::Base
       @headers = []
       row(first_row).each_with_index { |x, i| @headers << [x, i + 1] }
     else
+      options.delete(:headers)
       set_headers(options)
     end
   end
