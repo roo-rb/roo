@@ -19,7 +19,7 @@ module Roo
         end
       end
 
-      def targets(type: "")
+      def filter_by_type(type: "")
         return to_enum(__method__, type: type) unless block_given?
 
         to_a.each do |_, rel|

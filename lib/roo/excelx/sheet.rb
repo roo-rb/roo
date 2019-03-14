@@ -95,7 +95,7 @@ module Roo
 
       def images
         @images ||= begin
-          @rels.targets(type: "drawing").map do |target|
+          @rels.filter_by_type(type: "drawing").map do |target|
             match = /[a-zA-Z]+([0-9]+).xml/.match target
             Images.new(image_rels[match[1].to_i - 1]).list
           end.reduce({}, :merge).sort.to_h
