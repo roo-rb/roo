@@ -94,12 +94,11 @@ module Roo
       end
 
       def images
-        target = @rels.target("drawing")
-        match = /[a-zA-Z]+([0-9]+).xml/.match target
-        if match
-          Images.new(image_rels[match[1].to_i - 1]).list
-        else
-          []
+        @images ||= begin
+          @rels.targets(type: "drawing").map do |target|
+            match = /[a-zA-Z]+([0-9]+).xml/.match target
+            Images.new(image_rels[match[1].to_i - 1]).list
+          end.flatten
         end
       end
 

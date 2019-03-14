@@ -455,6 +455,7 @@ module Roo
           nr = Regexp.last_match[1].to_i
           image_rels[nr - 1] = "#{@tmpdir}/roo_image_rels#{nr}"
         end
+
         entry.extract(path) if path
       end
     end
