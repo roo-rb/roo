@@ -320,6 +320,13 @@ class TestRworkbookExcelx < Minitest::Test
     end
   end
 
+  def test_parsing_xlsx_with_richtext
+    xlsx = roo_class.new(File.join(TESTDIR, "richtext_example.xlsx"))
+
+    assert_equal "Example richtext", xlsx.cell("a", 1)
+    assert_equal "Example richtext", xlsx.cell("b", 1)
+  end
+
   def roo_class
     Roo::Excelx
   end
