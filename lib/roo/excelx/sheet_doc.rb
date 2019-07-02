@@ -207,7 +207,7 @@ module Roo
         end
         # Duplicate value into all cells in merged range
         merges.each do |dst, src|
-          cells[dst] = cells[src]
+          cells[dst] = cells[src] if cells[src]
         end
       end
 
