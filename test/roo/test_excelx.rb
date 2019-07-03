@@ -133,6 +133,13 @@ class TestRworkbookExcelx < Minitest::Test
     end
   end
 
+  def test_expand_merged_range_doesnt_insert_nil_values
+    options = { expand_merged_ranges: true }
+    xlsx = roo_class.new(File.join(TESTDIR, "merged_ranges.xlsx"), options)
+
+    refute_includes xlsx.sheet_for(0).cells.values, nil, "`nil` was copied into the cells hash from an empty merged range"
+  end
+
   def test_noexpand_merged_range
     xlsx = roo_class.new(File.join(TESTDIR, "merged_ranges.xlsx"))
 
