@@ -262,6 +262,18 @@ csv = Roo::CSV.new("mytsv.tsv", csv_options: {col_sep: "\t"})
 csv = Roo::CSV.new("mycsv.csv", csv_options: {encoding: Encoding::ISO_8859_1})
 ```
 
+You can also open csv files through the Roo::Spreadsheet class (useful if you accept both CSV and Excel types from a user file upload, for example).
+
+```ruby
+# Load a spreadsheet from a file path
+# Roo figures out the right parser based on file extension
+spreadsheet = Roo::Spreadsheet.open(csv_or_xlsx_file)
+
+# Load a csv and auto-strip the BOM (byte order mark)
+# csv files saved from MS Excel typically have the BOM marker at the beginning of the file
+spreadsheet = Roo::Spreadsheet.open("mycsv.csv", { csv_options: { encoding: 'bom|utf-8' } })
+```
+
 ## Upgrading from Roo 1.13.x
 If you use ``.xls`` or Google spreadsheets, you will need to install ``roo-xls`` or ``roo-google`` to continue using that functionality.
 
