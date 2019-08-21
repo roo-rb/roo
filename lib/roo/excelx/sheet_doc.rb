@@ -197,17 +197,18 @@ module Roo
         # Extract merged ranges from xml
         merges = {}
         doc.xpath('/worksheet/mergeCells/mergeCell').each do |mergecell_xml|
-          tl, br = mergecell_xml["ref"].split(/:/).map { |ref| ::Roo::Utils.ref_to_key(ref) }
-          for row in tl[0]..br[0] do
-            for col in tl[1]..br[1] do
-              next if row == tl[0] && col == tl[1]
-              merges[[row, col]] = tl
+          src, dst = mergecell_xml["ref"].split(/:/).map { |ref| ::Roo::Utils.ref_to_key(ref) }
+          next unless cells[src]
+          for row in src[0]..dst[0] do
+            for col in src[1]..dst[1] do
+              next if row == src[0] && col == src[1]
+              merges[[row, col]] = src
             end
           end
         end
         # Duplicate value into all cells in merged range
         merges.each do |dst, src|
-          cells[dst] = cells[src] if cells[src]
+          cells[dst] = cells[src]
         end
       end
 
