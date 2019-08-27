@@ -271,7 +271,7 @@ Roo's public methods have stayed relatively consistent between 1.13.x and 2.0.0,
 
 ## Contributing
 ### Features
-1. Fork it ( https://github.com/[my-github-username]/roo/fork )
+1. Fork it ( https://github.com/roo-rb/roo/fork )
 2. Install it (`bundle install --with local_development`)
 3. Create your feature branch (`git checkout -b my-new-feature`)
 4. Commit your changes (`git commit -am 'My new feature'`)
