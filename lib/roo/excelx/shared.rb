@@ -16,13 +16,9 @@ module Roo
       end
 
       def styles
-        begin
-          file_path = File.join(@dir, 'roo_styles.xml')
-          File.open(file_path)
-        rescue
-          File.open(file_path, "w")
-        end
-        @styles ||= Styles.new(File.join(@dir, 'roo_styles.xml'))
+        file_path = File.join(@dir, 'roo_styles.xml')
+        File.new(file_path, "a+") {} unless File.exists?(file_path)
+        @styles ||= Styles.new(file_path)
       end
 
       def shared_strings
