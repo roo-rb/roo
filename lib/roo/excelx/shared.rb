@@ -16,6 +16,12 @@ module Roo
       end
 
       def styles
+        begin
+          file_path = File.join(@dir, 'roo_styles.xml')
+          File.open(file_path)
+        rescue
+          File.open(file_path, "w")
+        end
         @styles ||= Styles.new(File.join(@dir, 'roo_styles.xml'))
       end
 
