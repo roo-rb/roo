@@ -1,16 +1,21 @@
+# frozen_string_literal: true
+
 require 'date'
 
 module Roo
   class Excelx
     class Cell
       class DateTime < Cell::Base
-        attr_reader :value, :formula, :format, :cell_value, :link, :coordinate
+        SECONDS_IN_DAY = 60 * 60 * 24
 
-        def initialize(value, formula, excelx_type, style, link, base_date, coordinate)
-          super(value, formula, excelx_type, style, link, coordinate)
-          @type = :datetime
+        attr_reader :value, :formula, :format, :cell_value, :coordinate
+
+        attr_reader_with_default default_type: :datetime
+
+        def initialize(value, formula, excelx_type, style, link, base_timestamp, coordinate)
+          super(value, formula, excelx_type, style, nil, coordinate)
           @format = excelx_type.last
-          @value = link? ? Roo::Link.new(link, value) : create_datetime(base_date, value)
+          @value = link ? Roo::Link.new(link, value) : create_datetime(base_timestamp, value)
         end
 
         # Public: Returns formatted value for a datetime. Format's can be an
@@ -78,7 +83,7 @@ module Roo
 
         TIME_FORMATS = {
           'hh' => '%H',    # Hour (24): 01
-          'h' => '%-k'.freeze,    # Hour (24): 1
+          'h' => '%-k',    # Hour (24): 1
           # 'hh'.freeze => '%I'.freeze,    # Hour (12): 08
           # 'h'.freeze => '%-l'.freeze,    # Hour (12): 8
           'mm' => '%M',    # Minute: 01
@@ -92,18 +97,9 @@ module Roo
           '0' => '%1N'    # Fractional Seconds: tenths.
         }
 
-        def create_datetime(base_date, value)
-          date = base_date + value.to_f.round(6)
-          datetime_string = date.strftime('%Y-%m-%d %H:%M:%S.%N')
-          t = round_datetime(datetime_string)
-
-          ::DateTime.civil(t.year, t.month, t.day, t.hour, t.min, t.sec)
-        end
-
-        def round_datetime(datetime_string)
-          /(?<yyyy>\d+)-(?<mm>\d+)-(?<dd>\d+) (?<hh>\d+):(?<mi>\d+):(?<ss>\d+.\d+)/ =~ datetime_string
-
-          ::Time.new(yyyy, mm, dd, hh, mi, ss.to_r).round(0)
+        def create_datetime(base_timestamp, value)
+          timestamp = (base_timestamp + (value.to_f.round(6) * SECONDS_IN_DAY)).round(0)
+          ::Time.at(timestamp).utc.to_datetime
         end
       end
     end

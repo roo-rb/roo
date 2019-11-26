@@ -25,6 +25,11 @@ class TestRooExcelxCellNumber < Minitest::Test
     assert_kind_of(Float, cell.value)
   end
 
+  def test_very_simple_scientific_notation
+    cell = Roo::Excelx::Cell::Number.new '1e6', nil, ['0'], nil, nil, nil
+    assert_kind_of(Float, cell.value)
+  end
+
   def test_percent
     cell = Roo::Excelx::Cell::Number.new '42.1', nil, ['0.00%'], nil, nil, nil
     assert_kind_of(Float, cell.value)
@@ -53,8 +58,12 @@ class TestRooExcelxCellNumber < Minitest::Test
   def test_formats
     [
       ['General', '1042'],
+      ['GENERAL', '1042'],
       ['0', '1042'],
+      ['000000', '001042'],
       ['0.00', '1042.00'],
+      ['0.0000', '1042.0000'],
+      ['0.000000000', '1042.000000000'],
       ['#,##0', '1,042'],
       ['#,##0.00', '1,042.00'],
       ['0%', '104200%'],

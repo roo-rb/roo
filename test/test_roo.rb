@@ -339,21 +339,21 @@ class TestRoo < Minitest::Test
 
   # compare large spreadsheets
   def test_compare_large_spreadsheets
-    # problematisch, weil Formeln in Excel nicht unterstützt werden
     skip_long_test
-    qq = Roo::OpenOffice.new(File.join('test',"Bibelbund.ods"))
-    with_each_spreadsheet(:name=>'Bibelbund') do |oo|
-      # p "comparing Bibelbund.ods with #{oo.class}"
+    qq = Roo::OpenOffice.new(File.join('test', 'files', "Bibelbund.ods"))
+    with_each_spreadsheet(name: 'Bibelbund') do |oo|
       oo.sheets.each do |sh|
         oo.first_row.upto(oo.last_row) do |row|
           oo.first_column.upto(oo.last_column) do |col|
-            c1 = qq.cell(row,col,sh)
+            c1 = qq.cell(row, col, sh)
             c1.force_encoding("UTF-8") if c1.class == String
             c2 = oo.cell(row,col,sh)
             c2.force_encoding("UTF-8") if c2.class == String
+            next if c1.nil? && c2.nil?
+
             assert_equal c1, c2, "diff in #{sh}/#{row}/#{col}}"
-            assert_equal qq.celltype(row,col,sh), oo.celltype(row,col,sh)
-            assert_equal qq.formula?(row,col,sh), oo.formula?(row,col,sh) if oo.class != Roo::Excel
+            assert_equal qq.celltype(row, col, sh), oo.celltype(row, col, sh)
+            assert_equal qq.formula?(row, col, sh), oo.formula?(row, col, sh)
           end
         end
       end

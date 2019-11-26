@@ -1,6 +1,6 @@
 # Roo
 
-[![Build Status](https://img.shields.io/travis/roo-rb/roo.svg?style=flat-square)](https://travis-ci.org/roo-rb/roo) [![Code Climate](https://img.shields.io/codeclimate/github/roo-rb/roo.svg?style=flat-square)](https://codeclimate.com/github/roo-rb/roo) [![Coverage Status](https://img.shields.io/coveralls/roo-rb/roo.svg?style=flat-square)](https://coveralls.io/r/roo-rb/roo) [![Gem Version](https://img.shields.io/gem/v/roo.svg?style=flat-square)](https://rubygems.org/gems/roo)
+[![Build Status](https://img.shields.io/travis/roo-rb/roo.svg?style=flat-square)](https://travis-ci.org/roo-rb/roo) [![Maintainability](https://api.codeclimate.com/v1/badges/be8d7bf34e2aeaf67c62/maintainability)](https://codeclimate.com/github/roo-rb/roo/maintainability) [![Coverage Status](https://img.shields.io/coveralls/roo-rb/roo.svg?style=flat-square)](https://coveralls.io/r/roo-rb/roo) [![Gem Version](https://img.shields.io/gem/v/roo.svg?style=flat-square)](https://rubygems.org/gems/roo)
 
 Roo implements read access for all common spreadsheet types. It can handle:
 * Excel 2007 - 2013 formats (xlsx, xlsm)
@@ -18,7 +18,7 @@ Install as a gem
 Or add it to your Gemfile
 
 ```ruby
-gem "roo", "~> 2.7.0"
+gem "roo", "~> 2.8.0"
 ```
 ## Usage
 
@@ -89,13 +89,13 @@ sheet.last_column
 You can access the top-left cell in the following ways
 
 ```ruby
-s.cell(1,1)
-s.cell('A',1)
-s.cell(1,'A')
-s.a1
+sheet.cell(1,1)
+sheet.cell('A',1)
+sheet.cell(1,'A')
+sheet.a1
 
 # Access the second sheet's top-left cell.
-s.cell(1,'A',s.sheets[1])
+sheet.cell(1,'A',sheet.sheets[1])
 ```
 
 #### Querying a spreadsheet
@@ -117,6 +117,12 @@ sheet.parse(id: /UPC|SKU/, qty: /ATS*\sATP\s*QTY\z/)
 # => [{:id => 727880013358, :qty => 12}, ...]
 ```
 
+Use the ``:headers`` option to include the header row in the parsed content.
+
+```ruby
+sheet.parse(headers: true)
+```
+
 Use the ``:header_search`` option to locate the header row and assign the header names.
 
 ```ruby
@@ -127,6 +133,16 @@ Use the ``:clean`` option to strip out control characters and surrounding white 
 
 ```ruby
 sheet.parse(clean: true)
+```
+
+#### Options
+
+When opening the file you can add a hash of options.
+
+##### expand_merged_ranges
+If you open a document with merged cells and do not want to end up with nil values for the rows after the first one.
+```ruby
+xlsx = Roo::Excelx.new('./roo_error.xlsx', {:expand_merged_ranges => true})
 ```
 
 ### Exporting spreadsheets
@@ -230,7 +246,7 @@ ods.formula('A', 2)
 
 ```ruby
 # Load a CSV file
-s = Roo::CSV.new("mycsv.csv")
+csv = Roo::CSV.new("mycsv.csv")
 ```
 
 Because Roo uses the [standard CSV library](), you can use options available to that library to parse csv files. You can pass options using the ``csv_options`` key.
@@ -240,10 +256,10 @@ For instance, you can load tab-delimited files (``.tsv``), and you can use a par
 
 ```ruby
 # Load a tab-delimited csv
-s = Roo::CSV.new("mytsv.tsv", csv_options: {col_sep: "\t"})
+csv = Roo::CSV.new("mytsv.tsv", csv_options: {col_sep: "\t"})
 
 # Load a csv with an explicit encoding
-s = Roo::CSV.new("mycsv.csv", csv_options: {encoding: Encoding::ISO_8859_1})
+csv = Roo::CSV.new("mycsv.csv", csv_options: {encoding: Encoding::ISO_8859_1})
 ```
 
 ## Upgrading from Roo 1.13.x
@@ -271,9 +287,6 @@ You can run the tests/examples with Rspec like reporters by running
 
 Roo also has a few tests that take a long time (5+ seconds). To run these, use
 `LONG_RUN=true bundle exec rake`
-
-When testing using Ruby 2.0 or 2.1, use this command:
-`BUNDLE_GEMFILE=Gemfile_ruby2 bundle exec rake`
 
 ### Issues
 

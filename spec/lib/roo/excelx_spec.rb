@@ -151,6 +151,22 @@ describe Roo::Excelx do
     it 'returns the expected result' do
       expect(subject.sheet_for("Tabelle1").instance_variable_get("@name")).to eq "Tabelle1"
     end
+
+    it 'returns the expected result when passed a number' do
+      expect(subject.sheet_for(0).instance_variable_get("@name")).to eq "Tabelle1"
+    end
+
+    it 'returns the expected result when passed a number that is not the first sheet' do
+      expect(subject.sheet_for(1).instance_variable_get("@name")).to eq "Name of Sheet 2"
+    end
+
+    it "should raise an error if passed a sheet that does not exist as an integer" do
+      expect { subject.sheet_for(10) }.to raise_error RangeError
+    end
+
+    it "should raise an error if passed a sheet that does not exist as a string" do
+      expect { subject.sheet_for("does_not_exist") }.to raise_error RangeError
+    end
   end
 
   describe '#row' do
@@ -304,6 +320,18 @@ describe Roo::Excelx do
     end
   end
 
+  describe '#row' do
+    context 'integers with leading zero'
+      let(:path) { 'test/files/number_with_zero_prefix.xlsx' }
+
+      it 'returns base 10 integer' do
+        (1..50).each do |row_index|
+          range_start = (row_index - 1) * 20 + 1
+          expect(subject.row(row_index)).to eq (range_start..(range_start+19)).to_a
+        end
+      end
+  end
+
   describe '#excelx_format' do
     let(:path) { 'test/files/style.xlsx' }
 
@@ -351,14 +379,50 @@ describe Roo::Excelx do
       expect(subject.hyperlink?(1, 1)).to eq true
       expect(subject.hyperlink?(1, 2)).to eq false
     end
+
+    context 'defined on cell range' do
+     let(:path) { 'test/files/cell-range-link.xlsx' }
+
+      it 'returns the expected result' do
+        [[false]*3, *[[true, true, false]]*4, [false]*3].each.with_index(1) do |row, row_index|
+          row.each.with_index(1) do |value, col_index|
+            expect(subject.hyperlink?(row_index, col_index)).to eq(value)
+          end
+        end
+      end
+    end
   end
 
   describe '#hyperlink' do
-    let(:path) { 'test/files/link.xlsx' }
+    context 'defined on cell range' do
+     let(:path) { 'test/files/cell-range-link.xlsx' }
 
-    it 'returns the expected result' do
-      expect(subject.hyperlink(1, 1)).to eq "http://www.google.com"
-      expect(subject.hyperlink(1, 2)).to eq nil
+      it 'returns the expected result' do
+        link = "http://www.google.com"
+        [[nil]*3, *[[link, link, nil]]*4, [nil]*3].each.with_index(1) do |row, row_index|
+          row.each.with_index(1) do |value, col_index|
+            expect(subject.hyperlink(row_index, col_index)).to eq(value)
+          end
+        end
+      end
+    end
+
+    context 'without location' do
+      let(:path) { 'test/files/link.xlsx' }
+
+      it 'returns the expected result' do
+        expect(subject.hyperlink(1, 1)).to eq "http://www.google.com"
+        expect(subject.hyperlink(1, 2)).to eq nil
+      end
+    end
+
+    context 'with location' do
+      let(:path) { 'test/files/link_with_location.xlsx' }
+
+      it 'returns the expected result' do
+        expect(subject.hyperlink(1, 1)).to eq "http://www.google.com/#hey"
+        expect(subject.hyperlink(1, 2)).to eq nil
+      end
     end
   end
 
@@ -480,34 +544,36 @@ describe Roo::Excelx do
   end
 
   describe '#html_strings' do
-    let(:path) { 'test/files/html_strings_formatting.xlsx' }
+    describe "HTML Parsing Enabling" do
+      let(:path) { 'test/files/html_strings_formatting.xlsx' }
 
-    it 'returns the expected result' do
-      expect(subject.excelx_value(1, 1, "Sheet1")).to eq "This has no formatting."
-      expect(subject.excelx_value(2, 1, "Sheet1")).to eq "<html>This has<b> bold </b>formatting.</html>"
-      expect(subject.excelx_value(2, 2, "Sheet1")).to eq "<html>This has <i>italics</i> formatting.</html>"
-      expect(subject.excelx_value(2, 3, "Sheet1")).to eq "<html>This has <u>underline</u> format.</html>"
-      expect(subject.excelx_value(2, 4, "Sheet1")).to eq "<html>Superscript. x<sup>123</sup></html>"
-      expect(subject.excelx_value(2, 5, "Sheet1")).to eq "<html>SubScript.  T<sub>j</sub></html>"
+      it 'returns the expected result' do
+        expect(subject.excelx_value(1, 1, "Sheet1")).to eq("This has no formatting.")
+        expect(subject.excelx_value(2, 1, "Sheet1")).to eq("<html>This has<b> bold </b>formatting.</html>")
+        expect(subject.excelx_value(2, 2, "Sheet1")).to eq("<html>This has <i>italics</i> formatting.</html>")
+        expect(subject.excelx_value(2, 3, "Sheet1")).to eq("<html>This has <u>underline</u> format.</html>")
+        expect(subject.excelx_value(2, 4, "Sheet1")).to eq("<html>Superscript. x<sup>123</sup></html>")
+        expect(subject.excelx_value(2, 5, "Sheet1")).to eq("<html>SubScript.  T<sub>j</sub></html>")
 
-      expect(subject.excelx_value(3, 1, "Sheet1")).to eq "<html>Bold, italics <b><i>together</i></b>.</html>"
-      expect(subject.excelx_value(3, 2, "Sheet1")).to eq "<html>Bold, Underline <b><u>together</u></b>.</html>"
-      expect(subject.excelx_value(3, 3, "Sheet1")).to eq "<html>Bold, Superscript. <b>x</b><sup><b>N</b></sup></html>"
-      expect(subject.excelx_value(3, 4, "Sheet1")).to eq "<html>Bold, Subscript. <b>T</b><sub><b>abc</b></sub></html>"
-      expect(subject.excelx_value(3, 5, "Sheet1")).to eq "<html>Italics, Underline <i><u>together</u></i>.</html>"
-      expect(subject.excelx_value(3, 6, "Sheet1")).to eq "<html>Italics, Superscript.  <i>X</i><sup><i>abc</i></sup></html>"
-      expect(subject.excelx_value(3, 7, "Sheet1")).to eq "<html>Italics, Subscript.  <i>B</i><sub><i>efg</i></sub></html>"
-      expect(subject.excelx_value(4, 1, "Sheet1")).to eq "<html>Bold, italics underline,<b><i><u> together</u></i></b>.</html>"
-      expect(subject.excelx_value(4, 2, "Sheet1")).to eq "<html>Bold, italics, superscript. <b>X</b><sup><b><i>abc</i></b></sup><b><i>123</i></b></html>"
-      expect(subject.excelx_value(4, 3, "Sheet1")).to eq "<html>Bold, Italics, subscript. <b><i>Mg</i></b><sub><b><i>ha</i></b></sub><b><i>2</i></b></html>"
-      expect(subject.excelx_value(4, 4, "Sheet1")).to eq "<html>Bold, Underline, superscript. <b><u>AB</u></b><sup><b><u>C12</u></b></sup><b><u>3</u></b></html>"
-      expect(subject.excelx_value(4, 5, "Sheet1")).to eq "<html>Bold, Underline, subscript. <b><u>Good</u></b><sub><b><u>XYZ</u></b></sub></html>"
-      expect(subject.excelx_value(4, 6, "Sheet1")).to eq "<html>Italics, Underline, superscript. <i><u>Up</u></i><sup><i><u>swing</u></i></sup></html>"
-      expect(subject.excelx_value(4, 7, "Sheet1")).to eq "<html>Italics, Underline, subscript. <i><u>T</u></i><sub><i><u>swing</u></i></sub></html>"
-      expect(subject.excelx_value(5, 1, "Sheet1")).to eq "<html>Bold, italics, underline, superscript.  <b><i><u>GHJK</u></i></b><sup><b><i><u>190</u></i></b></sup><b><i><u>4</u></i></b></html>"
-      expect(subject.excelx_value(5, 2, "Sheet1")).to eq "<html>Bold, italics, underline, subscript. <b><i><u>Mike</u></i></b><sub><b><i><u>drop</u></i></b></sub></html>"
-      expect(subject.excelx_value(6, 1, "Sheet1")).to eq "See that regular html tags do not create html tags.\n<ol>\n  <li> Denver Broncos </li>\n  <li> Carolina Panthers </li>\n  <li> New England Patriots</li>\n  <li>Arizona Panthers</li>\n</ol>"
-      expect(subject.excelx_value(7, 1, "Sheet1")).to eq "<html>Does create html tags when formatting is used..\n<ol>\n  <li> <b>Denver Broncos</b> </li>\n  <li> <i>Carolina Panthers </i></li>\n  <li> <u>New England Patriots</u></li>\n  <li>Arizona Panthers</li>\n</ol></html>"
+        expect(subject.excelx_value(3, 1, "Sheet1")).to eq("<html>Bold, italics <b><i>together</i></b>.</html>")
+        expect(subject.excelx_value(3, 2, "Sheet1")).to eq("<html>Bold, Underline <b><u>together</u></b>.</html>")
+        expect(subject.excelx_value(3, 3, "Sheet1")).to eq("<html>Bold, Superscript. <b>x</b><sup><b>N</b></sup></html>")
+        expect(subject.excelx_value(3, 4, "Sheet1")).to eq("<html>Bold, Subscript. <b>T</b><sub><b>abc</b></sub></html>")
+        expect(subject.excelx_value(3, 5, "Sheet1")).to eq("<html>Italics, Underline <i><u>together</u></i>.</html>")
+        expect(subject.excelx_value(3, 6, "Sheet1")).to eq("<html>Italics, Superscript.  <i>X</i><sup><i>abc</i></sup></html>")
+        expect(subject.excelx_value(3, 7, "Sheet1")).to eq("<html>Italics, Subscript.  <i>B</i><sub><i>efg</i></sub></html>")
+        expect(subject.excelx_value(4, 1, "Sheet1")).to eq("<html>Bold, italics underline,<b><i><u> together</u></i></b>.</html>")
+        expect(subject.excelx_value(4, 2, "Sheet1")).to eq("<html>Bold, italics, superscript. <b>X</b><sup><b><i>abc</i></b></sup><b><i>123</i></b></html>")
+        expect(subject.excelx_value(4, 3, "Sheet1")).to eq("<html>Bold, Italics, subscript. <b><i>Mg</i></b><sub><b><i>ha</i></b></sub><b><i>2</i></b></html>")
+        expect(subject.excelx_value(4, 4, "Sheet1")).to eq("<html>Bold, Underline, superscript. <b><u>AB</u></b><sup><b><u>C12</u></b></sup><b><u>3</u></b></html>")
+        expect(subject.excelx_value(4, 5, "Sheet1")).to eq("<html>Bold, Underline, subscript. <b><u>Good</u></b><sub><b><u>XYZ</u></b></sub></html>")
+        expect(subject.excelx_value(4, 6, "Sheet1")).to eq("<html>Italics, Underline, superscript. <i><u>Up</u></i><sup><i><u>swing</u></i></sup></html>")
+        expect(subject.excelx_value(4, 7, "Sheet1")).to eq("<html>Italics, Underline, subscript. <i><u>T</u></i><sub><i><u>swing</u></i></sub></html>")
+        expect(subject.excelx_value(5, 1, "Sheet1")).to eq("<html>Bold, italics, underline, superscript.  <b><i><u>GHJK</u></i></b><sup><b><i><u>190</u></i></b></sup><b><i><u>4</u></i></b></html>")
+        expect(subject.excelx_value(5, 2, "Sheet1")).to eq("<html>Bold, italics, underline, subscript. <b><i><u>Mike</u></i></b><sub><b><i><u>drop</u></i></b></sub></html>")
+        expect(subject.excelx_value(6, 1, "Sheet1")).to eq("See that regular html tags do not create html tags.\n<ol>\n  <li> Denver Broncos </li>\n  <li> Carolina Panthers </li>\n  <li> New England Patriots</li>\n  <li>Arizona Panthers</li>\n</ol>")
+        expect(subject.excelx_value(7, 1, "Sheet1")).to eq("<html>Does create html tags when formatting is used..\n<ol>\n  <li> <b>Denver Broncos</b> </li>\n  <li> <i>Carolina Panthers </i></li>\n  <li> <u>New England Patriots</u></li>\n  <li>Arizona Panthers</li>\n</ol></html>")
+      end
     end
   end
 
@@ -532,6 +598,59 @@ describe Roo::Excelx do
     end
     it 'should properly recognize formats' do
       expect(subject.sheet(0).excelx_format(2,1)).to eq 'm/d/yyyy" "h:mm:ss" "AM/PM'
+    end
+  end
+
+  describe 'images' do
+    let(:path) { 'test/files/images.xlsx' }
+
+    it 'returns array of images from default sheet' do
+      expect(subject.images).to be_kind_of(Array)
+      expect(subject.images.size).to eql(19)
+    end
+
+    it 'returns empty array if there is no images on the sheet' do
+      expect(subject.images("Sheet2")).to eql([])
+    end
+  end
+end
+
+describe 'Roo::Excelx with options set' do
+  subject(:xlsx) do
+    Roo::Excelx.new(path, disable_html_wrapper: true)
+  end
+
+  describe '#html_strings' do
+    describe "HTML Parsing Disabled" do
+      let(:path) { 'test/files/html_strings_formatting.xlsx' }
+
+      it 'returns the expected result' do
+        expect(subject.excelx_value(1, 1, "Sheet1")).to eq("This has no formatting.")
+        expect(subject.excelx_value(2, 1, "Sheet1")).to eq("This has bold formatting.")
+        expect(subject.excelx_value(2, 2, "Sheet1")).to eq("This has italics formatting.")
+        expect(subject.excelx_value(2, 3, "Sheet1")).to eq("This has underline format.")
+        expect(subject.excelx_value(2, 4, "Sheet1")).to eq("Superscript. x123")
+        expect(subject.excelx_value(2, 5, "Sheet1")).to eq("SubScript.  Tj")
+
+        expect(subject.excelx_value(3, 1, "Sheet1")).to eq("Bold, italics together.")
+        expect(subject.excelx_value(3, 2, "Sheet1")).to eq("Bold, Underline together.")
+        expect(subject.excelx_value(3, 3, "Sheet1")).to eq("Bold, Superscript. xN")
+        expect(subject.excelx_value(3, 4, "Sheet1")).to eq("Bold, Subscript. Tabc")
+        expect(subject.excelx_value(3, 5, "Sheet1")).to eq("Italics, Underline together.")
+        expect(subject.excelx_value(3, 6, "Sheet1")).to eq("Italics, Superscript.  Xabc")
+        expect(subject.excelx_value(3, 7, "Sheet1")).to eq("Italics, Subscript.  Befg")
+        expect(subject.excelx_value(4, 1, "Sheet1")).to eq("Bold, italics underline, together.")
+        expect(subject.excelx_value(4, 2, "Sheet1")).to eq("Bold, italics, superscript. Xabc123")
+        expect(subject.excelx_value(4, 3, "Sheet1")).to eq("Bold, Italics, subscript. Mgha2")
+        expect(subject.excelx_value(4, 4, "Sheet1")).to eq("Bold, Underline, superscript. ABC123")
+        expect(subject.excelx_value(4, 5, "Sheet1")).to eq("Bold, Underline, subscript. GoodXYZ")
+        expect(subject.excelx_value(4, 6, "Sheet1")).to eq("Italics, Underline, superscript. Upswing")
+        expect(subject.excelx_value(4, 7, "Sheet1")).to eq("Italics, Underline, subscript. Tswing")
+        expect(subject.excelx_value(5, 1, "Sheet1")).to eq("Bold, italics, underline, superscript.  GHJK1904")
+        expect(subject.excelx_value(5, 2, "Sheet1")).to eq("Bold, italics, underline, subscript. Mikedrop")
+        expect(subject.excelx_value(6, 1, "Sheet1")).to eq("See that regular html tags do not create html tags.\n<ol>\n  <li> Denver Broncos </li>\n  <li> Carolina Panthers </li>\n  <li> New England Patriots</li>\n  <li>Arizona Panthers</li>\n</ol>")
+        expect(subject.excelx_value(7, 1, "Sheet1")).to eq("Does create html tags when formatting is used..\n<ol>\n  <li> Denver Broncos </li>\n  <li> Carolina Panthers </li>\n  <li> New England Patriots</li>\n  <li>Arizona Panthers</li>\n</ol>")
+      end
     end
   end
 end

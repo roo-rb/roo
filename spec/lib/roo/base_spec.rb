@@ -127,10 +127,22 @@ describe Roo::Base do
     end
   end
 
-  describe '#row' do
-    it 'should return the specified row' do
+  describe "#row" do
+    it "should return the specified row" do
       expect(spreadsheet.row(12)).to eq([41.0, 42.0, 43.0, 44.0, 45.0, nil, nil])
-      expect(spreadsheet.row(16)).to eq([nil, '"Hello world!"', 'forty-three', 'forty-four', 'forty-five', nil, nil])
+      expect(spreadsheet.row(16)).to eq([nil, '"Hello world!"', "forty-three", "forty-four", "forty-five", nil, nil])
+    end
+
+    it "should return the specified row if default_sheet is set by a string" do
+      spreadsheet.default_sheet = "my_sheet"
+      expect(spreadsheet.row(12)).to eq([41.0, 42.0, 43.0, 44.0, 45.0, nil, nil])
+      expect(spreadsheet.row(16)).to eq([nil, '"Hello world!"', "forty-three", "forty-four", "forty-five", nil, nil])
+    end
+
+    it "should return the specified row if default_sheet is set by an integer" do
+      spreadsheet.default_sheet = 0
+      expect(spreadsheet.row(12)).to eq([41.0, 42.0, 43.0, 44.0, 45.0, nil, nil])
+      expect(spreadsheet.row(16)).to eq([nil, '"Hello world!"', "forty-three", "forty-four", "forty-five", nil, nil])
     end
   end
 
@@ -145,6 +157,11 @@ describe Roo::Base do
       it 'raises an error' do
         expect { spreadsheet.row_with([/Missing Header/]) }.to \
           raise_error(Roo::HeaderRowNotFoundError)
+      end
+
+      it 'returns missing headers' do
+        expect { spreadsheet.row_with([/Header/, /Missing Header 1/, /Missing Header 2/]) }.to \
+          raise_error(Roo::HeaderRowNotFoundError, '[/Missing Header 1/, /Missing Header 2/]')
       end
     end
   end
@@ -170,6 +187,31 @@ describe Roo::Base do
       each = spreadsheet.each
       expect(each).to be_a(Enumerator)
       expect(each.to_a.last).to eq([nil, '"Hello world!"', 'forty-three', 'forty-four', 'forty-five', nil, nil])
+    end
+  end
+
+  describe "#default_sheet=" do
+    it "should correctly set the default sheet if passed a string" do
+      spreadsheet.default_sheet = "my_sheet"
+      expect(spreadsheet.default_sheet).to eq("my_sheet")
+    end
+
+    it "should correctly set the default sheet if passed an integer" do
+      spreadsheet.default_sheet = 0
+      expect(spreadsheet.default_sheet).to eq("my_sheet")
+    end
+
+    it "should correctly set the default sheet if passed an integer for the second sheet" do
+      spreadsheet.default_sheet = 1
+      expect(spreadsheet.default_sheet).to eq("blank sheet")
+    end
+
+    it "should raise an error if passed a sheet that does not exist as an integer" do
+      expect { spreadsheet.default_sheet = 10 }.to raise_error RangeError
+    end
+
+    it "should raise an error if passed a sheet that does not exist as a string" do
+      expect { spreadsheet.default_sheet = "does_not_exist" }.to raise_error RangeError
     end
   end
 

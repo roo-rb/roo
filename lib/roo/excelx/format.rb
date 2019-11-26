@@ -1,49 +1,57 @@
+# frozen_string_literal: true
+
 module Roo
   class Excelx
     module Format
+      extend self
       EXCEPTIONAL_FORMATS = {
         'h:mm am/pm' => :date,
         'h:mm:ss am/pm' => :date
       }
 
       STANDARD_FORMATS = {
-        0 => 'General'.freeze,
-        1 => '0'.freeze,
-        2 => '0.00'.freeze,
-        3 => '#,##0'.freeze,
-        4 => '#,##0.00'.freeze,
-        9 => '0%'.freeze,
-        10 => '0.00%'.freeze,
-        11 => '0.00E+00'.freeze,
-        12 => '# ?/?'.freeze,
-        13 => '# ??/??'.freeze,
-        14 => 'mm-dd-yy'.freeze,
-        15 => 'd-mmm-yy'.freeze,
-        16 => 'd-mmm'.freeze,
-        17 => 'mmm-yy'.freeze,
-        18 => 'h:mm AM/PM'.freeze,
-        19 => 'h:mm:ss AM/PM'.freeze,
-        20 => 'h:mm'.freeze,
-        21 => 'h:mm:ss'.freeze,
-        22 => 'm/d/yy h:mm'.freeze,
-        37 => '#,##0 ;(#,##0)'.freeze,
-        38 => '#,##0 ;[Red](#,##0)'.freeze,
-        39 => '#,##0.00;(#,##0.00)'.freeze,
-        40 => '#,##0.00;[Red](#,##0.00)'.freeze,
-        45 => 'mm:ss'.freeze,
-        46 => '[h]:mm:ss'.freeze,
-        47 => 'mmss.0'.freeze,
-        48 => '##0.0E+0'.freeze,
-        49 => '@'.freeze
+        0 => 'General',
+        1 => '0',
+        2 => '0.00',
+        3 => '#,##0',
+        4 => '#,##0.00',
+        9 => '0%',
+        10 => '0.00%',
+        11 => '0.00E+00',
+        12 => '# ?/?',
+        13 => '# ??/??',
+        14 => 'mm-dd-yy',
+        15 => 'd-mmm-yy',
+        16 => 'd-mmm',
+        17 => 'mmm-yy',
+        18 => 'h:mm AM/PM',
+        19 => 'h:mm:ss AM/PM',
+        20 => 'h:mm',
+        21 => 'h:mm:ss',
+        22 => 'm/d/yy h:mm',
+        37 => '#,##0 ;(#,##0)',
+        38 => '#,##0 ;[Red](#,##0)',
+        39 => '#,##0.00;(#,##0.00)',
+        40 => '#,##0.00;[Red](#,##0.00)',
+        45 => 'mm:ss',
+        46 => '[h]:mm:ss',
+        47 => 'mmss.0',
+        48 => '##0.0E+0',
+        49 => '@'
       }
 
       def to_type(format)
+        @to_type ||= {}
+        @to_type[format] ||= _to_type(format)
+      end
+
+      def _to_type(format)
         format = format.to_s.downcase
         if (type = EXCEPTIONAL_FORMATS[format])
           type
         elsif format.include?('#')
           :float
-        elsif !format.match(/d+(?![\]])/).nil? || format.include?('y')
+        elsif format.include?('y') || !format.match(/d+(?![\]])/).nil?
           if format.include?('h') || format.include?('s')
             :datetime
           else
@@ -58,7 +66,6 @@ module Roo
         end
       end
 
-      module_function :to_type
     end
-  end 
+  end
 end

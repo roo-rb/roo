@@ -13,6 +13,34 @@ class TestRooCSV < Minitest::Test
     end
   end
 
+  def test_download_uri_with_query_string
+    file = filename("simple_spreadsheet")
+    port = 12_347
+    url = "#{local_server(port)}/#{file}?query-param=value"
+
+    start_local_server(file, port) do
+      csv = roo_class.new(url)
+      assert_equal "Task 1", csv.cell("f", 4)
+      assert_equal 1, csv.first_row
+      assert_equal 13, csv.last_row
+      assert_equal 1, csv.first_column
+      assert_equal 6, csv.last_column
+    end
+  end
+
+  def test_open_stream
+    file = filename("Bibelbund")
+    file_contents = File.read File.join(TESTDIR, file)
+    stream = StringIO.new(file_contents)
+    csv = roo_class.new(stream)
+
+    assert_equal "Aktuelle Seite", csv.cell("h", 12)
+    assert_equal 1, csv.first_row
+    assert_equal 3735, csv.last_row
+    assert_equal 1, csv.first_column
+    assert_equal 8, csv.last_column
+  end
+
   def test_nil_rows_and_lines_csv
     # x_123
     oo = Roo::CSV.new(File.join(TESTDIR,'Bibelbund.csv'))
