@@ -1,9 +1,7 @@
-# encoding: utf-8
-
-require 'tmpdir'
-require 'stringio'
-require 'nokogiri'
-require 'roo/utils'
+require "tmpdir"
+require "stringio"
+require "nokogiri"
+require "roo/utils"
 require "roo/formatters/base"
 require "roo/formatters/csv"
 require "roo/formatters/matrix"
@@ -19,8 +17,8 @@ class Roo::Base
   include Roo::Formatters::XML
   include Roo::Formatters::YAML
 
-  MAX_ROW_COL = 999_999.freeze
-  MIN_ROW_COL = 0.freeze
+  MAX_ROW_COL = 999_999
+  MIN_ROW_COL = 0
 
   attr_reader :headers
 
@@ -28,7 +26,7 @@ class Roo::Base
   attr_accessor :header_line
 
   def self.TEMP_PREFIX
-    warn '[DEPRECATION] please access TEMP_PREFIX via Roo::TEMP_PREFIX'
+    warn "[DEPRECATION] please access TEMP_PREFIX via Roo::TEMP_PREFIX"
     Roo::TEMP_PREFIX
   end
 
@@ -56,6 +54,11 @@ class Roo::Base
     if self.class.respond_to?(:finalize_tempdirs)
       self.class.finalize_tempdirs(object_id)
     end
+
+    instance_variables.each do |instance_variable|
+      instance_variable_set(instance_variable, nil)
+    end
+
     nil
   end
 
@@ -64,10 +67,10 @@ class Roo::Base
   end
 
   # sets the working sheet in the document
-  # 'sheet' can be a number (1 = first sheet) or the name of a sheet.
+  # 'sheet' can be a number (0 = first sheet) or the name of a sheet.
   def default_sheet=(sheet)
     validate_sheet!(sheet)
-    @default_sheet = sheet
+    @default_sheet = sheet.is_a?(String) ? sheet : sheets[sheet]
     @first_row[sheet] = @last_row[sheet] = @first_column[sheet] = @last_column[sheet] = nil
     @cells_read[sheet] = false
   end
@@ -100,7 +103,7 @@ class Roo::Base
   def collect_last_row_col_for_sheet(sheet)
     first_row = first_column = MAX_ROW_COL
     last_row = last_column = MIN_ROW_COL
-    @cell[sheet].each_pair do|key, value|
+    @cell[sheet].each_pair do |key, value|
       next unless value
       first_row = [first_row, key.first.to_i].min
       last_row = [last_row, key.first.to_i].max
@@ -110,13 +113,12 @@ class Roo::Base
     { first_row: first_row, first_column: first_column, last_row: last_row, last_column: last_column }
   end
 
-  %w(first_row last_row first_column last_column).each do |key|
-    class_eval <<-EOS, __FILE__, __LINE__ + 1
-      def #{key}(sheet = default_sheet)                                   # def first_row(sheet = default_sheet)
-        read_cells(sheet)                                                 #   read_cells(sheet)
-        @#{key}[sheet] ||= first_last_row_col_for_sheet(sheet)[:#{key}]   #   @first_row[sheet] ||= first_last_row_col_for_sheet(sheet)[:first_row]
-      end                                                                 # end
-    EOS
+  %i(first_row last_row first_column last_column).each do |key|
+    ivar = "@#{key}".to_sym
+    define_method(key) do |sheet = default_sheet|
+      read_cells(sheet)
+      instance_variable_get(ivar)[sheet] ||= first_last_row_col_for_sheet(sheet)[key]
+    end
   end
 
   def inspect
@@ -203,16 +205,16 @@ class Roo::Base
         "Number of sheets: #{sheets.size}\n"\
         "Sheets: #{sheets.join(', ')}\n"
       n = 1
-      sheets.each do|sheet|
+      sheets.each do |sheet|
         self.default_sheet = sheet
-        result << 'Sheet ' + n.to_s + ":\n"
+        result << "Sheet " + n.to_s + ":\n"
         if first_row
           result << "  First row: #{first_row}\n"
           result << "  Last row: #{last_row}\n"
           result << "  First column: #{::Roo::Utils.number_to_letter(first_column)}\n"
           result << "  Last column: #{::Roo::Utils.number_to_letter(last_column)}"
         else
-          result << '  - empty -'
+          result << "  - empty -"
         end
         result << "\n" if sheet != sheets.last
         n += 1
@@ -286,12 +288,12 @@ class Roo::Base
       clean_sheet_if_need(options)
       search_or_set_header(options)
       headers = @headers ||
-                Hash[(first_column..last_column).map do |col|
-                  [cell(@header_line, col), col]
-                end]
+                (first_column..last_column).each_with_object({}) do |col, hash|
+                  hash[cell(@header_line, col)] = col
+                end
 
       @header_line.upto(last_row) do |line|
-        yield(Hash[headers.map { |k, v| [k, cell(line, v)] }])
+        yield(headers.each_with_object({}) { |(k, v), hash| hash[k] = cell(line, v) })
       end
     end
   end
@@ -306,18 +308,22 @@ class Roo::Base
 
   def row_with(query, return_headers = false)
     line_no = 0
+    closest_mismatched_headers = []
     each do |row|
       line_no += 1
       headers = query.map { |q| row.grep(q)[0] }.compact
-
       if headers.length == query.length
         @header_line = line_no
         return return_headers ? headers : line_no
-      elsif line_no > 100
-        raise Roo::HeaderRowNotFoundError
+      else
+        closest_mismatched_headers = headers if headers.length > closest_mismatched_headers.length
+        if line_no > 100
+          break
+        end
       end
     end
-    raise Roo::HeaderRowNotFoundError
+    missing_headers = query.select { |q| closest_mismatched_headers.grep(q).empty? }
+    raise Roo::HeaderRowNotFoundError, missing_headers
   end
 
   protected
@@ -330,7 +336,7 @@ class Roo::Base
       filename = File.basename(filename, File.extname(filename))
     end
 
-    if uri?(filename) && (qs_begin = filename.rindex('?'))
+    if uri?(filename) && (qs_begin = filename.rindex("?"))
       filename = filename[0..qs_begin - 1]
     end
     exts = Array(exts)
@@ -356,7 +362,7 @@ class Roo::Base
   # Diese Methode ist eine temp. Loesung, um zu erforschen, ob der
   # Zugriff mit numerischen Keys schneller ist.
   def key_to_num(str)
-    r, c = str.split(',')
+    r, c = str.split(",")
     [r.to_i, c.to_i]
   end
 
@@ -418,9 +424,9 @@ class Roo::Base
 
   def find_by_conditions(options)
     rows = first_row.upto(last_row)
-    header_for = Hash[1.upto(last_column).map do |col|
-      [col, cell(@header_line, col)]
-    end]
+    header_for = 1.upto(last_column).each_with_object({}) do |col, hash|
+      hash[col] = cell(@header_line, col)
+    end
 
     # are all conditions met?
     conditions = options[:conditions]
@@ -435,9 +441,9 @@ class Roo::Base
       rows.map { |i| row(i) }
     else
       rows.map do |i|
-        Hash[1.upto(row(i).size).map do |j|
-          [header_for.fetch(j), cell(i, j)]
-        end]
+        1.upto(row(i).size).each_with_object({}) do |j, hash|
+          hash[header_for.fetch(j)] = cell(i, j)
+        end
       end
     end
   end
@@ -455,7 +461,7 @@ class Roo::Base
 
   def find_basename(filename)
     if uri?(filename)
-      require 'uri'
+      require "uri"
       uri = URI.parse filename
       File.basename(uri.path)
     elsif !is_stream?(filename)
@@ -464,9 +470,9 @@ class Roo::Base
   end
 
   def make_tmpdir(prefix = nil, root = nil, &block)
-    warn '[DEPRECATION] extend Roo::Tempdir and use its .make_tempdir instead'
+    warn "[DEPRECATION] extend Roo::Tempdir and use its .make_tempdir instead"
     prefix = "#{Roo::TEMP_PREFIX}#{prefix}"
-    root ||= ENV['ROO_TMP']
+    root ||= ENV["ROO_TMP"]
 
     if block_given?
       # folder is deleted at end of block
@@ -485,14 +491,17 @@ class Roo::Base
   end
 
   def sanitize_value(v)
-    v.gsub(/[[:cntrl:]]|^[\p{Space}]+|[\p{Space}]+$/, '')
+    v.gsub(/[[:cntrl:]]|^[\p{Space}]+|[\p{Space}]+$/, "")
   end
 
   def set_headers(hash = {})
     # try to find header row with all values or give an error
     # then create new hash by indexing strings and keeping integers for header array
-    @headers = row_with(hash.values, true)
-    @headers = Hash[hash.keys.zip(@headers.map { |x| header_index(x) })]
+    header_row = row_with(hash.values, true)
+    @headers = {}
+    hash.each_with_index do |(key, _), index|
+      @headers[key] = header_index(header_row[index])
+    end
   end
 
   def header_index(query)
@@ -525,17 +534,17 @@ class Roo::Base
   end
 
   def uri?(filename)
-    filename.start_with?('http://', 'https://', 'ftp://')
+    filename.start_with?("http://", "https://", "ftp://")
   rescue
     false
   end
 
   def download_uri(uri, tmpdir)
-    require 'open-uri'
+    require "open-uri"
     tempfilename = File.join(tmpdir, find_basename(uri))
     begin
-      File.open(tempfilename, 'wb') do |file|
-        open(uri, 'User-Agent' => "Ruby/#{RUBY_VERSION}") do |net|
+      File.open(tempfilename, "wb") do |file|
+        open(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}") do |net|
           file.write(net.read)
         end
       end
@@ -546,15 +555,15 @@ class Roo::Base
   end
 
   def open_from_stream(stream, tmpdir)
-    tempfilename = File.join(tmpdir, 'spreadsheet')
-    File.open(tempfilename, 'wb') do |file|
+    tempfilename = File.join(tmpdir, "spreadsheet")
+    File.open(tempfilename, "wb") do |file|
       file.write(stream[7..-1])
     end
-    File.join(tmpdir, 'spreadsheet')
+    File.join(tmpdir, "spreadsheet")
   end
 
   def unzip(filename, tmpdir)
-    require 'zip/filesystem'
+    require "zip/filesystem"
 
     Zip::File.open(filename) do |zip|
       process_zipfile_packed(zip, tmpdir)
@@ -567,7 +576,7 @@ class Roo::Base
     when nil
       fail ArgumentError, "Error: sheet 'nil' not valid"
     when Integer
-      sheets.fetch(sheet - 1) do
+      sheets.fetch(sheet) do
         fail RangeError, "sheet index #{sheet} not found"
       end
     when String
@@ -579,16 +588,16 @@ class Roo::Base
     end
   end
 
-  def process_zipfile_packed(zip, tmpdir, path = '')
+  def process_zipfile_packed(zip, tmpdir, path = "")
     if zip.file.file? path
       # extract and return filename
-      File.open(File.join(tmpdir, path), 'wb') do |file|
+      File.open(File.join(tmpdir, path), "wb") do |file|
         file.write(zip.read(path))
       end
       File.join(tmpdir, path)
     else
       ret = nil
-      path += '/' unless path.empty?
+      path += "/" unless path.empty?
       zip.dir.foreach(path) do |filename|
         ret = process_zipfile_packed(zip, tmpdir, path + filename)
       end

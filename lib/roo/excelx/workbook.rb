@@ -29,13 +29,17 @@ module Roo
 
       # aka labels
       def defined_names
-        Hash[doc.xpath('//definedName').map do |defined_name|
+        doc.xpath('//definedName').each_with_object({}) do |defined_name, hash|
           # "Sheet1!$C$5"
           sheet, coordinates = defined_name.text.split('!$', 2)
           col, row = coordinates.split('$')
           name = defined_name['name']
-          [name, Label.new(name, sheet, row, col)]
-        end]
+          hash[name] = Label.new(name, sheet, row, col)
+        end
+      end
+
+      def base_timestamp
+        @base_timestamp ||= base_date.to_datetime.to_time.to_i
       end
 
       def base_date
