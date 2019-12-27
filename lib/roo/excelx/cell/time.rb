@@ -13,7 +13,7 @@ module Roo
           super
           @format = excelx_type.last
           @datetime = create_datetime(base_date, value)
-          @value = link ? Roo::Link.new(link, value) : (value.to_f * 86_400).to_i
+          @value = link ? Roo::Link.new(link, value) : (value.to_f * 86_400).round.to_i
         end
 
         def formatted_value
