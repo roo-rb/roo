@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version  = ">= 2.3.0"
 
   spec.add_dependency 'nokogiri', '~> 1'
-  spec.add_dependency 'rubyzip', '>= 1.2.1', '< 2.0.0'
+  spec.add_dependency 'rubyzip', '>= 1.3.0', '< 3.0.0'
 
   spec.add_development_dependency 'rake', '~> 10.1'
   spec.add_development_dependency 'minitest', '~> 5.4', '>= 5.4.3'
