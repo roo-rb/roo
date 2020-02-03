@@ -1,6 +1,8 @@
 ##  Unreleased
-### Changed / Added
-- Updated rubyzip version. Now minimal version is 1.3.0. [CVE-2019-16892](https://github.com/rubyzip/rubyzip/pull/403)
+
+##  [2.8.3] 2020-02-03
+### Changed/Added
+- Updated rubyzip version. Now minimal version is 1.3.0 [515](https://github.com/roo-rb/roo/pull/515) - [CVE-2019-16892](https://github.com/rubyzip/rubyzip/pull/403)
 
 ##  [2.8.2] 2019-02-01
 ### Changed/Added

@@ -3,7 +3,7 @@ require "test_helper"
 class TestRworkbookExcelx < Minitest::Test
   def test_download_uri_with_invalid_host
     assert_raises(RuntimeError) do
-      Roo::Excelx.new("http://example.com/file.xlsx")
+      Roo::Excelx.new("http://examples.com/file.xlsx")
     end
   end
 

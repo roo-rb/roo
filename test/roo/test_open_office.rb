@@ -15,7 +15,7 @@ class TestRooOpenOffice < Minitest::Test
 
   def test_download_uri_with_invalid_host
     assert_raises(RuntimeError) do
-      roo_class.new("http://example.com/file.ods")
+      roo_class.new("http://examples.com/file.ods")
     end
   end
 
