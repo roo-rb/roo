@@ -24,7 +24,7 @@ module Roo
       file_warning = options[:file_warning] || :error
 
       @only_visible_sheets = options[:only_visible_sheets]
-      file_type_check(filename, '.ods', 'an Roo::OpenOffice', file_warning, packed)
+      file_type_check(filename, supported_extension, 'an Roo::OpenOffice', file_warning, packed)
       # NOTE: Create temp directory and allow Ruby to cleanup the temp directory
       #       when the object is garbage collected. Initially, the finalizer was
       #       created in the Roo::Tempdir module, but that led to a segfault
@@ -51,6 +51,10 @@ module Roo
     rescue
       self.class.finalize_tempdirs(object_id)
       raise
+    end
+
+    def supported_extension
+      '.ods'
     end
 
     def open_oo_file(options)
@@ -446,6 +450,10 @@ module Roo
       end
     end
 
+    def cell_elements(table_element)
+      table_element.children
+    end
+
     # read all cells in the selected sheet
     #--
     # the following construct means '4 blanks'
@@ -471,7 +479,7 @@ module Roo
               skip_row = attribute(table_element, 'number-rows-repeated').to_s.to_i
               row      = row + skip_row - 1
             end
-            table_element.children.each do |cell|
+            cell_elements(table_element).each do |cell|
               skip_col   = attribute(cell, 'number-columns-repeated')
               formula    = attribute(cell, 'formula')
               value_type = attribute(cell, 'value-type')
