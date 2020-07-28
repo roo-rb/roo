@@ -544,7 +544,7 @@ class Roo::Base
     tempfilename = File.join(tmpdir, find_basename(uri))
     begin
       File.open(tempfilename, "wb") do |file|
-        open_uri(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}") do |net|
+        URI.open(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}") do |net|
           file.write(net.read)
         end
       end
@@ -552,18 +552,6 @@ class Roo::Base
       raise "could not open #{uri}"
     end
     tempfilename
-  end
-
-  # Kernel#open re-defined by 'open-uri' is deprecated from Ruby 2.7.
-  # Before Ruby 2.5, URI.open is not defined by 'open-uri'.
-  # Therefore, this workaround is needed.
-  def open_uri(uri, options, &block)
-    require "open-uri"
-    if RUBY_VERSION >= '2.5.0'
-      URI.open(uri, options, &block)
-    else 
-      open(uri, options, &block)
-    end
   end
 
   def open_from_stream(stream, tmpdir)
