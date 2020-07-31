@@ -249,7 +249,7 @@ ods.formula('A', 2)
 csv = Roo::CSV.new("mycsv.csv")
 ```
 
-Because Roo uses the [standard CSV library](), you can use options available to that library to parse csv files. You can pass options using the ``csv_options`` key.
+Because Roo uses the standard CSV library, you can use options available to that library to parse csv files. You can pass options using the ``csv_options`` key.
 
 For instance, you can load tab-delimited files (``.tsv``), and you can use a particular encoding when opening the file.
 
