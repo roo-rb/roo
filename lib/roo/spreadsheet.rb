@@ -24,8 +24,14 @@ module Roo
           options[:file_warning] = :ignore
           extension.tr('.', '').downcase.to_sym
         else
-          res = ::File.extname((path =~ /\A#{::URI::DEFAULT_PARSER.make_regexp}\z/) ? ::URI.parse(::URI.encode(path)).path : path)
-          res.tr('.', '').downcase.to_sym
+          parsed_path =
+            if path =~ /\A#{::URI::DEFAULT_PARSER.make_regexp}\z/
+              # path is 7th match
+              Regexp.last_match[7]
+            else
+              path
+            end
+          ::File.extname(parsed_path).tr('.', '').downcase.to_sym
         end
       end
     end

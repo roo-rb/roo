@@ -544,7 +544,7 @@ class Roo::Base
     tempfilename = File.join(tmpdir, find_basename(uri))
     begin
       File.open(tempfilename, "wb") do |file|
-        open(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}") do |net|
+        URI.open(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}") do |net|
           file.write(net.read)
         end
       end
