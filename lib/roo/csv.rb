@@ -89,16 +89,16 @@ module Roo
 
     def each_row(options, &block)
       if uri?(filename)
-        each_row_using_tempdir(options, &block)
+        each_row_using_tempdir(**options, &block)
       else
-        csv_foreach(filename_or_stream, options, &block)
+        csv_foreach(filename_or_stream, **options, &block)
       end
     end
 
     def each_row_using_tempdir(options, &block)
       ::Dir.mktmpdir(Roo::TEMP_PREFIX, ENV["ROO_TMP"]) do |tmpdir|
         tmp_filename = download_uri(filename, tmpdir)
-        csv_foreach(tmp_filename, options, &block)
+        csv_foreach(tmp_filename, **options, &block)
       end
     end
 
