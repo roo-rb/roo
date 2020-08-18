@@ -86,6 +86,14 @@ describe Roo::Excelx do
     end
   end
 
+  describe 'for a workbook with hidden sheets' do
+    let(:path) { 'test/files/hidden_sheets.xlsx' }
+
+    it 'returns the cell contents from the visible sheet' do
+      expect(Roo::Excelx.new(path, only_visible_sheets: true).cell('A', 1)).to eq "visible sheet 1"
+    end
+  end
+
   describe '#parse' do
     let(:path) { 'test/files/numeric-link.xlsx' }
 

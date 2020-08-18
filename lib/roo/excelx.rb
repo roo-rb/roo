@@ -60,15 +60,16 @@ module Roo
       @filename = local_filename(filename_or_stream, @tmpdir, packed)
       process_zipfile(@filename || filename_or_stream)
 
-      @sheet_names = workbook.sheets.map do |sheet|
-        unless options[:only_visible_sheets] && sheet['state'] == 'hidden'
-          sheet['name']
-        end
-      end.compact
+      @sheet_names = []
       @sheets = []
       @sheets_by_name = {}
-      @sheet_names.each_with_index do |sheet_name, n|
-        @sheets_by_name[sheet_name] = @sheets[n] = Sheet.new(sheet_name, @shared, n, sheet_options)
+
+      workbook.sheets.each_with_index do |sheet, index|
+        next if options[:only_visible_sheets] && sheet['state'] == 'hidden'
+
+        sheet_name = sheet['name']
+        @sheet_names << sheet_name
+        @sheets_by_name[sheet_name] = @sheets[index] = Sheet.new(sheet_name, @shared, index, sheet_options)
       end
 
       if cell_max
