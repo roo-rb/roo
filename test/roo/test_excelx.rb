@@ -133,6 +133,20 @@ class TestRworkbookExcelx < Minitest::Test
     end
   end
 
+  def test_expand_merged_range_doesnt_insert_nil_values
+    options = { expand_merged_ranges: true }
+    xlsx = roo_class.new(File.join(TESTDIR, "merged_ranges.xlsx"), options)
+
+    refute_includes xlsx.sheet_for(0).cells.values, nil, "`nil` was copied into the cells hash from an empty merged range"
+  end
+
+  def test_expand_merged_range_doesnt_raise_issue_506
+    # Issue 506 sent an example test.xlsx file that would raise an error upon parsing.
+    xl = Roo::Spreadsheet.open(File.join(TESTDIR, "expand_merged_ranges_issue_506.xlsx"), expand_merged_ranges: true)
+    data = xl.parse(one: /one/i, two: /two/i, clean: true)
+    assert_equal [{:one=>"John", :two=>"Johnson"}, {:one=>"Sam", :two=>nil}, {:one=>"Dave", :two=>nil}], data
+  end
+
   def test_noexpand_merged_range
     xlsx = roo_class.new(File.join(TESTDIR, "merged_ranges.xlsx"))
 
