@@ -101,12 +101,7 @@ module Roo
         cell_xml_children.each do |cell|
           case cell.name
           when 'is'
-            content = +""
-            cell.children.each do |inline_str|
-              if inline_str.name == 't'
-                content << inline_str.content
-              end
-            end
+            content = cell.search('t').map(&:content).join
             unless content.empty?
               return Excelx::Cell.cell_class(:string).new(content, formula, style, hyperlink, coordinate)
             end
