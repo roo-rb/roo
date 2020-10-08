@@ -456,7 +456,8 @@ class Roo::Base
   end
 
   def reinitialize
-    initialize(@filename)
+    @filename.rewind if is_stream?(@filename)
+    initialize(@filename, @options)
   end
 
   def find_basename(filename)
