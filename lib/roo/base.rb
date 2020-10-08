@@ -201,7 +201,7 @@ class Roo::Base
   # this document.
   def info
     without_changing_default_sheet do
-      result = "File: #{File.basename(@filename)}\n"\
+      result = is_stream?(@filename) ? "Content: stream\n" : "File: #{File.basename(@filename)}\n"\
         "Number of sheets: #{sheets.size}\n"\
         "Sheets: #{sheets.join(', ')}\n"
       n = 1
