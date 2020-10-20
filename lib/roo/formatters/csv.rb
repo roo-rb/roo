@@ -44,8 +44,12 @@ module Roo
           %("#{onecell.gsub('"', '""')}") unless onecell.empty?
         when :boolean
           # TODO: this only works for excelx
-          onecell = self.sheet_for(sheet).cells[[row, col]].formatted_value
-          %("#{onecell.gsub('"', '""').downcase}")
+          if self.class == Roo::Excelx
+            onecell = self.sheet_for(sheet).cells[[row, col]].formatted_value
+            %("#{onecell.gsub('"', '""').downcase}")
+          else
+            onecell.to_s
+          end
         when :float, :percentage
           if onecell == onecell.to_i
             onecell.to_i.to_s

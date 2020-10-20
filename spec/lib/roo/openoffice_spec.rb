@@ -39,5 +39,41 @@ describe Roo::OpenOffice do
 
   end
 
+  describe '#to_csv' do
+    let(:expected_csv_row) {
+      [
+        '1',
+        '1.3',
+        'a',
+        '25/10/2020',
+        '2020-10-25',
+        '3324.23',
+        '23423',
+        '0.05',
+        '01:32:00',
+        '10:39:00',
+        '1.75',
+        'true',
+        'sarasum'
+      ]
+    }
+
+    context 'with boolean type in column' do
+      let(:spreadsheet) { Roo::OpenOffice.new('test/files/with-boolean.ods') }
+
+      it 'should convert the spreadsheet to csv' do
+        expect(CSV.new(spreadsheet.to_csv).first).to eq(expected_csv_row)
+      end
+    end
+
+    context 'with formula type in column' do
+      let(:spreadsheet) { Roo::OpenOffice.new('test/files/with-boolean-formula.ods') }
+
+      it 'should convert the spreadsheet to csv' do
+        expect(CSV.new(spreadsheet.to_csv).first).to eq(expected_csv_row)
+      end
+    end
+  end
+
   # OpenOffice is an alias of LibreOffice. See libreoffice_spec.
 end

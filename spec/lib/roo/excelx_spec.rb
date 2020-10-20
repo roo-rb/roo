@@ -18,6 +18,42 @@ describe Roo::Excelx do
     end
   end
 
+  describe '#to_csv' do
+    let(:expected_csv_row) {
+      [
+        '1',
+        '1.3',
+        'a',
+        '25/10/2020',
+        '2020-10-25',
+        '3324.23',
+        '23423',
+        '0.05',
+        '01:32:00',
+        '22:39:00',
+        '1.75',
+        'true',
+        'sarasum'
+      ]
+    }
+
+    context 'with boolean type in column' do
+      let(:spreadsheet) { Roo::Excelx.new('test/files/with-boolean.xlsx') }
+
+      it 'should convert the spreadsheet to csv' do
+        expect(CSV.new(spreadsheet.to_csv).first).to eq(expected_csv_row)
+      end
+    end
+
+    context 'with formula type in column' do
+      let(:spreadsheet) { Roo::Excelx.new('test/files/with-boolean-formula.xlsx') }
+
+      it 'should convert the spreadsheet to csv' do
+        expect(CSV.new(spreadsheet.to_csv).first).to eq(expected_csv_row)
+      end
+    end
+  end
+
   describe '.new' do
     let(:path) { 'test/files/numeric-link.xlsx' }
 
