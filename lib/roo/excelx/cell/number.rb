@@ -51,7 +51,7 @@ module Roo
           when /^#,##0.(0+)$/ then number_format("%.#{$1.size}f")
           when '0%'
             proc do |number|
-              Kernel.format('%d%%', number.to_f * 100)
+              Kernel.format('%.0f%%', number.to_f * 100)
             end
           when '0.00%'
             proc do |number|
