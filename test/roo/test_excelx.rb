@@ -341,6 +341,15 @@ class TestRworkbookExcelx < Minitest::Test
     assert_equal "Example richtext", xlsx.cell("b", 1)
   end
 
+  def test_implicit_coordinates
+    xlsx = roo_class.new(File.join(TESTDIR, 'implicit_coordinates.xlsx'))
+
+    assert_equal 'Test', xlsx.cell('a', 1)
+    assert_equal 'A2', xlsx.cell('a', 2)
+    assert_equal 'B2', xlsx.cell(2, 2)
+    assert_equal 'C2', xlsx.cell('c', 2)
+  end
+
   def roo_class
     Roo::Excelx
   end
