@@ -211,10 +211,19 @@ module Roo
         extracted_cells = {}
         empty_cell = @options[:empty_cell]
 
-        doc.xpath('/worksheet/sheetData/row/c').each do |cell_xml|
-          coordinate = ::Roo::Utils.extract_coordinate(cell_xml["r"])
-          cell = cell_from_xml(cell_xml, hyperlinks(relationships)[coordinate], coordinate, empty_cell)
-          extracted_cells[coordinate] = cell if cell
+        doc.xpath('/worksheet/sheetData/row').each.with_index(1) do |row_xml, ycoord|
+          row_xml.xpath('c').each.with_index(1) do |cell_xml, xcoord|
+            r = cell_xml['r']
+            coordinate =
+              if r.nil?
+                ::Roo::Excelx::Coordinate.new(ycoord, xcoord)
+              else
+                ::Roo::Utils.extract_coordinate(r)
+              end
+
+            cell = cell_from_xml(cell_xml, hyperlinks(relationships)[coordinate], coordinate, empty_cell)
+            extracted_cells[coordinate] = cell if cell
+          end
         end
 
         expand_merged_ranges(extracted_cells) if @options[:expand_merged_ranges]
