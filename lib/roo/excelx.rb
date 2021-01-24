@@ -429,6 +429,11 @@ module Roo
       entries.each do |entry|
         path =
         case entry.name.downcase
+        when /richdata/
+          # FIXME: Ignore richData as parsing is not implemented yet and can cause
+          # Zip::DestinationFileExistsError when including a second "styles.xml" entry
+          # see http://schemas.microsoft.com/office/spreadsheetml/2017/richdata2
+          nil
         when /sharedstrings.xml$/
           "#{@tmpdir}/roo_sharedStrings.xml"
         when /styles.xml$/
