@@ -10,6 +10,7 @@ group :test do
   gem 'simplecov', '>= 0.9.0', require: false
   gem 'coveralls', require: false
   gem "minitest-reporters"
+  gem 'webrick' if RUBY_VERSION >= '3.0.0'
 end
 
 group :local_development do
