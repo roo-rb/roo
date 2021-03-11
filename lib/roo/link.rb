@@ -23,7 +23,7 @@ module Roo
     alias_method :url, :href
 
     def initialize(href = '', text = href)
-      super(text)
+      super(text.to_s)
       @href = href
     end
 
