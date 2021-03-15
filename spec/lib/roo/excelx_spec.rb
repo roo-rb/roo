@@ -335,11 +335,19 @@ describe Roo::Excelx do
       end
     end
 
-    context 'contains other currency' do
+    context 'contains euro currency' do
       let(:path) { 'test/files/currency-euro.xlsx' }
 
       it 'returns a zero-padded number' do
         expect(subject.formatted_value(4, 1)).to eq '€20.51'
+      end
+    end
+
+    context 'contains uk currency' do
+      let(:path) { 'test/files/currency-uk.xlsx' }
+
+      it 'returns a zero-padded number' do
+        expect(subject.formatted_value(4, 1)).to eq '£20.51'
       end
     end
   end
