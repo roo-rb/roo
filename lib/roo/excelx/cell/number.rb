@@ -71,12 +71,7 @@ module Roo
               formatted_number = generate_formatter($2).call(number)
               "#{$1}#{formatted_number}"
             end
-          when /^_\(\[\$([^-]+)[^#@0]+([^_]+)_\)/
-            proc do |number|
-              formatted_number = generate_formatter($2).call(number)
-              "#{$1}#{formatted_number}"
-            end
-          when /^_[ -]\[\$([^-]*)[^#@]+([^_]+)_[ -]/
+          when /^_[- \()]\[\$([^-]*)[^#@]+([^_]+)_[- \)]/
             proc do |number|
               formatted_number = generate_formatter($2).call(number)
               "#{$1}#{formatted_number}"
