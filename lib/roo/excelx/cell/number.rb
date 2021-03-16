@@ -66,7 +66,7 @@ module Roo
           when '##0.0E+0' then '%.1E'
           when "_-* #,##0.00\\ _€_-;\\-* #,##0.00\\ _€_-;_-* \"-\"??\\ _€_-;_-@_-" then number_format('%.2f', '-%.2f')
           when '@' then proc { |number| number }
-          when /^"([^"]*)"(.+)/
+          when /^"([^"]*)"([^_]+)/
             proc do |number|
               formatted_number = generate_formatter($2).call(number)
               "#{$1}#{formatted_number}"
