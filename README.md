@@ -133,7 +133,11 @@ Use the ``:clean`` option to strip out control characters and surrounding white 
 
 ```ruby
 sheet.parse(clean: true)
-```
+
+A looser version of :clean may be specified as `clean: :loose` that strips out non-printable characters and surrounding
+white space. This will leave in-cell newlines, tabs, and similar printable control characters alone.
+
+sheet.parse(clean: :loose)
 
 #### Options
 

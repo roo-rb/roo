@@ -35,11 +35,24 @@ describe Roo::CSV do
       csv.parse(options)
     end
     context 'with clean: true' do
-      let(:options) { {clean: true} }
+      let(:options) { {clean: true, headers: true} }
       let(:path) { 'test/files/parse_with_clean_option.csv' }
 
       it "doesn't blow up" do
-        expect { subject }.to_not raise_error
+        expect {
+          expect(subject).to eq([["nameRobertEshleman"]])
+        }.to_not raise_error
+      end
+    end
+
+    context 'with clean: :loose' do
+      let(:options) { {clean: :loose, headers: true} }
+      let(:path) { 'test/files/parse_with_clean_option.csv' }
+
+      it "doesn't blow up" do
+        expect {
+          expect(subject).to eq([["name\nRobert\nEshleman"]])
+        }.to_not raise_error
       end
     end
   end

@@ -113,13 +113,21 @@ describe Roo::Excelx do
 
   describe '#parse_with_clean_option' do
     let(:path) { 'test/files/parse_with_clean_option.xlsx' }
-    let(:options) { {clean: true} }
 
     context 'with clean: true' do
-
+      let(:options) { {clean: true, name: 'name'} }
       it 'does not raise' do
         expect do
-          xlsx.parse(options)
+          expect(xlsx.parse(options).last[:name]).to eq("RobertEshleman")
+        end.not_to raise_error
+      end
+    end
+
+    context 'with clean: :loose' do
+      let(:options) { {clean: :loose, name: 'name'} }
+      it 'does not raise' do
+        expect do
+          expect(xlsx.parse(options).last[:name]).to eq("Robert\nEshleman")
         end.not_to raise_error
       end
     end
@@ -127,9 +135,16 @@ describe Roo::Excelx do
 
   describe '#parse_unicode_with_clean_option' do
     let(:path) { 'test/files/parse_clean_with_unicode.xlsx' }
-    let(:options) { {clean: true, name: 'Name'} }
 
     context 'with clean: true' do
+      let(:options) { {clean: true, name: 'Name'} }
+      it 'returns a non empty string' do
+        expect(xlsx.parse(options).last[:name]).to eql('凯')
+      end
+    end
+
+    context 'with clean: :loose' do
+      let(:options) { {clean: :loose, name: 'Name'} }
       it 'returns a non empty string' do
         expect(xlsx.parse(options).last[:name]).to eql('凯')
       end

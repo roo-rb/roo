@@ -305,11 +305,11 @@ module Roo
 
     private
 
-    def clean_sheet(sheet)
+    def clean_sheet(sheet, sanitizer)
       @sheets_by_name[sheet].cells.each_pair do |coord, value|
         next unless value.value.is_a?(::String)
 
-        @sheets_by_name[sheet].cells[coord].value = sanitize_value(value.value)
+        @sheets_by_name[sheet].cells[coord].value = sanitize_value(value.value, sanitizer)
       end
 
       @cleaned[sheet] = true

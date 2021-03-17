@@ -275,17 +275,21 @@ class Roo::Base
   # * is the wildcard character
 
   # you can also pass in a :clean => true option to strip the sheet of
-  # control characters and white spaces around columns
+  # control characters and white spaces around columns. Alternatively, :clean =>
+  # :strict (same as :clean => true) or :clean => :loose can be used. If the
+  # value of :clean is :loose, the cleaning will only remove non-printable
+  # values and surrounding whitespaces, preserving newlines, tabs, etc.
 
   def each(options = {})
     return to_enum(:each, options) unless block_given?
+
+    clean_sheet_if_need(options)
 
     if options.empty?
       1.upto(last_row) do |line|
         yield row(line)
       end
     else
-      clean_sheet_if_need(options)
       search_or_set_header(options)
       headers = @headers ||
                 (first_column..last_column).each_with_object({}) do |col, hash|
@@ -299,11 +303,13 @@ class Roo::Base
   end
 
   def parse(options = {})
+    need_headers = options.delete(:headers) == true
+
     results = each(options).map do |row|
       block_given? ? yield(row) : row
     end
 
-    options[:headers] == true ? results : results.drop(1)
+    need_headers ? results : results.drop(1)
   end
 
   def row_with(query, return_headers = false)
@@ -377,11 +383,22 @@ class Roo::Base
 
   private
 
+  def cell_sanitizer(type)
+    if type == :loose
+      /[^\p{Space}\p{Graph}]|^[\p{Space}]+|[\p{Space}]+$/
+    else
+      /[[:cntrl:]]|^[\p{Space}]+|[\p{Space}]+$/
+    end
+  end
+
   def clean_sheet_if_need(options)
     return unless options[:clean]
-    options.delete(:clean)
+
     @cleaned ||= {}
-    clean_sheet(default_sheet) unless @cleaned[default_sheet]
+    sanitizer = cell_sanitizer(options.delete(:clean))
+
+    return if @cleaned[default_sheet]
+    clean_sheet(default_sheet, sanitizer)
   end
 
   def search_or_set_header(options)
@@ -482,16 +499,16 @@ class Roo::Base
     end
   end
 
-  def clean_sheet(sheet)
+  def clean_sheet(sheet, sanitizer)
     read_cells(sheet)
     @cell[sheet].each_pair do |coord, value|
-      @cell[sheet][coord] = sanitize_value(value) if value.is_a?(::String)
+      @cell[sheet][coord] = sanitize_value(value, sanitizer) if value.is_a?(::String)
     end
     @cleaned[sheet] = true
   end
 
-  def sanitize_value(v)
-    v.gsub(/[[:cntrl:]]|^[\p{Space}]+|[\p{Space}]+$/, "")
+  def sanitize_value(v, sanitizer)
+    v.gsub(sanitizer, "")
   end
 
   def set_headers(hash = {})

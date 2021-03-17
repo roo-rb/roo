@@ -126,11 +126,12 @@ module Roo
       nil
     end
 
-    def clean_sheet(sheet)
+    def clean_sheet(sheet, sanitizer)
       read_cells(sheet)
 
       @cell.each_pair do |coord, value|
-        @cell[coord] = sanitize_value(value) if value.is_a?(::String)
+        value = sanitize_value(value, sanitizer) if value.is_a?(::String)
+        @cell[coord] = value
       end
 
       @cleaned[sheet] = true
