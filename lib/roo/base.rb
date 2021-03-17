@@ -303,7 +303,7 @@ class Roo::Base
   end
 
   def parse(options = {})
-    need_headers = options.delete(:headers) == true
+    need_headers = options[:headers] == true
 
     results = each(options).map do |row|
       block_given? ? yield(row) : row
@@ -384,11 +384,7 @@ class Roo::Base
   private
 
   def cell_sanitizer(type)
-    if type == :loose
-      /[^\p{Space}\p{Graph}]|^[\p{Space}]+|[\p{Space}]+$/
-    else
-      /[[:cntrl:]]|^[\p{Space}]+|[\p{Space}]+$/
-    end
+    type == :loose ? /[^\p{Space}\p{Graph}]/ : /[[:cntrl:]]/
   end
 
   def clean_sheet_if_need(options)
@@ -508,7 +504,7 @@ class Roo::Base
   end
 
   def sanitize_value(v, sanitizer)
-    v.gsub(sanitizer, "")
+    v.gsub(sanitizer, "").sub(/^[\p{Space}]+/, "").sub(/[\p{Space}]+$/, "")
   end
 
   def set_headers(hash = {})

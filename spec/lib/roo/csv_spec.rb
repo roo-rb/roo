@@ -40,7 +40,7 @@ describe Roo::CSV do
 
       it "doesn't blow up" do
         expect {
-          expect(subject).to eq([["nameRobertEshleman"]])
+          expect(subject).to eq([{"nameRobertEshleman" => "nameRobertEshleman"}])
         }.to_not raise_error
       end
     end
@@ -51,7 +51,7 @@ describe Roo::CSV do
 
       it "doesn't blow up" do
         expect {
-          expect(subject).to eq([["name\nRobert\nEshleman"]])
+          expect(subject).to eq([{"name\nRobert\nEshleman" => "name\nRobert\nEshleman"}])
         }.to_not raise_error
       end
     end
