@@ -40,4 +40,15 @@ module TestComments
       assert_equal expected_comments, oo.comments(oo.sheets.first), "comments error in class #{oo.class}"
     end
   end
+
+  def test_excel_comment_with_author
+    options = { name: "comments-with-author", format: [:excelx] }
+    expexted_comments = [
+      [6, 2, "Eli Wang:\ncomment with author"]
+    ]
+
+    with_each_spreadsheet(options) do |oo|
+      assert_equal expexted_comments, oo.comments(oo.sheets.first), "comments error in class #{oo.class}"
+    end
+  end
 end
