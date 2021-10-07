@@ -13,8 +13,8 @@ Gem::Specification.new do |spec|
   spec.homepage               = 'https://github.com/roo-rb/roo'
   spec.license                = 'MIT'
 
-  spec.files                  = `git ls-files -z`.split("\x0")
-  spec.files.reject! { |fn| fn.include?('test/files') }
+  spec.files                  = Dir.glob('lib/**/*').reject { |f| File.directory?(f) } + %w{CHANGELOG.md LICENSE README.md Gemfile roo.gemspec}
+
   spec.require_paths          = ['lib']
 
   spec.required_ruby_version  = ">= 2.5.0"
