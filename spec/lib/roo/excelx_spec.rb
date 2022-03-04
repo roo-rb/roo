@@ -56,6 +56,14 @@ describe Roo::Excelx do
         expect(subject).to be_a(Roo::Excelx)
       end
     end
+
+    context 'given a URI created stream' do
+      let(:file) { 'test/files/simple_spreadsheet.xlsx' }
+
+      it 'creates an instance' do
+        expect(subject).to be_a(Roo::Excelx)
+      end
+    end
   end
 
   describe '#cell' do
