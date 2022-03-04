@@ -391,6 +391,7 @@ module Roo
       end
     end
 
+    # Extracts all needed files from the zip file
     def process_zipfile(zipfilename_or_stream)
       @sheet_files = []
 
