@@ -57,8 +57,8 @@ describe Roo::Excelx do
       end
     end
 
-    context 'given a URI created stream' do
-      let(:file) { 'test/files/simple_spreadsheet.xlsx' }
+    context 'given a stream input' do
+      let(:path) { StringIO.new(File.read('test/files/simple_spreadsheet.xlsx')) }
 
       it 'creates an instance' do
         expect(subject).to be_a(Roo::Excelx)
