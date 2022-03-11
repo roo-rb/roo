@@ -312,7 +312,7 @@ class Roo::Base
     each do |row|
       line_no += 1
       headers = query.map { |q| row.grep(q)[0] }.compact
-      if headers.length == query.length
+      if headers.length > 1
         @header_line = line_no
         return return_headers ? headers : line_no
       else
@@ -498,6 +498,8 @@ class Roo::Base
     # try to find header row with all values or give an error
     # then create new hash by indexing strings and keeping integers for header array
     header_row = row_with(hash.values, true)
+    # reject column names from hash that do not exist
+    hash.reject!{|k,v| header_row.grep(v).empty?}
     @headers = {}
     hash.each_with_index do |(key, _), index|
       @headers[key] = header_index(header_row[index])
