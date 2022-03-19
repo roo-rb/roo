@@ -25,7 +25,7 @@ describe Roo::Spreadsheet do
       let(:filename) { tempfile.path }
 
       it 'loads the proper type' do
-        expect(Roo::CSV).to receive(:new).with(filename, file_warning: :ignore).and_call_original
+        expect(Roo::CSV).to receive(:new).with(filename, {file_warning: :ignore}).and_call_original
         expect(Roo::Spreadsheet.open(tempfile, extension: :csv)).to be_a(Roo::CSV)
       end
     end
