@@ -1,0 +1,33 @@
+name: Ruby
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby:
+          - 2.7
+          - 3.0
+          - 3.1
+          - ruby-head
+          - jruby-9.3.3.0
+        include:
+          - ruby: ruby-head
+            env:
+              RUBYOPT: '--jit'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - run: bundle exec rake
+        env:
+          LONG_RUN: true
+
