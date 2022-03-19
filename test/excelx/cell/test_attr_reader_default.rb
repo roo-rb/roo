@@ -60,7 +60,7 @@ class TestAttrReaderDefault < Minitest::Test
                 object.instance_variable_defined?(attr_name) ? object.instance_variable_get(attr_name) : nil
               else
                 object.public_send(attr_name)
-      end
+              end
 
       if expected_value
         assert_equal expected_value, value
