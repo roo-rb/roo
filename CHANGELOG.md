@@ -1,5 +1,19 @@
 ##  Unreleased
 
+##  [2.9.0] 2022-03-19
+
+### Changed/Added
+- Ruby 3.x Support [555](https://github.com/roo-rb/roo/pull/555)
+- Ignore all richdata at 'xl/richData' of XSLX [552](https://github.com/roo-rb/roo/pull/552)
+- Only copy if cell is present when `expand_merged_ranges: true` [557](https://github.com/roo-rb/roo/pull/557)
+- Fixes issue where the contents of hidden sheet was returned when parsing visible sheets only. [536](https://github.com/roo-rb/roo/pull/536)
+- Add formats [525](https://github.com/roo-rb/roo/pull/525)
+- Fix warnings caused by Ruby 2.7 update [530](https://github.com/roo-rb/roo/pull/530)
+- Add formats [525](https://github.com/roo-rb/roo/pull/525)
+
+### Removed
+- Support for ruby 2.4, 2.5, 2.6(excluded jRuby)
+
 ##  [2.8.3] 2020-02-03
 ### Changed/Added
 - Updated rubyzip version. Now minimal version is 1.3.0 [515](https://github.com/roo-rb/roo/pull/515) - [CVE-2019-16892](https://github.com/rubyzip/rubyzip/pull/403)
