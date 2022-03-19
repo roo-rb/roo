@@ -1,0 +1,15 @@
+name: Changelog
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: amoniacou/changelog-enforcer@v1.4.0
+        with:
+          changeLogPath: 'CHANGELOG.md'
+          skipLabel: 'Skip-Changelog'
