@@ -1,22 +1,19 @@
 language: ruby
 rvm:
-  - 2.5
-  - 2.6
   - 2.7
   - 3.0
+  - 3.1
   - ruby-head
-  - jruby-9.1.6.0
+  - jruby-9.3.3.0
 env:
   - LONG_RUN=true
 matrix:
   include:
-    - rvm: 2.6
-      env: RUBYOPT=--jit LONG_RUN=true
     - rvm: ruby-head
       env: RUBYOPT=--jit LONG_RUN=true
   allow_failures:
     - rvm: ruby-head
     - rvm: ruby-head
       env: RUBYOPT=--jit LONG_RUN=true
-    - rvm: jruby-9.1.6.0
+    - rvm: jruby-9.3.3.0
 bundler_args: --without local_development
