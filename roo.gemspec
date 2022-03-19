@@ -25,4 +25,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'minitest', '~> 5.4', '>= 5.4.3'
   spec.add_development_dependency 'rack', '~> 1.6', '< 2.0.0'
+  if RUBY_VERSION >= '3.0.0'
+    spec.add_development_dependency 'matrix'
+  end
 end
