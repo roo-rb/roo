@@ -396,13 +396,18 @@ module Roo
       @sheet_files = []
 
       entries = if is_stream?(zipfilename_or_stream)
-        zip_stream = Zip::InputStream.new(zipfilename_or_stream)
-        entries = []
-        while (entry = zip_stream.get_next_entry)
-          entries << entry
-        end
+        begin
+          zip_stream = Zip::InputStream.new(zipfilename_or_stream)
+          entries = []
+          while (entry = zip_stream.get_next_entry)
+            entries << entry
+          end
 
-        entries
+          entries
+        rescue Zip::GPFBit3Error
+          zip_file = Zip::File.open_buffer(zipfilename_or_stream)
+          zip_file.to_a
+        end
       else
         zip_file = Zip::File.open(zipfilename_or_stream)
         zip_file.to_a
