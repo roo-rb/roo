@@ -1,5 +1,8 @@
 ##  Unreleased
 
+### Changed/Added
+- Roo::Base#each_with_pagename returns Enumerator Object [576](https://github.com/roo-rb/roo/pull/576)
+
 ##  [2.9.0] 2022-03-19
 
 ### Changed/Added
