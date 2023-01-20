@@ -250,8 +250,10 @@ class Roo::Base
 
   # iterate through all worksheets of a document
   def each_with_pagename
-    sheets.each do |s|
-      yield sheet(s, true)
+    Enumerator.new do |yielder|
+      sheets.each do |s|
+        yielder << sheet(s, true)
+      end
     end
   end
 

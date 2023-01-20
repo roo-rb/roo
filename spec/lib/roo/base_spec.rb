@@ -182,6 +182,14 @@ describe Roo::Base do
     end
   end
 
+  describe '#each_with_pagename' do
+    it 'should return an enumerator with all the rows' do
+      each_with_pagename = spreadsheet.each_with_pagename
+      expect(each_with_pagename).to be_a(Enumerator)
+      expect(each_with_pagename.to_a.last).to eq([spreadsheet.default_sheet, spreadsheet])
+    end
+  end
+
   describe '#each' do
     it 'should return an enumerator with all the rows' do
       each = spreadsheet.each
