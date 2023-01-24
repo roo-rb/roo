@@ -1,4 +1,5 @@
 ##  Unreleased
+- Add support for boolean values in open office files that were generated via Google Sheets [579](https://github.com/roo-rb/roo/pull/579)
 
 ### Changed/Added
 - Roo::Base#each_with_pagename returns Enumerator Object [576](https://github.com/roo-rb/roo/pull/576)
