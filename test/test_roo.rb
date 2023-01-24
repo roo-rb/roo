@@ -286,8 +286,8 @@ class TestRoo < Minitest::Test
         cell = oo.sheet_for(oo.default_sheet).cells[[2, 1,]]
         assert_equal 'FALSE', cell.formatted_value
       else
-        assert_equal "true", oo.cell(1,1), "failure in "+oo.class.to_s
-        assert_equal "false", oo.cell(2,1), "failure in "+oo.class.to_s
+        assert_equal "true", oo.cell(1,1), "failure in #{oo.class}"
+        assert_equal "false", oo.cell(2,1), "failure in #{oo.class}"
       end
     end
   end
