@@ -274,6 +274,24 @@ class TestRoo < Minitest::Test
     end
   end
 
+  def test_cell_boolean_from_google_sheets
+    with_each_spreadsheet(:name=>'boolean-from-google-sheets', :format=>[:openoffice, :excelx]) do |oo|
+      if oo.class == Roo::Excelx
+        assert_equal true, oo.cell(1, 1), "failure in #{oo.class}"
+        assert_equal false, oo.cell(2, 1), "failure in #{oo.class}"
+
+        cell = oo.sheet_for(oo.default_sheet).cells[[1, 1,]]
+        assert_equal 'TRUE', cell.formatted_value
+
+        cell = oo.sheet_for(oo.default_sheet).cells[[2, 1,]]
+        assert_equal 'FALSE', cell.formatted_value
+      else
+        assert_equal "true", oo.cell(1,1), "failure in "+oo.class.to_s
+        assert_equal "false", oo.cell(2,1), "failure in "+oo.class.to_s
+      end
+    end
+  end
+
   def test_cell_multiline
     with_each_spreadsheet(:name=>'paragraph', :format=>[:openoffice, :excelx]) do |oo|
       assert_equal "This is a test\nof a multiline\nCell", oo.cell(1,1)
