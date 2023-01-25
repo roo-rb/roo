@@ -282,6 +282,12 @@ class TestRoo < Minitest::Test
     end
   end
 
+  def test_apostrophe_replacement
+    with_each_spreadsheet(:name=>'apostrophe', :format=>[:openoffice]) do |oo|
+      assert_equal "", oo.cell(1,1)
+    end
+  end
+
   def test_row_whitespace
     # auf dieses Dokument habe ich keinen Zugriff TODO:
     # TODO: No access to document whitespace?
