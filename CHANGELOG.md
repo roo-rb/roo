@@ -1,4 +1,5 @@
 ##  Unreleased
+- Fix gsub! usage for open office documents on a frozen string [580](https://github.com/roo-rb/roo/pull/580)
 
 ### Changed/Added
 - Roo::Base#each_with_pagename returns Enumerator Object [576](https://github.com/roo-rb/roo/pull/576)
