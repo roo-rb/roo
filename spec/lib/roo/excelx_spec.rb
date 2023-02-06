@@ -633,6 +633,17 @@ describe Roo::Excelx do
     end
   end
 
+  describe 'opening a file with filters' do
+    let(:path) { 'test/files/wrong_coordinates.xlsx' }
+    subject(:xlsx) do
+      Roo::Spreadsheet.open(path)
+    end
+
+    it 'should properly extract defined_names' do
+      expect(subject.sheet(0).workbook.defined_names.length).to eq(1)
+    end
+  end
+
   describe 'images' do
     let(:path) { 'test/files/images.xlsx' }
 

@@ -32,6 +32,7 @@ module Roo
         doc.xpath('//definedName').each_with_object({}) do |defined_name, hash|
           # "Sheet1!$C$5"
           sheet, coordinates = defined_name.text.split('!$', 2)
+          next unless coordinates
           col, row = coordinates.split('$')
           name = defined_name['name']
           hash[name] = Label.new(name, sheet, row, col)
