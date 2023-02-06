@@ -517,7 +517,7 @@ module Roo
                         str_v += child.content #.text
                       end
                     end
-                    str_v.gsub!(/&apos;/, "'") # special case not supported by unescapeHTML
+                    str_v = str_v.gsub(/&apos;/, "'") # special case not supported by unescapeHTML
                     str_v = CGI.unescapeHTML(str_v)
                   end # == 'p'
                 end
