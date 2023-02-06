@@ -1,4 +1,5 @@
 ##  Unreleased
+- Fix gsub! usage for open office documents on a frozen string [580](https://github.com/roo-rb/roo/pull/580)
 - Add support for boolean values in open office files that were generated via Google Sheets [579](https://github.com/roo-rb/roo/pull/579)
 
 ### Changed/Added
