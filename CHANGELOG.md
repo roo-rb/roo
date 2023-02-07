@@ -1,5 +1,6 @@
 ##  Unreleased
-- Fix gsub! usage for open office documents on a frozen string [580](https://github.com/roo-rb/roo/pull/580)
+- Fix gsub! usage for open office documents on a frozen string [581](https://github.com/roo-rb/roo/pull/581)
+- Add support for boolean values in open office files that were generated via Google Sheets [580](https://github.com/roo-rb/roo/pull/580)
 
 ### Changed/Added
 - Roo::Base#each_with_pagename returns Enumerator Object [576](https://github.com/roo-rb/roo/pull/576)
