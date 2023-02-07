@@ -18,7 +18,7 @@ Install as a gem
 Or add it to your Gemfile
 
 ```ruby
-gem "roo", "~> 2.9.0"
+gem "roo", "~> 2.10.0"
 ```
 ## Usage
 
