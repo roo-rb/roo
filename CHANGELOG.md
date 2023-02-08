@@ -1,6 +1,7 @@
 ##  Unreleased
 
 ### Changed/Added
+- Add Ruby 3.2 and JRuby 9.4 to the CI matrix [582](https://github.com/roo-rb/roo/pull/582)
 
 ##  [2.10.0] 2023-02-07
 
