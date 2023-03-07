@@ -458,6 +458,7 @@ module Roo
           rels_files[nr - 1] = "#{@tmpdir}/roo_rels#{nr}"
         when /drawing([0-9]+).xml.rels$/
           # Extracting drawing relationships to make images lists for each sheet
+          binding.pry
           nr = Regexp.last_match[1].to_i
           image_rels[nr - 1] = "#{@tmpdir}/roo_image_rels#{nr}"
         end
