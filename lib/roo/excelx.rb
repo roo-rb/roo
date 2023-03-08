@@ -25,8 +25,9 @@ module Roo
     require 'roo/excelx/coordinate'
     require 'roo/excelx/format'
     require 'roo/excelx/images'
+    require 'roo/excelx/drawing'
 
-    delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files, :image_rels, :image_files] => :@shared
+    delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files, :image_rels, :image_files, :drawing_files] => :@shared
     ExceedsMaxError = Class.new(StandardError)
 
     # initialization and opening of a spreadsheet file
@@ -458,9 +459,11 @@ module Roo
           rels_files[nr - 1] = "#{@tmpdir}/roo_rels#{nr}"
         when /drawing([0-9]+).xml.rels$/
           # Extracting drawing relationships to make images lists for each sheet
-          binding.pry
           nr = Regexp.last_match[1].to_i
           image_rels[nr - 1] = "#{@tmpdir}/roo_image_rels#{nr}"
+        when /drawing([0-9]).xml$/
+          nr = Regexp.last_match[1].to_i
+          drawing_files[nr - 1] = "#{@tmpdir}/roo_drawing#{nr}.xml"
         end
 
         entry.extract(path) if path
