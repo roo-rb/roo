@@ -5,9 +5,10 @@ module Roo
     class Drawing < Excelx::Extractor
 
       # Returns: Hash { id1: cell_coordinates },
-      # Example: { "rId1"=> [2,4],
-      #            "rId2"=> [4,3],
-      #            "rId3"=> [5,4] }
+      # Example: { "rId1"=> { from_col: 2, from_row: 3, to_col: 2, to_row: 3 },
+      #            "rId2"=> { from_col: 2, from_row: 4, to_col: 2, to_row: 4 },
+      #            "rId3"=> { from_col: 2, from_row: 5, to_col: 2, to_row: 5 } }
+      #
       def list
         @image_coordinates ||= extract_image_coordinates
       end
@@ -26,7 +27,7 @@ module Roo
           to_col = anchor.at_xpath('./to/col').text.to_i
           to_row = anchor.at_xpath('./to/row').text.to_i
 
-          # Extract the rId attribute from the blip element
+          # Extract the rId attribute from the blip element if present, if not ignore anchor element
           if anchor.at_xpath('./pic/blipFill/blip')
             r_id = anchor.at_xpath('./pic/blipFill/blip')['embed']
 
