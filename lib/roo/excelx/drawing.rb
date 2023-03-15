@@ -36,6 +36,21 @@ module Roo
           end
         end
 
+        # Loop through all oneCellAnchor elements and extract the information
+        doc.xpath('//oneCellAnchor').each do |anchor|
+          # Extract the row and column numbers
+          from_col = anchor.at_xpath('./from/col')&.text&.to_i
+          from_row = anchor.at_xpath('./from/row')&.text&.to_i
+
+          # Extract the rId attribute from the blip element if present, if not ignore anchor element
+          if anchor.at_xpath('./pic/blipFill/blip')
+            r_id = anchor.at_xpath('./pic/blipFill/blip')['embed']
+
+            # Store the extracted information in the data hash
+            data[r_id] = { from_col: from_col, from_row: from_row }
+          end
+        end
+
         data
       end
     end
