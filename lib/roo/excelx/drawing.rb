@@ -17,7 +17,7 @@ module Roo
 
       def extract_image_coordinates
         return {} unless doc_exists?
-        data = {}
+        data = Hash.new { |hash, key| hash[key] = [] }
 
         # Loop through all twoCellAnchor elements and extract the information
         doc.xpath('//twoCellAnchor').each do |anchor|
@@ -32,7 +32,7 @@ module Roo
             r_id = anchor.at_xpath('./pic/blipFill/blip')['embed']
 
             # Store the extracted information in the data hash
-            data[r_id] = { from_col: from_col, from_row: from_row, to_col: to_col, to_row: to_row }
+            data[r_id] << { from_col: from_col, from_row: from_row, to_col: to_col, to_row: to_row }
           end
         end
 
@@ -47,7 +47,7 @@ module Roo
             r_id = anchor.at_xpath('./pic/blipFill/blip')['embed']
 
             # Store the extracted information in the data hash
-            data[r_id] = { from_col: from_col, from_row: from_row }
+            data[r_id] << { from_col: from_col, from_row: from_row }
           end
         end
 
