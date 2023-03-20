@@ -4,10 +4,10 @@ module Roo
   class Excelx
     class Drawing < Excelx::Extractor
 
-      # Returns: Hash { id1: cell_coordinates },
-      # Example: { "rId1"=> { from_col: 2, from_row: 3, to_col: 2, to_row: 3 },
-      #            "rId2"=> { from_col: 2, from_row: 4, to_col: 2, to_row: 4 },
-      #            "rId3"=> { from_col: 2, from_row: 5, to_col: 2, to_row: 5 } }
+      # Returns: Hash { id1: [cell_coordinates] },
+      # Example: { "rId1"=> [{ from_col: 2, from_row: 3, to_col: 2, to_row: 3 }, { from_col: 6, from_row: 3, to_col: 7, to_row: 3 }],
+      #            "rId2"=> [{ from_col: 2, from_row: 4, to_col: 2, to_row: 4 }],
+      #            "rId3"=> [{ from_col: 2, from_row: 5, to_col: 2, to_row: 5 }] }
       #
       def list
         @image_coordinates ||= extract_image_coordinates
