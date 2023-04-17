@@ -390,6 +390,8 @@ class Roo::Base
     if options[:header_search]
       @headers = nil
       @header_line = row_with(options[:header_search])
+    elsif options[:header_offset]
+      @header_line = options[:header_offset] + 1
     elsif [:first_row, true].include?(options[:headers])
       @headers = []
       row(first_row).each_with_index { |x, i| @headers << [x, i + 1] }

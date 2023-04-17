@@ -78,6 +78,14 @@ class TestRooCSV < Minitest::Test
     assert_equal(19, result)
   end
 
+  def test_header_offset_skips_lines
+    file = File.open(File.join(TESTDIR, "header_offset.csv"))
+    headers = ["header 1", "header 2"]
+    oo = Roo::Spreadsheet.open(file)
+    parsed = oo.parse(header_offset: 3)
+    assert_equal parsed[0].keys
+  end
+
   def roo_class
     Roo::CSV
   end
