@@ -30,7 +30,7 @@ module Roo
         def contains_only_digits(string)
           pattern = /^(\.|\d+(\.\d+)?)$/
           string = string.to_s unless string.is_a?(String)
-          !!(string.match?(pattern))
+          (string.match?(pattern))
         end
       end
     end
