@@ -1,5 +1,4 @@
 require 'date'
-require 'byebug'
 
 module Roo
   class Excelx
