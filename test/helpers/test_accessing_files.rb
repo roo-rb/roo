@@ -36,6 +36,27 @@ module TestAccesingFiles
     end
   end
 
+  def test_finalize_twice
+    skip if defined? JRUBY_VERSION
+
+    instance = Class.new { include Roo::Tempdir }.new
+
+    tempdir = instance.make_tempdir(instance, "my_temp_prefix", nil)
+    assert File.exist?(tempdir), "Expected #{tempdir} to initially exist"
+
+    pid = Process.fork do
+      # Inside the forked process finalize does not affect the parent process's state, but does
+      # delete the tempfile on disk
+      instance.finalize_tempdirs(instance.object_id)
+    end
+
+    Process.wait(pid)
+    refute File.exist?(tempdir), "Expected #{tempdir} to have been cleaned up by child process"
+
+    instance.finalize_tempdirs(instance.object_id)
+    refute File.exist?(tempdir), "Expected #{tempdir} to still have been cleaned up"
+  end
+
   def test_cleanup_on_error
     # NOTE: This test was occasionally failing because when it started running
     #       other tests would have already added folders to the temp directory,

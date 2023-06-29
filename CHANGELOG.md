@@ -1,6 +1,7 @@
 ##  Unreleased
 
 ### Changed/Added
+- Prevent warnings on Ruby 3.1 if finalizer is called twice [586](https://github.com/roo-rb/roo/pull/586)
 
 ##  [2.10.0] 2023-02-07
 
