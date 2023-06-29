@@ -250,11 +250,8 @@ class Roo::Base
 
   # iterate through all worksheets of a document
   def each_with_pagename
-    Enumerator.new do |yielder|
-      sheets.each do |s|
-        yielder << sheet(s, true)
-      end
-    end
+    return to_enum(:each_with_pagename) { sheets.size } unless block_given?
+    sheets.each { |x| yield(sheet(x, true)) }
   end
 
   # by passing in headers as options, this method returns
