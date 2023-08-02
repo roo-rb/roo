@@ -53,9 +53,10 @@ module Roo
             proc do |number|
               Kernel.format('%d%%', number.to_f * 100)
             end
-          when '0.00%'
+          when /0\.0+%/
+            precision = format.match(/0\.(0+)%/)[1].length
             proc do |number|
-              Kernel.format('%.2f%%', number.to_f * 100)
+              Kernel.format("%.#{precision}f%%", number.to_f * 100)
             end
           when '0.00E+00' then '%.2E'
           when '#,##0 ;(#,##0)' then number_format('%.0f', '(%.0f)')
