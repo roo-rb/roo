@@ -183,10 +183,22 @@ describe Roo::Base do
   end
 
   describe '#each_with_pagename' do
-    it 'should return an enumerator with all the rows' do
-      each_with_pagename = spreadsheet.each_with_pagename
-      expect(each_with_pagename).to be_a(Enumerator)
-      expect(each_with_pagename.to_a.last).to eq([spreadsheet.default_sheet, spreadsheet])
+    context 'when block given' do
+      it 'iterate with sheet and sheet_name' do
+        sheet_names = []
+        spreadsheet.each_with_pagename do |sheet_name, sheet|
+          sheet_names << sheet_name
+        end
+        expect(sheet_names).to eq ['my_sheet', 'blank sheet']
+      end
+    end
+
+    context 'when called without block' do
+      it 'should return an enumerator with all the rows' do
+        each_with_pagename = spreadsheet.each_with_pagename
+        expect(each_with_pagename).to be_a(Enumerator)
+        expect(each_with_pagename.to_a.last).to eq([spreadsheet.default_sheet, spreadsheet])
+      end
     end
   end
 

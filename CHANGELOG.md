@@ -2,6 +2,7 @@
 
 ### Changed/Added
 - Prevent warnings on Ruby 3.1 if finalizer is called twice [586](https://github.com/roo-rb/roo/pull/586)
+- Fix Roo::Base#each_with_pagename degraded at [576](https://github.com/roo-rb/roo/pull/576) [583](https://github.com/roo-rb/roo/pull/583)
 
 ##  [2.10.0] 2023-02-07
 
