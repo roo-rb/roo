@@ -350,6 +350,21 @@ class TestRworkbookExcelx < Minitest::Test
     assert_equal 'C2', xlsx.cell('c', 2)
   end
 
+  def test_implicit_coordinates_with_streaming_rows
+    xlsx = roo_class.new(File.join(TESTDIR, 'implicit_coordinates.xlsx'))
+
+    expected_rows = [
+      ['Test'],
+      ['A2', 'B2', 'C2']
+    ]
+
+    index = 0
+    xlsx.each_row_streaming do |row|
+      assert_equal expected_rows[index], row.map(&:value)
+      index += 1
+    end
+  end
+
   def roo_class
     Roo::Excelx
   end
