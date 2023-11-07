@@ -18,6 +18,8 @@ module Roo
 
         def create_numeric(number)
           return number if Excelx::ERROR_VALUES.include?(number)
+          return nil if (number.nil? || number == "")
+
           case @format
           when /%/
             Float(number)
@@ -30,6 +32,7 @@ module Roo
 
         def formatted_value
           return @cell_value if Excelx::ERROR_VALUES.include?(@cell_value)
+          return '' if  (@cell_value.nil? || @cell_value == "")
 
           formatter = generate_formatter(@format)
           if formatter.is_a? Proc
