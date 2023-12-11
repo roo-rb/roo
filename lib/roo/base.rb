@@ -7,6 +7,7 @@ require "roo/formatters/csv"
 require "roo/formatters/matrix"
 require "roo/formatters/xml"
 require "roo/formatters/yaml"
+require "open-uri"
 
 # Base class for all other types of spreadsheets
 class Roo::Base
@@ -542,13 +543,11 @@ class Roo::Base
   end
 
   def download_uri(uri, tmpdir)
-    require "open-uri"
     tempfilename = File.join(tmpdir, find_basename(uri))
     begin
+      uri_content = URI.open(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}").read
       File.open(tempfilename, "wb") do |file|
-        URI.open(uri, "User-Agent" => "Ruby/#{RUBY_VERSION}") do |net|
-          file.write(net.read)
-        end
+        file.write(uri_content)
       end
     rescue OpenURI::HTTPError
       raise "could not open #{uri}"
