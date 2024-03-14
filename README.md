@@ -171,6 +171,18 @@ sheet.to_xml
 sheet.to_yaml
 ```
 
+Specify the file as default argument for `#to_csv`:
+
+```ruby
+sheet.to_csv(File.new("/dev/null"))
+```
+
+specify the custom separator:
+
+```ruby
+sheet.to_csv(separator: ":") # "," using by default
+```
+
 ### Excel (xlsx and xlsm) Support
 
 Stream rows from an Excelx spreadsheet.

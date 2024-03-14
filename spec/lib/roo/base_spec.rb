@@ -289,7 +289,21 @@ EOS
     end
 
     it 'should convert the spreadsheet to csv using the separator when is passed on the parameter' do
-      expect(spreadsheet.to_csv(nil, ';')).to eq(expected_csv_with_semicolons)
+      expect(spreadsheet.to_csv(separator: ';')).to eq(expected_csv_with_semicolons)
+    end
+
+    context 'should contains the deprecation warning message' do
+      it 'convert the spreadsheet to csv using the separator' do
+        converting =-> { spreadsheet.to_csv(nil, ';') }
+        expect(converting.call).to eq(expected_csv_with_semicolons)
+        expect(&converting).to output(/DEPRECATION.*:separator\b/).to_stderr
+      end
+
+      it 'be able to arguments: filename, separator, sheet' do
+        converting =-> { spreadsheet.to_csv(nil, ';', spreadsheet.default_sheet) }
+        expect(converting.call).to eq(expected_csv_with_semicolons)
+        expect(&converting).to output(/DEPRECATION.*:sheet\b/).to_stderr
+      end
     end
   end
 end
