@@ -1,7 +1,15 @@
 module Roo
   module Formatters
     module CSV
-      def to_csv(filename = nil, separator = ",", sheet = default_sheet)
+      def to_csv(filename = nil, old_separator = nil, old_sheet = nil, separator: ",", sheet: default_sheet)
+        if old_separator
+          warn("[DEPRECATION] optional argument for separator is deprecated. Please use keyword argument :separator instead")
+          separator = old_separator
+        end
+        if old_sheet
+          warn("[DEPRECATION] optional argument for sheet is deprecated. Please use keyword argument :sheet instead")
+          sheet = old_sheet
+        end
         if filename
           File.open(filename, "w") do |file|
             write_csv_content(file, sheet, separator)

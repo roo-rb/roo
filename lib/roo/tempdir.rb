@@ -4,7 +4,10 @@ module Roo
       if @tempdirs && (dirs_to_remove = @tempdirs[object_id])
         @tempdirs.delete(object_id)
         dirs_to_remove.each do |dir|
-          ::FileUtils.remove_entry(dir)
+          # Pass force=true to avoid an exception (and thus warnings in Ruby 3.1) if dir has
+          # already been removed. This can occur when the finalizer is called both in a forked
+          # child process and in the parent.
+          ::FileUtils.remove_entry(dir, true)
         end
       end
     end

@@ -35,6 +35,11 @@ class TestRooExcelxCellNumber < Minitest::Test
     assert_kind_of(Float, cell.value)
   end
 
+  def test_rounded_percent_formatted_value
+    cell = Roo::Excelx::Cell::Number.new '0.569999999995', nil, ['0%'], nil, nil, nil
+    assert_equal('57%', cell.formatted_value)
+  end
+
   def test_formats_with_negative_numbers
     [
       ['#,##0 ;(#,##0)', '(1,042)'],

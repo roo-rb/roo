@@ -1,7 +1,9 @@
-##  Unreleased
+##  [2.10.1] 2024-01-17
 
 ### Changed/Added
-- Add Ruby 3.2 and JRuby 9.4 to the CI matrix [582](https://github.com/roo-rb/roo/pull/582)
+- Add Ruby 3.2, 3.3 and JRuby 9.4 to the CI matrix [582](https://github.com/roo-rb/roo/pull/582)
+- Prevent warnings on Ruby 3.1 if finalizer is called twice [586](https://github.com/roo-rb/roo/pull/586)
+- Fix Roo::Base#each_with_pagename degraded at [576](https://github.com/roo-rb/roo/pull/576) [583](https://github.com/roo-rb/roo/pull/583)
 
 ##  [2.10.0] 2023-02-07
 

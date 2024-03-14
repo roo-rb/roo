@@ -22,22 +22,37 @@ gem "roo", "~> 2.10.0"
 ```
 ## Usage
 
-Opening a spreadsheet
+### Opening a spreadsheet
 
+You can use the `Roo::Spreadsheet` class so `roo` automatically detects which [parser class](https://github.com/roo-rb/roo/blob/master/lib/roo.rb#L17) to use for you.
 ```ruby
 require 'roo'
 
-xlsx = Roo::Spreadsheet.open('./new_prices.xlsx')
-xlsx = Roo::Excelx.new("./new_prices.xlsx")
-
-# Use the extension option if the extension is ambiguous.
-xlsx = Roo::Spreadsheet.open('./rails_temp_upload', extension: :xlsx)
-
+file_name = './new_prices.xlsx'
+xlsx = Roo::Spreadsheet.open(file_name)
 xlsx.info
 # => Returns basic info about the spreadsheet file
 ```
 
-``Roo::Spreadsheet.open`` can accept both paths and ``File`` instances.
+``Roo::Spreadsheet.open`` can accept both string paths and ``File`` instances. Also, you can provide the extension of the file as an option: 
+
+```ruby
+require 'roo'
+
+file_name = './rails_temp_upload'
+xlsx = Roo::Spreadsheet.open(file_name, extension: :xlsx)
+xlsx.info
+# => Returns basic info about the spreadsheet file
+```
+
+On the other hand, if you know what the file extension is, you can use the specific parser class instead:
+```ruby
+require 'roo'
+
+xlsx = Roo::Excelx.new("./new_prices.xlsx")
+xlsx.info
+# => Returns basic info about the spreadsheet file
+```
 
 ### Working with sheets
 
@@ -154,6 +169,18 @@ sheet.to_csv
 sheet.to_matrix
 sheet.to_xml
 sheet.to_yaml
+```
+
+Specify the file as default argument for `#to_csv`:
+
+```ruby
+sheet.to_csv(File.new("/dev/null"))
+```
+
+specify the custom separator:
+
+```ruby
+sheet.to_csv(separator: ":") # "," using by default
 ```
 
 ### Excel (xlsx and xlsm) Support

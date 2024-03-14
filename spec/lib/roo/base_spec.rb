@@ -183,10 +183,22 @@ describe Roo::Base do
   end
 
   describe '#each_with_pagename' do
-    it 'should return an enumerator with all the rows' do
-      each_with_pagename = spreadsheet.each_with_pagename
-      expect(each_with_pagename).to be_a(Enumerator)
-      expect(each_with_pagename.to_a.last).to eq([spreadsheet.default_sheet, spreadsheet])
+    context 'when block given' do
+      it 'iterate with sheet and sheet_name' do
+        sheet_names = []
+        spreadsheet.each_with_pagename do |sheet_name, sheet|
+          sheet_names << sheet_name
+        end
+        expect(sheet_names).to eq ['my_sheet', 'blank sheet']
+      end
+    end
+
+    context 'when called without block' do
+      it 'should return an enumerator with all the rows' do
+        each_with_pagename = spreadsheet.each_with_pagename
+        expect(each_with_pagename).to be_a(Enumerator)
+        expect(each_with_pagename.to_a.last).to eq([spreadsheet.default_sheet, spreadsheet])
+      end
     end
   end
 
@@ -277,7 +289,21 @@ EOS
     end
 
     it 'should convert the spreadsheet to csv using the separator when is passed on the parameter' do
-      expect(spreadsheet.to_csv(nil, ';')).to eq(expected_csv_with_semicolons)
+      expect(spreadsheet.to_csv(separator: ';')).to eq(expected_csv_with_semicolons)
+    end
+
+    context 'should contains the deprecation warning message' do
+      it 'convert the spreadsheet to csv using the separator' do
+        converting =-> { spreadsheet.to_csv(nil, ';') }
+        expect(converting.call).to eq(expected_csv_with_semicolons)
+        expect(&converting).to output(/DEPRECATION.*:separator\b/).to_stderr
+      end
+
+      it 'be able to arguments: filename, separator, sheet' do
+        converting =-> { spreadsheet.to_csv(nil, ';', spreadsheet.default_sheet) }
+        expect(converting.call).to eq(expected_csv_with_semicolons)
+        expect(&converting).to output(/DEPRECATION.*:sheet\b/).to_stderr
+      end
     end
   end
 end
