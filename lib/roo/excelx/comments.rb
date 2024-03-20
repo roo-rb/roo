@@ -13,7 +13,7 @@ module Roo
         return {} unless doc_exists?
 
         doc.xpath('//comments/commentList/comment').each_with_object({}) do |comment, hash|
-          value = (comment.at_xpath('./text/r/t') || comment.at_xpath('./text/t')).text
+          value = comment.xpath('./text/r/t', './text/t').text
           hash[::Roo::Utils.ref_to_key(comment['ref'].to_s)] = value
         end
       end
