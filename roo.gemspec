@@ -1,7 +1,6 @@
-# encoding: utf-8
-lib = File.expand_path('../lib', __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'roo/version'
+# frozen_string_literal: true
+
+require_relative 'lib/roo/version'
 
 Gem::Specification.new do |spec|
   spec.name                   = 'roo'
@@ -13,14 +12,13 @@ Gem::Specification.new do |spec|
   spec.homepage               = 'https://github.com/roo-rb/roo'
   spec.license                = 'MIT'
 
-  spec.files                  = `git ls-files -z`.split("\x0")
-  spec.files.reject! { |fn| fn.include?('test/files') }
+  spec.files                  = Dir['lib/**/*', '*.md', 'LICENSE', 'roo.gemspec', 'examples/**/*']
   spec.require_paths          = ['lib']
 
   if defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
-    spec.required_ruby_version  = ">= 2.6.0"
+    spec.required_ruby_version  = '>= 2.6.0'
   else
-    spec.required_ruby_version  = ">= 2.7.0"
+    spec.required_ruby_version  = '>= 2.7.0'
   end
 
   spec.add_dependency 'nokogiri', '~> 1'
