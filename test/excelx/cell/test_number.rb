@@ -15,6 +15,11 @@ class TestRooExcelxCellNumber < Minitest::Test
     assert_kind_of(Integer, cell.value)
   end
 
+  def test_blank
+    cell = Roo::Excelx::Cell::Number.new '', nil, ['0'], nil, nil, nil
+    assert_kind_of(Integer, cell.value)
+  end
+
   def test_scientific_notation
     cell = Roo::Excelx::Cell::Number.new '1.2E-3', nil, ['0'], nil, nil, nil
     assert_kind_of(Float, cell.value)
