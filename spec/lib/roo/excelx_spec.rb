@@ -410,6 +410,7 @@ describe Roo::Excelx do
     it 'returns the expected result' do
       expect(subject.hyperlink?(1, 1)).to eq true
       expect(subject.hyperlink?(1, 2)).to eq false
+      expect(subject.hyperlink?(3, 1)).to eq false
     end
 
     context 'defined on cell range' do
@@ -660,13 +661,14 @@ end
 
 describe 'Roo::Excelx with options set' do
   subject(:xlsx) do
-    Roo::Excelx.new(path, disable_html_wrapper: true)
+    Roo::Excelx.new(path, options)
   end
 
   describe '#html_strings' do
-    describe "HTML Parsing Disabled" do
-      let(:path) { 'test/files/html_strings_formatting.xlsx' }
+    let(:path) { 'test/files/html_strings_formatting.xlsx' }
+    let(:options) { {disable_html_wrapper: true} }
 
+    describe "HTML Parsing Disabled" do
       it 'returns the expected result' do
         expect(subject.excelx_value(1, 1, "Sheet1")).to eq("This has no formatting.")
         expect(subject.excelx_value(2, 1, "Sheet1")).to eq("This has bold formatting.")
@@ -694,6 +696,16 @@ describe 'Roo::Excelx with options set' do
         expect(subject.excelx_value(6, 1, "Sheet1")).to eq("See that regular html tags do not create html tags.\n<ol>\n  <li> Denver Broncos </li>\n  <li> Carolina Panthers </li>\n  <li> New England Patriots</li>\n  <li>Arizona Panthers</li>\n</ol>")
         expect(subject.excelx_value(7, 1, "Sheet1")).to eq("Does create html tags when formatting is used..\n<ol>\n  <li> Denver Broncos </li>\n  <li> Carolina Panthers </li>\n  <li> New England Patriots</li>\n  <li>Arizona Panthers</li>\n</ol>")
       end
+    end
+  end
+
+  describe '#match_relationships_with_hyperlinks' do
+    let(:path) { 'test/files/sheet_link.xlsx' }
+    let(:options) { { support_excel_sheet_hyperlinks: true } }
+
+    it 'should display excel links' do
+      expect(subject.hyperlink(1, 1)).to eq "http://www.google.com/"
+      expect(subject.hyperlink(1, 2)).to eq "#Sheet2!A1"
     end
   end
 end
