@@ -4,8 +4,6 @@
 # with the wrong spreadsheet class
 #STDERR.reopen "/dev/null","w"
 
-Encoding.default_external = "UTF-8"
-
 require 'test_helper'
 require 'stringio'
 
