@@ -23,6 +23,10 @@ Gem::Specification.new do |spec|
     spec.required_ruby_version  = ">= 2.7.0"
   end
 
+  if RUBY_VERSION >= '3.4.0'
+    spec.add_dependency 'base64', '~> 0.2'
+    spec.add_dependency 'csv', '~> 3'
+  end
   spec.add_dependency 'nokogiri', '~> 1'
   spec.add_dependency 'rubyzip', '>= 1.3.0', '< 3.0.0'
 
