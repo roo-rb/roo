@@ -25,7 +25,7 @@ module Roo
           extension.tr('.', '').downcase.to_sym
         else
           parsed_path =
-            if path =~ /\A#{::URI::DEFAULT_PARSER.make_regexp}\z/
+            if path =~ /\A#{URI::RFC2396_PARSER.make_regexp}\z/
               # path is 7th match
               Regexp.last_match[7]
             else
