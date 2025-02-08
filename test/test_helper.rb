@@ -80,7 +80,7 @@ def local_server(port)
 end
 
 def start_local_server(filename, port = nil)
-  require "rack"
+  require "rackup"
   content_type = filename.split(".").last
   port ||= TEST_RACK_PORT
 
@@ -92,7 +92,7 @@ def start_local_server(filename, port = nil)
     ]
   end
 
-  t = Thread.new { Rack::Handler::WEBrick.run web_server, Host: "0.0.0.0", Port: port , Logger: WEBrick::BasicLog.new(nil,1) }
+  t = Thread.new { Rackup::Handler::WEBrick.run web_server, Host: "0.0.0.0", Port: port , Logger: WEBrick::BasicLog.new(nil,1) }
   # give the app a chance to startup
   sleep(0.2)
 
