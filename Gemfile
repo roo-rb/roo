@@ -2,15 +2,18 @@ source 'https://rubygems.org'
 
 gemspec
 
+gem 'rubocop'
+gem 'rubocop-performance', require: false
+
 group :test do
   # additional testing libs
   gem 'shoulda'
-  gem 'activesupport', '< 5.1'
+  gem 'activesupport'
   gem 'rspec', '>= 3.0.0'
   gem 'simplecov', '>= 0.9.0', require: false
   gem 'coveralls', require: false
   gem "minitest-reporters"
-  gem 'webrick' if RUBY_VERSION >= '3.0.0'
+  gem 'webrick' 
 end
 
 group :local_development do

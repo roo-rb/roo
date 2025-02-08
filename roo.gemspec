@@ -17,25 +17,21 @@ Gem::Specification.new do |spec|
   spec.files.reject! { |fn| fn.include?('test/files') }
   spec.require_paths          = ['lib']
 
-  if defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
-    spec.required_ruby_version  = ">= 2.6.0"
-  else
-    spec.required_ruby_version  = ">= 2.7.0"
-  end
+  spec.required_ruby_version  = ">= 3.1.0"
 
   if RUBY_VERSION >= '3.4.0'
     spec.add_dependency 'base64', '~> 0.2'
     spec.add_dependency 'csv', '~> 3'
+    spec.add_dependency 'logger', '~> 1'
   end
+
   spec.add_dependency 'nokogiri', '~> 1'
   spec.add_dependency 'rubyzip', '>= 1.3.0', '< 3.0.0'
 
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'minitest', '~> 5.4', '>= 5.4.3'
   spec.add_development_dependency 'rack', '~> 1.6', '< 2.0.0'
-  if RUBY_VERSION >= '3.0.0'
-    spec.add_development_dependency 'matrix'
-  end
+  spec.add_development_dependency 'matrix'
 
   spec.metadata["changelog_uri"] = spec.homepage + '/blob/master/CHANGELOG.md'
 end

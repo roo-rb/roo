@@ -1,7 +1,12 @@
 ## Unreleased
 
 ### Changed/Added
-- Add dependencies for `csv` and `base64` if Ruby version higher or equal 3.4 
+- Add dependencies for `csv` and `base64` if Ruby version higher or equal 3.4 [616](https://github.com/roo-rb/roo/pull/616)
+- Add dependency for `logger` if Ruby version higher or equal 3.4 [618](https://github.com/roo-rb/roo/pull/618)
+- Add changelog link to gemspec [605](https://github.com/roo-rb/roo/pull/605)
+
+### Removed
+- Support for ruby 2.7, 3.0
 
 ##  [2.10.1] 2024-01-17
 
