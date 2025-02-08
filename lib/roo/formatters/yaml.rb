@@ -13,7 +13,7 @@ module Roo
         from_column ||= first_column(sheet)
         to_column ||= last_column(sheet)
 
-        result = "--- \n"
+        result = String.new("--- \n")
         from_row.upto(to_row) do |row|
           from_column.upto(to_column) do |col|
             next if empty?(row, col, sheet)

@@ -224,7 +224,7 @@ class TestRooOpenOffice < Minitest::Test
       assert workbook.empty?("C", 1)
       assert workbook.empty?("D", 1)
       expected = 1
-      letter = "e"
+      letter = String.new("e")
       while letter <= "u"
         assert_equal expected, workbook.cell(letter, 1)
         letter.succ!
