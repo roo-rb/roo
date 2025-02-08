@@ -36,4 +36,6 @@ Gem::Specification.new do |spec|
   if RUBY_VERSION >= '3.0.0'
     spec.add_development_dependency 'matrix'
   end
+
+  spec.metadata["changelog_uri"] = spec.homepage + '/blob/master/CHANGELOG.md'
 end
