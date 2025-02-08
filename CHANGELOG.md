@@ -1,3 +1,8 @@
+## Unreleased
+
+### Changed/Added
+- Add dependencies for `csv` and `base64` if Ruby version higher or equal 3.4 
+
 ##  [2.10.1] 2024-01-17
 
 ### Changed/Added
