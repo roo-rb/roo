@@ -18,8 +18,9 @@ jobs:
           - '3.1'
           - '3.2'
           - '3.3'
+          - '3.4'
           - ruby-head
-          - jruby-9.3.3.0
+          - jruby-9.4.10.0
         include:
           - ruby: ruby-head
             env:
@@ -33,4 +34,3 @@ jobs:
       - run: bundle exec rake
         env:
           LONG_RUN: true
-
