@@ -5,6 +5,7 @@ module Roo
     extend self
 
     LETTERS = ('A'..'Z').to_a
+    URI_PARSER = defined?(::URI::RFC2396_PARSER) ? ::URI::RFC2396_PARSER : ::URI::DEFAULT_PARSER
 
     def extract_coordinate(s)
       num = letter_num = 0
@@ -33,8 +34,6 @@ module Roo
       warn "[DEPRECATION] `Roo::Utils.split_coordinate` is deprecated.  Please use `Roo::Utils.extract_coordinate` instead."
       extract_coordinate(str)
     end
-
-
 
     def split_coord(str)
       coord = extract_coordinate(str)
