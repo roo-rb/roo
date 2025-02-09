@@ -5,6 +5,8 @@ require 'roo/excelx/extractor'
 module Roo
   class Excelx
     class SharedStrings < Excelx::Extractor
+      DEFAULT_RPR_ELEMENTS = %w[b i u vertAlign].freeze
+
       def [](index)
         to_a[index]
       end
@@ -21,7 +23,7 @@ module Roo
       # See what is happening with commit???
       def use_html?(index)
         return false if @options[:disable_html_wrapper]
-        to_html[index][/<([biu]|sup|sub)>/]
+        to_html[index][/<([biu]|sup|sub|\/font)>/]
       end
 
       private
@@ -102,6 +104,8 @@ module Roo
           case elem.name
           when 'rPr'
             elem.children.each do |rPr_elem|
+              next if !@options[:rpr_elements].include?(rPr_elem.name)
+
               case rPr_elem.name
               when 'b'
                 # set formatting for Bold to true
@@ -124,6 +128,8 @@ module Roo
                   xml_elems[:sup] = true
                   xml_elems[:sub] = false
                 end
+              when 'rFont'
+                xml_elems[:font] = { face: rPr_elem['val'] }
               end
             end
           when 't'
@@ -137,7 +143,13 @@ module Roo
       def create_html(text, formatting)
         tmp_str = +""
         formatting.each do |elem, val|
-          tmp_str << "<#{elem}>" if val
+          case val
+          when TrueClass
+            tmp_str << "<#{elem}>"
+          when Hash
+            attributes = val.map{ |k, v| "#{k}=\"#{v}\"" }.join(' ')
+            tmp_str << "<#{elem} #{attributes}>"
+          end
         end
         tmp_str << text
 
