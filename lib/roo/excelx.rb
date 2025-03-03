@@ -395,15 +395,27 @@ module Roo
     def process_zipfile(zipfilename_or_stream)
       @sheet_files = []
 
-      unless is_stream?(zipfilename_or_stream)
-        zip_file = Zip::File.open(zipfilename_or_stream)
+      entries = if is_stream?(zipfilename_or_stream)
+        begin
+          zip_stream = Zip::InputStream.new(zipfilename_or_stream)
+          entries = []
+          while (entry = zip_stream.get_next_entry)
+            entries << entry
+          end
+
+          entries
+        rescue Zip::GPFBit3Error
+          zip_file = Zip::File.open_buffer(zipfilename_or_stream)
+          zip_file.to_a
+        end
       else
-        zip_file = Zip::CentralDirectory.new
-        zip_file.read_from_stream zipfilename_or_stream
+        zip_file = Zip::File.open(zipfilename_or_stream)
+        zip_file.to_a
       end
 
-      process_zipfile_entries zip_file.to_a.sort_by(&:name)
+      process_zipfile_entries entries.sort_by(&:name)
     end
+
 
     def process_zipfile_entries(entries)
       # NOTE: When Google or Numbers 3.1 exports to xlsx, the worksheet filenames
