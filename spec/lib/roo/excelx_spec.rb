@@ -56,6 +56,14 @@ describe Roo::Excelx do
         expect(subject).to be_a(Roo::Excelx)
       end
     end
+
+    context 'given a stream input' do
+      let(:path) { StringIO.new(File.read('test/files/simple_spreadsheet.xlsx')) }
+
+      it 'creates an instance' do
+        expect(subject).to be_a(Roo::Excelx)
+      end
+    end
   end
 
   describe '#cell' do
