@@ -17,7 +17,7 @@ module Roo
         end
 
         def create_numeric(number)
-          return number if Excelx::ERROR_VALUES.include?(number)
+          return number if Excelx::ERROR_VALUES.include?(number) || number == ""
           case @format
           when /%/
             Float(number)
