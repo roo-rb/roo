@@ -6,9 +6,11 @@
 - Add changelog link to gemspec [605](https://github.com/roo-rb/roo/pull/605)
 - Upgraded rack via usage of rackup
 - Resolve deprecation warnings about uri DEFAULT_PARSER
+- Add support for rubyzip 3.x [629](https://github.com/roo-rb/roo/pull/629)
 
 ### Removed
 - Support for ruby 2.7, 3.0
+- Support for rubyzip < 3.x
 
 ##  [2.10.1] 2024-01-17
 

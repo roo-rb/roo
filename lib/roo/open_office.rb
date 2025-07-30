@@ -59,7 +59,7 @@ module Roo
         fail ArgumentError, ERROR_MISSING_CONTENT_XML unless content_entry
 
         roo_content_xml_path = ::File.join(@tmpdir, 'roo_content.xml')
-        content_entry.extract(roo_content_xml_path)
+        content_entry.extract('roo_content.xml', destination_directory: @tmpdir)
         decrypt_if_necessary(zip_file, content_entry, roo_content_xml_path, options)
       end
     end
@@ -234,7 +234,7 @@ module Roo
 
       if (manifest_entry = zip_file.glob('META-INF/manifest.xml').first)
         roo_manifest_xml_path = File.join(@tmpdir, 'roo_manifest.xml')
-        manifest_entry.extract(roo_manifest_xml_path)
+        manifest_entry.extract('roo_manifest.xml', destination_directory: @tmpdir)
         manifest        = ::Roo::Utils.load_xml(roo_manifest_xml_path)
 
         # XPath search for manifest:encryption-data only for the content.xml
