@@ -606,6 +606,39 @@ describe Roo::Excelx do
         expect(subject.excelx_value(6, 1, "Sheet1")).to eq("See that regular html tags do not create html tags.\n<ol>\n  <li> Denver Broncos </li>\n  <li> Carolina Panthers </li>\n  <li> New England Patriots</li>\n  <li>Arizona Panthers</li>\n</ol>")
         expect(subject.excelx_value(7, 1, "Sheet1")).to eq("<html>Does create html tags when formatting is used..\n<ol>\n  <li> <b>Denver Broncos</b> </li>\n  <li> <i>Carolina Panthers </i></li>\n  <li> <u>New England Patriots</u></li>\n  <li>Arizona Panthers</li>\n</ol></html>")
       end
+
+      context 'when rpr_elements includes rFont' do
+        subject(:xlsx) do
+          Roo::Excelx.new(path, rpr_elements: [*Roo::Excelx::SharedStrings::DEFAULT_RPR_ELEMENTS, 'rFont'])
+        end
+
+        it 'returns the expected result' do
+          expect(subject.excelx_value(1, 1, "Sheet1")).to eq("This has no formatting.")
+          expect(subject.excelx_value(2, 1, "Sheet1")).to eq("<html>This has<b><font face=\"Calibri\"> bold </font></b><font face=\"Calibri\">formatting.</font></html>")
+          expect(subject.excelx_value(2, 2, "Sheet1")).to eq("<html>This has <i><font face=\"Calibri\">italics</font></i><font face=\"Calibri\"> formatting.</font></html>")
+          expect(subject.excelx_value(2, 3, "Sheet1")).to eq("<html>This has <u><font face=\"Calibri\">underline</font></u><font face=\"Calibri\"> format.</font></html>")
+          expect(subject.excelx_value(2, 4, "Sheet1")).to eq("<html>Superscript. x<sup><font face=\"Calibri\">123</font></sup></html>")
+          expect(subject.excelx_value(2, 5, "Sheet1")).to eq("<html>SubScript.  T<sub><font face=\"Calibri\">j</font></sub></html>")
+          expect(subject.excelx_value(3, 1, "Sheet1")).to eq("<html>Bold, italics <b><i><font face=\"Calibri\">together</font></i></b><font face=\"Calibri\">.</font></html>")
+          expect(subject.excelx_value(3, 2, "Sheet1")).to eq("<html>Bold, Underline <b><u><font face=\"Calibri\">together</font></u></b><font face=\"Calibri\">.</font></html>")
+          expect(subject.excelx_value(3, 3, "Sheet1")).to eq("<html>Bold, Superscript. <b><font face=\"Calibri\">x</font></b><sup><b><font face=\"Calibri\">N</font></b></sup></html>")
+          expect(subject.excelx_value(3, 4, "Sheet1")).to eq("<html>Bold, Subscript. <b><font face=\"Calibri\">T</font></b><sub><b><font face=\"Calibri\">abc</font></b></sub></html>")
+          expect(subject.excelx_value(3, 5, "Sheet1")).to eq("<html>Italics, Underline <i><u><font face=\"Calibri\">together</font></u></i><font face=\"Calibri\">.</font></html>")
+          expect(subject.excelx_value(3, 6, "Sheet1")).to eq("<html>Italics, Superscript.  <i><font face=\"Calibri\">X</font></i><sup><i><font face=\"Calibri\">abc</font></i></sup></html>")
+          expect(subject.excelx_value(3, 7, "Sheet1")).to eq("<html>Italics, Subscript.  <i><font face=\"Calibri\">B</font></i><sub><i><font face=\"Calibri\">efg</font></i></sub></html>")
+          expect(subject.excelx_value(4, 1, "Sheet1")).to eq("<html>Bold, italics underline,<b><i><u><font face=\"Calibri\"> together</font></u></i></b><font face=\"Calibri\">.</font></html>")
+          expect(subject.excelx_value(4, 2, "Sheet1")).to eq("<html>Bold, italics, superscript. <b><font face=\"Calibri\">X</font></b><sup><b><i><font face=\"Calibri\">abc</font></i></b></sup><b><i><font face=\"Calibri\">123</font></i></b></html>")
+          expect(subject.excelx_value(4, 3, "Sheet1")).to eq("<html>Bold, Italics, subscript. <b><i><font face=\"Calibri\">Mg</font></i></b><sub><b><i><font face=\"Calibri\">ha</font></i></b></sub><b><i><font face=\"Calibri\">2</font></i></b></html>")
+          expect(subject.excelx_value(4, 4, "Sheet1")).to eq("<html>Bold, Underline, superscript. <b><u><font face=\"Calibri\">AB</font></u></b><sup><b><u><font face=\"Calibri\">C12</font></u></b></sup><b><u><font face=\"Calibri\">3</font></u></b></html>")
+          expect(subject.excelx_value(4, 5, "Sheet1")).to eq("<html>Bold, Underline, subscript. <b><u><font face=\"Calibri\">Good</font></u></b><sub><b><u><font face=\"Calibri\">XYZ</font></u></b></sub></html>")
+          expect(subject.excelx_value(4, 6, "Sheet1")).to eq("<html>Italics, Underline, superscript. <i><u><font face=\"Calibri\">Up</font></u></i><sup><i><u><font face=\"Calibri\">swing</font></u></i></sup></html>")
+          expect(subject.excelx_value(4, 7, "Sheet1")).to eq("<html>Italics, Underline, subscript. <i><u><font face=\"Calibri\">T</font></u></i><sub><i><u><font face=\"Calibri\">swing</font></u></i></sub></html>")
+          expect(subject.excelx_value(5, 1, "Sheet1")).to eq("<html>Bold, italics, underline, superscript.  <b><i><u><font face=\"Calibri\">GHJK</font></u></i></b><sup><b><i><u><font face=\"Calibri\">190</font></u></i></b></sup><b><i><u><font face=\"Calibri\">4</font></u></i></b></html>")
+          expect(subject.excelx_value(5, 2, "Sheet1")).to eq("<html>Bold, italics, underline, subscript. <b><i><u><font face=\"Calibri\">Mike</font></u></i></b><sub><b><i><u><font face=\"Calibri\">drop</font></u></i></b></sub></html>")
+          expect(subject.excelx_value(6, 1, "Sheet1")).to eq("See that regular html tags do not create html tags.\n<ol>\n  <li> Denver Broncos </li>\n  <li> Carolina Panthers </li>\n  <li> New England Patriots</li>\n  <li>Arizona Panthers</li>\n</ol>")
+          expect(subject.excelx_value(7, 1, "Sheet1")).to eq("<html>Does create html tags when formatting is used..\n<ol>\n  <li> <b><font face=\"Calibri\">Denver Broncos</font></b><font face=\"Calibri\"> </li>\n  <li> </font><i><font face=\"Calibri\">Carolina Panthers </font></i><font face=\"Calibri\"></li>\n  <li> </font><u><font face=\"Calibri\">New England Patriots</font></u><font face=\"Calibri\"></li>\n  <li>Arizona Panthers</li>\n</ol></font></html>")
+        end
+      end
     end
   end
 
