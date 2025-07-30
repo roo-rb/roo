@@ -333,7 +333,7 @@ module Roo
       wb = entries.find { |e| e.name[/workbook.xml$/] }
       fail ArgumentError 'missing required workbook file' if wb.nil?
 
-      wb.extract(path)
+      wb.extract(File.basename(path), destination_directory: File.dirname(path))
       workbook_doc = Roo::Utils.load_xml(path).remove_namespaces!
       workbook_doc.xpath('//sheet').map { |s| s['id'] }
     end
@@ -357,7 +357,7 @@ module Roo
       wb_rels = entries.find { |e| e.name[/workbook.xml.rels$/] }
       fail ArgumentError 'missing required workbook file' if wb_rels.nil?
 
-      wb_rels.extract(path)
+      wb_rels.extract(File.basename(path), destination_directory: File.dirname(path))
       rels_doc = Roo::Utils.load_xml(path).remove_namespaces!
 
       relationships = rels_doc.xpath('//Relationship').select do |relationship|
@@ -378,7 +378,7 @@ module Roo
         path = "#{tmpdir}/roo_sheet#{i + 1}"
         sheet_files << path
         @sheet_files << path
-        entry.extract(path)
+        entry.extract(File.basename(path), destination_directory: File.dirname(path))
       end
     end
 
@@ -387,7 +387,7 @@ module Roo
       img_entries.each do |entry|
         path = "#{@tmpdir}/roo#{entry.name.gsub(/xl\/|\//, "_")}"
         image_files << path
-        entry.extract(path)
+        entry.extract(File.basename(path), destination_directory: File.dirname(path))
       end
     end
 
@@ -402,7 +402,7 @@ module Roo
         zip_file.read_from_stream zipfilename_or_stream
       end
 
-      process_zipfile_entries zip_file.to_a.sort_by(&:name)
+      process_zipfile_entries zip_file.entries.sort_by(&:name)
     end
 
     def process_zipfile_entries(entries)
@@ -462,7 +462,7 @@ module Roo
           image_rels[nr - 1] = "#{@tmpdir}/roo_image_rels#{nr}"
         end
 
-        entry.extract(path) if path
+        entry.extract(File.basename(path), destination_directory: File.dirname(path)) if path
       end
     end
 
