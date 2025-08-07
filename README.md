@@ -9,6 +9,11 @@ Roo implements read access for all common spreadsheet types. It can handle:
 * Excel 97, Excel 2002 XML, and Excel 2003 XML formats when using the [roo-xls](https://github.com/roo-rb/roo-xls) gem (xls, xml)
 * Google spreadsheets with read/write access when using [roo-google](https://github.com/roo-rb/roo-google)
 
+## Important note about next major release
+
+There a plan to make a new major release which will have better support for Ruby 3.x
+Please leave your comments there - https://github.com/roo-rb/roo/issues/630
+
 ## Installation
 
 Install as a gem
