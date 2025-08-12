@@ -93,6 +93,15 @@ module Roo
       end
     end
 
+    # Anchor format:
+    # <x:Anchor>from_col, from_offset_y, from_row, from_offset_x, to_col, to_offset_y, to_row, to_offset_x</x:Anchor>
+    # Example: <x:Anchor>0, 2, 0, 1, 0, 35, 0, 19</x:Anchor>
+    def anchor_to_coordinates(anchor)
+      col, _, row  = *anchor.split(',').map!(&:strip).map!(&:to_i)
+
+      Excelx::Coordinate.new(row + 1, col + 1)
+    end
+
     def load_xml(path)
       ::File.open(path, 'rb') do |file|
         ::Nokogiri::XML(file)

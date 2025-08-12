@@ -4,7 +4,7 @@ module Roo
     class Sheet
       extend Forwardable
 
-      delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files, :image_rels] => :@shared
+      delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files, :image_rels, :drawing_files] => :@shared
 
       attr_reader :images
 
@@ -20,6 +20,10 @@ module Roo
 
       def cells
         @cells ||= @sheet.cells(@rels)
+      end
+
+      def drawings
+        @drawings ||= Drawings.new(drawing_files[@sheet_index]).list
       end
 
       def present_cells
