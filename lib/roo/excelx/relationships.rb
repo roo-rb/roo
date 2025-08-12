@@ -19,6 +19,14 @@ module Roo
         end
       end
 
+      def filter_by_type(type: "")
+        return to_enum(__method__, type: type) unless block_given?
+
+        to_a.each do |_, rel|
+          yield rel["Target"] if rel["Type"]&.include? type
+        end
+      end
+
       private
 
       def extract_relationships
