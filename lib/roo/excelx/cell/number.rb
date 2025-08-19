@@ -20,12 +20,24 @@ module Roo
           return number if Excelx::ERROR_VALUES.include?(number)
           case @format
           when /%/
-            Float(number)
+            cast_float(number)
           when /\.0/
-            Float(number)
+            cast_float(number)
           else
-            (number.include?('.') || (/\A[-+]?\d+E[-+]?\d+\z/i =~ number)) ? Float(number) : Integer(number, 10)
+            (number.include?('.') || (/\A[-+]?\d+E[-+]?\d+\z/i =~ number)) ? cast_float(number) : cast_int(number, 10)
           end
+        end
+
+        def cast_float(number)
+          return 0.0 if number == ''
+
+          Float(number)
+        end
+
+        def cast_int(number, base = 10)
+          return 0 if number == ''
+
+          Integer(number, base)
         end
 
         def formatted_value
