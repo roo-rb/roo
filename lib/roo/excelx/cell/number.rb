@@ -86,7 +86,7 @@ module Roo
         def number_format(formatter, negative_formatter = nil)
           proc do |number|
             if negative_formatter
-              formatter = number.to_i > 0 ? formatter : negative_formatter
+              formatter = negative_formatter if number.to_f.negative?
               number = number.to_f.abs
             end
 
