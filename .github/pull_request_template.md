@@ -1,3 +1,21 @@
+<!--
+Thank you for your contribution!
+
+Please ensure your pull request title follows the Conventional Commits format.
+This is important because our release process is automated based on the commit messages.
+
+Examples:
+- feat: Add new feature
+- fix: Fix a bug
+- docs: Update documentation
+- chore: Build process or auxiliary tool changes
+- refactor: A code change that neither fixes a bug nor adds a feature
+- style: Changes that do not affect the meaning of the code (white-space, formatting, etc)
+- test: Adding missing tests or correcting existing tests
+
+If your change is a breaking change, please add a '!' after the type, e.g., 'feat!: ...'
+-->
+
 ### Summary
 
 Provide a general description of the code changes in your pull
