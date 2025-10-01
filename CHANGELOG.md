@@ -1,6 +1,10 @@
 ## Unreleased
 
+## [3.0.0](https://github.com/roo-rb/roo/compare/v2.10.1...v3.0.0) (2025-10-01)
 
+### Miscellaneous Chores
+
+* release 3.0.0 ([82619d3](https://github.com/roo-rb/roo/commit/82619d33929fd51411d173fbedd8a9c8136b4f72))
 
 ### Changed/Added
 
@@ -22,14 +26,14 @@
 - Prevent warnings on Ruby 3.1 if finalizer is called twice [586](https://github.com/roo-rb/roo/pull/586)
 - Fix Roo::Base#each_with_pagename degraded at [576](https://github.com/roo-rb/roo/pull/576) [583](https://github.com/roo-rb/roo/pull/583)
 
-##  [2.10.0] 2023-02-07
+## [2.10.0] 2023-02-07
 
 ### Changed/Added
 - Fix gsub! usage for open office documents on a frozen string [581](https://github.com/roo-rb/roo/pull/581)
 - Add support for boolean values in open office files that were generated via Google Sheets [580](https://github.com/roo-rb/roo/pull/580)
 - Roo::Base#each_with_pagename returns Enumerator Object [576](https://github.com/roo-rb/roo/pull/576)
 
-##  [2.9.0] 2022-03-19
+## [2.9.0] 2022-03-19
 
 ### Changed/Added
 - Ruby 3.x Support [555](https://github.com/roo-rb/roo/pull/555)
@@ -43,11 +47,11 @@
 ### Removed
 - Support for ruby 2.4, 2.5, 2.6(excluded jRuby)
 
-##  [2.8.3] 2020-02-03
+## [2.8.3] 2020-02-03
 ### Changed/Added
 - Updated rubyzip version. Now minimal version is 1.3.0 [515](https://github.com/roo-rb/roo/pull/515) - [CVE-2019-16892](https://github.com/rubyzip/rubyzip/pull/403)
 
-##  [2.8.2] 2019-02-01
+## [2.8.2] 2019-02-01
 ### Changed/Added
 - Support range cell for Excelx's links [490](https://github.com/roo-rb/roo/pull/490)
 - Skip `extract_hyperlinks` if not required [488](https://github.com/roo-rb/roo/pull/488)
@@ -55,11 +59,11 @@
 ### Fixed
 - Fixed error for invalid link [492](https://github.com/roo-rb/roo/pull/492)
 
-##  [2.8.1] 2019-01-21
+## [2.8.1] 2019-01-21
 ### Fixed
 - Fixed error if excelx's cell have empty children [487](https://github.com/roo-rb/roo/pull/487)
 
-##  [2.8.0] 2019-01-18
+## [2.8.0] 2019-01-18
 ### Fixed
 - Fixed inconsistent column length for CSV [375](https://github.com/roo-rb/roo/pull/375)
 - Fixed formatted_value with `%` for Excelx [416](https://github.com/roo-rb/roo/pull/416)
@@ -89,13 +93,6 @@
 - Roo::Excelx::Sheet#present_cells is deprecated [454](https://github.com/roo-rb/roo/pull/454)
 - Roo::Utils.split_coordinate is deprecated [458](https://github.com/roo-rb/roo/pull/458)
 - Roo::Excelx::Cell::Base#link is deprecated [457](https://github.com/roo-rb/roo/pull/457)
-
-## [3.0.0](https://github.com/roo-rb/roo/compare/v2.10.1...v3.0.0) (2025-10-01)
-
-
-### Miscellaneous Chores
-
-* release 3.0.0 ([82619d3](https://github.com/roo-rb/roo/commit/82619d33929fd51411d173fbedd8a9c8136b4f72))
 
 ## [2.7.1] 2017-01-03
 ### Fixed
