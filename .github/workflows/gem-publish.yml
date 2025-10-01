@@ -9,10 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     environment: PUBLISH
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-tags: true
+
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -21,3 +25,8 @@ jobs:
 
     - name: Publish to RubyGems
       uses: rubygems/release-gem@v1
+
+    - name: Upload Gem to GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: gh release upload ${{ github.ref_name }} ./*.gem --clobber
