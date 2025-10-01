@@ -1,5 +1,7 @@
 ## Unreleased
 
+
+
 ### Changed/Added
 
 - Add dependencies for `csv` and `base64` if Ruby version higher or equal 3.4 [616](https://github.com/roo-rb/roo/pull/616)
