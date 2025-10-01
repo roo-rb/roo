@@ -2,6 +2,13 @@
 
 ### Changed/Added
 
+## [3.0.0](https://github.com/roo-rb/roo/compare/v2.10.0...v3.0.0) (2025-10-01)
+
+
+### Miscellaneous Chores
+
+* release 3.0.0 ([82619d3](https://github.com/roo-rb/roo/commit/82619d33929fd51411d173fbedd8a9c8136b4f72))
+
 ## [3.0.0] 
 
 - Add dependencies for `csv` and `base64` if Ruby version higher or equal 3.4 [616](https://github.com/roo-rb/roo/pull/616)
