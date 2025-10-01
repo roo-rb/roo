@@ -1,5 +1,12 @@
 ## Unreleased
 
+
+## [3.0.0](https://github.com/roo-rb/roo/compare/roo-v2.10.1...roo/v3.0.0) (2025-10-01)
+
+### Miscellaneous Chores
+
+* release 3.0.0 ([82619d3](https://github.com/roo-rb/roo/commit/82619d33929fd51411d173fbedd8a9c8136b4f72))
+
 ### Changed/Added
 
 - Add dependencies for `csv` and `base64` if Ruby version higher or equal 3.4 [616](https://github.com/roo-rb/roo/pull/616)
@@ -87,13 +94,6 @@
 - Roo::Excelx::Sheet#present_cells is deprecated [454](https://github.com/roo-rb/roo/pull/454)
 - Roo::Utils.split_coordinate is deprecated [458](https://github.com/roo-rb/roo/pull/458)
 - Roo::Excelx::Cell::Base#link is deprecated [457](https://github.com/roo-rb/roo/pull/457)
-
-## [3.0.0](https://github.com/roo-rb/roo/compare/roo-v2.10.1...roo/v3.0.0) (2025-10-01)
-
-
-### Miscellaneous Chores
-
-* release 3.0.0 ([82619d3](https://github.com/roo-rb/roo/commit/82619d33929fd51411d173fbedd8a9c8136b4f72))
 
 ## [2.7.1] 2017-01-03
 ### Fixed
