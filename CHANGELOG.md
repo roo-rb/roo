@@ -88,6 +88,13 @@
 - Roo::Utils.split_coordinate is deprecated [458](https://github.com/roo-rb/roo/pull/458)
 - Roo::Excelx::Cell::Base#link is deprecated [457](https://github.com/roo-rb/roo/pull/457)
 
+## [3.0.0](https://github.com/roo-rb/roo/compare/roo-v2.10.1...roo/v3.0.0) (2025-10-01)
+
+
+### Miscellaneous Chores
+
+* release 3.0.0 ([82619d3](https://github.com/roo-rb/roo/commit/82619d33929fd51411d173fbedd8a9c8136b4f72))
+
 ## [2.7.1] 2017-01-03
 ### Fixed
 - Fixed regression where a CSV's encoding was being ignored [372](https://github.com/roo-rb/roo/pull/372)
