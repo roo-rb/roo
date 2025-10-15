@@ -19,7 +19,7 @@ module Roo
       end
 
       def cells
-        @cells ||= @sheet.cells(@rels)
+        @cells ||= @sheet.cells
       end
 
       def present_cells
@@ -85,7 +85,7 @@ module Roo
       end
 
       def hyperlinks
-        @hyperlinks ||= @sheet.hyperlinks(@rels)
+        @hyperlinks ||= @sheet.hyperlinks
       end
 
       def comments
