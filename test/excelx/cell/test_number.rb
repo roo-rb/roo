@@ -81,7 +81,8 @@ class TestRooExcelxCellNumber < Minitest::Test
       ['#,##0.00;[Red](#,##0.00)', '1,042.00'],
       ['##0.0E+0', '1.0E+03'],
       ["_-* #,##0.00\\ _€_-;\\-* #,##0.00\\ _€_-;_-* \"-\"??\\ _€_-;_-@_-", '1,042.00'],
-      ['@', '1042']
+      ['@', '1042'],
+      ['0.00\\ [$EUR]', '1042.00 EUR']
     ].each do |style_format, result|
       cell = Roo::Excelx::Cell::Number.new '1042', nil, [style_format], nil, nil, nil
       assert_equal result, cell.formatted_value, "Style=#{style_format}"

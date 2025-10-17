@@ -28,14 +28,14 @@ module Roo
           end
         end
 
-        def formatted_value
-          return @cell_value if Excelx::ERROR_VALUES.include?(@cell_value)
+        def formatted_value(format = @format, cell_value = @cell_value)
+          return cell_value if Excelx::ERROR_VALUES.include?(cell_value)
 
-          formatter = generate_formatter(@format)
+          formatter = generate_formatter(format)
           if formatter.is_a? Proc
-            formatter.call(@cell_value)
+            formatter.call(cell_value)
           else
-            Kernel.format(formatter, @cell_value)
+            Kernel.format(formatter, cell_value)
           end
         end
 
@@ -75,6 +75,11 @@ module Roo
             proc do |number|
               formatted_number = generate_formatter($2).call(number)
               "#{$1}#{formatted_number}"
+            end
+          when /^([^\\]+)\\?\s*\[\$([A-Z]+)\]$/ # 0.00\\ [$EUR]
+            proc do |number|
+              formatted_number = formatted_value($1, number)
+              "#{formatted_number} #{$2}"
             end
           else
             raise "Unknown format: #{format.inspect}"
