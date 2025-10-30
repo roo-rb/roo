@@ -11,8 +11,12 @@ require 'roo/excelx/cell/time'
 module Roo
   class Excelx
     class Cell
+      extend Forwardable
+
       attr_reader :formula, :value, :excelx_type, :excelx_value, :style, :hyperlink, :coordinate
       attr_writer :value
+
+      delegate :empty? => :@value
 
       # DEPRECATED: Please use Cell.create_cell instead.
       def initialize(value, type, formula, excelx_type, excelx_value, style, hyperlink, base_date, coordinate)

@@ -238,6 +238,16 @@ describe Roo::Excelx do
     end
   end
 
+  describe '#to_csv' do
+    let(:path) { 'test/files/numbers1.xlsx' }
+
+    it 'continues working after updating a cell' do
+      subject.set(1, 2, 'Foo', 'Sheet5')
+
+      expect { subject.to_csv(nil, nil, 'Sheet5') }.not_to raise_error
+    end
+  end
+
   describe '#formula' do
     let(:path) { 'test/files/formula.xlsx' }
 
