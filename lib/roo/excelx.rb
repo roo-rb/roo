@@ -44,6 +44,10 @@ module Roo
       shared_options = {}
 
       shared_options[:disable_html_wrapper] = (options[:disable_html_wrapper] || false)
+      if !shared_options[:disable_html_wrapper]
+        shared_options[:rpr_elements] = options[:rpr_elements] || SharedStrings::DEFAULT_RPR_ELEMENTS
+      end
+
       unless is_stream?(filename_or_stream)
         file_type_check(filename_or_stream, %w[.xlsx .xlsm], 'an Excel 2007', file_warning, packed)
         basename = find_basename(filename_or_stream)
