@@ -6,13 +6,10 @@ module Roo
 
       delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files, :image_rels] => :@shared
 
-      attr_reader :images
-
       def initialize(name, shared, sheet_index, options = {})
         @name = name
         @shared = shared
         @sheet_index = sheet_index
-        @images = Images.new(image_rels[sheet_index]).list
         @rels = Relationships.new(rels_files[sheet_index])
         @comments = Comments.new(comments_files[sheet_index])
         @sheet = SheetDoc.new(sheet_files[sheet_index], @rels, shared, options)
@@ -94,6 +91,15 @@ module Roo
 
       def dimensions
         @sheet.dimensions
+      end
+
+      def images
+        @images ||= begin
+          @rels.filter_by_type(type: "drawing").map do |target|
+            match = /[a-zA-Z]+([0-9]+).xml/.match target
+            Images.new(image_rels[match[1].to_i - 1]).list
+          end.reduce({}, :merge).sort.to_h
+        end
       end
 
       private
