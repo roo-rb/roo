@@ -65,7 +65,15 @@ xlsx.info
 ods.sheets
 # => ['Info', 'Sheet 2', 'Sheet 3']   # an Array of sheet names in the workbook
 
+# Access specific sheet
+info_sheet = ods.sheet_for('Info')
+info_sheet.each_row |row|
+  p row
+end
+
+# Set default sheet by name
 ods.sheet('Info').row(1)
+# Set default sheet by zero-based index
 ods.sheet(0).row(1)
 
 # Set the last sheet as the default sheet.
