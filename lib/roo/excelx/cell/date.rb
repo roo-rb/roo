@@ -20,7 +20,7 @@ module Roo
         def create_datetime(_,_);  end
 
         def create_date(base_date, value)
-          base_date + value.to_i
+          base_date + value.to_f.round(6).to_i
         end
       end
     end
