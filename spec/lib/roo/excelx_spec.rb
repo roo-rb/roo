@@ -573,6 +573,23 @@ describe Roo::Excelx do
         expect(subject.each_row_streaming).to be_a(Enumerator)
       end
     end
+
+    # Writers built on the OpenXML SDK (ClosedXML among them) emit the worksheet
+    # with an explicit namespace prefix: <x:row> rather than <row>.
+    context 'when the worksheet is serialized with a namespace prefix' do
+      let(:path) { 'test/files/prefixed_namespace.xlsx' }
+
+      it 'yields every row' do
+        rows = []
+        subject.each_row_streaming { |row| rows << row.map(&:value) }
+        expect(rows).to eq [['id', 'name', 'qty'], [1.0, 'Widget', 10.0], [2.0, 'Gadget', 20.0]]
+      end
+
+      it 'agrees with the non-streaming reader' do
+        streamed = subject.each_row_streaming.map { |row| row.map(&:value) }
+        expect(streamed.size).to eq subject.last_row
+      end
+    end
   end
 
   describe '#html_strings' do
