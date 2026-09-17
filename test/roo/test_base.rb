@@ -56,6 +56,14 @@ class TestRooBase < Minitest::Test
     end
   end
 
+  def test_each_on_empty_sheet
+    with_each_spreadsheet(name: "emptysheets", format: [:openoffice, :excelx]) do |workbook|
+      workbook.default_sheet = workbook.sheets.first
+      assert_equal [], workbook.each.to_a
+      assert_nil workbook.first
+    end
+  end
+
   def test_find_by_row_huge_document
     skip_long_test
     options = { name: "Bibelbund", format: [:openoffice, :excelx] }
