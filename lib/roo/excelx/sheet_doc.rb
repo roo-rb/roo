@@ -44,6 +44,8 @@ module Roo
       # Yield each cell as Excelx::Cell to caller for given
       # row xml
       def each_cell(row_xml)
+        return to_enum(:each_cell, row_xml) unless block_given?
+
         return [] unless row_xml
         row_xml.children.each do |cell_element|
           coordinate = ::Roo::Utils.extract_coordinate(cell_element["r"])
@@ -111,7 +113,7 @@ module Roo
             format = style_format(style)
             value_type = cell_value_type(cell_xml["t"], format)
 
-            return create_cell_from_value(value_type, cell, formula, format, style, hyperlink, coordinate)
+            return create_cell_from_value(value_type, cell, formula, format, style, hyperlink, coordinate) unless cell.content.empty?
           end
         end
 
