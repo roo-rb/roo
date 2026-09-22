@@ -126,7 +126,16 @@ If each is given a hash with the names of some columns, then each will generate 
 ```ruby
 sheet.each(id: 'ID', name: 'FULL_NAME') do |hash|
   puts hash.inspect
-  # => { id: 1, name: 'John Smith' }
+  # => { id: 'ID', name: 'FULL_NAME' }
+end
+```
+
+First hash will be with headers. You can use ``headers: false`` option to exclude the header row.
+
+```ruby
+sheet.each(id: 'ID', name: 'FULL_NAME', headers: false) do |hash|
+  puts hash.inspect
+  # => { id: '1', name: 'John Smith' }
 end
 ```
 
@@ -154,6 +163,15 @@ Use the ``:clean`` option to strip out control characters and surrounding white 
 ```ruby
 sheet.parse(clean: true)
 ```
+
+Use the ``:offset`` option to skip some rows.
+
+```ruby
+sheet.parse(offset: 1)
+```
+
+If you have the option ``headers: true`` offset starts from header line or from first data line if ``headers: false``.
+
 
 #### Options
 

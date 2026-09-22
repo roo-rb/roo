@@ -70,6 +70,72 @@ class TestRooCSV < Minitest::Test
     assert_equal headers, parsed[1].keys
   end
 
+  def test_csv_iterate_with_headers
+    return unless CSV
+    headers = ["TITEL", "VERFASSER", "OBJEKT", "NUMMER", "SEITE", "INTERNET", "PC", "KENNUNG"]
+    first_row = ["Was bedeutet 1Timotheus 2,15 selig durch Kindergebären?", "A. K.", "Bibel+Gem",
+                 "1972-4", "335", nil, '#C:\Bibelbund\reprint\BuG1972-4.pdf#', "Bibelstudien & Predigten"]
+
+    oo = Roo::Spreadsheet.open(File.join(TESTDIR, "Bibelbund.csv"))
+    each = oo.each(headers: true)
+    assert_equal headers, each.to_a[0].keys
+    assert_equal first_row, each.to_a[1].values
+  end
+
+  def test_csv_iterate_without_headers
+    return unless CSV
+    headers = { h1: "TITEL", h2: "VERFASSER", h3: "OBJEKT", h4: "NUMMER", h5: "SEITE", h6: "INTERNET",
+                h7: "PC", h8: "KENNUNG" }
+    first_row = { h1: "Was bedeutet 1Timotheus 2,15 selig durch Kindergebären?", h2: "A. K.",
+                  h3: "Bibel+Gem", h4: "1972-4", h5: "335", h6: nil,
+                  h7: '#C:\Bibelbund\reprint\BuG1972-4.pdf#', h8: "Bibelstudien & Predigten" }
+
+    oo = Roo::Spreadsheet.open(File.join(TESTDIR, "Bibelbund.csv"))
+    each = oo.each(headers.merge(headers: false))
+    assert_equal first_row, each.to_a[0]
+  end
+
+  def test_csv_iterate_with_offset
+    return unless CSV
+    first_row = ["Was bedeutet 1Timotheus 2,15 selig durch Kindergebären?", "A. K.",
+                  "Bibel+Gem", "1972-4", "335", nil, '#C:\Bibelbund\reprint\BuG1972-4.pdf#',
+                  "Bibelstudien & Predigten"]
+
+    oo = Roo::Spreadsheet.open(File.join(TESTDIR, "Bibelbund.csv"))
+    each = oo.each(offset: 1)
+    assert_equal first_row, each.to_a[0]
+  end
+
+  def test_csv_iterate_with_over_row_count_offset
+    return unless CSV
+    oo = Roo::Spreadsheet.open(File.join(TESTDIR, "Bibelbund.csv"))
+    each = oo.each(offset: oo.last_row + 1)
+    assert_equal nil, each.to_a[0]
+  end
+
+  def test_csv_iterate_with_offset_and_headers
+    return unless CSV
+    first_row = ["Was bedeutet 1Timotheus 2,15 selig durch Kindergebären?", "A. K.", "Bibel+Gem",
+                 "1972-4", "335", nil, '#C:\Bibelbund\reprint\BuG1972-4.pdf#', "Bibelstudien & Predigten"]
+
+    oo = Roo::Spreadsheet.open(File.join(TESTDIR, "Bibelbund.csv"))
+    each = oo.each(headers: true, offset: 1)
+    assert_equal first_row, each.to_a[0].values
+  end
+
+  def test_csv_iterate_with_offset_and_without_headers
+    return unless CSV
+    headers = { h1: "TITEL", h2: "VERFASSER", h3: "OBJEKT", h4: "NUMMER", h5: "SEITE", h6: "INTERNET",
+                h7: "PC", h8: "KENNUNG" }
+    first_row = { h1: "Billy Graham: Eine Generation entdeckt Jesus.", h2: "A. K.",
+                  h3: "Bibel+Gem", h4: "1972-3", h5: "228", h6: nil,
+                  h7: '#C:\Bibelbund\reprint\BuG1972-3.pdf#', h8: "Buchbesprechungen" }
+
+    oo = Roo::Spreadsheet.open(File.join(TESTDIR, "Bibelbund.csv"))
+    each = oo.each(headers.merge(headers: false, offset: 1))
+    assert_equal first_row, each.to_a[0]
+  end
+
   def test_iso_8859_1
     file = File.open(File.join(TESTDIR, "iso_8859_1.csv"))
     options = { csv_options: { col_sep: ";", encoding: Encoding::ISO_8859_1 } }
