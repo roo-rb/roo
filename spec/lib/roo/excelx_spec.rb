@@ -616,6 +616,15 @@ describe Roo::Excelx do
     end
   end
 
+  describe 'empty value cells with no format' do
+    let(:path) { 'test/files/empty_numeric_cell.xlsx' }
+
+    it 'returns 0 for empty numeric cells' do
+      expect(subject.excelx_value(3, 2)).to eq('')
+      expect(subject.cell(3, 2)).to eq(0)
+    end
+  end
+
   describe 'opening a file with a chart sheet' do
     let(:path) { 'test/files/chart_sheet.xlsx' }
     it 'should not raise' do
