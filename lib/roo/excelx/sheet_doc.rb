@@ -16,16 +16,16 @@ module Roo
         @relationships = relationships
       end
 
-      def cells(relationships)
-        @cells ||= extract_cells(relationships)
+      def cells
+        @cells ||= extract_cells
       end
 
-      def hyperlinks(relationships)
+      def hyperlinks
         # If you're sure you're not going to need this hyperlinks you can discard it
-        @hyperlinks ||= if @options[:no_hyperlinks] || !relationships.include_type?("hyperlink")
+        @hyperlinks ||= if @options[:no_hyperlinks] || (!@relationships.include_type?("hyperlink") && !@options[:support_excel_sheet_hyperlinks])
           {}
         else
-          extract_hyperlinks(relationships)
+          extract_hyperlinks
         end
       end
 
@@ -47,9 +47,9 @@ module Roo
         return [] unless row_xml
         row_xml.children.each do |cell_element|
           coordinate = ::Roo::Utils.extract_coordinate(cell_element["r"])
-          hyperlinks = hyperlinks(@relationships)[coordinate]
+          row_hyperlink = hyperlinks[coordinate]
 
-          yield cell_from_xml(cell_element, hyperlinks, coordinate)
+          yield cell_from_xml(cell_element, row_hyperlink, coordinate)
         end
       end
 
@@ -173,17 +173,20 @@ module Roo
         end
       end
 
-      def extract_hyperlinks(relationships)
+      def extract_hyperlinks
         return {} unless (hyperlinks = doc.xpath('/worksheet/hyperlinks/hyperlink'))
 
         hyperlinks.each_with_object({}) do |hyperlink, hash|
-          if relationship = relationships[hyperlink['id']]
-            target_link = relationship['Target']
-            target_link += "##{hyperlink['location']}" if hyperlink['location']
+          relationship = @relationships[hyperlink['id']]
+          # If the relationship is not found, we can still use the location for the excel sheet link
+          target_link = relationship['Target'] if relationship
+          target_link += "##{hyperlink['location']}" if hyperlink['location'] && (!@options[:support_excel_sheet_hyperlinks] || relationship)
+          target_link = "##{hyperlink['location']}" if @options[:support_excel_sheet_hyperlinks] && hyperlink['location'] && !relationship
 
-            Roo::Utils.coordinates_in_range(hyperlink["ref"].to_s) do |coord|
-              hash[coord] = target_link
-            end
+          next unless target_link
+
+          Roo::Utils.coordinates_in_range(hyperlink["ref"].to_s) do |coord|
+            hash[coord] = target_link
           end
         end
       end
@@ -207,7 +210,7 @@ module Roo
         end
       end
 
-      def extract_cells(relationships)
+      def extract_cells
         extracted_cells = {}
         empty_cell = @options[:empty_cell]
 
@@ -221,7 +224,7 @@ module Roo
                 ::Roo::Utils.extract_coordinate(r)
               end
 
-            cell = cell_from_xml(cell_xml, hyperlinks(relationships)[coordinate], coordinate, empty_cell)
+            cell = cell_from_xml(cell_xml, hyperlinks[coordinate], coordinate, empty_cell)
             extracted_cells[coordinate] = cell if cell
           end
         end
