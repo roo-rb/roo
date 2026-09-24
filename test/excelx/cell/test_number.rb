@@ -52,6 +52,18 @@ class TestRooExcelxCellNumber < Minitest::Test
     end
   end
 
+  def test_formats_with_zeros
+    [
+      ['#,##0 ;(#,##0)', '0'],
+      ['#,##0 ;[Red](#,##0)', '0'],
+      ['#,##0.00;(#,##0.00)', '0.00'],
+      ['#,##0.00;[Red](#,##0.00)', '0.00']
+    ].each do |style_format, result|
+      cell = Roo::Excelx::Cell::Number.new '0', nil, [style_format], nil, nil, nil
+      assert_equal result, cell.formatted_value, "Style=#{style_format}"
+    end
+  end
+
   def test_numbers_with_cell_errors
     Roo::Excelx::ERROR_VALUES.each do |error|
       cell = Roo::Excelx::Cell::Number.new error, nil, ['General'], nil, nil, nil
