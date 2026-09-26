@@ -4,7 +4,7 @@ module Roo
     #          reduce memory usage and reduce the number of objects being passed
     #          to various inititializers.
     class Shared
-      attr_accessor :comments_files, :sheet_files, :rels_files, :image_rels, :image_files
+      attr_accessor :comments_files, :sheet_files, :rels_files, :image_rels, :image_files, :drawings
       def initialize(dir, options = {})
         @dir = dir
         @comments_files = []
@@ -13,6 +13,7 @@ module Roo
         @options = options
         @image_rels = []
         @image_files = []
+        @drawings = []
       end
 
       def styles
