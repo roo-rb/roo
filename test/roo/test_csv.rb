@@ -83,7 +83,23 @@ class TestRooCSV < Minitest::Test
     headers = ["header 1", "header 2"]
     oo = Roo::Spreadsheet.open(file)
     parsed = oo.parse(header_offset: 3)
-    assert_equal parsed[0].keys
+    assert_equal headers, parsed[0].keys
+    assert_equal [
+      { "header 1" => "a", "header 2" => "b" },
+      { "header 1" => "c", "header 2" => "d" }
+    ], parsed
+  end
+
+  def test_header_offset_replaces_cached_headers
+    oo = Roo::Spreadsheet.open(File.join(TESTDIR, "header_offset.csv"))
+    oo.parse(headers: true)
+
+    parsed = oo.parse(header_offset: 3)
+
+    assert_equal [
+      { "header 1" => "a", "header 2" => "b" },
+      { "header 1" => "c", "header 2" => "d" }
+    ], parsed
   end
 
   def roo_class
