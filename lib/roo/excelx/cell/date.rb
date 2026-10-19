@@ -20,7 +20,17 @@ module Roo
         def create_datetime(_,_);  end
 
         def create_date(base_date, value)
-          base_date + value.to_i
+          if contains_only_digits(value)
+            base_date + value.to_i
+          else
+            ::Date.parse(value)
+          end
+        end
+
+        def contains_only_digits(string)
+          pattern = /^(\.|\d+(\.\d+)?)$/
+          string = string.to_s unless string.is_a?(String)
+          (string.match?(pattern))
         end
       end
     end
