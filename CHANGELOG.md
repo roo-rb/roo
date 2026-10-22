@@ -1,5 +1,17 @@
 ## Unreleased
 
+## [4.0.0](https://github.com/roo-rb/roo/compare/v3.0.0...v4.0.0) (2026-10-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ci:** remove unsupported ruby versions
+
+### Bug Fixes
+
+* **ci:** remove unsupported ruby versions ([3425358](https://github.com/roo-rb/roo/commit/34253583250a3c6d43e632ac376dd2715c519557))
+* compare the worksheet target from workbook.xml.rels as text, not as a regexp ([#645](https://github.com/roo-rb/roo/issues/645)) ([3bfff46](https://github.com/roo-rb/roo/commit/3bfff46c21888f8969b41d9a6d69b4609e906969))
+
 ## [3.0.0](https://github.com/roo-rb/roo/compare/v2.10.1...v3.0.0) (2025-10-01)
 
 ### Miscellaneous Chores
