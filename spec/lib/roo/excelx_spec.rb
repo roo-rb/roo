@@ -56,6 +56,26 @@ describe Roo::Excelx do
         expect(subject).to be_a(Roo::Excelx)
       end
     end
+
+    context 'given a worksheet target with characters that are special in a regexp' do
+      let(:path) do
+        tmpdir = Dir.mktmpdir
+        path = File.join(tmpdir, 'special_target.xlsx')
+        FileUtils.cp('test/files/only_one_sheet.xlsx', path)
+        Zip::File.open(path) do |zip|
+          zip.rename('xl/worksheets/sheet1.xml', 'xl/worksheets/sheet(1).xml')
+          rels = zip.read('xl/_rels/workbook.xml.rels')
+          zip.get_output_stream('xl/_rels/workbook.xml.rels') do |stream|
+            stream.write(rels.sub('Target="worksheets/sheet1.xml"', 'Target="worksheets/sheet(1).xml"'))
+          end
+        end
+        path
+      end
+
+      it 'finds the worksheet by its target as text, not as a pattern' do
+        expect(subject.sheets).to eq(['Sheet1'])
+      end
+    end
   end
 
   describe '#cell' do
