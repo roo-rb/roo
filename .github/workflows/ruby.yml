@@ -22,7 +22,7 @@ jobs:
           - '3.4'
           - '4.0'
           - ruby-head
-          - jruby-9.4.10.0
+          - jruby-10
         include:
           - ruby: ruby-head
             env:
