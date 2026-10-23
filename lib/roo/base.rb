@@ -281,6 +281,7 @@ class Roo::Base
 
   def each(options = {})
     return to_enum(:each, options) unless block_given?
+    return if last_row.nil?
 
     if options.empty?
       1.upto(last_row) do |line|
