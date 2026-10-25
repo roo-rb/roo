@@ -268,6 +268,16 @@ class TestRooOpenOffice < Minitest::Test
     end
   end
 
+  def test_time_value_does_not_depend_on_number_format
+    with_each_spreadsheet(name: "time_formats", format: :openoffice) do |workbook|
+      assert_equal 13 * 3600 + 45 * 60, workbook.cell(1, 1) # HH:MM AM/PM, shown as 01:45 PM
+      assert_equal 36 * 3600, workbook.cell(2, 1) # [HH]:MM:SS
+      assert_equal 12 * 3600 + 34 * 60 + 56, workbook.cell(3, 1) # MM:SS, shown as 34:56
+      assert_equal 6 * 3600 + 30 * 60, workbook.cell(4, 1) # HH:MM:SS
+      assert_equal :time, workbook.celltype(1, 1)
+    end
+  end
+
   def test_cell_openoffice_html_escape
     with_each_spreadsheet(name: "html-escape", format: :openoffice) do |workbook|
       assert_equal "'", workbook.cell(1, 1)

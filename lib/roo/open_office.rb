@@ -442,8 +442,7 @@ module Roo
           @cell[sheet][key] = table_cell.attributes['date-value']
         end
       when :time
-        hms = v.split(':')
-        @cell[sheet][key] = hms[0].to_i * 3600 + hms[1].to_i * 60 + hms[2].to_i
+        @cell[sheet][key] = time_value_to_seconds(v)
       else
         @cell[sheet][key] = v
       end
@@ -525,8 +524,11 @@ module Roo
                   end # == 'p'
                 end
               when 'time'
-                cell.children.each do |str|
-                  v = str.content if str.name == 'p'
+                v = attribute(cell, 'time-value')
+                unless v
+                  cell.children.each do |str|
+                    v = str.content if str.name == 'p'
+                  end
                 end
               when '', nil, 'date', 'percentage', 'float'
                 #
@@ -622,6 +624,19 @@ module Roo
           end
         end
       end.join
+    end
+
+    # office:time-value is an ISO 8601 duration such as PT13H45M00S. Fall back
+    # to the displayed text (HH:MM:SS) when a file has no time-value.
+    def time_value_to_seconds(value)
+      duration = /\A(-)?P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?\z/.match(value.to_s)
+      if duration
+        seconds = duration[2].to_i * 86_400 + duration[3].to_i * 3600 + duration[4].to_i * 60 + duration[5].to_f
+        duration[1] ? -seconds.to_i : seconds.to_i
+      else
+        hms = value.to_s.split(':')
+        hms[0].to_i * 3600 + hms[1].to_i * 60 + hms[2].to_i
+      end
     end
 
     def attribute(node, attr_name)
