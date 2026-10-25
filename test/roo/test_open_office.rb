@@ -268,6 +268,17 @@ class TestRooOpenOffice < Minitest::Test
     end
   end
 
+  def test_rows_in_header_rows_and_row_groups
+    # Row 1 is a print title row (table:table-header-rows), rows 3-4 are grouped
+    with_each_spreadsheet(name: "header_rows_and_group", format: :openoffice) do |workbook|
+      assert_equal 1, workbook.first_row
+      assert_equal 6, workbook.last_row
+      assert_equal "Header", workbook.cell(1, 1)
+      assert_equal [1, 2, 3, 4, 5], (2..6).map { |row| workbook.cell(row, 1) }
+      assert_equal ["row 2", "row 3", "row 4", "row 5", "row 6"], (2..6).map { |row| workbook.cell(row, 2) }
+    end
+  end
+
   def test_cell_openoffice_html_escape
     with_each_spreadsheet(name: "html-escape", format: :openoffice) do |workbook|
       assert_equal "'", workbook.cell(1, 1)

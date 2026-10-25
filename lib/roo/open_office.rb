@@ -465,7 +465,7 @@ module Roo
         sheet_found = true
         col         = 1
         row         = 1
-        ws.children.each do |table_element|
+        table_children(ws).each do |table_element|
           case table_element.name
           when 'table-column'
             @style_defaults[sheet] << table_element.attributes['default-cell-style-name']
@@ -622,6 +622,19 @@ module Roo
           end
         end
       end.join
+    end
+
+    # Rows and columns can be wrapped in header, group and plain container
+    # elements, e.g. table:table-header-rows for print title rows.
+    TABLE_CONTAINERS = %w[
+      table-header-rows table-row-group table-rows
+      table-header-columns table-column-group table-columns
+    ].freeze
+
+    def table_children(element)
+      element.children.flat_map do |child|
+        TABLE_CONTAINERS.include?(child.name) ? table_children(child) : [child]
+      end
     end
 
     def attribute(node, attr_name)
