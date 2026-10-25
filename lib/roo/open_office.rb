@@ -2,7 +2,11 @@
 
 require 'date'
 require 'nokogiri'
-require 'cgi'
+if RUBY_VERSION.to_i >= 4
+  require "cgi/escape"
+else
+  require "cgi/util"
+end
 require 'zip/filesystem'
 require 'roo/font'
 require 'roo/tempdir'
