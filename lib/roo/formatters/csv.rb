@@ -74,6 +74,8 @@ module Roo
             end
           when Date, DateTime, TrueClass, FalseClass
             onecell.to_s
+          when nil
+            ""
           else
             fail "unhandled onecell-class #{onecell.class}"
           end
