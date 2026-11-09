@@ -60,6 +60,11 @@ class TestRooFormatterCSV < Minitest::Test
     end
   end
 
+  def test_formula_without_cached_value
+    workbook = Roo::Excelx.new(File.join(TESTDIR, "formula_no_cached_value.xlsx"))
+    assert_equal %("a","b"\n1,\n), workbook.to_csv
+  end
+
   def test_bug_empty_sheet
     with_each_spreadsheet(name: "formula", format: [:openoffice, :excelx]) do |workbook|
       workbook.default_sheet = "Sheet3" # is an empty sheet
