@@ -157,7 +157,8 @@ module Roo
           #      standard format, than it's a date, otherwise, it is a datetime.
           #      @styles.standard_style?(style_id)
           #      STANDARD_STYLES.keys.include?(style_id.to_i)
-          cell_type = if cell_content < 1.0
+          # An elapsed format such as [h]:mm is a duration, however many days it spans.
+          cell_type = if cell_content < 1.0 || format.to_s =~ /\[(?:h+|m+|s+)\]/i
                         :time
                       elsif (cell_content - cell_content.floor).abs > 0.000001
                         :datetime
