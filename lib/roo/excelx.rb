@@ -25,6 +25,9 @@ module Roo
     require 'roo/excelx/coordinate'
     require 'roo/excelx/format'
     require 'roo/excelx/images'
+    require "roo/excelx/csv"
+
+    include SparseCSVWriter
 
     delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files, :image_rels, :image_files] => :@shared
     ExceedsMaxError = Class.new(StandardError)
@@ -118,6 +121,67 @@ module Roo
 
     def row(rownumber, sheet = nil)
       sheet_for(sheet).row(rownumber)
+    end
+
+    def each(options = {})
+      return to_enum(:each, options) unless block_given?
+
+      return super if options.empty? || method(:cell).owner != Roo::Excelx || method(:safe_send).owner != Roo::Excelx
+
+      headers = iteration_headers(options)
+      @header_line.upto(last_row) do |line|
+        cells = nil
+        values = {}
+        headers.each do |key, column|
+          cells ||= sheet_for(nil).cells
+          cell = cells[normalize(line, column)]
+          values[key] = cell.respond_to?(:value) ? cell.value : nil
+        end
+        yield values
+      end
+    end
+
+    def parse(options = {})
+      return super if block_given? || method(:each).owner != Roo::Excelx
+
+      if options.empty?
+        return super unless method(:row).owner == Roo::Excelx
+
+        sheet = sheet_for(nil)
+        count = last_row
+        return super unless sheet.method(:row).owner == Roo::Excelx::Sheet && count.is_a?(Integer) && count > 0
+        return super unless sheet.cells.default.nil? && sheet.cells.default_proc.nil?
+
+        return parse_array_rows(sheet, count)
+      end
+      return super unless options[:headers] == true && method(:cell).owner == Roo::Excelx
+      return super unless method(:safe_send).owner == Roo::Excelx && method(:normalize).owner == Roo::Base
+
+      cells = sheet_for(nil).cells
+      return super unless cells.default.nil? && cells.default_proc.nil?
+
+      headers = iteration_headers(options)
+      last = last_row
+      fields = headers.to_h
+      rows = @header_line.upto(last).map do
+        headers.each_with_object({}) { |(key, _), values| values[key] = nil }
+      end
+      columns = {}
+      fields.each { |key, column| (columns[normalize(0, column).last] ||= []) << key }
+      unless rows.empty? || columns.empty?
+        sheet_for(nil).cells.each_pair do |coordinate, cell|
+          next unless coordinate.is_a?(Array) && coordinate.size == 2
+
+          line, column = coordinate
+          next unless line.is_a?(Integer) && line >= @header_line && line <= last
+          keys = columns[column]
+          next unless keys
+
+          values = rows[line - @header_line]
+          keys.each { |key| values[key] = safe_send(cell, :value) }
+        end
+      end
+      rows
     end
 
     # returns all values in this column as an array
@@ -304,6 +368,22 @@ module Roo
     end
 
     private
+
+    def parse_array_rows(sheet, count)
+      first = sheet.first_column
+      last = sheet.last_column
+      rows = Array.new(count) { Array.new(last - first + 1) }
+      sheet.cells.each_pair do |coordinate, cell|
+        next unless coordinate.is_a?(Array) && coordinate.size == 2
+
+        line, column = coordinate
+        next unless line.is_a?(Integer) && line >= 1 && line <= count &&
+                    column.is_a?(Integer) && column >= first && column <= last
+
+        rows[line - 1][column - first] = cell&.value
+      end
+      rows.drop(1)
+    end
 
     def clean_sheet(sheet)
       @sheets_by_name[sheet].cells.each_pair do |coord, value|

@@ -129,6 +129,97 @@ describe Roo::Excelx do
         end
       end
     end
+
+    context "with mutable worksheet cells" do
+      let(:path) { "test/files/header_offset.xlsx" }
+
+      it "uses the cell Hash default for missing coordinates" do
+        subject.last_row
+        cells = subject.sheet_for(nil).cells
+        cells.delete([2, 2])
+        cells.default = cells[[3, 2]]
+
+        expect(subject.parse).to eq([
+          ["Data A2", "Data B3"],
+          ["Data A3", "Data B3"]
+        ])
+        expect(subject.parse(headers: true)[1]).to eq("Header A1" => "Data A2", "Header B1" => "Data B3")
+      end
+
+      it "uses the cell Hash default proc for missing coordinates" do
+        subject.last_row
+        cells = subject.sheet_for(nil).cells
+        cells.delete([2, 2])
+        cells.default_proc = proc { |hash, _| hash[[3, 2]] }
+
+        expect(subject.parse[0]).to eq(["Data A2", "Data B3"])
+      end
+
+      it "reads replaced cells after each header callback" do
+        rows = []
+        subject.each(headers: true) do |row|
+          rows << row
+          subject.sheet_for(nil).cells[[3, 2]] = subject.sheet_for(nil).cells[[2, 2]] if rows.length == 1
+        end
+
+        expect(rows.last).to eq("Header A1" => "Data A3", "Header B1" => "Data B2")
+      end
+
+      it "returns only the requested named columns" do
+        expect(subject.parse(value: "Header B1")).to eq([{ value: "Data B2" }, { value: "Data B3" }])
+      end
+
+      it "keeps row overrides when parsing without options" do
+        subclass = Class.new(Roo::Excelx) do
+          def row(number, sheet = nil)
+            super.map { |value| "custom:#{value}" }
+          end
+        end
+        book = subclass.new(path)
+        expect(book.parse.first).to eq(["custom:Data A2", "custom:Data B2"])
+      ensure
+        book&.close
+      end
+
+      it "keeps scalar helper overrides for header reads" do
+        subclass = Class.new(Roo::Excelx) do
+          private
+
+          def safe_send(object, name, *arguments)
+            return "missing" if object.nil?
+
+            value = super
+            value.is_a?(String) ? "custom:#{value}" : value
+          end
+        end
+        book = subclass.new(path)
+        expect(book.each(headers: true).to_a.last).to eq(
+          "Header A1" => "custom:Data A3", "Header B1" => "custom:Data B3"
+        )
+        book.sheet_for(nil).cells.delete([2, 2])
+        expect(book.parse(headers: true)[1]).to eq(
+          "Header A1" => "custom:Data A2", "Header B1" => "missing"
+        )
+      ensure
+        book&.close
+      end
+
+      it "keeps coordinate normalization overrides when parsing headers" do
+        subclass = Class.new(Roo::Excelx) do
+          def normalize(row, column)
+            row, column = super
+            [row > 1 ? row + 1 : row, column]
+          end
+        end
+        book = subclass.new(path)
+
+        expect(book.parse(headers: true)[1]).to eq(
+          "Header A1" => "Data A3", "Header B1" => "Data B3"
+        )
+      ensure
+        book&.close
+      end
+    end
   end
 
   describe '#parse_with_clean_option' do
@@ -546,6 +637,42 @@ describe Roo::Excelx do
         expect(row.map(&:value)).to eq expected_rows[index]
         index += 1
       end
+    end
+
+    it "pads wide gaps with nil" do
+      xml = <<~XML
+        <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+          <sheetData>
+            <row><c r="A1"><v>1</v></c><c r="SF1"><v>2</v></c></row>
+            <row><c r="A2"><v>3</v></c><c r="SF2"><v>4</v></c></row>
+          </sheetData>
+        </worksheet>
+      XML
+      Dir.mktmpdir do |directory|
+        filename = File.join(directory, "wide.xlsx")
+        FileUtils.cp(path, filename)
+        Zip::File.open(filename) do |zip|
+          zip.get_output_stream("xl/worksheets/sheet1.xml") { |stream| stream.write(xml) }
+        end
+        book = Roo::Excelx.new(filename)
+        begin
+          rows = book.each_row_streaming(pad_cells: true).map { |row| row.map { |cell| cell&.value } }
+          expect(rows).to eq([[1] + [nil] * 498 + [2], [3] + [nil] * 498 + [4]])
+        ensure
+          book.close
+        end
+      end
+    end
+
+    it "keeps the error for non-integer coordinates supplied by a cell hook" do
+      doc = subject.sheet_for(nil).instance_variable_get(:@sheet)
+      doc.define_singleton_method(:each_cell) do |_row, &block|
+        coordinate = Roo::Excelx::Coordinate.new(1, 1.5)
+        cell = Roo::Excelx::Cell::Number.new("1", nil, [:numeric_or_formula, "General"], nil, nil, coordinate)
+        block.call(cell)
+      end
+
+      expect { subject.each_row_streaming(pad_cells: true, max_rows: 0).to_a }.to raise_error(NoMethodError, /times/)
     end
 
     context 'with max_rows options' do
