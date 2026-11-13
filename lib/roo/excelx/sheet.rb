@@ -114,8 +114,11 @@ module Roo
       end
 
       def pad_cells(cell, last_column)
+        count = cell.coordinate.column - 1 - last_column
+        return count.positive? ? Array.new(count) : [] if count.is_a?(Integer)
+
         pad = []
-        (cell.coordinate.column - 1 - last_column).times { pad << nil }
+        count.times { pad << nil }
         pad
       end
 

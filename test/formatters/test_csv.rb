@@ -1,6 +1,105 @@
 require "test_helper"
 
 class TestRooFormatterCSV < Minitest::Test
+  def test_csv_constant_in_an_excelx_subclass_uses_rubys_csv_library
+    subclass = Class.new(Roo::Excelx)
+    subclass.class_eval <<~RUBY
+      def export_rows(rows)
+        CSV.generate { |csv| rows.each { |row| csv << row } }
+      end
+    RUBY
+
+    assert_equal "1,2\n", subclass.allocate.export_rows([[1, 2]])
+  end
+
+  def test_csv_keeps_coordinate_normalization_overrides
+    book = Roo::Excelx.new(File.join(TESTDIR, "header_offset.xlsx"))
+    book.define_singleton_method(:normalize) do |row, column|
+      row, column = super(row, column)
+      [row > 1 ? row + 1 : row, column]
+    end
+    cells = book.sheet_for(nil).cells
+    cells.delete([2, 2])
+    cells[[3, 10]] = cells[[3, 2]].dup
+
+    expected = "\"Header A1\",\"Header B1\"" + "," * 8 + "\n" +
+      "\"Data A3\",\"Data B3\"" + "," * 8 + "\"Data B3\"\n" +
+      "," * 9 + "\n"
+    assert_equal expected, book.to_csv
+  ensure
+    book&.close
+  end
+
+  def test_csv_preserves_missing_cells_and_unordered_keys
+    book = Roo::Excelx.new(File.join(TESTDIR, "header_offset.xlsx"))
+    cells = book.sheet_for(nil).cells
+    cells[[3, 10]] = cells[[3, 2]].dup
+    cells.delete([2, 1])
+    cells.replace(cells.to_a.reverse.to_h)
+
+    expected = "\"Header A1\",\"Header B1\"" + "," * 8 + "\n" +
+      ",\"Data B2\"" + "," * 8 + "\n" +
+      "\"Data A3\",\"Data B3\"" + "," * 8 + "\"Data B3\"\n"
+    assert_equal expected, book.to_csv
+  ensure
+    book&.close
+  end
+
+  def test_csv_uses_the_cell_hash_default
+    book = Roo::Excelx.new(File.join(TESTDIR, "header_offset.xlsx"))
+    cells = book.sheet_for(nil).cells
+    cells[[3, 10]] = cells[[3, 2]].dup
+    cells.delete([2, 2])
+    cells.default = cells[[3, 2]]
+
+    expected = "\"Header A1\",\"Header B1\"" + ",\"Data B3\"" * 8 + "\n" +
+      "\"Data A2\"" + ",\"Data B3\"" * 9 + "\n" +
+      "\"Data A3\"" + ",\"Data B3\"" * 9 + "\n"
+    assert_equal expected, book.to_csv
+    cells.default_proc = proc { |hash, _| hash[[3, 2]] }
+    assert_equal expected, book.to_csv
+  ensure
+    book&.close
+  end
+
+  def test_csv_preserves_partial_output_when_a_formula_has_no_cached_value
+    book = Roo::Excelx.new(File.join(TESTDIR, "numbers1.xlsx"))
+    book.default_sheet = "Sheet5"
+    cells = book.sheet_for(nil).cells
+    cells[[6, 10]] = cells[[6, 5]].dup
+    formula = cells[[1, 1]].dup
+    formula.value = nil
+    formula.instance_variable_set(:@formula, "1+1")
+    cells[[2, 2]] = formula
+
+    Dir.mktmpdir do |directory|
+      path = File.join(directory, "partial.csv")
+      error = assert_raises(RuntimeError) { book.to_csv(path) }
+      assert_equal "unhandled onecell-class NilClass", error.message
+      assert_equal "1,5,5" + "," * 7 + "\n2,", File.binread(path)
+    end
+  ensure
+    book&.close
+  end
+
+  def test_csv_preserves_foreign_bytes_returned_by_a_cell_reader
+    book = Roo::Excelx.new(File.join(TESTDIR, "header_offset.xlsx"))
+    cells = book.sheet_for(nil).cells
+    cells[[3, 10]] = cells[[3, 2]].dup
+    cells[[2, 1]].value = "ü"
+    klass = Roo::Excelx::Cell::String
+    original = klass.instance_method(:value)
+    klass.define_method(:value) do
+      value = original.bind_call(self)
+      value == "Data B2" ? "\xE9".b : value
+    end
+
+    assert_includes book.to_csv.b, "\"ü\",\"\xE9\"".b
+  ensure
+    klass.define_method(:value, original) if original
+    book&.close
+  end
+
   def test_date_time_to_csv
     with_each_spreadsheet(name: "time-test") do |workbook|
       Dir.mktmpdir do |tempdir|
