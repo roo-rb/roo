@@ -100,6 +100,28 @@ class TestRooFormatterCSV < Minitest::Test
     book&.close
   end
 
+  def test_csv_preserves_partial_output_on_encoding_conversion_error
+    original_external = Encoding.default_external
+    original_internal = Encoding.default_internal
+    book = Roo::Excelx.new(File.join(TESTDIR, "header_offset.xlsx"))
+    cells = book.sheet_for(nil).cells
+    cells[[3, 10]] = cells[[3, 2]].dup
+    cells[[1, 2]].value = "caf\u00e9"
+
+    Dir.mktmpdir do |directory|
+      path = File.join(directory, "partial.csv")
+      Encoding.default_external = Encoding::US_ASCII
+      Encoding.default_internal = Encoding::UTF_8
+
+      assert_raises(Encoding::UndefinedConversionError) { book.to_csv(path) }
+      assert_equal "\"Header A1\",", File.binread(path)
+    end
+  ensure
+    Encoding.default_external = original_external
+    Encoding.default_internal = original_internal
+    book&.close
+  end
+
   def test_date_time_to_csv
     with_each_spreadsheet(name: "time-test") do |workbook|
       Dir.mktmpdir do |tempdir|

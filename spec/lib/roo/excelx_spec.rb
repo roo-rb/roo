@@ -133,6 +133,28 @@ describe Roo::Excelx do
     context "with mutable worksheet cells" do
       let(:path) { "test/files/header_offset.xlsx" }
 
+      it "keeps blank values and row alignment when parsing sparse cells" do
+        subject.sheet_for(nil).cells.delete([2, 2])
+
+        expect(subject.parse).to eq([["Data A2", nil], ["Data A3", "Data B3"]])
+        expect(subject.parse(headers: true)).to eq([
+          {"Header A1" => "Header A1", "Header B1" => "Header B1"},
+          {"Header A1" => "Data A2", "Header B1" => nil},
+          {"Header A1" => "Data A3", "Header B1" => "Data B3"}
+        ])
+      end
+
+      it "includes the first array row when the options Hash defaults headers to true" do
+        expect(subject.parse(Hash.new(true)).first).to eq(["Header A1", "Header B1"])
+      end
+
+      it "preserves identity-based cell Hash lookup" do
+        subject.sheet_for(nil).cells.compare_by_identity
+
+        expect(subject.parse.first).to eq([nil, nil])
+        expect(subject.parse(headers: true)[1]).to eq(nil => nil)
+      end
+
       it "uses the cell Hash default for missing coordinates" do
         subject.last_row
         cells = subject.sheet_for(nil).cells
@@ -219,6 +241,21 @@ describe Roo::Excelx do
       ensure
         book&.close
       end
+    end
+  end
+
+  describe '#each' do
+    let(:path) { 'test/files/numbers1.xlsx' }
+
+    it "uses the active worksheet after a missing cell changes it" do
+      cells = subject.sheet_for(nil).cells
+      cells.delete([2, 1])
+      cells.default_proc = proc do |_, coordinate|
+        subject.default_sheet = "Sheet5" if coordinate == [2, 1]
+        nil
+      end
+
+      expect(subject.each(headers: true).take(2).last.fetch(2)).to be_nil
     end
   end
 

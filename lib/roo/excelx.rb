@@ -127,15 +127,20 @@ module Roo
       return to_enum(:each, options) unless block_given?
 
       return super if options.empty? || method(:cell).owner != Roo::Excelx || method(:safe_send).owner != Roo::Excelx
+      return super unless method(:normalize).owner == Roo::Base
 
       headers = iteration_headers(options)
       @header_line.upto(last_row) do |line|
-        cells = nil
+        cells = sheet_for(nil).cells unless headers.empty?
+        cells = nil if cells&.default_proc
         values = {}
         headers.each do |key, column|
-          cells ||= sheet_for(nil).cells
-          cell = cells[normalize(line, column)]
-          values[key] = cell.respond_to?(:value) ? cell.value : nil
+          if cells
+            stored_cell = cells[normalize(line, column)]
+            values[key] = stored_cell.respond_to?(:value) ? stored_cell.value : nil
+          else
+            values[key] = cell(line, column)
+          end
         end
         yield values
       end
@@ -150,15 +155,16 @@ module Roo
         sheet = sheet_for(nil)
         count = last_row
         return super unless sheet.method(:row).owner == Roo::Excelx::Sheet && count.is_a?(Integer) && count > 0
-        return super unless sheet.cells.default.nil? && sheet.cells.default_proc.nil?
+        return super unless sparse_parse_cells?(sheet.cells)
 
-        return parse_array_rows(sheet, count)
+        rows = parse_array_rows(sheet, count)
+        return options[:headers] == true ? rows : rows.drop(1)
       end
       return super unless options[:headers] == true && method(:cell).owner == Roo::Excelx
       return super unless method(:safe_send).owner == Roo::Excelx && method(:normalize).owner == Roo::Base
 
       cells = sheet_for(nil).cells
-      return super unless cells.default.nil? && cells.default_proc.nil?
+      return super unless sparse_parse_cells?(cells)
 
       headers = iteration_headers(options)
       last = last_row
@@ -369,6 +375,10 @@ module Roo
 
     private
 
+    def sparse_parse_cells?(cells)
+      !cells.compare_by_identity? && cells.default.nil? && cells.default_proc.nil?
+    end
+
     def parse_array_rows(sheet, count)
       first = sheet.first_column
       last = sheet.last_column
@@ -382,7 +392,7 @@ module Roo
 
         rows[line - 1][column - first] = cell&.value
       end
-      rows.drop(1)
+      rows
     end
 
     def clean_sheet(sheet)

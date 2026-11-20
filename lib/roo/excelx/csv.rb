@@ -24,36 +24,30 @@ module Roo
         return super unless csv_cells_compatible?(cells)
 
         separator = separator.to_s
-        runs = Hash.new { |cache, count| cache[count] = separator * count }
-        blank = "#{runs[width - 1]}\n"
-        line = +""
-        line_row = column_written = 0
-        each_csv_coordinate(cells, rows, width) do |row, column|
-          if row != line_row
-            file.print(line << runs[width - 1 - column_written] << "\n") if line_row.positive?
-            (row - line_row - 1).times { file.print(blank) }
-            line.clear
-            line_row = row
-            column_written = 0
-          end
-          line << runs[column - 1 - column_written]
-          column_written = column - 1
-          begin
-            field = cell_to_csv(row, column, sheet)
-          rescue StandardError
-            file.print(line)
-            raise
-          end
-          if field.ascii_only? || field.encoding == Encoding::UTF_8
-            line << field
-          else
-            file.print(line)
-            line.clear
-            file.print(field)
-          end
+        separators = separator * (width - 1)
+        separator_bytes = separator.bytesize
+        blank = "#{separators}\n"
+        separator_run = ->(count) do
+          bytes = count * separator_bytes
+          separators.byteslice(-bytes, bytes)
         end
-        file.print(line << runs[width - 1 - column_written] << "\n") if line_row.positive?
-        (line_row + 1).upto(rows) { file.print(blank) }
+        current_row = 0
+        column_written = 1
+        each_csv_coordinate(cells, rows, width) do |row, column|
+          if row != current_row
+            file.write(separator_run.call(width - column_written), "\n") if current_row.positive?
+            (row - current_row - 1).times { file.print(blank) }
+            current_row = row
+            column_written = 1
+          end
+
+          gap = column - column_written
+          file.print(separator_run.call(gap)) if gap.positive?
+          file.print(cell_to_csv(row, column, sheet))
+          column_written = column
+        end
+        file.write(separator_run.call(width - column_written), "\n") if current_row.positive?
+        (current_row + 1).upto(rows) { file.print(blank) }
       end
 
       def each_csv_coordinate(cells, rows, columns)
@@ -86,6 +80,7 @@ module Roo
         instance_of?(Roo::Excelx) && $OUTPUT_RECORD_SEPARATOR.nil? &&
           method(:normalize).owner == Roo::Base &&
           [String, Symbol, NilClass].include?(separator.class) &&
+          separator.singleton_methods.empty? &&
           (separator.to_s.ascii_only? || separator.to_s.encoding == Encoding::UTF_8) &&
           %i[cell celltype empty? sheet_for first_row last_row last_column].all? do |name|
             method(name).owner == Roo::Excelx
