@@ -38,7 +38,7 @@ jobs:
           fetch-tags: true
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@e1bd6146574da5e0795075b5319b300edb30c5b0 # v1.333.0
+        uses: ruby/setup-ruby@4e97ecde5048e1e0816923020652678063ffbf65 # v1.339.0
         with:
           ruby-version: '3.4'
           bundler-cache: true
