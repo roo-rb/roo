@@ -287,12 +287,7 @@ class Roo::Base
         yield row(line)
       end
     else
-      clean_sheet_if_need(options)
-      search_or_set_header(options)
-      headers = @headers ||
-                (first_column..last_column).each_with_object({}) do |col, hash|
-                  hash[cell(@header_line, col)] = col
-                end
+      headers = iteration_headers(options)
 
       @header_line.upto(last_row) do |line|
         yield(headers.each_with_object({}) { |(k, v), hash| hash[k] = cell(line, v) })
@@ -378,6 +373,14 @@ class Roo::Base
   end
 
   private
+
+  def iteration_headers(options)
+    clean_sheet_if_need(options)
+    search_or_set_header(options)
+    @headers || (first_column..last_column).each_with_object({}) do |column, headers|
+      headers[cell(@header_line, column)] = column
+    end
+  end
 
   def clean_sheet_if_need(options)
     return unless options[:clean]
