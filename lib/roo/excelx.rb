@@ -331,7 +331,7 @@ module Roo
     # Returns an Array of Strings.
     def extract_worksheet_ids(entries, path)
       wb = entries.find { |e| e.name[/workbook.xml$/] }
-      fail ArgumentError 'missing required workbook file' if wb.nil?
+      fail ArgumentError, 'missing required workbook file' if wb.nil?
 
       wb.extract(File.basename(path), destination_directory: File.dirname(path))
       workbook_doc = Roo::Utils.load_xml(path).remove_namespaces!
@@ -355,7 +355,7 @@ module Roo
     # Returns a Hash.
     def extract_worksheet_rels(entries, path)
       wb_rels = entries.find { |e| e.name[/workbook.xml.rels$/] }
-      fail ArgumentError 'missing required workbook file' if wb_rels.nil?
+      fail ArgumentError, 'missing required workbook file' if wb_rels.nil?
 
       wb_rels.extract(File.basename(path), destination_directory: File.dirname(path))
       rels_doc = Roo::Utils.load_xml(path).remove_namespaces!

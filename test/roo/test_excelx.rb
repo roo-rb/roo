@@ -24,6 +24,13 @@ class TestRworkbookExcelx < Minitest::Test
     end
   end
 
+  def test_should_raise_argument_error_when_workbook_rels_is_missing
+    error = assert_raises(ArgumentError) do
+      roo_class.new(File.join(TESTDIR, "missing_workbook_rels.xlsx"))
+    end
+    assert_equal "missing required workbook file", error.message
+  end
+
   def test_file_warning_default
     assert_raises(TypeError) { roo_class.new(File.join(TESTDIR, "numbers1.ods")) }
     assert_raises(TypeError) { roo_class.new(File.join(TESTDIR, "numbers1.xls")) }
