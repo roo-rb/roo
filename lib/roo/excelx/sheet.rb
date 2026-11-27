@@ -42,7 +42,7 @@ module Roo
         @sheet.each_row_streaming do |row|
           break if options[:max_rows] && row_count == options[:max_rows] + options[:offset] + 1
           if block_given? && !(options[:offset] && row_count < options[:offset])
-            block.call(cells_for_row_element(row, options))
+            block.call(cells_for_row_element(row, row_count + 1, options))
           end
           row_count += 1
         end
@@ -101,11 +101,11 @@ module Roo
       # Take an xml row and return an array of Excelx::Cell objects
       # optionally pad array to header width(assumed 1st row).
       # takes option pad_cells (boolean) defaults false
-      def cells_for_row_element(row_element, options = {})
+      def cells_for_row_element(row_element, row_index, options = {})
         return [] unless row_element
         cell_col = 0
         cells = []
-        @sheet.each_cell(row_element) do |cell|
+        @sheet.each_cell(row_element, row_index) do |cell|
           cells.concat(pad_cells(cell, cell_col)) if options[:pad_cells]
           cells << cell
           cell_col = cell.coordinate.column

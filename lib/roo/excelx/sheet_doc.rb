@@ -43,10 +43,10 @@ module Roo
 
       # Yield each cell as Excelx::Cell to caller for given
       # row xml
-      def each_cell(row_xml)
+      def each_cell(row_xml, row_index = nil)
         return [] unless row_xml
-        row_xml.children.each do |cell_element|
-          coordinate = ::Roo::Utils.extract_coordinate(cell_element["r"])
+        row_xml.children.each.with_index(1) do |cell_element, col_index|
+          coordinate = cell_coordinate(cell_element["r"], row_index, col_index)
           hyperlinks = hyperlinks(@relationships)[coordinate]
 
           yield cell_from_xml(cell_element, hyperlinks, coordinate)
@@ -213,13 +213,7 @@ module Roo
 
         doc.xpath('/worksheet/sheetData/row').each.with_index(1) do |row_xml, ycoord|
           row_xml.xpath('c').each.with_index(1) do |cell_xml, xcoord|
-            r = cell_xml['r']
-            coordinate =
-              if r.nil?
-                ::Roo::Excelx::Coordinate.new(ycoord, xcoord)
-              else
-                ::Roo::Utils.extract_coordinate(r)
-              end
+            coordinate = cell_coordinate(cell_xml['r'], ycoord, xcoord)
 
             cell = cell_from_xml(cell_xml, hyperlinks(relationships)[coordinate], coordinate, empty_cell)
             extracted_cells[coordinate] = cell if cell
@@ -251,6 +245,12 @@ module Roo
 
       def shared_strings
         @shared.shared_strings
+      end
+
+      def cell_coordinate(r, row_index, col_index)
+        return ::Roo::Excelx::Coordinate.new(row_index, col_index) if r.nil?
+        
+        ::Roo::Utils.extract_coordinate(r)
       end
     end
   end
