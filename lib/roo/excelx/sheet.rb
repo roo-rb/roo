@@ -4,7 +4,7 @@ module Roo
     class Sheet
       extend Forwardable
 
-      delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files, :image_rels] => :@shared
+      delegate [:styles, :workbook, :shared_strings, :rels_files, :sheet_files, :comments_files, :image_rels, :drawings] => :@shared
 
       attr_reader :images
 
@@ -14,6 +14,7 @@ module Roo
         @sheet_index = sheet_index
         @images = Images.new(image_rels[sheet_index]).list
         @rels = Relationships.new(rels_files[sheet_index])
+        @drawing_xml_path = drawings[sheet_index]
         @comments = Comments.new(comments_files[sheet_index])
         @sheet = SheetDoc.new(sheet_files[sheet_index], @rels, shared, options)
       end
@@ -94,6 +95,35 @@ module Roo
 
       def dimensions
         @sheet.dimensions
+      end
+
+      def embedded_image_refs_anchored_to_single_cells
+        @embedded_image_refs_anchored_to_single_cells ||= begin
+          parsed_xml = Roo::Utils.load_xml(@drawing_xml_path).remove_namespaces!
+          nodes = parsed_xml.xpath('/wsDr/twoCellAnchor[pic/blipFill/blip[@embed]]')
+
+          nodes.map do |node|
+            from = node.at_xpath('from')
+            from_coords = [from.at_xpath('row').content.to_i + 1, from.at_xpath('col').content.to_i + 1]
+
+            to = node.at_xpath('to')
+            to_coords = [to.at_xpath('row').content.to_i + 1, to.at_xpath('col').content.to_i + 1]
+
+            image_ref = node.at_xpath('pic/blipFill/blip')['embed']
+
+            [from_coords, to_coords, image_ref]
+          end.select do |from, to, image_ref|
+            (to[1] == from[1] + 1) && (to[0] == from[0] + 1)
+          end.map do |from, to, image_ref|
+            [from, image_ref]
+          end.inject(Hash.new) do |hsh, item|
+            from, image_ref = item
+            hsh[from] ||= Array.new
+            hsh[from] << image_ref
+
+            hsh
+          end
+        end
       end
 
       private
