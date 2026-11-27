@@ -17,7 +17,7 @@ module Roo
         end
 
         def formatted_value
-          formatter = @format.gsub(/#{TIME_FORMATS.keys.join('|')}/, TIME_FORMATS)
+          formatter = @format.downcase.gsub(/#{TIME_FORMATS.keys.join('|')}/, TIME_FORMATS)
           @datetime.strftime(formatter)
         end
 
